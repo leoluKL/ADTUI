@@ -1,0 +1,25 @@
+{
+  "name": "ADTUI",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "devDependencies": {
+    "npm-run-all": "latest",
+    "reload": "latest"
+  },
+  "scripts": {
+    "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js",
+    "dev": "npm-run-all -p dev:* ",
+        "dev:bundleBrowserFile": "watchify .\\portalSourceCode\\main.js  --debug -o .\\portalDev\\bundle.js -v",
+        "dev:autoBrowser": "reload -b -w .\\portalDev -s .\\portalDev\\index.html -p 8888",
+    "production": "npm-run-all production:* ",
+        "production:bundleBrowserFile": "browserify .\\portalSourceCode\\main.js  > .\\portalSourceCode\\bundle.js",
+        "production:compress":"uglifyjs .\\portalSourceCode\\bundle.js -cm -o .\\bundle.min.js",
+        "production:autoBrowser_comment": "echo watch empty folder so it will never trigger browser to refresh",
+        "production:autoBrowser": "reload -b -w .\\emptyFolder\\ -p 9999",
+    "start": "npm run production"
+  },
+  "dependencies": {
+    "@jsplumb/browser-ui": "^4.0.0-RC75"
+  }
+}

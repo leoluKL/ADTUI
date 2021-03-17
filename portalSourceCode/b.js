@@ -1,0 +1,1 @@
+module.exports = function () { console.log("b22fdsgfdssafdsafdsasafdsafdsa1b") }
