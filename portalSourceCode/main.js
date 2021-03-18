@@ -1,4 +1,4 @@
-finalF=require("./a.js")
+finalF=require("./init.js")
 
 $('document').ready(function(){
     finalF()

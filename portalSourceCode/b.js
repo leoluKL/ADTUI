@@ -1,1 +1,1 @@
-module.exports = function () { console.log("b22fdsgfdssafdsafdsasafdsafdsa1b") }
+module.exports = function () { console.log("bsb") }
