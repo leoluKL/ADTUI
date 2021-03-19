@@ -1,5 +1,5 @@
-finalF=require("./init.js")
+const initF=require("./init.js")
 
 $('document').ready(function(){
-    finalF()
+    initF()
 });

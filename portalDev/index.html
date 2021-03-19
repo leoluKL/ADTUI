@@ -9,14 +9,13 @@
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link href="//fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
 
-    <link rel="stylesheet" href="node_modules/@jsplumb/browser-ui/css/jsplumbtoolkit.css">
-    <link rel="stylesheet" href="demo.css">
-
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="node_modules/@jsplumb/core/js/jsplumb.core.umd.js"></script>
-    <script src="node_modules/@jsplumb/browser-ui/js/jsplumb.browser-ui.umd.js"></script>
-    <script src="portalDev/bundle.js"></script>
   </head>
-  <body></body>
+  <body style="margin:0px">
+    <div style="width: 700px;height: 400px;display: block;background-color: lightblue;" id="canvas"></div>
+    
+    <script src="node_modules/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="portalDev/bundle.js"></script>
+  </body>
 </html>

@@ -1,9 +1,15 @@
 'use strict';
 
-const initF=function(){
-    jsPlumbBrowserUI.ready(function () {
-        console.log("jsPlumbBrowser ui initiated.")
-    })
+var topologyDOM=require("./topologyDOM.js")
+
+function initF() {
+    console.log("init function.")
+
+    var topologyInstance=new topologyDOM($('#canvas'))
+    topologyInstance.init()
+
 }
 
-module.exports= initF
+
+
+module.exports = initF
