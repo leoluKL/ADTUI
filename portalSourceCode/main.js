@@ -1,5 +1,5 @@
-const initF=require("./init.js")
+const mainUI=require("./mainUI.js")
 
 $('document').ready(function(){
-    initF()
+    var theMainUI=new mainUI()
 });
