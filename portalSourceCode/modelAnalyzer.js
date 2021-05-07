@@ -34,7 +34,7 @@ modelAnalyzer.prototype.expandValidRelationshipTypesFromBaseClass = function (pa
     if (baseClass == null) return;
     if (baseClass.validRelationships) {
         for (var ind in baseClass.validRelationships) {
-            if(parentObj[ind]==null) parentObj[ind] = baseClassID
+            if(parentObj[ind]==null) parentObj[ind] = this.relationshipTypes[ind][baseClassID]
         }
     }
     var furtherBaseClassIDs = baseClass.extends;
@@ -67,6 +67,37 @@ modelAnalyzer.prototype.expandEditableProperties=function(parentObj,dataInfo,emb
 
 
 modelAnalyzer.prototype.analyze=function(){
+    //analyze all relationship types
+    for (var id in this.relationshipTypes) delete this.relationshipTypes[id]
+    for (var modelID in this.DTDLModels) {
+        var ele = this.DTDLModels[modelID]
+        var embeddedSchema = {}
+        if (ele.schemas) {
+            var tempArr;
+            if (Array.isArray(ele.schemas)) tempArr = ele.schemas
+            else tempArr = [ele.schemas]
+            tempArr.forEach((ele) => {
+                embeddedSchema[ele["@id"]] = ele
+            })
+        }
+
+        var contentArr = ele.contents
+        if (!contentArr) continue;
+        contentArr.forEach((oneContent) => {
+            if (oneContent["@type"] == "Relationship") {
+                if(!this.relationshipTypes[oneContent["name"]]) this.relationshipTypes[oneContent["name"]]= {}
+                this.relationshipTypes[oneContent["name"]][modelID] = oneContent
+                oneContent.editableRelationshipProperties = {}
+                if (Array.isArray(oneContent.properties)) {
+                    //can reuse function expandEditableProperties even though now is todo relationship properties
+                    this.expandEditableProperties(oneContent.editableRelationshipProperties, oneContent.properties, embeddedSchema)
+                }
+            }
+        })
+    }
+
+
+
     //analyze each model's property that can be edited
     for(var modelID in this.DTDLModels){ //expand possible embedded schema to editableProperties, also extract possible relationship types for this model
         var ele=this.DTDLModels[modelID]
@@ -86,7 +117,7 @@ modelAnalyzer.prototype.analyze=function(){
 
             ele.contents.forEach((oneContent)=>{
                 if(oneContent["@type"]=="Relationship") {
-                    ele.validRelationships[oneContent["name"]]=modelID
+                    ele.validRelationships[oneContent["name"]]=this.relationshipTypes[oneContent["name"]][modelID]
                 }
             })
         }
@@ -100,34 +131,6 @@ modelAnalyzer.prototype.analyze=function(){
         tmpArr.forEach((eachBase)=>{
             this.expandEditablePropertiesFromBaseClass(ele.editableProperties,eachBase)
             this.expandValidRelationshipTypesFromBaseClass(ele.validRelationships,eachBase)
-        })
-    }
-
-    //analyze all relationship types
-    for(var id in this.relationshipTypes) delete this.relationshipTypes[id]
-    for(var modelID in this.DTDLModels){
-        var ele=this.DTDLModels[modelID]
-        var embeddedSchema={}
-        if(ele.schemas){
-            var tempArr;
-            if(Array.isArray(ele.schemas)) tempArr=ele.schemas
-            else tempArr=[ele.schemas]
-            tempArr.forEach((ele)=>{
-                embeddedSchema[ele["@id"]]=ele
-            })
-        }
-        
-        var contentArr=ele.contents
-        if(!contentArr) continue;
-        contentArr.forEach((oneContent)=>{
-            if(oneContent["@type"]=="Relationship") {
-                this.relationshipTypes[oneContent["name"]]={}
-                this.relationshipTypes[oneContent["name"]][modelID]=oneContent
-                oneContent.editableProperties={}
-                if(Array.isArray(oneContent.properties)){
-                    this.expandEditableProperties(oneContent.editableProperties,oneContent.properties,embeddedSchema)
-                }
-            }
         })
     }
 

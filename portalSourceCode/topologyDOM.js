@@ -1,5 +1,8 @@
 'use strict';
 
+const modelManagerDialog = require("./modelManagerDialog");
+const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
+
 function topologyDOM(DOM){
     this.DOM=DOM
 }
@@ -63,19 +66,25 @@ topologyDOM.prototype.init=function(){
             {
                 selector: 'edge',
                 style: {
-                    'width': 3,
+                    'width': 2,
                     'line-color': '#888',
                     'target-arrow-color': '#000',
                     'target-arrow-shape': 'triangle',
                     'curve-style': 'bezier'
                 }
             },
-            {selector: ':selected',
+            {selector: 'edge:selected',
             style: {
-                'background-color': 'SteelBlue',
-                'line-color': 'SteelBlue',
-                'target-arrow-color': 'SteelBlue',
-                'source-arrow-color': 'SteelBlue'
+                'width': 3,
+                'line-color': 'red',
+                'target-arrow-color': 'red',
+                'source-arrow-color': 'red'
+            }},
+            {selector: 'node:selected',
+            style: {
+                'border-color':"red",
+                'border-width':3,
+                'background-color': 'Gray'
             }}
             
         ],
@@ -104,18 +113,19 @@ topologyDOM.prototype.init=function(){
     this.core.on('boxend',(e)=>{//put inside boxend event to trigger only one time, and repleatly after each box select
         this.core.one('boxselect',selectFunction)
     })
-    
+}
 
-
-    /*partially upgrade style sheet
+topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode){
     this.core.style()
-        .selector(':selected')
-        .style({
-            'background-color': 'yellow'
-        })
-
-        .update()
-    */
+        .selector('node[modelID = "'+modelID+'"]')
+        .style({'background-color': colorCode})
+        .update()   
+}
+topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){
+    this.core.style()
+        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
+        .style({'line-color': colorCode})
+        .update()   
 }
 
 topologyDOM.prototype.drawTwins=function(twinsData){
@@ -125,6 +135,8 @@ topologyDOM.prototype.drawTwins=function(twinsData){
         var newNode={data:{},group:"nodes"}
         newNode.data["originalInfo"]= originalInfo;
         newNode.data["id"]=originalInfo['$dtId']
+        var modelID=originalInfo['$metadata']['$model']
+        newNode.data["modelID"]=modelID
         arr.push(newNode)
     }
     var eles = this.core.add(arr)
@@ -147,10 +159,14 @@ topologyDOM.prototype.drawRelations=function(relationsData){
         
         //add additional source node information to the original relationship information
         originalInfo['sourceModel']=sourceModel
+        aRelation.data["sourceModel"]=sourceModel
+        aRelation.data["relationshipName"]=originalInfo['$relationshipName']
+
         relationInfoArr.push(aRelation)
     }
 
-    return this.core.add(relationInfoArr)
+    var edges=this.core.add(relationInfoArr)
+    return edges
 }
 
 topologyDOM.prototype.drawTwinsAndRelations=function(twinsAndRelations){
@@ -170,8 +186,25 @@ topologyDOM.prototype.drawTwinsAndRelations=function(twinsAndRelations){
     })
 }
 
+topologyDOM.prototype.applyVisualDefinition=function(){
+    var visualJson=modelManagerDialog.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    if(visualJson==null) return;
+    for(var modelID in visualJson){
+        if(visualJson[modelID].color){
+            this.updateModelTwinColor(modelID,visualJson[modelID].color)
+        }
+        if(visualJson[modelID].relationships){
+            for(var relationshipName in visualJson[modelID].relationships)
+                this.updateRelationshipColor(modelID,relationshipName,visualJson[modelID].relationships[relationshipName])
+        }
+    }
+}
+
 topologyDOM.prototype.rxMessage=function(msgPayload){
-    if(msgPayload.message=="refreshAllTwin") {
+    if(msgPayload.message=="ADTDatasourceChange"){
+        this.core.nodes().remove()
+        this.applyVisualDefinition()
+    }else if(msgPayload.message=="refreshAllTwin") {
         this.core.nodes().remove()
         var eles= this.drawTwins(msgPayload.info)
     }else if(msgPayload.message=="drawAllRelations"){
@@ -192,6 +225,9 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         if(topoNode){
             this.core.center(topoNode)
         }
+    }else if(msgPayload.message=="visualDefinitionChange"){
+        if(msgPayload.srcModelID) this.updateRelationshipColor(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.colorCode)
+        else this.updateModelTwinColor(msgPayload.modelID,msgPayload.colorCode)
     }
 }
 

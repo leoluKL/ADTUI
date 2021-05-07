@@ -10,11 +10,21 @@ function adtInstanceSelectionDialog() {
     }
 }
 
-adtInstanceSelectionDialog.prototype.popup = function () {
-    $.get("twinsFilter/readStartFilters", (data, status) => {
-        if(data!=null) this.filters=data;
-        this.prepareAllUIComponent()
+
+adtInstanceSelectionDialog.prototype.preparationFunc = async function () {
+    return new Promise((resolve, reject) => {
+        try{
+            $.get("twinsFilter/readStartFilters", (data, status) => {
+                if(data!=null) this.filters=data;
+                resolve()
+            })
+        }catch(e){
+            reject(e)
+        }
     })
+}
+adtInstanceSelectionDialog.prototype.popup = function () {
+    this.prepareAllUIComponent()
 }
 
 adtInstanceSelectionDialog.prototype.prepareAllUIComponent = function () {

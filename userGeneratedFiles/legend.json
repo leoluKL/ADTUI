@@ -1,0 +1,1 @@
+{"https://adtleo.api.wcus.digitaltwins.azure.net":{"dtmi:ADTUILayoutParent;1":{"color":"Green","relationships":{"position":"Blue"}},"dtmi:example:grid:plants:solarPlant;1":{"color":"Red","relationships":{"feeds":"Green"}},"dtmi:example:grid:plants:gasPlant;1":{"color":"Bisque"},"dtmi:example:grid:plants:domesticConsumer;1":{"color":"Brown"}}}

@@ -43,10 +43,8 @@ infoPanel.prototype.rxMessage=function(msgPayload){
 }
 
 infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,sourceModel){
-    var relationDefinitionModel=modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]
-    if(relationDefinitionModel==null) return
-    if(!modelAnalyzer.relationshipTypes[relationshipName][relationDefinitionModel]) return
-    return modelAnalyzer.relationshipTypes[relationshipName][relationDefinitionModel].editableProperties
+    if(!modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]) return
+    return modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName].editableRelationshipProperties
 }
 
 infoPanel.prototype.drawButtons=function(selectType){

@@ -40,12 +40,7 @@ twinsTree.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="ADTModelsChange") this.refreshModels(msgPayload.models)
 }
 
-twinsTree.prototype.refreshModels=function(modelsData){modelAnalyzer.clearAllModels();
-    modelAnalyzer.clearAllModels();
-    modelAnalyzer.addModels(data)
-    modelAnalyzer.analyze();
-
-
+twinsTree.prototype.refreshModels=function(modelsData){
     //delete all group nodes of deleted models
     this.tree.groupNodes.forEach((gnode)=>{
         if(modelsData[gnode.name]==null){

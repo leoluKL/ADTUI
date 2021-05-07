@@ -10,14 +10,25 @@ function mainUI() {
     this.initUILayout()
 
     this.twinsTree= new twinsTree($("#treeHolder"),$("#treeSearch"))
-    adtInstanceSelectionDialog.popup()
+    
     this.mainToolbar=new mainToolbar()
     this.topologyInstance=new topologyDOM($('#canvas'))
     this.topologyInstance.init()
     this.infoPanel= new infoPanel()
 
     this.broadcastMessage() //initialize all ui components to have the broadcast capability
+    this.prepareData()
 }
+
+mainUI.prototype.prepareData=async function(){
+    var promiseArr=[
+        modelManagerDialog.preparationFunc(),
+        adtInstanceSelectionDialog.preparationFunc()
+    ]
+    await Promise.allSettled(promiseArr);
+    adtInstanceSelectionDialog.popup()
+}
+
 
 mainUI.prototype.assignBroadcastMessage=function(uiComponent){
     uiComponent.broadcastMessage=(msgObj)=>{this.broadcastMessage(uiComponent,msgObj)}

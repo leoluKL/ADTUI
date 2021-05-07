@@ -1,4 +1,7 @@
+const modelAnalyzer=require("./modelAnalyzer")
+const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 function modelManagerDialog() {
+    this.visualDefinition={}
     this.models={}
     if($("#modelManagerDialog").length==0){
         this.DOM = $('<div id="modelManagerDialog" title="Models"></div>')
@@ -7,11 +10,20 @@ function modelManagerDialog() {
     }
 }
 
-modelManagerDialog.prototype.popup = function () {
-    this.prepareAllUIComponent()
+modelManagerDialog.prototype.preparationFunc = async function () {
+    return new Promise((resolve, reject) => {
+        try{
+            $.get("visualDefinition/readVisualDefinition", (data, status) => {
+                if(data!="" && typeof(data)==="object") this.visualDefinition=data;
+                resolve()
+            })
+        }catch(e){
+            reject(e)
+        }
+    })
 }
 
-modelManagerDialog.prototype.prepareAllUIComponent = function () {
+modelManagerDialog.prototype.popup = function () {
     this.DOM.empty()
 
     var importModelsBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Import</a>')
@@ -58,24 +70,139 @@ modelManagerDialog.prototype.prepareAllUIComponent = function () {
 
 modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     this.rightSpan.empty()
+    var modelID=this.models[modelName]['@id']
 
     var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete</a>')
     this.rightSpan.append(delBtn)
     delBtn.click(()=>{
-        $.post("editADT/deleteModel",{"model":this.models[modelName]['@id']}, (data)=> {
+        $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
             if(data==""){//successful
                 this.listModels("shouldBroadcast")
+                this.rightSpan.empty()
+                if(this.visualDefinition[adtInstanceSelectionDialog.selectedADT] && this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID] ){
+                    delete this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID]
+                    this.saveVisualDefinition()
+                }
             }else{ //error happens
                 alert(data)
             }
         });
     })
-    var originalDefinitionDOM=this.addAPartInRightSpan("Original Definition")
-    var editablePropertiesDOM=this.addAPartInRightSpan("Editable Properties")
+    
     var VisualizationDOM=this.addAPartInRightSpan("Visualization")
+    var editablePropertiesDOM=this.addAPartInRightSpan("Editable Properties And Relationships")
+    var originalDefinitionDOM=this.addAPartInRightSpan("Original Definition")
 
-    //this.rightSpan.text(JSON.stringify(this.models[modelName]))
+    var str=JSON.stringify(this.models[modelName],null,2)
+    originalDefinitionDOM.append($('<pre id="json">'+str+'</pre>'))
+
+    var edittableProperties=modelAnalyzer.DTDLModels[modelID].editableProperties
+    this.fillEditableProperties(edittableProperties,editablePropertiesDOM)
+    var validRelationships=modelAnalyzer.DTDLModels[modelID].validRelationships
+    this.fillRelationshipInfo(validRelationships,editablePropertiesDOM)
+
+    this.fillVisualization(modelID,VisualizationDOM)
 }
+
+modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
+    var modelJson=modelAnalyzer.DTDLModels[modelID];
+    this.addOneVisualizationRow(modelID,parentDom)
+    for(var ind in modelJson.validRelationships){
+        this.addOneVisualizationRow(modelID,parentDom,ind)
+    }
+}
+modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,relatinshipName){
+    if(relatinshipName==null) var nameStr="◯" //visual for node
+    else nameStr="⟜ "+relatinshipName
+    var containerDiv=$("<div style='padding-bottom:8px'></div>")
+    parentDom.append(containerDiv)
+    var contentDOM=$("<label style='margin-right:10px'>"+nameStr+"</label>")
+    containerDiv.append(contentDOM)
+
+    var definiedColor=null
+    var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    if(relatinshipName==null){
+        if(visualJson && visualJson[modelID] && visualJson[modelID].color) definiedColor=visualJson[modelID].color
+    }else{
+        if(visualJson && visualJson[modelID]
+             && visualJson[modelID]["relationships"]
+              && visualJson[modelID]["relationships"][relatinshipName])
+              definiedColor=visualJson[modelID]["relationships"][relatinshipName]
+    }
+
+    var colorSelector=$('<select></select>')
+    containerDiv.append(colorSelector)
+    var colorArr=["Black","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
+    colorArr.forEach((oneColorCode)=>{
+        var anOption=$("<option value='"+oneColorCode+"'>"+oneColorCode+"▧</option>")
+        colorSelector.append(anOption)
+        anOption.css("color",oneColorCode)
+    })
+    if(definiedColor!=null) {
+        colorSelector.val(definiedColor)
+        colorSelector.css("color",definiedColor)
+    }
+    colorSelector.change((eve)=>{
+        var selectColorCode=eve.target.value
+        colorSelector.css("color",selectColorCode)
+        if(!this.visualDefinition[adtInstanceSelectionDialog.selectedADT]) 
+            this.visualDefinition[adtInstanceSelectionDialog.selectedADT]={}
+        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+
+        if(!visualJson[modelID]) visualJson[modelID]={}
+        if(!relatinshipName) {
+            visualJson[modelID].color=selectColorCode
+            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"colorCode":selectColorCode })
+        }else{
+            if(!visualJson[modelID]["relationships"]) visualJson[modelID]["relationships"]={}
+            visualJson[modelID]["relationships"][relatinshipName]=selectColorCode
+            this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"colorCode":selectColorCode })
+        }
+        this.saveVisualDefinition()
+    })
+}
+
+modelManagerDialog.prototype.saveVisualDefinition=function(){
+    $.post("visualDefinition/saveVisualDefinition",{visualDefinitionJson:this.visualDefinition})
+}
+
+modelManagerDialog.prototype.fillRelationshipInfo=function(validRelationships,parentDom){
+    for(var ind in validRelationships){
+        var keyDiv= $("<label style='display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</label>")
+        parentDom.append(keyDiv)
+        keyDiv.css("padding-top",".1em")
+        var label=$("<label style='display:inline;background-color:yellowgreen;color:white;font-size:9px;padding:2px'>Relationship type</label>")
+        parentDom.append(label)
+        var contentDOM=$("<label></label>")
+        contentDOM.css("display","block")
+        contentDOM.css("padding-left","1em")
+        parentDom.append(contentDOM)
+        this.fillEditableProperties(validRelationships[ind].editableRelationshipProperties, contentDOM)
+    }
+}
+
+modelManagerDialog.prototype.fillEditableProperties=function(jsonInfo,parentDom){
+    for(var ind in jsonInfo){
+        var keyDiv= $("<label style='display:block'><div style='display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</div></label>")
+        parentDom.append(keyDiv)
+        keyDiv.css("padding-top",".1em")
+
+        var contentDOM=$("<label></label>")
+        if(Array.isArray(jsonInfo[ind])){
+            contentDOM.text("enum")
+            contentDOM.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px'})
+        }else if(typeof(jsonInfo[ind])==="object") {
+            contentDOM.css("display","block")
+            contentDOM.css("padding-left","1em")
+            this.fillEditableProperties(jsonInfo[ind],contentDOM)
+        }else {
+            contentDOM.text(jsonInfo[ind])
+            contentDOM.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px'})
+        }
+        keyDiv.append(contentDOM)
+    }
+}
+
 
 modelManagerDialog.prototype.addAPartInRightSpan=function(partName){
     var headerDOM=$('<h3 class="accordion-header ui-accordion-header ui-helper-reset ui-state-default ui-accordion-icons ui-corner-all"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-e"></span></h3>')
@@ -123,8 +250,6 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
     $.post("editADT/importModels",{"models":fileContentArr}, (data)=> {
         if (data == "") {//successful
             this.listModels("shouldBroadCast")
-
-            
         } else { //error happens
             alert(data)
         }
@@ -152,6 +277,12 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
         data.forEach(oneItem=>{
             this.models[oneItem["displayName"]] = oneItem
         })
+        if(shouldBroadcast){
+            modelAnalyzer.clearAllModels();
+            modelAnalyzer.addModels(data)
+            modelAnalyzer.analyze();
+        }
+        
         var sortArr=[]
         for(var modelName in this.models) sortArr.push(modelName)
         sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
