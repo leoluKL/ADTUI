@@ -120,6 +120,22 @@ simpleTree.prototype.delGroupNode=function(gnode){
     gnode.deleteSelf()
 }
 
+simpleTree.prototype.deleteLeafNode=function(nodeName){
+    var findLeafNode=null
+    this.groupNodes.forEach((gNode)=>{
+        if(findLeafNode!=null) return;
+        gNode.childLeafNodes.forEach((aLeaf)=>{
+            if(aLeaf.name==nodeName){
+                findLeafNode=aLeaf
+                return;
+            }
+        })
+    })
+    if(findLeafNode==null) return;
+    findLeafNode.deleteSelf()
+}
+
+
 simpleTree.prototype.insertGroupNode=function(obj,index){
     var aNewGroupNode = new simpleTreeGroupNode(this,obj)
     var existGroupNode= this.findGroupNode(aNewGroupNode.name)
@@ -157,6 +173,10 @@ simpleTree.prototype.appendLeafNodeToSelection=function(leafNode){
     this.selectLeafNodeArr(newArr)
 }
 
+simpleTree.prototype.selectGroupNode=function(groupNode){
+    if(this.callback_afterSelectGroupNode) this.callback_afterSelectGroupNode(groupNode.info)
+}
+
 simpleTree.prototype.selectLeafNodeArr=function(leafNodeArr){
     for(var i=0;i<this.selectedNodes.length;i++){
         this.selectedNodes[i].dim()
@@ -189,14 +209,6 @@ simpleTreeGroupNode.prototype.isOpen=function(){
     return  panel.is(':visible');
 }
 
-simpleTreeGroupNode.prototype.expand=function(){
-    if(!this.isOpen()) this.headerDOM.trigger("click")
-}
-
-simpleTreeGroupNode.prototype.shrink=function(){
-    if(this.isOpen()) this.headerDOM.trigger("click")
-}
-
 simpleTreeGroupNode.prototype.refreshName=function(){
     this.headerDOM.text(this.name+"("+this.childLeafNodes.length+")")
 }
@@ -214,27 +226,34 @@ simpleTreeGroupNode.prototype.createDOM=function(){
     this.refreshName()
     this.listDOM=$('<div class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom"></div>')
 
-    this.headerDOM.click( ()=> {
-        var panel = this.listDOM;
-        var isOpen = this.isOpen()
-
-        if(!isOpen){
-            this.headerDOM.children(":first").removeClass("ui-icon-triangle-1-e")
-            this.headerDOM.children(":first").addClass("ui-icon-triangle-1-s")
-        }else{
-            this.headerDOM.children(":first").removeClass("ui-icon-triangle-1-s")
-            this.headerDOM.children(":first").addClass("ui-icon-triangle-1-e")
-        }
-
-        // open or close as necessary
-        panel[isOpen ? 'slideUp' : 'slideDown']()
-            // trigger the correct custom event
-            .trigger(isOpen ? 'hide' : 'show');
-
+    this.headerDOM.click( (evt)=> {
+        if(this.isOpen()) this.shrink()
+        else this.expand() 
+        this.parentTree.selectGroupNode(this)    
         // stop the link from causing a pagescroll
         return false;
     });
 }
+
+simpleTreeGroupNode.prototype.expand=function(){
+    var panel = this.listDOM;
+    var isOpen = this.isOpen()
+    if(isOpen) return;
+    this.headerDOM.children(":first").removeClass("ui-icon-triangle-1-e")
+            this.headerDOM.children(":first").addClass("ui-icon-triangle-1-s")
+    panel['slideDown']().trigger('show');
+}
+
+simpleTreeGroupNode.prototype.shrink=function(){
+    var panel = this.listDOM;
+    var isOpen = this.isOpen()
+    if(!isOpen) return;
+    this.headerDOM.children(":first").removeClass("ui-icon-triangle-1-s")
+    this.headerDOM.children(":first").addClass("ui-icon-triangle-1-e")
+    panel['slideUp']().trigger('hide');
+}
+
+
 simpleTreeGroupNode.prototype.addNode=function(obj,skipRepeat){
     if(skipRepeat){
         var foundRepeat=false;
@@ -260,6 +279,15 @@ function simpleTreeLeafNode(parentGroupNode,obj){
     this.name=this.leafInfo["$dtId"]
     this.createLeafNodeDOM()
 }
+
+simpleTreeLeafNode.prototype.deleteSelf = function () {
+    this.DOM.remove()
+    var gNode = this.parentGroupNode
+    const index = gNode.childLeafNodes.indexOf(this);
+    if (index > -1) gNode.childLeafNodes.splice(index, 1);
+    gNode.refreshName()
+}
+
 simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
     this.DOM=$('<li style="padding-left:3px;padding-top:1px;cursor:default">'+this.name+'</li>')
     var clickF=(e)=>{

@@ -8,6 +8,7 @@ function routerQueryADT(adtClients){
 
     this.useRoute("listModels")
     this.useRoute("allTwinsInfo","isPost")
+    this.useRoute("oneTwinInfo","isPost")
     this.useRoute("allRelationships","isPost")
     this.useRoute("addOutBound","isPost")
     this.useRoute("addInBound","isPost")
@@ -44,6 +45,17 @@ routerQueryADT.prototype.querySingleOutBound = async function (adtClient,twinID)
         oneSet=oneSet.concat(page.value)
     }
     return oneSet;
+}
+
+routerQueryADT.prototype.oneTwinInfo =async function(adtClient,req,res) {
+    var twinID = req.body.twinID; 
+    try{
+        var twinInfo = await adtClient.getDigitalTwin(twinID)
+        res.send(twinInfo.body)
+    }catch(e){
+        console.log(e)
+        res.end()
+    }
 }
 
 routerQueryADT.prototype.allTwinsInfo =async function(adtClient,req,res) {

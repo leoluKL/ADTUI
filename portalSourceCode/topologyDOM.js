@@ -5,6 +5,7 @@ const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 
 function topologyDOM(DOM){
     this.DOM=DOM
+    this.defaultNodeSize=30
 }
 
 topologyDOM.prototype.init=function(){
@@ -46,8 +47,9 @@ topologyDOM.prototype.init=function(){
             {
                 selector: 'node',
                 style: {
-                    //'background-color': '#666',
-                    'label': 'data(id)'
+                    "width":this.defaultNodeSize,"height":this.defaultNodeSize,
+                    'label': 'data(id)',
+                    'opacity':0.9
                     //'background-color': function( ele ){ return ele.data('bg') }
                 }
             },
@@ -66,7 +68,7 @@ topologyDOM.prototype.init=function(){
             {
                 selector: 'edge',
                 style: {
-                    'width': 2,
+                    'width':2,
                     'line-color': '#888',
                     'target-arrow-color': '#000',
                     'target-arrow-shape': 'triangle',
@@ -83,7 +85,7 @@ topologyDOM.prototype.init=function(){
             {selector: 'node:selected',
             style: {
                 'border-color':"red",
-                'border-width':3,
+                'border-width':2,
                 'background-color': 'Gray'
             }}
             
@@ -128,7 +130,26 @@ topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipNa
         .update()   
 }
 
-topologyDOM.prototype.drawTwins=function(twinsData){
+topologyDOM.prototype.deleteTwins=function(twinIDArr){
+    twinIDArr.forEach(twinID=>{
+        this.core.$('[id = "'+twinID+'"]').remove()
+    })   
+}
+
+topologyDOM.prototype.animateANode=function(twin){
+    twin.animate({
+        style: { 'height': this.defaultNodeSize*2,'width': this.defaultNodeSize*2 },
+        duration: 200,
+        complete:()=>{
+            twin.animate({
+                style: { 'height': this.defaultNodeSize,'width': this.defaultNodeSize },
+                duration: 200,
+            })
+        }
+      });
+}
+
+topologyDOM.prototype.drawTwins=function(twinsData,animation){
     var arr=[]
     for(var i=0;i<twinsData.length;i++){
         var originalInfo=twinsData[i];
@@ -141,6 +162,9 @@ topologyDOM.prototype.drawTwins=function(twinsData){
     }
     var eles = this.core.add(arr)
     this.noPosition_grid(eles)
+    if(animation){
+        eles.forEach((ele)=>{ this.animateANode(ele) })
+    }
     return eles
 }
 
@@ -173,7 +197,7 @@ topologyDOM.prototype.drawTwinsAndRelations=function(twinsAndRelations){
     twinsAndRelations.forEach(oneSet=>{
         var twinInfoArr=[]
         for(var ind in oneSet.childTwins) twinInfoArr.push(oneSet.childTwins[ind])
-        var eles=this.drawTwins(twinInfoArr)
+        var eles=this.drawTwins(twinInfoArr,"animation")
         
     
         var relationsInfo=oneSet["relationships"]
@@ -210,14 +234,17 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="drawAllRelations"){
         this.drawRelations(msgPayload.info)
         if(this.core.edges().size()!=0) this.noPosition_cose()
-    } 
-    else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
+    }else if(msgPayload.message=="addNewTwin") {
+        this.drawTwins([msgPayload.twinInfo],"animation")
+    }else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
     else if(msgPayload.message=="selectNodes"){
         this.core.nodes().unselect()
         this.core.edges().unselect()
         var arr=msgPayload.info;
         arr.forEach(element => {
-            this.core.nodes("#"+element['$dtId']).select()
+            var aTwin= this.core.nodes("#"+element['$dtId'])
+            aTwin.select()
+            this.animateANode(aTwin)
         });
     }else if(msgPayload.message=="PanToNode"){
         var nodeInfo= msgPayload.info;
@@ -228,8 +255,10 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="visualDefinitionChange"){
         if(msgPayload.srcModelID) this.updateRelationshipColor(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.colorCode)
         else this.updateModelTwinColor(msgPayload.modelID,msgPayload.colorCode)
-    }
+    }else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
 }
+
+
 
 topologyDOM.prototype.noPosition_grid=function(eles){
     var newLayout = eles.layout({

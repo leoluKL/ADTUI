@@ -23,11 +23,8 @@ adtInstanceSelectionDialog.prototype.preparationFunc = async function () {
         }
     })
 }
-adtInstanceSelectionDialog.prototype.popup = function () {
-    this.prepareAllUIComponent()
-}
 
-adtInstanceSelectionDialog.prototype.prepareAllUIComponent = function () {
+adtInstanceSelectionDialog.prototype.popup = function () {
     $.get("queryADT/listADTInstance", (data, status) => {
         var adtArr=data;
         if (adtArr.length == 0) return;

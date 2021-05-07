@@ -17,6 +17,10 @@ function twinsTree(DOM, searchDOM) {
         this.broadcastMessage({ "message": "PanToNode", info:theNode.leafInfo})
     }
 
+    this.tree.callback_afterSelectGroupNode=(nodeInfo)=>{
+        this.broadcastMessage({"message":"selectGroupNode",info:nodeInfo})
+    }
+
     this.searchBox=$('<input type="text"/>').addClass("ui-corner-all");
     this.searchBox.css({"border":"solid 1px grey","height":"calc(100% - 4px)","width":"calc(100% - 7px)"})
     searchDOM.append(this.searchBox)
@@ -38,6 +42,14 @@ twinsTree.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="ADTDatasourceChange") this.refreshContent(msgPayload.query, msgPayload.twins)
     else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
     else if(msgPayload.message=="ADTModelsChange") this.refreshModels(msgPayload.models)
+    else if(msgPayload.message=="addNewTwin") this.drawOneTwin(msgPayload.twinInfo)
+    else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
+}
+
+twinsTree.prototype.deleteTwins=function(twinIDArr){
+    twinIDArr.forEach(twinID=>{
+        this.tree.deleteLeafNode(twinID)
+    })
 }
 
 twinsTree.prototype.refreshModels=function(modelsData){
@@ -103,10 +115,13 @@ twinsTree.prototype.drawTwinsAndRelations= function(data){
     data.forEach(oneSet=>{
         for(var ind in oneSet.childTwins){
             var oneTwin=oneSet.childTwins[ind]
-            var groupName=this.modelIDMapToName[oneTwin["$metadata"]["$model"]]
-            this.tree.addLeafnodeToGroup(groupName,oneTwin,"skipRepeat")
+            this.drawOneTwin(oneTwin)
         }
     })
+}
+twinsTree.prototype.drawOneTwin= function(twinInfo){
+    var groupName=this.modelIDMapToName[twinInfo["$metadata"]["$model"]]
+    this.tree.addLeafnodeToGroup(groupName,twinInfo,"skipRepeat")
 }
 
 twinsTree.prototype.renderAllTwins= function(data){

@@ -7,6 +7,45 @@ function routerEditADT(adtClients){
     this.useRoute("changeAttribute","isPost")
     this.useRoute("importModels","isPost")
     this.useRoute("deleteModel","isPost")
+    this.useRoute("upsertDigitalTwin","isPost")
+    this.useRoute("deleteTwins","isPost")
+    
+}
+
+
+routerEditADT.prototype.deleteTwins =async function(adtClient,req,res) {
+    var twinIDArr=req.body.arr;
+    var promiseArr=[]
+
+    for(var i=0;i<twinIDArr.length;i++){
+        var twinID = twinIDArr[i];
+        promiseArr.push(this.deleteOneTwin(adtClient,twinID))
+    }
+    var results=await Promise.allSettled(promiseArr);
+    var succeedList=[]
+    results.forEach((oneSet,index)=>{
+        if(oneSet.status=="fulfilled") succeedList.push(twinIDArr[index]) 
+    })
+    res.send(succeedList)
+}
+
+routerEditADT.prototype.deleteOneTwin =async function(adtClient,twinID) {
+    var relationships = await adtClient.listRelationships(twinID)
+    var incomingRelationship=await adtClient.listIncomingRelationships(twinID)
+    var promiseArr=[]
+    for await (let page of relationships.byPage({ maxPageSize: 1000 })) { //should be only one page
+        page.value.forEach((oneRel) => {
+            promiseArr.push(adtClient.deleteRelationship(oneRel["$sourceId"],oneRel["$relationshipId"]))
+        })
+    }
+    for await (let page of incomingRelationship.byPage({ maxPageSize: 1000 })) { //should be only one page
+        page.value.forEach((oneRel) => {
+            promiseArr.push(adtClient.deleteRelationship(oneRel["sourceId"],oneRel["relationshipId"]))
+        })
+    }
+    await Promise.allSettled(promiseArr);
+    var result=adtClient.deleteDigitalTwin(twinID)
+    return result;
 }
 
 routerEditADT.prototype.useRoute=function(routeStr,isPost){
@@ -17,6 +56,22 @@ routerEditADT.prototype.useRoute=function(routeStr,isPost){
         if (!adtClient) res.end()
         this[routeStr](adtClient,req,res)
     })
+}
+
+routerEditADT.prototype.upsertDigitalTwin = async function (adtClient, req, res) {
+    var newTwin = req.body.newTwinJson;
+    try{
+        var obj=JSON.parse(newTwin)
+        var twinID=obj['$dtId']
+        var re = await adtClient.upsertDigitalTwin(twinID, newTwin)
+        res.statusCode = 200;
+        res.end()
+    }catch(e){
+        res.statusCode = 200;
+        res.send(e.message)
+    }
+    
+    res.end()
 }
 
 routerEditADT.prototype.importModels =async function(adtClient,req,res) {
