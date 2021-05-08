@@ -1,5 +1,6 @@
 function adtInstanceSelectionDialog() {
     this.filters={}
+    this.previousSelectedADT=null
     this.selectedADT=null;
     this.allTwinsInfo=null;
 
@@ -79,7 +80,7 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         var nameInput=$('<input/>').addClass("ui-corner-all");
         this.queryNameInput=nameInput;
         var queryLbl=$("<span style='display:block;padding-top:10px'>Query</span>")
-        var queryInput=$('<textarea style="width:calc(100% - 5px);overflow-y:auto;overflow-x:hidden;height:3em"/>').addClass("ui-corner-all");
+        var queryInput=$('<textarea style="width:calc(100% - 5px);overflow-y:auto;overflow-x:hidden;height:5em;font-size:10px"/>').addClass("ui-corner-all");
         this.queryInput=queryInput;
 
         var saveBtn=$('<a class="ui-button ui-widget ui-corner-all" style="background-color:yellowgreen" href="#">Save</a>')
@@ -97,7 +98,7 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         var testResultSpan=$("<span style='display:block;border:solid 1px grey'></span>")
         var testResultTable=$("<table></table>")
         this.testResultTable=testResultTable
-        testResultSpan.css({"margin-top":"2px","height":"calc(100% - 122px)",overflow:"auto"})
+        testResultSpan.css({"margin-top":"2px",overflow:"auto","position":"absolute","top":"135px","bottom":"1px","left":"1px","right":"1px"})
         testResultTable.css({"border-collapse":"collapse"})
         rightSpan.append(testResultSpan)
         testResultSpan.append(testResultTable)
@@ -107,14 +108,6 @@ adtInstanceSelectionDialog.prototype.popup = function () {
             width:650
             ,height:500
             ,resizable:false
-            ,buttons: [
-                {
-                  text: "Confirm",
-                  click: ()=> {
-                    this.confirmFilter()
-                  }
-                }
-              ]
         })
 
         this.setADTInstance(adtArr[0])
@@ -122,6 +115,20 @@ adtInstanceSelectionDialog.prototype.popup = function () {
 }
 
 adtInstanceSelectionDialog.prototype.setADTInstance=function(selectedADT){
+    if(this.previousSelectedADT==null || this.previousSelectedADT == selectedADT){
+        this.DOM.dialog({ 
+            buttons: [
+                {  text: "Replace",  click: ()=> { this.useFilterToReplace()  }   },
+                {  text: "Append",  click: ()=> { this.useFilterToAppend()  }   }
+              ]
+        })
+    }else{
+        this.DOM.dialog({ 
+            buttons: [
+                {  text: "Replace",  click: ()=> { this.useFilterToReplace()  }   }
+              ]
+        })
+    }
     this.selectedADT = selectedADT
     this.listFilters(selectedADT)
     this.chooseOneFilter("","")
@@ -219,12 +226,21 @@ adtInstanceSelectionDialog.prototype.listFilters=function(adtInstanceName){
         
 
         oneFilter.dblclick((e)=>{
-            this.confirmFilter();
+            this.useFilterToReplace();
         })
     }
 }
 
-adtInstanceSelectionDialog.prototype.confirmFilter=function(){
+adtInstanceSelectionDialog.prototype.useFilterToAppend=function(){
+    this.previousSelectedADT=this.selectedADT
+    if(this.queryInput.val()==""){
+        alert("Please fill in query to fetch data from digital twin service..")
+        return;
+    }
+}
+
+adtInstanceSelectionDialog.prototype.useFilterToReplace=function(){
+    this.previousSelectedADT=this.selectedADT
     if(this.queryInput.val()==""){
         alert("Please fill in query to fetch data from digital twin service..")
         return;

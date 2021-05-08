@@ -16,7 +16,7 @@
     "production:compress": "uglifyjs .\\portalDev\\bundle.js -cm -o .\\portalProduction\\bundle.min.js",
     "production:assemblehtml": "node ./assembleIndexHtml.js",
     "production:autoBrowser": "node ./backendSourceCode/server.js",
-    "start": "npm run production"
+    "start": "node ./backendSourceCode/server.js"
   },
   "dependencies": {
     "npm-run-all": "latest",

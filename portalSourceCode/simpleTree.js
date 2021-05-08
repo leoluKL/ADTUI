@@ -211,6 +211,9 @@ simpleTreeGroupNode.prototype.isOpen=function(){
 
 simpleTreeGroupNode.prototype.refreshName=function(){
     this.headerDOM.text(this.name+"("+this.childLeafNodes.length+")")
+    if(this.childLeafNodes.length>0) this.headerDOM.css("font-weight","bold")
+    else this.headerDOM.css("font-weight","normal")
+
 }
 
 simpleTreeGroupNode.prototype.deleteSelf = function () {
