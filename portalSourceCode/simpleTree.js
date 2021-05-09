@@ -20,6 +20,14 @@ simpleTree.prototype.scrollToLeafNode=function(aNode){
     }
 }
 
+simpleTree.prototype.clearAllLeafNodes=function(){
+    this.groupNodes.forEach((gNode)=>{
+        gNode.listDOM.empty()
+        gNode.childLeafNodes.length=0
+        gNode.refreshName()
+    })
+}
+
 simpleTree.prototype.firstLeafNode=function(){
     if(this.groupNodes.length==0) return null;
     var firstLeafNode=null;

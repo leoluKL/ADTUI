@@ -9,9 +9,49 @@ function routerEditADT(adtClients){
     this.useRoute("deleteModel","isPost")
     this.useRoute("upsertDigitalTwin","isPost")
     this.useRoute("deleteTwins","isPost")
-    
+    this.useRoute("createRelations","isPost")
+    this.useRoute("deleteRelations","isPost")
 }
 
+
+routerEditADT.prototype.deleteRelations =async function(adtClient,req,res) {
+    var relations=req.body.relations;
+    var promiseArr=[]
+    relations.forEach(oneAction=>{
+        promiseArr.push(adtClient.deleteRelationship(oneAction["srcID"],oneAction["relID"]))
+    })
+
+    var results=await Promise.allSettled(promiseArr);
+    var succeedList=[]
+    results.forEach((oneSet,index)=>{
+        if(oneSet.status=="fulfilled") {
+            succeedList.push(relations[index]) 
+        }
+    })
+    res.send(succeedList)
+}
+
+routerEditADT.prototype.createRelations =async function(adtClient,req,res) {
+    var actions=req.body.actions;
+    var promiseArr=[]
+    actions.forEach(oneAction=>{
+        var relationshipID=oneAction["from"]+";"+oneAction["to"]+";"+oneAction["connect"]+";"+oneAction["IDindex"]
+        var obj={
+            "$targetId": oneAction["to"],
+            "$relationshipName": oneAction["connect"]
+          }
+        promiseArr.push(adtClient.upsertRelationship(oneAction["from"],relationshipID,obj))
+    })
+    var results=await Promise.allSettled(promiseArr);
+    var succeedList=[]
+    results.forEach((oneSet,index)=>{
+        if(oneSet.status=="fulfilled") {
+            //console.log(JSON.stringify(oneSet,null,2))
+            succeedList.push(oneSet.value.body) 
+        }
+    })
+    res.send(succeedList)
+}
 
 routerEditADT.prototype.deleteTwins =async function(adtClient,req,res) {
     var twinIDArr=req.body.arr;
@@ -28,6 +68,7 @@ routerEditADT.prototype.deleteTwins =async function(adtClient,req,res) {
     })
     res.send(succeedList)
 }
+
 
 routerEditADT.prototype.deleteOneTwin =async function(adtClient,twinID) {
     var relationships = await adtClient.listRelationships(twinID)

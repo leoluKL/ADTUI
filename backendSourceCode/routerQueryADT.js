@@ -10,8 +10,8 @@ function routerQueryADT(adtClients){
     this.useRoute("allTwinsInfo","isPost")
     this.useRoute("oneTwinInfo","isPost")
     this.useRoute("allRelationships","isPost")
-    this.useRoute("addOutBound","isPost")
-    this.useRoute("addInBound","isPost")
+    this.useRoute("showOutBound","isPost")
+    this.useRoute("showInBound","isPost")
 }
 
 routerQueryADT.prototype.useRoute=function(routeStr,isPost){
@@ -38,7 +38,7 @@ routerQueryADT.prototype.listModels=async function(adtClient,req,res){
     }
 }
 
-routerQueryADT.prototype.querySingleOutBound = async function (adtClient,twinID) {
+routerQueryADT.prototype.querySingleTwinRelations = async function (adtClient,twinID) {
     var oneSet = []
     var relationships = await adtClient.listRelationships(twinID)
     for await (let page of relationships.byPage({ maxPageSize: 1000 })) { //it is strange that i must set maxPagesize as 1 to only have one page
@@ -84,7 +84,7 @@ routerQueryADT.prototype.allRelationships =async function(adtClient,req,res) {
 
     for(var i=0;i<twinIDArr.length;i++){
         var twinID = twinIDArr[i];
-        promiseArr.push(this.querySingleOutBound(adtClient,twinID))
+        promiseArr.push(this.querySingleTwinRelations(adtClient,twinID))
     }
     var results=await Promise.all(promiseArr);
     results.forEach(oneSet=>{
@@ -94,30 +94,45 @@ routerQueryADT.prototype.allRelationships =async function(adtClient,req,res) {
     res.send(reArr)
 }
 
-routerQueryADT.prototype.addInBound =async function(adtClient,req,res) {
+routerQueryADT.prototype.showInBound =async function(adtClient,req,res) {
     var twinIDArr=req.body.arr;
-    var reArr=[]
+    var knownSourceTwins= req.body.knownSources;
+    var childTwinsAndRelationsArr=[]
     var promiseArr=[];
     for(var i=0;i<twinIDArr.length;i++){
         var twinID = twinIDArr[i];
-        promiseArr.push(this.addSingleInBound(adtClient,twinID))
+        promiseArr.push(this.showSingleInBound(adtClient,twinID,knownSourceTwins))
     }
 
     var results=await Promise.all(promiseArr);
+    var newTwins={}
     results.forEach(oneSet=>{
-        reArr.push(oneSet)
+        childTwinsAndRelationsArr.push(oneSet)
+        for(var twinID in oneSet.childTwins) newTwins[twinID]=1
     })
 
-    res.send(reArr)
+    //for new twins, query their relationships that will be also stored in client browser app
+    var promiseArr = []
+    var newTwinRelations = []
+    for (var twinID in newTwins) { promiseArr.push(this.querySingleTwinRelations(adtClient, twinID)) }
+    var results = await Promise.all(promiseArr);
+    results.forEach(oneSet => {
+        newTwinRelations = newTwinRelations.concat(oneSet)
+    })
+    var reInfo={"childTwinsAndRelations":childTwinsAndRelationsArr,"newTwinRelations":newTwinRelations}
+
+    res.send(reInfo)
 }
 
-routerQueryADT.prototype.addSingleInBound = async function (adtClient,twinID) {
+routerQueryADT.prototype.showSingleInBound = async function (adtClient,twinID,knownSourceTwins) {
     var oneSet = { childTwins: {}, relationships: [] }
     var relationships = await adtClient.listIncomingRelationships(twinID)
     var promiseArr=[]
     for await (let page of relationships.byPage({ maxPageSize: 1000 })) { //should be only one page
         page.value.forEach((oneRel) => {
-            promiseArr.push(adtClient.getDigitalTwin(oneRel["sourceId"]))
+            if(knownSourceTwins[oneRel["sourceId"]]==null){
+                promiseArr.push(adtClient.getDigitalTwin(oneRel["sourceId"]))
+            }
             promiseArr.push(adtClient.getRelationship(oneRel["sourceId"], oneRel["relationshipId"]))
         })
     }
@@ -129,31 +144,47 @@ routerQueryADT.prototype.addSingleInBound = async function (adtClient,twinID) {
     return oneSet;
 }
 
-routerQueryADT.prototype.addOutBound =async function(adtClient,req,res) {
+routerQueryADT.prototype.showOutBound =async function(adtClient,req,res) {
     var twinIDArr=req.body.arr;
-    var reArr=[]
+    var knownTargetTwins= req.body.knownTargets;
+    var childTwinsAndRelationsArr=[]
     var promiseArr=[];
     for(var i=0;i<twinIDArr.length;i++){
         var twinID = twinIDArr[i];
-        promiseArr.push(this.addSingleOutBound(adtClient,twinID))
+        promiseArr.push(this.showSingleOutBound(adtClient,twinID,knownTargetTwins))
     }
 
     var results=await Promise.all(promiseArr);
+    var newTwins={}
     results.forEach(oneSet=>{
-        reArr.push(oneSet)
+        childTwinsAndRelationsArr.push(oneSet)
+        for(var twinID in oneSet.childTwins) newTwins[twinID]=1
     })
 
-    res.send(reArr)
+    //for new twins, query their relationships that will be also stored in client browser app
+    var promiseArr=[]
+    var newTwinRelations=[]
+    for(var twinID in newTwins){ promiseArr.push(this.querySingleTwinRelations(adtClient,twinID)) }
+    var results=await Promise.all(promiseArr);
+    results.forEach(oneSet=>{
+        newTwinRelations=newTwinRelations.concat(oneSet)
+    })
+
+    var reInfo={"childTwinsAndRelations":childTwinsAndRelationsArr,"newTwinRelations":newTwinRelations}
+
+    res.send(reInfo)
 }
 
-routerQueryADT.prototype.addSingleOutBound = async function (adtClient,twinID) {
+routerQueryADT.prototype.showSingleOutBound = async function (adtClient,twinID,knownTargetTwins) {
     var oneSet = { childTwins: {}, relationships: [] }
     var relationships = await adtClient.listRelationships(twinID)
     //console.log(Date.now() + " to get all relation")
     var promiseArr=[]
     for await (let page of relationships.byPage({ maxPageSize: 1000 })) { //should be only one page
         page.value.forEach((oneRel) => {
-            promiseArr.push(adtClient.getDigitalTwin(oneRel["$targetId"]))
+            if(knownTargetTwins[oneRel["$targetId"]]==null){
+                promiseArr.push(adtClient.getDigitalTwin(oneRel["$targetId"]))
+            }
         })
         oneSet.relationships=oneSet.relationships.concat(page.value)
     }

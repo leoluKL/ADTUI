@@ -6,6 +6,7 @@ function modelAnalyzer(){
 }
 
 modelAnalyzer.prototype.clearAllModels=function(){
+    console.log("clear all model info")
     for(var id in this.DTDLModels) delete this.DTDLModels[id]
 }
 
@@ -14,6 +15,20 @@ modelAnalyzer.prototype.addModels=function(arr){
         var modelID= ele["@id"]
         this.DTDLModels[modelID]=ele
     })
+}
+
+
+modelAnalyzer.prototype.recordAllBaseClasses= function (parentObj, baseClassID) {
+    var baseClass = this.DTDLModels[baseClassID]
+    if (baseClass == null) return;
+
+    parentObj[baseClassID]=1
+
+    var furtherBaseClassIDs = baseClass.extends;
+    if (furtherBaseClassIDs == null) return;
+    if(Array.isArray(furtherBaseClassIDs)) var tmpArr=furtherBaseClassIDs
+    else tmpArr=[furtherBaseClassIDs]
+    tmpArr.forEach((eachBase) => { this.recordAllBaseClasses(parentObj, eachBase) })
 }
 
 modelAnalyzer.prototype.expandEditablePropertiesFromBaseClass = function (parentObj, baseClassID) {
@@ -67,6 +82,7 @@ modelAnalyzer.prototype.expandEditableProperties=function(parentObj,dataInfo,emb
 
 
 modelAnalyzer.prototype.analyze=function(){
+    console.log("analyze model info")
     //analyze all relationship types
     for (var id in this.relationshipTypes) delete this.relationshipTypes[id]
     for (var modelID in this.DTDLModels) {
@@ -112,6 +128,7 @@ modelAnalyzer.prototype.analyze=function(){
         }
         ele.editableProperties={}
         ele.validRelationships={}
+        ele.allBaseClasses={}
         if(Array.isArray(ele.contents)){
             this.expandEditableProperties(ele.editableProperties,ele.contents,embeddedSchema)
 
@@ -129,6 +146,7 @@ modelAnalyzer.prototype.analyze=function(){
         if(Array.isArray(baseClassIDs)) var tmpArr=baseClassIDs
         else tmpArr=[baseClassIDs]
         tmpArr.forEach((eachBase)=>{
+            this.recordAllBaseClasses(ele.allBaseClasses,eachBase)
             this.expandEditablePropertiesFromBaseClass(ele.editableProperties,eachBase)
             this.expandValidRelationshipTypesFromBaseClass(ele.validRelationships,eachBase)
         })

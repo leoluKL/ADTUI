@@ -1,5 +1,6 @@
 const simpleTree=require("./simpleTree")
 const modelAnalyzer=require("./modelAnalyzer")
+const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 
 function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM)
@@ -39,7 +40,8 @@ function twinsTree(DOM, searchDOM) {
 }
 
 twinsTree.prototype.rxMessage=function(msgPayload){
-    if(msgPayload.message=="ADTDatasourceChange") this.refreshContent(msgPayload.query, msgPayload.twins)
+    if(msgPayload.message=="ADTDatasourceChange_replace") this.ADTDatasourceChange_replace(msgPayload.query, msgPayload.twins,msgPayload.ADTInstanceDoesNotChange)
+    else if(msgPayload.message=="ADTDatasourceChange_append") this.ADTDatasourceChange_append(msgPayload.query, msgPayload.twins)
     else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
     else if(msgPayload.message=="ADTModelsChange") this.refreshModels(msgPayload.models)
     else if(msgPayload.message=="addNewTwin") this.drawOneTwin(msgPayload.twinInfo)
@@ -78,41 +80,65 @@ twinsTree.prototype.refreshModels=function(modelsData){
     }
 }
 
-twinsTree.prototype.refreshContent=function(twinQueryStr,twinsData){
-    var theTree= this.tree;
-    theTree.removeAllNodes()
-    for(var id in this.modelIDMapToName) delete this.modelIDMapToName[id]
 
-    //query to get all models
-    $.get("queryADT/listModels", (data, status) => {
-        var tmpNameArr=[]
-        var tmpNameToObj={}
-        for(var i=0;i<data.length;i++){
-            this.modelIDMapToName[data[i]["@id"]]=data[i]["displayName"]
-            tmpNameArr.push(data[i]["displayName"])
-            tmpNameToObj[data[i]["displayName"]]=data[i]
-        }
-        tmpNameArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
-        tmpNameArr.forEach(modelName=>{
-            var newGroup=theTree.addGroupNode(tmpNameToObj[modelName])
-            newGroup.shrink()
+twinsTree.prototype.ADTDatasourceChange_append=function(twinQueryStr,twinsData){
+    if (twinsData != null) this.appendAllTwins(twinsData)
+    else {
+        $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
+            data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+            this.appendAllTwins(data)
         })
-        modelAnalyzer.clearAllModels();
-        modelAnalyzer.addModels(data)
-        modelAnalyzer.analyze();
+    }
+}
 
-        if(twinsData!=null) this.renderAllTwins(twinsData)
-        else{
-            $.post("queryADT/allTwinsInfo",{query:twinQueryStr}, (data)=> {
-                this.renderAllTwins(data)
+twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,ADTInstanceDoesNotChange){
+    var theTree= this.tree;
+
+    if (ADTInstanceDoesNotChange) {
+        //keep all group node as model is the same, only fetch all leaf node again
+        //remove all leaf nodes
+        this.tree.clearAllLeafNodes()
+        if (twinsData != null) this.replaceAllTwins(twinsData)
+        else {
+            $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
+                data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+                this.replaceAllTwins(data)
             })
         }
-        
-    })
+    }else{
+        theTree.removeAllNodes()
+        for (var id in this.modelIDMapToName) delete this.modelIDMapToName[id]
+        //query to get all models
+        $.get("queryADT/listModels", (data, status) => {
+            var tmpNameArr = []
+            var tmpNameToObj = {}
+            for (var i = 0; i < data.length; i++) {
+                this.modelIDMapToName[data[i]["@id"]] = data[i]["displayName"]
+                tmpNameArr.push(data[i]["displayName"])
+                tmpNameToObj[data[i]["displayName"]] = data[i]
+            }
+            tmpNameArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
+            tmpNameArr.forEach(modelName => {
+                var newGroup = theTree.addGroupNode(tmpNameToObj[modelName])
+                newGroup.shrink()
+            })
+            modelAnalyzer.clearAllModels();
+            modelAnalyzer.addModels(data)
+            modelAnalyzer.analyze();
+
+            if (twinsData != null) this.replaceAllTwins(twinsData)
+            else {
+                $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
+                    data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+                    this.replaceAllTwins(data)
+                })
+            }
+        })
+    }
 }
 
 twinsTree.prototype.drawTwinsAndRelations= function(data){
-    data.forEach(oneSet=>{
+    data.childTwinsAndRelations.forEach(oneSet=>{
         for(var ind in oneSet.childTwins){
             var oneTwin=oneSet.childTwins[ind]
             this.drawOneTwin(oneTwin)
@@ -124,9 +150,29 @@ twinsTree.prototype.drawOneTwin= function(twinInfo){
     this.tree.addLeafnodeToGroup(groupName,twinInfo,"skipRepeat")
 }
 
-twinsTree.prototype.renderAllTwins= function(data){
+twinsTree.prototype.appendAllTwins= function(data){
     var twinIDArr=[]
-    this.broadcastMessage({ "message": "refreshAllTwin",info:data})
+    //check if any current leaf node does not have stored outbound relationship data yet
+    this.tree.groupNodes.forEach((gNode)=>{
+        gNode.childLeafNodes.forEach(leafNode=>{
+            var nodeId=leafNode.leafInfo["$dtId"]
+            if(adtInstanceSelectionDialog.storedOutboundRelationships[nodeId]==null) twinIDArr.push(nodeId)
+        })
+    })
+
+    this.broadcastMessage({ "message": "appendAllTwins",info:data})
+    for(var i=0;i<data.length;i++){
+        var groupName=this.modelIDMapToName[data[i]["$metadata"]["$model"]]
+        this.tree.addLeafnodeToGroup(groupName,data[i],"skipRepeat")
+        twinIDArr.push(data[i]["$dtId"])
+    }
+
+    this.fetchAllRelationships(twinIDArr)
+}
+
+twinsTree.prototype.replaceAllTwins= function(data){
+    var twinIDArr=[]
+    this.broadcastMessage({ "message": "replaceAllTwins",info:data})
     for(var i=0;i<data.length;i++){
         var groupName=this.modelIDMapToName[data[i]["$metadata"]["$model"]]
         this.tree.addLeafnodeToGroup(groupName,data[i])
@@ -137,8 +183,9 @@ twinsTree.prototype.renderAllTwins= function(data){
 
 twinsTree.prototype.fetchAllRelationships= async function(twinIDArr){
     while(twinIDArr.length>0){
-        var smallArr= twinIDArr.splice(0, 50);
+        var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialRelationships(smallArr)
+        adtInstanceSelectionDialog.storeTwinRelationships(data) //store them in global available array
         this.broadcastMessage({ "message": "drawAllRelations",info:data})
     }
 }

@@ -91,6 +91,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     
     var VisualizationDOM=this.addAPartInRightSpan("Visualization")
     var editablePropertiesDOM=this.addAPartInRightSpan("Editable Properties And Relationships")
+    var baseClassesDOM=this.addAPartInRightSpan("Base Classes")
     var originalDefinitionDOM=this.addAPartInRightSpan("Original Definition")
 
     var str=JSON.stringify(this.models[modelName],null,2)
@@ -102,6 +103,15 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     this.fillRelationshipInfo(validRelationships,editablePropertiesDOM)
 
     this.fillVisualization(modelID,VisualizationDOM)
+
+    this.fillBaseClasses(modelAnalyzer.DTDLModels[modelID].allBaseClasses,baseClassesDOM) 
+}
+
+modelManagerDialog.prototype.fillBaseClasses=function(baseClasses,parentDom){
+    for(var ind in baseClasses){
+        var keyDiv= $("<label style='display:block;padding:.1em'>"+ind+"</label>")
+        parentDom.append(keyDiv)
+    }
 }
 
 modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){

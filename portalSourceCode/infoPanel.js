@@ -1,3 +1,4 @@
+const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
 var modelAnlyzer=require("./modelAnalyzer")
 function infoPanel() {
@@ -63,6 +64,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                         var IDInput=keyLabel.find("input")
                         if(IDInput) IDInput.val("")
                         $.post("queryADT/oneTwinInfo",{twinID:twinJson["$dtId"]}, (data)=> {
+                            adtInstanceSelectionDialog.storedTwins[data["$dtId"]] = data;
                             this.broadcastMessage({ "message": "addNewTwin",twinInfo:data})
                         })                        
                     }
@@ -96,12 +98,15 @@ infoPanel.prototype.drawButtons=function(selectType){
         var showOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Show Outbound</a>')
         var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete All</a>')
         var connectToBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Connect To</a>')
+        var connectFromBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Connect From</a>')
     
-        this.DOM.append(showInboundBtn, showOutBoundBtn, delBtn,connectToBtn)
+        this.DOM.append(showInboundBtn, showOutBoundBtn, delBtn,connectToBtn,connectFromBtn)
     
-        showOutBoundBtn.click(()=>{this.addOutBound()})
-        showInboundBtn.click(()=>{this.addInBound()})  
-        
+        showOutBoundBtn.click(()=>{this.showOutBound()})
+        showInboundBtn.click(()=>{this.showInBound()})  
+        connectToBtn.click(()=>{this.broadcastMessage({ "message": "connectTo"}) })
+        connectFromBtn.click(()=>{this.broadcastMessage({ "message": "connectFrom"}) })
+
         delBtn.click(()=>{this.deleteSelected()})
     }
 }
@@ -159,8 +164,14 @@ infoPanel.prototype.deleteSelected=async function(){
 
 infoPanel.prototype.deleteTwins=async function(twinIDArr){   
     while(twinIDArr.length>0){
-        var smallArr= twinIDArr.splice(0, 50);
+        var smallArr= twinIDArr.splice(0, 100);
         var result=await this.deletePartialTwins(smallArr)
+
+        result.forEach((oneID)=>{
+            delete adtInstanceSelectionDialog.storedTwins[oneID]
+            delete adtInstanceSelectionDialog.storedOutboundRelationships[oneID]
+        });
+
         this.broadcastMessage({ "message": "twinsDeleted",twinIDArr:result})
     }
 }
@@ -183,11 +194,15 @@ infoPanel.prototype.deleteRelations=async function(relationsArr){
     relationsArr.forEach(oneRelation=>{
         arr.push({srcID:oneRelation['$sourceId'],relID:oneRelation['$relationshipId']})
     })
+    $.post("editADT/deleteRelations",{"relations":arr},  (data)=> { 
+        adtInstanceSelectionDialog.storeTwinRelationships_remove(data)
+        this.broadcastMessage({ "message": "relationsDeleted","relations":data})
+    });
     
 }
 
 
-infoPanel.prototype.addOutBound=async function(){
+infoPanel.prototype.showOutBound=async function(){
     var arr=this.selectedObjects;
     var twinIDArr=[]
     arr.forEach(element => {
@@ -196,13 +211,25 @@ infoPanel.prototype.addOutBound=async function(){
     });
     
     while(twinIDArr.length>0){
-        var smallArr= twinIDArr.splice(0, 50);
+        var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialOutbounds(smallArr)
+        
+        //new twin's relationship should be stored as well
+        adtInstanceSelectionDialog.storeTwinRelationships(data.newTwinRelations)
+        
+        data.childTwinsAndRelations.forEach(oneSet=>{
+            for(var ind in oneSet.childTwins){
+                var oneTwin=oneSet.childTwins[ind]
+                adtInstanceSelectionDialog.storedTwins[ind]=oneTwin
+            }
+        })
         this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
+        
+
     }
 }
 
-infoPanel.prototype.addInBound=async function(){
+infoPanel.prototype.showInBound=async function(){
     var arr=this.selectedObjects;
     var twinIDArr=[]
     arr.forEach(element => {
@@ -211,8 +238,21 @@ infoPanel.prototype.addInBound=async function(){
     });
     
     while(twinIDArr.length>0){
-        var smallArr= twinIDArr.splice(0, 50);
+        var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialInbounds(smallArr)
+
+        //new twin's relationship should be stored as well
+        adtInstanceSelectionDialog.storeTwinRelationships(data.newTwinRelations)
+        
+        //data.newTwinRelations.forEach(oneRelation=>{console.log(oneRelation['$sourceId']+"->"+oneRelation['$targetId'])})
+        //console.log(adtInstanceSelectionDialog.storedOutboundRelationships["default"])
+
+        data.childTwinsAndRelations.forEach(oneSet=>{
+            for(var ind in oneSet.childTwins){
+                var oneTwin=oneSet.childTwins[ind]
+                adtInstanceSelectionDialog.storedTwins[ind]=oneTwin
+            }
+        })
         this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
     }
 }
@@ -220,7 +260,20 @@ infoPanel.prototype.addInBound=async function(){
 infoPanel.prototype.fetchPartialOutbounds= async function(IDArr){
     return new Promise((resolve, reject) => {
         try{
-            $.post("queryADT/addOutBound",{arr:IDArr}, function (data) {
+            //find out those existed outbound with known target Twins so they can be excluded from query
+            var knownTargetTwins={}
+            IDArr.forEach(oneID=>{
+                knownTargetTwins[oneID]=1 //itself also is known
+                var outBoundRelation=adtInstanceSelectionDialog.storedOutboundRelationships[oneID]
+                if(outBoundRelation){
+                    outBoundRelation.forEach(oneRelation=>{
+                        var targetID=oneRelation["$targetId"]
+                        if(adtInstanceSelectionDialog.storedTwins[targetID]!=null) knownTargetTwins[targetID]=1
+                    })
+                }
+            })
+
+            $.post("queryADT/showOutBound",{arr:IDArr,"knownTargets":knownTargetTwins}, function (data) {
                 resolve(data)
             });
         }catch(e){
@@ -232,7 +285,25 @@ infoPanel.prototype.fetchPartialOutbounds= async function(IDArr){
 infoPanel.prototype.fetchPartialInbounds= async function(IDArr){
     return new Promise((resolve, reject) => {
         try{
-            $.post("queryADT/addInBound",{arr:IDArr}, function (data) {
+            //find out those existed inbound with known source Twins so they can be excluded from query
+            var knownSourceTwins={}
+            var IDDict={}
+            IDArr.forEach(oneID=>{
+                IDDict[oneID]=1
+                knownSourceTwins[oneID]=1 //itself also is known
+            })
+            for(var twinID in adtInstanceSelectionDialog.storedOutboundRelationships){
+                var relations=adtInstanceSelectionDialog.storedOutboundRelationships[twinID]
+                relations.forEach(oneRelation=>{
+                    var targetID=oneRelation['$targetId']
+                    var srcID=oneRelation['$sourceId']
+                    if(IDDict[targetID]!=null){
+                        if(adtInstanceSelectionDialog.storedTwins[srcID]!=null) knownSourceTwins[srcID]=1
+                    }
+                })
+            }
+
+            $.post("queryADT/showInBound",{arr:IDArr,"knownSources":knownSourceTwins}, function (data) {
                 resolve(data)
             });
         }catch(e){

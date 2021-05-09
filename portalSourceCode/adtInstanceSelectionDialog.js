@@ -2,7 +2,11 @@ function adtInstanceSelectionDialog() {
     this.filters={}
     this.previousSelectedADT=null
     this.selectedADT=null;
-    this.allTwinsInfo=null;
+    this.testTwinsInfo=null;
+
+    //stored purpose for global usage
+    this.storedOutboundRelationships={}
+    this.storedTwins={}
 
     if($("#adtInstanceSelectionDialog").length==0){
         this.DOM = $('<div id="adtInstanceSelectionDialog" title="Choose Data Set"></div>')
@@ -201,8 +205,9 @@ adtInstanceSelectionDialog.prototype.testQuery=function(){
             alert("Query is not correct!")
             return;
         }
-        this.allTwinsInfo=data
+        this.testTwinsInfo=data
         data.forEach((oneNode)=>{
+            this.storedTwins[oneNode["$dtId"]] = oneNode;
             var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey">'+oneNode["$dtId"]+'</td><td style="border-bottom:solid 1px lightgrey">'+oneNode['$metadata']['$model']+'</td></tr>')
             this.testResultTable.append(tr)
         })
@@ -226,26 +231,70 @@ adtInstanceSelectionDialog.prototype.listFilters=function(adtInstanceName){
         
 
         oneFilter.dblclick((e)=>{
-            this.useFilterToReplace();
+            if(this.previousSelectedADT == this.selectedADT) this.useFilterToAppend();
+            else this.useFilterToReplace();
         })
     }
 }
 
 adtInstanceSelectionDialog.prototype.useFilterToAppend=function(){
-    this.previousSelectedADT=this.selectedADT
     if(this.queryInput.val()==""){
         alert("Please fill in query to fetch data from digital twin service..")
         return;
     }
+    this.previousSelectedADT=this.selectedADT
+    this.broadcastMessage({ "message": "ADTDatasourceChange_append", "query": this.queryInput.val(), "twins":this.testTwinsInfo })
+    this.DOM.dialog( "close" );
+}
+
+adtInstanceSelectionDialog.prototype.storeTwinRelationships_remove=function(relationsData){
+    relationsData.forEach((oneRelationship)=>{
+        var srcID=oneRelationship["srcID"]
+        if(this.storedOutboundRelationships[srcID]){
+            var arr=this.storedOutboundRelationships[srcID]
+            for(var i=0;i<arr.length;i++){
+                if(arr[i]['$relationshipId']==oneRelationship["relID"]){
+                    arr.splice(i,1)
+                    break;
+                }
+            }
+        }
+    })
+}
+
+adtInstanceSelectionDialog.prototype.storeTwinRelationships_append=function(relationsData){
+    relationsData.forEach((oneRelationship)=>{
+        if(!this.storedOutboundRelationships[oneRelationship['$sourceId']])
+            this.storedOutboundRelationships[oneRelationship['$sourceId']]=[]
+        this.storedOutboundRelationships[oneRelationship['$sourceId']].push(oneRelationship)
+    })
+}
+
+adtInstanceSelectionDialog.prototype.storeTwinRelationships=function(relationsData){
+    relationsData.forEach((oneRelationship)=>{
+        var twinID=oneRelationship['$sourceId']
+        this.storedOutboundRelationships[twinID]=[]
+    })
+
+    relationsData.forEach((oneRelationship)=>{
+        this.storedOutboundRelationships[oneRelationship['$sourceId']].push(oneRelationship)
+    })
 }
 
 adtInstanceSelectionDialog.prototype.useFilterToReplace=function(){
-    this.previousSelectedADT=this.selectedADT
     if(this.queryInput.val()==""){
         alert("Please fill in query to fetch data from digital twin service..")
         return;
     }
-    this.broadcastMessage({ "message": "ADTDatasourceChange", "query": this.queryInput.val(), "twins":this.allTwinsInfo })
+    var ADTInstanceDoesNotChange=true
+    if(this.previousSelectedADT!=this.selectedADT){
+        for(var ind in this.storedOutboundRelationships) delete this.storedOutboundRelationships[ind]
+        for(var ind in this.storedTwins) delete this.storedTwins[ind]
+        ADTInstanceDoesNotChange=false
+    }
+    this.previousSelectedADT=this.selectedADT
+    this.broadcastMessage({ "message": "ADTDatasourceChange_replace", "query": this.queryInput.val()
+    , "twins":this.testTwinsInfo, "ADTInstanceDoesNotChange":ADTInstanceDoesNotChange })
     this.DOM.dialog( "close" );
 }
 
@@ -253,7 +302,7 @@ adtInstanceSelectionDialog.prototype.chooseOneFilter=function(queryName,queryStr
     this.queryNameInput.val(queryName)
     this.queryInput.val(queryStr)
     this.testResultTable.empty()
-    this.allTwinsInfo=null
+    this.testTwinsInfo=null
 }
 
 module.exports = new adtInstanceSelectionDialog();
