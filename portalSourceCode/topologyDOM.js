@@ -3,6 +3,11 @@
 const modelManagerDialog = require("./modelManagerDialog");
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
+const editLayoutDialog = require("./editLayoutDialog")
+const formatter = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 3,      
+    maximumFractionDigits: 3,
+ });
 
 function topologyDOM(DOM){
     this.DOM=DOM
@@ -98,19 +103,11 @@ topologyDOM.prototype.init=function(){
     this.core.boxSelectionEnabled(true)
 
 
-    var selectFunction=(event)=> {
-        // target holds a reference to the originator of the event (core or element)
-        var arr=this.core.$(":selected")
-        if(arr.length==0) return
-        var re=[]
-        arr.forEach((ele) => { re.push(ele.data().originalInfo) })
-        this.broadcastMessage({ "message": "selectNodes", info: re })
-    }
-    this.core.on('tapselect', selectFunction);
-    this.core.on('tapunselect', selectFunction);
+    this.core.on('tapselect', ()=>{this.selectFunction()});
+    this.core.on('tapunselect', ()=>{this.selectFunction()});
 
     this.core.on('boxend',(e)=>{//put inside boxend event to trigger only one time, and repleatly after each box select
-        this.core.one('boxselect',selectFunction)
+        this.core.one('boxselect',()=>{this.selectFunction()})
     })
 
     this.core.on('cxttap',(e)=>{
@@ -126,6 +123,14 @@ topologyDOM.prototype.init=function(){
                 .update()
     })
     
+}
+
+topologyDOM.prototype.selectFunction = function () {
+    var arr = this.core.$(":selected")
+    if (arr.length == 0) return
+    var re = []
+    arr.forEach((ele) => { re.push(ele.data().originalInfo) })
+    this.broadcastMessage({ "message": "selectNodes", info: re })
 }
 
 topologyDOM.prototype.getFontSizeInCurrentZoom=function(){
@@ -192,17 +197,22 @@ topologyDOM.prototype.deleteTwins=function(twinIDArr){
 }
 
 topologyDOM.prototype.animateANode=function(twin){
+   
     var curDimension= this.getNodeSizeInCurrentZoom()
     twin.animate({
         style: { 'height': curDimension*2,'width': curDimension*2 },
-        duration: 200,
-        complete:()=>{
-            twin.animate({
-                style: { 'height': curDimension,'width': curDimension },
-                duration: 200,
-            })
-        }
-      });
+        duration: 200
+    });
+
+    setTimeout(()=>{
+        twin.animate({
+            style: { 'height': curDimension,'width': curDimension },
+            duration: 200
+            ,complete:()=>{
+                twin.removeStyle() //must remove the style after animation, otherwise they will have their own style
+            }
+        });
+    },200)
 }
 
 topologyDOM.prototype.drawTwins=function(twinsData,animation){
@@ -222,6 +232,10 @@ topologyDOM.prototype.drawTwins=function(twinsData,animation){
     if(animation){
         eles.forEach((ele)=>{ this.animateANode(ele) })
     }
+
+    //if there is currently a layout there, apply it
+    this.applyNewLayout()
+
     return eles
 }
 
@@ -330,8 +344,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="drawAllRelations"){
         var edges= this.drawRelations(msgPayload.info)
         if(edges!=null) {
-            //console.log("layout cose " +edges.size())
-            this.noPosition_cose()
+            if(editLayoutDialog.currentLayoutName==null)  this.noPosition_cose()
         }
     }else if(msgPayload.message=="addNewTwin") {
         this.drawTwins([msgPayload.twinInfo],"animation")
@@ -361,8 +374,56 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="addSelectOutbound"){ this.selectOutboundNodes()   }
     else if(msgPayload.message=="addSelectInbound"){ this.selectInboundNodes()   }
     else if(msgPayload.message=="hideSelectedNodes"){ this.hideSelectedNodes()   }
+    else if(msgPayload.message=="COSESelectedNodes"){ this.COSESelectedNodes()   }
+    else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName,msgPayload.adtName)   }
+    else if(msgPayload.message=="layoutChange"){ this.applyNewLayout()   }
+}
+
+topologyDOM.prototype.applyNewLayout = function () {
+    var layoutName=editLayoutDialog.currentLayoutName
+    var layoutDetail= editLayoutDialog.layoutJSON[layoutName]
+    if(layoutDetail==null) return;
     
+    var storedPositions={}
+    for(var ind in layoutDetail){
+        storedPositions[ind]={
+            x:layoutDetail[ind][0]
+            ,y:layoutDetail[ind][1]
+        }
+    }
+    var newLayout=this.core.layout({
+        name: 'preset',
+        positions:storedPositions,
+        fit:false,
+        animate: true,
+        animationDuration: 300,
+    })
+    newLayout.run()
+}
+
+
+topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
+    var positionDict=editLayoutDialog.layoutJSON[layoutName]
+    if(!positionDict){
+        positionDict=editLayoutDialog.layoutJSON[layoutName]={}
+    }
     
+    if(this.core.nodes().size()==0) return;
+    this.core.nodes().forEach(oneNode=>{
+        var position=oneNode.position()
+        positionDict[oneNode.id()]=[this.numberPrecision(position['x']),this.numberPrecision(position['y'])]
+    })
+    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(editLayoutDialog.layoutJSON)})
+    this.broadcastMessage({ "message": "layoutsUpdated"})
+}
+
+topologyDOM.prototype.numberPrecision = function (number) {
+    return parseFloat(formatter.format(number))
+}
+
+topologyDOM.prototype.COSESelectedNodes = function () {
+    var selected=this.core.$(':selected')
+    this.noPosition_cose(selected)
 }
 
 topologyDOM.prototype.hideSelectedNodes = function () {
@@ -373,13 +434,17 @@ topologyDOM.prototype.hideSelectedNodes = function () {
 topologyDOM.prototype.selectInboundNodes = function () {
     var selectedNodes=this.core.nodes(':selected')
     var eles=this.core.nodes().edgesTo(selectedNodes).sources()
+    eles.forEach((ele)=>{ this.animateANode(ele) })
     eles.select()
+    this.selectFunction()
 }
 
 topologyDOM.prototype.selectOutboundNodes = function () {
     var selectedNodes=this.core.nodes(':selected')
     var eles=selectedNodes.edgesTo(this.core.nodes()).targets()
+    eles.forEach((ele)=>{ this.animateANode(ele) })
     eles.select()
+    this.selectFunction()
 }
 
 topologyDOM.prototype.addConnections = function (targetNode) {

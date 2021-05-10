@@ -91,6 +91,7 @@ infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,
 
 infoPanel.prototype.drawButtons=function(selectType){
     var refreshBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Refresh Information</a>')
+    refreshBtn.css({"display":"block","width":"120px"})
     refreshBtn.click(()=>{this.refreshInfomation()})
     this.DOM.append(refreshBtn)
 
@@ -99,8 +100,8 @@ infoPanel.prototype.drawButtons=function(selectType){
         this.DOM.append(delBtn)
         delBtn.click(()=>{this.deleteSelected()})
     }else if(selectType=="singleNode" || selectType=="multiple"){
-        var showInboundBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Show Inbound</a>')
-        var showOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Show Outbound</a>')
+        var showInboundBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Query Inbound</a>')
+        var showOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Query Outbound</a>')
         var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete All</a>')
         var connectToBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Connect To</a>')
         var connectFromBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Connect From</a>')
@@ -123,11 +124,13 @@ infoPanel.prototype.drawButtons=function(selectType){
     if(numOfNode>0){
         var selectInboundBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">+Select Inbound</a>')
         var selectOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">+Select Outbound</a>')
+        var coseLayoutBtn= $('<a class="ui-button ui-widget ui-corner-all"  href="#">Cose Layout</a>')
         var hideBtn= $('<a class="ui-button ui-widget ui-corner-all"  href="#">Hide</a>')
-        this.DOM.append(selectInboundBtn, selectOutBoundBtn,hideBtn)
+        this.DOM.append(selectInboundBtn, selectOutBoundBtn,coseLayoutBtn,hideBtn)
 
         selectInboundBtn.click(()=>{this.broadcastMessage({"message": "addSelectInbound"})})
         selectOutBoundBtn.click(()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
+        coseLayoutBtn.click(()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
         hideBtn.click(()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
     }
 }
@@ -296,7 +299,6 @@ infoPanel.prototype.showInBound=async function(){
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialInbounds(smallArr)
-
         //new twin's relationship should be stored as well
         adtInstanceSelectionDialog.storeTwinRelationships(data.newTwinRelations)
         

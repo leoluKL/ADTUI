@@ -43,6 +43,7 @@ httpServerHelper.prototype.createHTTPServer=function(){
     app.use("/editADT", require("./routerEditADT")(this.adtClients))
     app.use("/twinsFilter", require("./routerTwinsFilters")())
     app.use("/visualDefinition", require("./routerVisualDefinition")())
+    app.use("/layout", require("./routerLayoutStore")())
 
     var server = http.createServer(app)
     if(devFlag){

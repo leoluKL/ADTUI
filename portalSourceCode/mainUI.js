@@ -3,6 +3,7 @@ const topologyDOM=require("./topologyDOM.js")
 const twinsTree=require("./twinsTree")
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 const modelManagerDialog = require("./modelManagerDialog")
+const editLayoutDialog = require("./editLayoutDialog")
 const mainToolbar = require("./mainToolbar")
 const infoPanel= require("./infoPanel")
 
@@ -11,7 +12,7 @@ function mainUI() {
 
     this.twinsTree= new twinsTree($("#treeHolder"),$("#treeSearch"))
     
-    this.mainToolbar=new mainToolbar()
+    this.mainToolbar=mainToolbar
     this.topologyInstance=new topologyDOM($('#canvas'))
     this.topologyInstance.init()
     this.infoPanel= new infoPanel()
@@ -35,7 +36,7 @@ mainUI.prototype.assignBroadcastMessage=function(uiComponent){
 }
 
 mainUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[this.twinsTree,adtInstanceSelectionDialog,modelManagerDialog,
+    var componentsArr=[this.twinsTree,adtInstanceSelectionDialog,modelManagerDialog,editLayoutDialog,
          this.mainToolbar,this.topologyInstance,this.infoPanel]
 
     if(source==null){
@@ -105,4 +106,4 @@ mainUI.prototype.initUILayout = function () {
 }
 
 
-module.exports = mainUI;
+module.exports = new mainUI();

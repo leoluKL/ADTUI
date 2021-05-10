@@ -45,7 +45,7 @@ adtInstanceSelectionDialog.prototype.popup = function () {
             var anOption=$("<option value='"+adtInstance+"'>"+str+"</option>")
             switchADTSelector.append(anOption)
             if(this.filters[adtInstance]==null) this.filters[adtInstance]={}
-        })     
+        })
         switchADTSelector.selectmenu({
             appendTo: this.DOM,
             change: (event, ui) => {
@@ -109,12 +109,25 @@ adtInstanceSelectionDialog.prototype.popup = function () {
 
 
         this.DOM.dialog({ 
+            dialogClass: "no-close",
+            modal: true,
             width:650
             ,height:500
             ,resizable:false
         })
+        
+        if(this.previousSelectedADT!=null){
+            this.DOM.parent().find(".ui-dialog-titlebar-close").css("display","block");
+        }
 
-        this.setADTInstance(adtArr[0])
+        if(this.previousSelectedADT!=null){
+            switchADTSelector.val(this.previousSelectedADT)
+            switchADTSelector.selectmenu("refresh")
+            this.setADTInstance(this.previousSelectedADT)
+        }else{
+            this.setADTInstance(adtArr[0])
+        }
+        
     });
 }
 
@@ -242,8 +255,13 @@ adtInstanceSelectionDialog.prototype.useFilterToAppend=function(){
         alert("Please fill in query to fetch data from digital twin service..")
         return;
     }
-    this.previousSelectedADT=this.selectedADT
-    this.broadcastMessage({ "message": "ADTDatasourceChange_append", "query": this.queryInput.val(), "twins":this.testTwinsInfo })
+    if(this.previousSelectedADT==null){
+        this.broadcastMessage({ "message": "ADTDatasourceChange_replace", "query": this.queryInput.val(), "twins":this.testTwinsInfo })
+    }else{
+        this.previousSelectedADT=this.selectedADT
+        this.broadcastMessage({ "message": "ADTDatasourceChange_append", "query": this.queryInput.val(), "twins":this.testTwinsInfo })
+    }
+    
     this.DOM.dialog( "close" );
 }
 
