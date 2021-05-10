@@ -35,7 +35,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 this.drawEditable(this.DOM,this.getRelationShipEditableProperties(relationshipName,sourceModel),singleElementInfo,[])
                 this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
             }
-        }else{
+        }else if(arr.length>1){
             this.drawButtons("multiple")
             this.drawMultipleObj()
         }
@@ -109,6 +109,23 @@ infoPanel.prototype.drawButtons=function(selectType){
 
         delBtn.click(()=>{this.deleteSelected()})
     }
+    
+    var numOfNode = 0;
+    var arr=this.selectedObjects;
+    arr.forEach(element => {
+        if (element['$dtId']) numOfNode++
+    });
+    if(numOfNode>0){
+        var selectInboundBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">+Select Inbound</a>')
+        var selectOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">+Select Outbound</a>')
+        var hideBtn= $('<a class="ui-button ui-widget ui-corner-all"  href="#">Hide</a>')
+        this.DOM.append(selectInboundBtn, selectOutBoundBtn,hideBtn)
+
+        selectInboundBtn.click(()=>{this.broadcastMessage({"message": "addSelectInbound"})})
+        selectOutBoundBtn.click(()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
+        hideBtn.click(()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
+    }
+
 }
 
 infoPanel.prototype.deleteSelected=async function(){
@@ -200,7 +217,6 @@ infoPanel.prototype.deleteRelations=async function(relationsArr){
     });
     
 }
-
 
 infoPanel.prototype.showOutBound=async function(){
     var arr=this.selectedObjects;

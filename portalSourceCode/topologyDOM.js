@@ -280,21 +280,25 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
         combineTwins=combineTwins.union(eles)
     })
 
-    this.reviewStoredRelationshipsToDraw()
-
+    //draw those known twins from the relationships
+    var twinsInfo={}
     twinsAndRelations.forEach(oneSet=>{
         var relationsInfo=oneSet["relationships"]
-        var edges = this.drawRelations(relationsInfo)
-        if(edges==null) return;
-
-        var sources = edges.sources()
-        var targets = edges.targets()
-    
-        var fullSet=edges.union(sources.union(targets))
-    
-        this.noPosition_concentric(fullSet,sources.boundingBox())
+        relationsInfo.forEach((oneRelation)=>{
+            var srcID=oneRelation['$sourceId']
+            var targetID=oneRelation['$targetId']
+            if(adtInstanceSelectionDialog.storedTwins[srcID])
+                twinsInfo[srcID] = adtInstanceSelectionDialog.storedTwins[srcID]
+            if(adtInstanceSelectionDialog.storedTwins[targetID])
+                twinsInfo[targetID] = adtInstanceSelectionDialog.storedTwins[targetID]    
+        })
     })
-    if(combineTwins.size()>1) this.core.center(combineTwins)
+    var tmpArr=[]
+    for(var twinID in twinsInfo) tmpArr.push(twinsInfo[twinID])
+    this.drawTwins(tmpArr)
+
+    //then check all stored relationships and draw if it can be drawn
+    this.reviewStoredRelationshipsToDraw()
 }
 
 topologyDOM.prototype.applyVisualDefinition=function(){
@@ -354,8 +358,28 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="relationsDeleted") this.deleteRelations(msgPayload.relations)
     else if(msgPayload.message=="connectTo"){ this.startTargetNodeMode("connectTo")   }
     else if(msgPayload.message=="connectFrom"){ this.startTargetNodeMode("connectFrom")   }
+    else if(msgPayload.message=="addSelectOutbound"){ this.selectOutboundNodes()   }
+    else if(msgPayload.message=="addSelectInbound"){ this.selectInboundNodes()   }
+    else if(msgPayload.message=="hideSelectedNodes"){ this.hideSelectedNodes()   }
+    
 }
 
+topologyDOM.prototype.hideSelectedNodes = function () {
+    var selectedNodes=this.core.nodes(':selected')
+    selectedNodes.remove()
+}
+
+topologyDOM.prototype.selectInboundNodes = function () {
+    var selectedNodes=this.core.nodes(':selected')
+    var eles=this.core.nodes().edgesTo(selectedNodes).sources()
+    eles.select()
+}
+
+topologyDOM.prototype.selectOutboundNodes = function () {
+    var selectedNodes=this.core.nodes(':selected')
+    var eles=selectedNodes.edgesTo(this.core.nodes()).targets()
+    eles.select()
+}
 
 topologyDOM.prototype.addConnections = function (targetNode) {
     var theConnectMode=this.targetNodeMode
