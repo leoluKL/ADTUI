@@ -12,6 +12,7 @@ function routerQueryADT(adtClients){
     this.useRoute("allRelationships","isPost")
     this.useRoute("showOutBound","isPost")
     this.useRoute("showInBound","isPost")
+    this.useRoute("fetchInfomation","isPost")
 }
 
 routerQueryADT.prototype.useRoute=function(routeStr,isPost){
@@ -22,6 +23,24 @@ routerQueryADT.prototype.useRoute=function(routeStr,isPost){
         if (!adtClient) res.end()
         this[routeStr](adtClient,req,res)
     })
+}
+
+routerQueryADT.prototype.fetchInfomation=async function(adtClient,req,res){
+    var elements=req.body.elements
+    var promiseArr=[]
+    elements.forEach(ele=>{
+        if(ele['$sourceId']){ //query relationship
+            promiseArr.push(adtClient.getRelationship(ele["$sourceId"], ele["$relationshipId"]))
+        }else{ //query twin
+            promiseArr.push(adtClient.getDigitalTwin(ele["$dtId"]))
+        }
+    })
+    var results=await Promise.allSettled(promiseArr);
+    var responds=[]
+    results.forEach(oneRe=>{
+        if(oneRe.status=="fulfilled") responds.push(oneRe.value.body)
+    })
+    res.send(responds)
 }
 
 routerQueryADT.prototype.listModels=async function(adtClient,req,res){

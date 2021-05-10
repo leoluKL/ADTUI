@@ -362,6 +362,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="addSelectInbound"){ this.selectInboundNodes()   }
     else if(msgPayload.message=="hideSelectedNodes"){ this.hideSelectedNodes()   }
     
+    
 }
 
 topologyDOM.prototype.hideSelectedNodes = function () {

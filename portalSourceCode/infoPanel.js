@@ -7,9 +7,9 @@ function infoPanel() {
     this.selectedObjects=null;
 }
 
-infoPanel.prototype.rxMessage=function(msgPayload){
-    this.DOM.empty()
+infoPanel.prototype.rxMessage=function(msgPayload){    
     if(msgPayload.message=="selectNodes"){
+        this.DOM.empty()
         var arr=msgPayload.info;
         this.selectedObjects=arr;
         if(arr.length==1){
@@ -40,6 +40,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
             this.drawMultipleObj()
         }
     }else if(msgPayload.message=="selectGroupNode"){
+        this.DOM.empty()
         var modelID = msgPayload.info["@id"]
         var twinJson = {
             "$metadata": {
@@ -89,6 +90,10 @@ infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,
 }
 
 infoPanel.prototype.drawButtons=function(selectType){
+    var refreshBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Refresh Information</a>')
+    refreshBtn.click(()=>{this.refreshInfomation()})
+    this.DOM.append(refreshBtn)
+
     if(selectType=="singleRelationship"){
         var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete</a>')
         this.DOM.append(delBtn)
@@ -125,8 +130,43 @@ infoPanel.prototype.drawButtons=function(selectType){
         selectOutBoundBtn.click(()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
         hideBtn.click(()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
     }
-
 }
+
+infoPanel.prototype.refreshInfomation=async function(){
+    var arr=this.selectedObjects;
+    var queryArr=[]
+    arr.forEach(oneItem=>{
+        if(oneItem['$relationshipId']) queryArr.push({'$sourceId':oneItem['$sourceId'],'$relationshipId':oneItem['$relationshipId']})
+        else queryArr.push({'$dtId':oneItem['$dtId']})
+    })
+
+    $.post("queryADT/fetchInfomation",{"elements":queryArr},  (data)=> { 
+        data.forEach(oneRe=>{
+            if(oneRe["$relationshipId"]){//update storedOutboundRelationships
+                var srcID= oneRe['$sourceId']
+                var relationshipId= oneRe['$relationshipId']
+                if(adtInstanceSelectionDialog.storedOutboundRelationships[srcID]!=null){
+                    var relations=adtInstanceSelectionDialog.storedOutboundRelationships[srcID]
+                    relations.forEach(oneStoredRelation=>{
+                        if(oneStoredRelation['$relationshipId']==relationshipId){
+                            //update all content
+                            for(var ind in oneRe){ oneStoredRelation[ind]=oneRe[ind] }
+                        }
+                    })
+                }
+            }else{//update storedTwins
+                var twinID= oneRe['$dtId']
+                if(adtInstanceSelectionDialog.storedTwins[twinID]!=null){
+                    for(var ind in oneRe){ adtInstanceSelectionDialog.storedTwins[twinID][ind]=oneRe[ind] }
+                }
+            }
+        })
+        
+        //redraw infopanel if needed
+        if(this.selectedObjects.length==1) this.rxMessage({ "message": "selectNodes", info: this.selectedObjects })
+    });
+}
+
 
 infoPanel.prototype.deleteSelected=async function(){
     var arr=this.selectedObjects;
