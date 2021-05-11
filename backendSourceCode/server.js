@@ -16,8 +16,12 @@ async function main() {
         var token = await credential.getToken("https://management.azure.com/.default");
         console.log("DefaultAzureCredential works....")
     } catch (err) {
-        console.log("DefaultAzureCredential does not exist, try InteractiveBrowserCredential....")
-        const credential = new InteractiveBrowserCredential({ redirectUri: "http://localhost:8080/" });
+        //InteractiveBrowserCredential only works for getting one token. but this application need multiple token for different services
+        //thus it is not suitable for now.... It waits for future thinking how to achieve when default login not available
+        console.log("Please 'az login' before running this application....")
+        return;
+        //console.log("DefaultAzureCredential does not exist, try InteractiveBrowserCredential....")
+        //const credential = new InteractiveBrowserCredential({ redirectUri: "http://localhost:8080/" });
     }
 
     try{
