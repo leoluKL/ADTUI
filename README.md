@@ -32,7 +32,11 @@ For developer's usage, there is additional npm run option to use
 - Nodejs
  
 ## Development
-The application is created as an single web page application that accesses azure digital twin service remotely. Since this limitation, more advanced features, such as SingalR integration for live telemetry event, database storage and so on, are not created.
+The application is created as an single web page application that accesses azure digital twin service remotely. Since this limitation, more advanced features, such as
+- SingalR integration for live telemetry event
+- database storage and so on, are not created
+- Azure indoor map view integration
+- Revit 3D Autocad BIM model integration
 It should. So it is in plan to create a really cloud host demonstration platform with those advanced capabilities.
 
 ## Purpose
