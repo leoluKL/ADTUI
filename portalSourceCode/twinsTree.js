@@ -113,6 +113,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
             var tmpNameArr = []
             var tmpNameToObj = {}
             for (var i = 0; i < data.length; i++) {
+                if(data[i]["displayName"]==null) data[i]["displayName"]=data[i]["@id"]
                 this.modelIDMapToName[data[i]["@id"]] = data[i]["displayName"]
                 tmpNameArr.push(data[i]["displayName"])
                 tmpNameToObj[data[i]["displayName"]] = data[i]

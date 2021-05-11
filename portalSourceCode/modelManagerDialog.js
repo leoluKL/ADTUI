@@ -335,10 +335,11 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
             var obj=JSON.parse(str)
             fileContentArr.push(obj)
         }catch(err){
+            alert(err)
         }
     }
     if(fileContentArr.length==0) return;
-
+    console.log(fileContentArr)
     $.post("editADT/importModels",{"models":fileContentArr}, (data)=> {
         if (data == "") {//successful
             this.listModels("shouldBroadCast")
@@ -367,6 +368,7 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
     for(var ind in this.models) delete this.models[ind]
     $.get("queryADT/listModels", (data, status) => {
         data.forEach(oneItem=>{
+            if(oneItem["displayName"]==null) oneItem["displayName"]=oneItem["@id"]
             this.models[oneItem["displayName"]] = oneItem
         })
         if(shouldBroadcast){
@@ -379,7 +381,7 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
         for(var modelName in this.models) sortArr.push(modelName)
         sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
         sortArr.forEach(oneModelName=>{
-            var oneModelItem=$('<li style="font-size:1.2em" class="ui-widget-content">'+oneModelName+'</li>')
+            var oneModelItem=$('<li style="font-size:0.9em" class="ui-widget-content">'+oneModelName+'</li>')
             oneModelItem.css("cursor","default")
             oneModelItem.data("modelName", oneModelName)
             this.modelList.append(oneModelItem)

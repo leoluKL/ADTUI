@@ -112,8 +112,6 @@ modelAnalyzer.prototype.analyze=function(){
         })
     }
 
-
-
     //analyze each model's property that can be edited
     for(var modelID in this.DTDLModels){ //expand possible embedded schema to editableProperties, also extract possible relationship types for this model
         var ele=this.DTDLModels[modelID]
@@ -128,6 +126,7 @@ modelAnalyzer.prototype.analyze=function(){
         }
         ele.editableProperties={}
         ele.validRelationships={}
+        ele.includedComponents=[]
         ele.allBaseClasses={}
         if(Array.isArray(ele.contents)){
             this.expandEditableProperties(ele.editableProperties,ele.contents,embeddedSchema)
@@ -139,6 +138,22 @@ modelAnalyzer.prototype.analyze=function(){
             })
         }
     }
+
+    for(var modelID in this.DTDLModels){//expand component properties
+        var ele=this.DTDLModels[modelID]
+        if(Array.isArray(ele.contents)){
+            ele.contents.forEach(oneContent=>{
+                if(oneContent["@type"]=="Component"){
+                    var componentName=oneContent["name"]
+                    var componentClass=oneContent["schema"]
+                    ele.editableProperties[componentName]={}
+                    this.expandEditablePropertiesFromBaseClass(ele.editableProperties[componentName],componentClass)
+                    ele.includedComponents.push(componentName)
+                } 
+            })
+        }
+    }
+
     for(var modelID in this.DTDLModels){//expand base class properties to editableProperties and valid relationship types to validRelationships
         var ele=this.DTDLModels[modelID]
         var baseClassIDs=ele.extends;

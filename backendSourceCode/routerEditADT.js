@@ -109,7 +109,8 @@ routerEditADT.prototype.upsertDigitalTwin = async function (adtClient, req, res)
         res.end()
     }catch(e){
         res.statusCode = 200;
-        res.send(e.message)
+        if(e.details && e.details.error && e.details.error.details) res.send(JSON.stringify(e.details.error.details))
+        else res.send(e.message)
     }
     
     res.end()

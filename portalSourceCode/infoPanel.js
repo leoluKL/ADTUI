@@ -1,6 +1,7 @@
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
-var modelAnlyzer=require("./modelAnalyzer")
+var modelAnlyzer=require("./modelAnalyzer");
+const modelManagerDialog = require("./modelManagerDialog");
 function infoPanel() {
     this.DOM=$("#infoPanel")
     this.DOM.css({"margin-top":"10px","margin-left":"3px"})
@@ -55,6 +56,11 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 alert("Please fill in name for the new digital twin")
                 return;
             }
+            var componentsNameArr=modelAnalyzer.DTDLModels[modelID].includedComponents
+            componentsNameArr.forEach(oneComponentName=>{ //adt service requesting all component appear by mandatory
+                if(twinJson[oneComponentName]==null)twinJson[oneComponentName]={}
+                twinJson[oneComponentName]["$metadata"]= {}
+            })
             $.post("editADT/upsertDigitalTwin", {"newTwinJson":JSON.stringify(twinJson)}
                 , (data) => {
                     if (data != "") {//not successful editing
