@@ -23,11 +23,12 @@ modelManagerDialog.prototype.preparationFunc = async function () {
     })
 }
 
-modelManagerDialog.prototype.popup = function () {
+modelManagerDialog.prototype.popup = async function() {
     this.DOM.empty()
 
     var importModelsBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Import</a>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
+
     this.DOM.append(importModelsBtn,actualImportModelsBtn)
     importModelsBtn.click( ()=>{
         actualImportModelsBtn.trigger('click');
@@ -51,7 +52,7 @@ modelManagerDialog.prototype.popup = function () {
         }
     })
 
-    var rightSpan=$("<span/>")
+    var rightSpan=$("<span/>") 
     rightSpan.css({"position":"absolute",left:"210px",bottom: "0px",top:"5px",right:"0px",border:"solid 1px grey",padding:"5px",
     "overflow-x": "hidden", "overflow-y": "auto"})
     this.DOM.append(rightSpan)
@@ -68,12 +69,78 @@ modelManagerDialog.prototype.popup = function () {
 
 }
 
+modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {
+    return new Promise((resolve, reject) => {
+        try {
+            var reader = new FileReader();
+            var tmpImg = new Image();
+            reader.onload = () => {
+                tmpImg.onload =  ()=> {
+                    var canvas = document.createElement('canvas')
+                    var width = tmpImg.width
+                    var height = tmpImg.height;
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(tmpImg, 0, 0, width, height);
+                    var dataUrl = canvas.toDataURL('image/png');
+                    resolve(dataUrl)
+                }
+                tmpImg.src = reader.result;
+            }
+            reader.readAsDataURL(theFile);
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     this.rightSpan.empty()
     var modelID=this.models[modelName]['@id']
 
     var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete</a>')
-    this.rightSpan.append(delBtn)
+    var importPicBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Upload Avarta</a>')
+    var actualImportPicBtn =$('<input type="file" name="img" style="display:none"></input>')
+    var clearAvartaBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Clear Avarta</a>')
+    this.rightSpan.append(delBtn,importPicBtn,actualImportPicBtn,clearAvartaBtn)
+
+    importPicBtn.click( ()=>{
+        actualImportPicBtn.trigger('click');
+    });
+
+    actualImportPicBtn.change(async (evt)=>{
+        var files = evt.target.files; // FileList object
+        var theFile=files[0]
+        var dataUrl= await this.resizeImgFile(theFile,70)
+        if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
+
+        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        if(!visualJson[modelID]) visualJson[modelID]={}
+        visualJson[modelID].avarta=dataUrl
+        this.saveVisualDefinition()
+        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"avarta":dataUrl })
+    })
+
+    clearAvartaBtn.click( ()=>{
+        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        if(visualJson[modelID]) delete visualJson[modelID].avarta 
+        if(this.avartaImg) this.avartaImg.removeAttr('src');
+        this.saveVisualDefinition()
+        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"noAvarta":true })
+    });
+
+
     delBtn.click(()=>{
         $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
             if(data==""){//successful
@@ -116,9 +183,24 @@ modelManagerDialog.prototype.fillBaseClasses=function(baseClasses,parentDom){
 
 modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     var modelJson=modelAnalyzer.DTDLModels[modelID];
-    this.addOneVisualizationRow(modelID,parentDom)
+    var aTable=$("<table style='width:100%'></table>")
+    aTable.html('<tr><td></td><td></td></tr>')
+    parentDom.append(aTable) 
+
+    var leftPart=aTable.find("td:first")
+    var rightPart=aTable.find("td:nth-child(2)")
+    rightPart.css({"width":"50px","height":"50px","border":"solid 1px lightGray"})
+    
+    var avartaImg=$("<img></img>")
+    rightPart.append(avartaImg)
+    var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)
+    this.avartaImg=avartaImg;
+
+    
+    this.addOneVisualizationRow(modelID,leftPart)
     for(var ind in modelJson.validRelationships){
-        this.addOneVisualizationRow(modelID,parentDom,ind)
+        this.addOneVisualizationRow(modelID,leftPart,ind)
     }
 }
 modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,relatinshipName){
@@ -142,7 +224,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 
     var colorSelector=$('<select></select>')
     containerDiv.append(colorSelector)
-    var colorArr=["Black","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
+    var colorArr=["Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
     colorArr.forEach((oneColorCode)=>{
         var anOption=$("<option value='"+oneColorCode+"'>"+oneColorCode+"▧</option>")
         colorSelector.append(anOption)
@@ -162,11 +244,11 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
             visualJson[modelID].color=selectColorCode
-            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"colorCode":selectColorCode })
+            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"color":selectColorCode })
         }else{
             if(!visualJson[modelID]["relationships"]) visualJson[modelID]["relationships"]={}
             visualJson[modelID]["relationships"][relatinshipName]=selectColorCode
-            this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"colorCode":selectColorCode })
+            this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"color":selectColorCode })
         }
         this.saveVisualDefinition()
     })

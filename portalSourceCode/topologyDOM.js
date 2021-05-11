@@ -58,6 +58,8 @@ topologyDOM.prototype.init=function(){
                     'label': 'data(id)',
                     'opacity':0.9,
                     'font-size':15
+                    //,'background-image': function(ele){ return "images/cat.png"; }
+                    ,'background-fit':'contain' //cover
                     //'background-color': function( ele ){ return ele.data('bg') }
                 }
             },
@@ -160,6 +162,18 @@ topologyDOM.prototype.getNodeSizeInCurrentZoom=function(){
     }
 }
 
+
+topologyDOM.prototype.updateModelAvarta=function(modelID,dataUrl){
+    try{
+        this.core.style() 
+        .selector('node[modelID = "'+modelID+'"]')
+        .style({'background-image': dataUrl})
+        .update()   
+    }catch(e){
+        
+    }
+    
+}
 topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode){
     this.core.style()
         .selector('node[modelID = "'+modelID+'"]')
@@ -322,6 +336,9 @@ topologyDOM.prototype.applyVisualDefinition=function(){
         if(visualJson[modelID].color){
             this.updateModelTwinColor(modelID,visualJson[modelID].color)
         }
+        if(visualJson[modelID].avarta){
+            this.updateModelAvarta(modelID,visualJson[modelID].avarta)
+        }
         if(visualJson[modelID].relationships){
             for(var relationshipName in visualJson[modelID].relationships)
                 this.updateRelationshipColor(modelID,relationshipName,visualJson[modelID].relationships[relationshipName])
@@ -365,8 +382,12 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
             this.core.center(topoNode)
         }
     }else if(msgPayload.message=="visualDefinitionChange"){
-        if(msgPayload.srcModelID) this.updateRelationshipColor(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.colorCode)
-        else this.updateModelTwinColor(msgPayload.modelID,msgPayload.colorCode)
+        if(msgPayload.srcModelID) this.updateRelationshipColor(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.color)
+        else{
+            if(msgPayload.color) this.updateModelTwinColor(msgPayload.modelID,msgPayload.color)
+            else if(msgPayload.avarta) this.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
+            else if(msgPayload.noAvarta)  this.updateModelAvarta(msgPayload.modelID,null)
+        } 
     }else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
     else if(msgPayload.message=="relationsDeleted") this.deleteRelations(msgPayload.relations)
     else if(msgPayload.message=="connectTo"){ this.startTargetNodeMode("connectTo")   }
