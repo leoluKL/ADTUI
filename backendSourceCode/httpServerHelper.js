@@ -85,36 +85,3 @@ httpServerHelper.prototype.createHTTPServer=function(){
 
 
 module.exports = httpServerHelper;
-
-/*
-        for (var adturl in adtClients) {
-            var client = adtClients[adturl]
-            console.log(adturl)
-            
-            //
-            
-            //var twins=await client.queryTwins("SELECT * FROM digitaltwins")
-            console.log("just before query...")
-            var twins = await client.queryTwins("SELECT T,CT,R from DIGITALTWINS T JOIN CT RELATED T.position R where T.$metadata.$model='dtmi:ADTUILayoutParent;1' and T.$dtId='default'")
-            for await (const twin of twins) {
-                console.log("one row -----------------")
-                console.log(twin);
-            }
-
-
-            var jsonPatch = [
-                { "op": "add", "path": "/x", "value": 30 }
-                , { "op": "add", "path": "/y", "value": 20 }
-                , { "op": "add", "path": "/z", "value": 0 }
-            ]
-            var re = await client.updateRelationship('default', 'f2432e13-60ca-472f-b6ab-45efc170d3a0', jsonPatch)
-
-            console.log("-----****")
-            console.log(re)
-            console.log("-----****------")
-        }
-
-        */
-
-
-        //console.log(dtinstances)
