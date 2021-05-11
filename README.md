@@ -21,6 +21,9 @@ For developer's usage, there is additional npm run option to use
 4. A flexible data selection feature at the start so you do not need to wait a long loading time when there are many twins.
 5. Customizable twin and relationship visualization style, including importing image as twin's avarta    
 
+![screenshot](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/screenshot1.jpg)
+
+
 ## Prerequisites
 
 - An Azure Digital Twin service subscription in any of your Azure subscriptions
