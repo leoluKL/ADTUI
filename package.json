@@ -4,9 +4,11 @@
   "version": "0.9.0",
   "description": "",
   "devDependencies": {
-    "reload": "latest"
+    "reload": "latest",
+    "url-parse": "^1.5.1"
   },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js",
     "dev": "npm-run-all -p dev:* ",
     "dev:bundleBrowserFile": "watchify .\\portalSourceCode\\main.js  --debug -o .\\portalDev\\bundle.js -v",
@@ -19,13 +21,16 @@
     "start": "node ./backendSourceCode/server.js"
   },
   "dependencies": {
-    "npm-run-all": "latest",
-    "cytoscape": "3.18.1",
-    "@azure/identity": "latest",
-    "got": "^11.8.0",
     "@azure/arm-digitaltwins": "latest",
     "@azure/digital-twins-core": "latest",
+    "@azure/identity": "latest",
+    "cytoscape": "3.18.1",
     "express": "latest",
-    "open": "latest"
+    "got": "^11.8.0",
+    "npm-run-all": "latest",
+    "open": "^8.0.8"
+  },
+  "resolutions": {
+    "url-parse": "^1.5.1"
   }
 }
