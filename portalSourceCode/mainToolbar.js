@@ -23,7 +23,7 @@ function mainToolbar() {
     this.editLayoutBtn.on("click",()=>{ editLayoutDialog.popup() })
 
     this.switchLayoutSelector.selectmenu({
-        change: (event, ui) => {
+        select: (event, ui) => {
             editLayoutDialog.currentLayoutName=ui.item.value
             this.broadcastMessage({ "message": "layoutChange"})
         }

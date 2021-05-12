@@ -415,7 +415,15 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
 
 topologyDOM.prototype.applyNewLayout = function () {
     var layoutName=editLayoutDialog.currentLayoutName
+    
     var layoutDetail= editLayoutDialog.layoutJSON[layoutName]
+    
+    //remove all bending edge 
+    this.core.edges().forEach(oneEdge=>{
+        oneEdge.removeClass('edgebendediting-hasbendpoints')
+        oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
+    })
+    
     if(layoutDetail==null) return;
     
     var storedPositions={}
