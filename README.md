@@ -52,8 +52,12 @@ It should. So it is in plan to create a native cloud host demonstration platform
 
 * JQuery
 * Crytoscape.js (https://js.cytoscape.org/#demos)
-* Azure Digital Twin Javascript SDK
-* Azure Identity Javascript SDK
+* Crytoscape Edge Editing extension (https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing)
+* Azure Digital Twin Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/digital-twins-core/?view=azure-node-latest)
+* Azure Identity Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/identity/?view=azure-node-latest)
+* JQuery UI (https://jqueryui.com/)
+* JQuery UI Layout (http://layout.jquery-dev.com/)
+
 
 ## Contributing
 
