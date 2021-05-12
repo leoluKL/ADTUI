@@ -24,6 +24,9 @@ For developer's usage, there is additional npm run option to use
 ![Main UI](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/screenshot1.jpg)
 ![Choose datasets](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/screenshot2.jpg)
 
+## New Feature update
+- Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
+![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/bendEdge.jpg)
 
 ## Prerequisites
 
