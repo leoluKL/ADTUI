@@ -311,7 +311,7 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
     }
     this.DOM.on("click",(e)=>{ clickF(e)})
 
-    this.DOM.dblclick((e)=>{
+    this.DOM.on("dblclick",(e)=>{
         clickF(e)
         this.parentGroupNode.parentTree.dblClickNode(this)
     })

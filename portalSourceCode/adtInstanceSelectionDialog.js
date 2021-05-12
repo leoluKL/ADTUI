@@ -243,7 +243,7 @@ adtInstanceSelectionDialog.prototype.listFilters=function(adtInstanceName){
         else filterList.append(oneFilter)
         
 
-        oneFilter.dblclick((e)=>{
+        oneFilter.on("dblclick",(e)=>{
             if(this.previousSelectedADT == this.selectedADT) this.useFilterToAppend();
             else this.useFilterToReplace();
         })
