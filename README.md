@@ -39,7 +39,7 @@ The application is created as an single web page application that accesses azure
 - Revit 3D Autocad BIM model integration
 
 
-It should. So it is in plan to create a really cloud host demonstration platform with those advanced capabilities.
+It should. So it is in plan to create a native cloud host demonstration platform with those advanced capabilities.
 
 ## Purpose
 - A convinient application to use together with ADT cloud service
