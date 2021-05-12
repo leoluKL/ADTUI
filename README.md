@@ -26,7 +26,7 @@ For developer's usage, there is additional npm run option to use
 
 ## New Feature update
 - Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
-![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/bendEdge.jpg)
+![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/saveEdge.jpg)
 
 ## Prerequisites
 
