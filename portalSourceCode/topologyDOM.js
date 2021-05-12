@@ -101,6 +101,14 @@ topologyDOM.prototype.init=function(){
             
         ]
     });
+
+    //cytoscape edge editing plug-in
+    this.core.edgeEditing({
+        undoable: true,
+        bendRemovalSensitivity: 16,
+        enableMultipleAnchorRemovalOption: true
+    });
+
     
     this.core.boxSelectionEnabled(true)
 
@@ -424,6 +432,12 @@ topologyDOM.prototype.applyNewLayout = function () {
 
 
 topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
+    var edgeEditInstance= this.core.edgeEditing('get');
+    this.core.edges().forEach(oneEdge=>{
+        console.log(oneEdge.id())
+        console.log(edgeEditInstance.getAnchorsAsArray(oneEdge))
+    })
+    
     var positionDict=editLayoutDialog.layoutJSON[layoutName]
     if(!positionDict){
         positionDict=editLayoutDialog.layoutJSON[layoutName]={}

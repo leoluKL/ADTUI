@@ -3,7 +3,7 @@ const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 function editLayoutDialog() {
     if($("#editLayoutDialog").length==0){
         this.DOM = $('<div id="editLayoutDialog" title="Layouts"></div>')
-        this.DOM.css("overflow","hidden")
+        this.DOM.css("overflow","visible")
         $("body").append(this.DOM)
     }
     this.layoutJSON={}
@@ -45,16 +45,7 @@ editLayoutDialog.prototype.popup = function () {
         var anOption=$("<option>"+ind+"</option>")
         switchLayoutSelector.append(anOption)
     }
-    switchLayoutSelector.selectmenu({
-        appendTo: this.DOM,
-        change: (event, ui) => { }
-    });
-
-
-    switchLayoutSelector.val(this.currentLayoutName)
-    switchLayoutSelector.selectmenu("refresh")
-
-    
+        
     var saveAsBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Save As</a>')
     var deleteBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Delete</a>')
     this.DOM.append(saveAsBtn,deleteBtn)
@@ -75,7 +66,16 @@ editLayoutDialog.prototype.popup = function () {
         ,resizable:false
         ,buttons: []
     })
+    switchLayoutSelector.selectmenu({
+        appendTo: this.DOM,
+        change: (event, ui) => { }
+    });
 
+    if(this.currentLayoutName!=null){
+        switchLayoutSelector.val(this.currentLayoutName)
+    }
+    
+    switchLayoutSelector.selectmenu("refresh")
     saveAsNewBtn.click(()=>{this.saveIntoLayout(nameInput.val())})
 }
 
