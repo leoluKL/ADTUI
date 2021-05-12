@@ -92,9 +92,9 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         var delBtn=$('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete Filter</a>')
 
 
-        testBtn.click(()=>{this.testQuery()})
-        saveBtn.click(()=>{this.saveQuery()})
-        delBtn.click(()=>{this.delQuery()})
+        testBtn.on("click",()=>{this.testQuery()})
+        saveBtn.on("click",()=>{this.saveQuery()})
+        delBtn.on("click",()=>{this.delQuery()})
 
 
         querySpan.append(nameLbl,nameInput,queryLbl,queryInput,saveBtn,testBtn,delBtn)

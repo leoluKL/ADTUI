@@ -30,7 +30,7 @@ modelManagerDialog.prototype.popup = async function() {
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
 
     this.DOM.append(importModelsBtn,actualImportModelsBtn)
-    importModelsBtn.click( ()=>{
+    importModelsBtn.on("click", ()=>{
         actualImportModelsBtn.trigger('click');
     });
     actualImportModelsBtn.change((evt)=>{
@@ -115,7 +115,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     var clearAvartaBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Clear Avarta</a>')
     this.rightSpan.append(delBtn,importPicBtn,actualImportPicBtn,clearAvartaBtn)
 
-    importPicBtn.click( ()=>{
+    importPicBtn.on("click", ()=>{
         actualImportPicBtn.trigger('click');
     });
 
@@ -132,7 +132,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
         this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"avarta":dataUrl })
     })
 
-    clearAvartaBtn.click( ()=>{
+    clearAvartaBtn.on("click", ()=>{
         var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
         if(visualJson[modelID]) delete visualJson[modelID].avarta 
         if(this.avartaImg) this.avartaImg.removeAttr('src');
@@ -141,7 +141,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     });
 
 
-    delBtn.click(()=>{
+    delBtn.on("click",()=>{
         $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
             if(data==""){//successful
                 this.listModels("shouldBroadcast")
@@ -302,7 +302,7 @@ modelManagerDialog.prototype.addAPartInRightSpan=function(partName){
     var listDOM=$('<div class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom"></div>')
     this.rightSpan.append(headerDOM,listDOM)
     
-    headerDOM.click( ()=> {
+    headerDOM.on("click", ()=> {
         var panel = listDOM;
         var isOpen = panel.is(':visible');
         if(!isOpen){

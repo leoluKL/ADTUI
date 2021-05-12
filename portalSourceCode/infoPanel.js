@@ -51,7 +51,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
         var addBtn = $('<a class="ui-button ui-widget ui-corner-all" style="margin-bottom:10px" href="#">Add Twin</a>')
         this.DOM.append(addBtn)
 
-        addBtn.click((e) => {
+        addBtn.on("click",(e) => {
             if(!twinJson["$dtId"]||twinJson["$dtId"]==""){
                 alert("Please fill in name for the new digital twin")
                 return;
@@ -98,13 +98,13 @@ infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,
 infoPanel.prototype.drawButtons=function(selectType){
     var refreshBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Refresh Information</a>')
     refreshBtn.css({"display":"block","width":"120px"})
-    refreshBtn.click(()=>{this.refreshInfomation()})
+    refreshBtn.on("click",()=>{this.refreshInfomation()})
     this.DOM.append(refreshBtn)
 
     if(selectType=="singleRelationship"){
         var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete</a>')
         this.DOM.append(delBtn)
-        delBtn.click(()=>{this.deleteSelected()})
+        delBtn.on("click",()=>{this.deleteSelected()})
     }else if(selectType=="singleNode" || selectType=="multiple"){
         var showInboundBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Query Inbound</a>')
         var showOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Query Outbound</a>')
@@ -114,12 +114,12 @@ infoPanel.prototype.drawButtons=function(selectType){
     
         this.DOM.append(showInboundBtn, showOutBoundBtn, delBtn,connectToBtn,connectFromBtn)
     
-        showOutBoundBtn.click(()=>{this.showOutBound()})
-        showInboundBtn.click(()=>{this.showInBound()})  
-        connectToBtn.click(()=>{this.broadcastMessage({ "message": "connectTo"}) })
-        connectFromBtn.click(()=>{this.broadcastMessage({ "message": "connectFrom"}) })
+        showOutBoundBtn.on("click",()=>{this.showOutBound()})
+        showInboundBtn.on("click",()=>{this.showInBound()})  
+        connectToBtn.on("click",()=>{this.broadcastMessage({ "message": "connectTo"}) })
+        connectFromBtn.on("click",()=>{this.broadcastMessage({ "message": "connectFrom"}) })
 
-        delBtn.click(()=>{this.deleteSelected()})
+        delBtn.on("click",()=>{this.deleteSelected()})
     }
     
     var numOfNode = 0;
@@ -134,10 +134,10 @@ infoPanel.prototype.drawButtons=function(selectType){
         var hideBtn= $('<a class="ui-button ui-widget ui-corner-all"  href="#">Hide</a>')
         this.DOM.append(selectInboundBtn, selectOutBoundBtn,coseLayoutBtn,hideBtn)
 
-        selectInboundBtn.click(()=>{this.broadcastMessage({"message": "addSelectInbound"})})
-        selectOutBoundBtn.click(()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
-        coseLayoutBtn.click(()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
-        hideBtn.click(()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
+        selectInboundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectInbound"})})
+        selectOutBoundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
+        coseLayoutBtn.on("click",()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
+        hideBtn.on("click",()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
     }
 }
 

@@ -18,9 +18,9 @@ function mainToolbar() {
     this.showForgeViewBtn.attr("disabled", true).addClass("ui-state-disabled");
     this.showGISViewBtn.attr("disabled", true).addClass("ui-state-disabled");
 
-    this.switchADTInstanceBtn.click(()=>{ adtInstanceSelectionDialog.popup() })
-    this.modelIOBtn.click(()=>{ modelManagerDialog.popup() })
-    this.editLayoutBtn.click(()=>{ editLayoutDialog.popup() })
+    this.switchADTInstanceBtn.on("click",()=>{ adtInstanceSelectionDialog.popup() })
+    this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })
+    this.editLayoutBtn.on("click",()=>{ editLayoutDialog.popup() })
 
     this.switchLayoutSelector.selectmenu({
         change: (event, ui) => {

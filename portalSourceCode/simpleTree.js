@@ -237,7 +237,7 @@ simpleTreeGroupNode.prototype.createDOM=function(){
     this.refreshName()
     this.listDOM=$('<div class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom"></div>')
 
-    this.headerDOM.click( (evt)=> {
+    this.headerDOM.on("click",(evt)=> {
         if(this.isOpen()) this.shrink()
         else this.expand() 
         this.parentTree.selectGroupNode(this)    
@@ -309,7 +309,7 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
             this.parentGroupNode.parentTree.selectLeafNode(this)
         }
     }
-    this.DOM.click((e)=>{ clickF(e)})
+    this.DOM.on("click",(e)=>{ clickF(e)})
 
     this.DOM.dblclick((e)=>{
         clickF(e)

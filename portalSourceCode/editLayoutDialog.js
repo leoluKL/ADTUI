@@ -49,8 +49,8 @@ editLayoutDialog.prototype.popup = function () {
     var saveAsBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Save As</a>')
     var deleteBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Delete</a>')
     this.DOM.append(saveAsBtn,deleteBtn)
-    saveAsBtn.click(()=>{this.saveIntoLayout(switchLayoutSelector.val())})
-    deleteBtn.click(()=>{this.deleteLayout(switchLayoutSelector.val())})
+    saveAsBtn.on("click",()=>{this.saveIntoLayout(switchLayoutSelector.val())})
+    deleteBtn.on("click",()=>{this.deleteLayout(switchLayoutSelector.val())})
 
     var lbl=$("<label style='display:block;width:100%;margin-top:1.3em;margin-bottom:1.3em;text-align: center'>- OR -</label>")
     this.DOM.append(lbl) 
@@ -59,6 +59,7 @@ editLayoutDialog.prototype.popup = function () {
     this.DOM.append(nameInput)
     var saveAsNewBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Save As New</a>')
     this.DOM.append(saveAsNewBtn)
+    saveAsNewBtn.on("click",()=>{this.saveIntoLayout(nameInput.val())})
 
     this.DOM.dialog({ 
         width:400
@@ -76,7 +77,7 @@ editLayoutDialog.prototype.popup = function () {
     }
     
     switchLayoutSelector.selectmenu("refresh")
-    saveAsNewBtn.click(()=>{this.saveIntoLayout(nameInput.val())})
+    
 }
 
 editLayoutDialog.prototype.saveIntoLayout = function (layoutName) {
