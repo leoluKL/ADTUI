@@ -141,6 +141,11 @@ topologyDOM.prototype.selectFunction = function () {
     var re = []
     arr.forEach((ele) => { re.push(ele.data().originalInfo) })
     this.broadcastMessage({ "message": "selectNodes", info: re })
+
+    //for debugging purpose
+    //arr.forEach((ele)=>{
+    //  console.log("")
+    //})
 }
 
 topologyDOM.prototype.getFontSizeInCurrentZoom=function(){
@@ -428,31 +433,95 @@ topologyDOM.prototype.applyNewLayout = function () {
         animationDuration: 300,
     })
     newLayout.run()
+
+    //restore edges bending or control points
+    var edgePointsDict=layoutDetail["edges"]
+    if(edgePointsDict==null)return;
+    for(var srcID in edgePointsDict){
+        for(var relationshipID in edgePointsDict[srcID]){
+            var obj=edgePointsDict[srcID][relationshipID]
+            this.applyEdgeBendcontrolPoints(srcID,relationshipID,obj["cyedgebendeditingWeights"]
+            ,obj["cyedgebendeditingDistances"],obj["cyedgecontroleditingWeights"],obj["cyedgecontroleditingDistances"])
+        }
+    }
+
+}
+
+topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipID
+    ,cyedgebendeditingWeights,cyedgebendeditingDistances,cyedgecontroleditingWeights,cyedgecontroleditingDistances) {
+        var theNode=this.core.filter('[id = "'+srcID+'"]');
+        var edges=theNode.connectedEdges().toArray()
+        for(var i=0;i<edges.length;i++){
+            var anEdge=edges[i]
+            if(anEdge.data("originalInfo")["$relationshipId"]==relationshipID){
+                if(cyedgebendeditingWeights){
+                    anEdge.data("cyedgebendeditingWeights",cyedgebendeditingWeights)
+                    anEdge.data("cyedgebendeditingDistances",cyedgebendeditingDistances)
+                    anEdge.addClass('edgebendediting-hasbendpoints');
+                }
+                if(cyedgecontroleditingWeights){
+                    anEdge.data("cyedgecontroleditingWeights",cyedgecontroleditingWeights)
+                    anEdge.data("cyedgecontroleditingDistances",cyedgecontroleditingDistances)
+                    anEdge.addClass('edgecontrolediting-hascontrolpoints');
+                }
+                
+                break
+            }
+        }
 }
 
 
+
 topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
-    var edgeEditInstance= this.core.edgeEditing('get');
-    this.core.edges().forEach(oneEdge=>{
-        console.log(oneEdge.id())
-        console.log(edgeEditInstance.getAnchorsAsArray(oneEdge))
-    })
-    
-    var positionDict=editLayoutDialog.layoutJSON[layoutName]
-    if(!positionDict){
-        positionDict=editLayoutDialog.layoutJSON[layoutName]={}
+    var layoutDict=editLayoutDialog.layoutJSON[layoutName]
+    if(!layoutDict){
+        layoutDict=editLayoutDialog.layoutJSON[layoutName]={}
     }
     
     if(this.core.nodes().size()==0) return;
+
+    //store nodes position
     this.core.nodes().forEach(oneNode=>{
         var position=oneNode.position()
-        positionDict[oneNode.id()]=[this.numberPrecision(position['x']),this.numberPrecision(position['y'])]
+        layoutDict[oneNode.id()]=[this.numberPrecision(position['x']),this.numberPrecision(position['y'])]
     })
+
+    //store any edge bending points or controling points
+
+    if(layoutDict.edges==null) layoutDict.edges={}
+    var edgeEditInstance= this.core.edgeEditing('get');
+    this.core.edges().forEach(oneEdge=>{
+        var srcID=oneEdge.data("originalInfo")["$sourceId"]
+        var relationshipID=oneEdge.data("originalInfo")["$relationshipId"]
+        var cyedgebendeditingWeights=oneEdge.data('cyedgebendeditingWeights')
+        var cyedgebendeditingDistances=oneEdge.data('cyedgebendeditingDistances')
+        var cyedgecontroleditingWeights=oneEdge.data('cyedgecontroleditingWeights')
+        var cyedgecontroleditingDistances=oneEdge.data('cyedgecontroleditingDistances')
+        if(!cyedgebendeditingWeights && !cyedgecontroleditingWeights) return;
+
+        if(layoutDict.edges[srcID]==null)layoutDict.edges[srcID]={}
+        layoutDict.edges[srcID][relationshipID]={}
+        if(cyedgebendeditingWeights && cyedgebendeditingWeights.length>0) {
+            layoutDict.edges[srcID][relationshipID]["cyedgebendeditingWeights"]=this.numberPrecision(cyedgebendeditingWeights)
+            layoutDict.edges[srcID][relationshipID]["cyedgebendeditingDistances"]=this.numberPrecision(cyedgebendeditingDistances)
+        }
+        if(cyedgecontroleditingWeights && cyedgecontroleditingWeights.length>0) {
+            layoutDict.edges[srcID][relationshipID]["cyedgecontroleditingWeights"]=this.numberPrecision(cyedgecontroleditingWeights)
+            layoutDict.edges[srcID][relationshipID]["cyedgecontroleditingDistances"]=this.numberPrecision(cyedgecontroleditingDistances)
+        }
+    })
+
     $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(editLayoutDialog.layoutJSON)})
     this.broadcastMessage({ "message": "layoutsUpdated"})
 }
 
 topologyDOM.prototype.numberPrecision = function (number) {
+    if(Array.isArray(number)){
+        for(var i=0;i<number.length;i++){
+            number[i] = this.numberPrecision(number[i])
+        }
+        return number
+    }else
     return parseFloat(formatter.format(number))
 }
 

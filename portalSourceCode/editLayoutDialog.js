@@ -31,20 +31,29 @@ editLayoutDialog.prototype.rxMessage=function(msgPayload){
     }
 }
 
-editLayoutDialog.prototype.popup = function () {
-    this.DOM.empty()
-
-    var switchLayoutSelector=$('<select></select>')
-    this.DOM.append(switchLayoutSelector)
-
-    switchLayoutSelector.html(
+editLayoutDialog.prototype.refillOptions = function () {
+    this.switchLayoutSelector.html(
         '<option disabled selected>Choose Layout...</option>'
     )
 
     for(var ind in this.layoutJSON){
         var anOption=$("<option>"+ind+"</option>")
-        switchLayoutSelector.append(anOption)
+        this.switchLayoutSelector.append(anOption)
     }
+    this.switchLayoutSelector.selectmenu( "refresh" );
+}
+
+editLayoutDialog.prototype.popup = function () {
+    this.DOM.empty()
+
+    var switchLayoutSelector=$('<select></select>')
+    this.switchLayoutSelector=switchLayoutSelector
+    this.DOM.append(switchLayoutSelector)
+    switchLayoutSelector.selectmenu({
+        appendTo: this.DOM,
+        change: (event, ui) => { }
+    });
+    this.refillOptions()
         
     var saveAsBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Save As</a>')
     var deleteBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Delete</a>')
@@ -67,10 +76,7 @@ editLayoutDialog.prototype.popup = function () {
         ,resizable:false
         ,buttons: []
     })
-    switchLayoutSelector.selectmenu({
-        appendTo: this.DOM,
-        change: (event, ui) => { }
-    });
+    
 
     if(this.currentLayoutName!=null){
         switchLayoutSelector.val(this.currentLayoutName)
@@ -107,6 +113,7 @@ editLayoutDialog.prototype.deleteLayout = function (layoutName) {
                     this.broadcastMessage({ "message": "layoutsUpdated"})
                     $.post("layout/saveLayouts",{"adtName":this.getCurADTName(),"layouts":JSON.stringify(this.layoutJSON)})
                     confirmDialogDiv.dialog("destroy");
+                    this.refillOptions()
                 }
             },
             {
