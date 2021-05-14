@@ -224,7 +224,6 @@ topologyDOM.prototype.deleteTwins=function(twinIDArr){
 }
 
 topologyDOM.prototype.animateANode=function(twin){
-   
     var curDimension= this.getNodeSizeInCurrentZoom()
     twin.animate({
         style: { 'height': curDimension*2,'width': curDimension*2 },
@@ -383,10 +382,11 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         this.core.nodes().unselect()
         this.core.edges().unselect()
         var arr=msgPayload.info;
+        var mouseClickDetail=msgPayload.mouseClickDetail;
         arr.forEach(element => {
             var aTwin= this.core.nodes("#"+element['$dtId'])
             aTwin.select()
-            this.animateANode(aTwin)
+            if(mouseClickDetail!=2) this.animateANode(aTwin) //ignore double click second click
         });
     }else if(msgPayload.message=="PanToNode"){
         var nodeInfo= msgPayload.info;

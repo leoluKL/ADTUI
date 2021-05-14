@@ -6,12 +6,12 @@ function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM)
     this.modelIDMapToName={}
 
-    this.tree.callback_afterSelectNodes=(nodesArr)=>{
+    this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
         var infoArr=[]
         nodesArr.forEach((item, index) =>{
             infoArr.push(item.leafInfo)
         });
-        this.broadcastMessage({ "message": "selectNodes", info:infoArr})
+        this.broadcastMessage({ "message": "selectNodes", info:infoArr, "mouseClickDetail":mouseClickDetail})
     }
 
     this.tree.callback_afterDblclickNode=(theNode)=>{

@@ -172,8 +172,8 @@ simpleTree.prototype.addGroupNode=function(obj){
     return aNewGroupNode;
 }
 
-simpleTree.prototype.selectLeafNode=function(leafNode){
-    this.selectLeafNodeArr([leafNode])
+simpleTree.prototype.selectLeafNode=function(leafNode,mouseClickDetail){
+    this.selectLeafNodeArr([leafNode],mouseClickDetail)
 }
 simpleTree.prototype.appendLeafNodeToSelection=function(leafNode){
     var newArr=[].concat(this.selectedNodes)
@@ -185,7 +185,7 @@ simpleTree.prototype.selectGroupNode=function(groupNode){
     if(this.callback_afterSelectGroupNode) this.callback_afterSelectGroupNode(groupNode.info)
 }
 
-simpleTree.prototype.selectLeafNodeArr=function(leafNodeArr){
+simpleTree.prototype.selectLeafNodeArr=function(leafNodeArr,mouseClickDetail){
     for(var i=0;i<this.selectedNodes.length;i++){
         this.selectedNodes[i].dim()
     }
@@ -195,7 +195,7 @@ simpleTree.prototype.selectLeafNodeArr=function(leafNodeArr){
         this.selectedNodes[i].highlight()
     }
 
-    if(this.callback_afterSelectNodes) this.callback_afterSelectNodes(this.selectedNodes)
+    if(this.callback_afterSelectNodes) this.callback_afterSelectNodes(this.selectedNodes,mouseClickDetail)
 }
 
 simpleTree.prototype.dblClickNode=function(theNode){
@@ -303,16 +303,16 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
     this.DOM=$('<li style="padding-left:3px;padding-top:1px;cursor:default">'+this.name+'</li>')
     var clickF=(e)=>{
         this.highlight();
+        var clickDetail=e.detail
         if (e.ctrlKey) {
             this.parentGroupNode.parentTree.appendLeafNodeToSelection(this)
         }else{
-            this.parentGroupNode.parentTree.selectLeafNode(this)
+            this.parentGroupNode.parentTree.selectLeafNode(this,e.detail)
         }
     }
-    this.DOM.on("click",(e)=>{ clickF(e)})
+    this.DOM.on("click",(e)=>{clickF(e)})
 
     this.DOM.on("dblclick",(e)=>{
-        clickF(e)
         this.parentGroupNode.parentTree.dblClickNode(this)
     })
 }
