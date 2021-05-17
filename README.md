@@ -56,11 +56,11 @@ The application is created as an single web page application that accesses azure
 - Azure indoor map view integration
 - Revit 3D Autocad BIM model integration
 
+It should. So it is in plan to create a native cloud host demonstration platform with those advanced capabilities.
+
 ### New Feature update
 - Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
 ![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/saveEdge.jpg)
-
-It should. So it is in plan to create a native cloud host demonstration platform with those advanced capabilities.
 
 ## Purpose
 - A convinient application to use together with ADT cloud service
