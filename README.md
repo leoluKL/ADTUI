@@ -14,6 +14,12 @@ For developer's usage, there is additional npm run option to use
 1. npm run dev  -  It will monitor change in frontend code change (in ./portalSourceCode) and refresh browser window automatically
 2. npm run production - It will minify the frontend code and put the code to folder portalProduction
 
+## Prerequisites
+
+- An Azure Digital Twin service subscription in any of your Azure subscriptions
+- Azure CLI
+- Nodejs
+
 ## Highlight Features
 1. Full support of ADT editing functionalites, including relationship level properties editing
 2. Create multiple customized layout of your twins for your purpose like in CAD tool. It is important for practical tasks.
@@ -24,23 +30,35 @@ For developer's usage, there is additional npm run option to use
 ![Main UI](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/screenshot1.jpg)
 ![Choose datasets](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/screenshot2.jpg)
 
-## New Feature update
-- Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
-![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/saveEdge.jpg)
+## How To Use Tips
+1. Start with a set of twins data
+    - You can create a filter in start screen to query a subset of twins to start, instead of "ALL" filter
+    - You can always append another filter (that queries another subset of twins) to the current workspace in "Source" 
+    - You can choose twins, and use "query inbound/outbound" button to expand the twins set in your workspace
 
-## Prerequisites
+2. You can multi-select twins and connections in topology view by pressing shift key
 
-- An Azure Digital Twin service subscription in any of your Azure subscriptions
-- Azure CLI
-- Nodejs
- 
+3. You can define color and icon image for twins and connections in "Models"
+
+4. You can save the location of twins in topology view to layouts. You can call back twins' location by selecting a stored layout.
+
+5. You can edit the connections line by inserting bend points or control points. You will create segmented edge line or bezier curve edge line.
+
+6. There is a text search box above the twins list tree view. You can use it to search twins by typing substring and press enter till you find the twin you are looking for.
+
+7. Double click the twin name in the twins list tree view will center to the twin in topology view.
+
 ## Development
+### Plan
 The application is created as an single web page application that accesses azure digital twin service remotely. Since this limitation, more advanced features, such as
 - SingalR integration for live telemetry event
 - database storage and so on, are not created
 - Azure indoor map view integration
 - Revit 3D Autocad BIM model integration
 
+### New Feature update
+- Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
+![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/saveEdge.jpg)
 
 It should. So it is in plan to create a native cloud host demonstration platform with those advanced capabilities.
 
