@@ -106,7 +106,12 @@ topologyDOM.prototype.init=function(){
     this.core.edgeEditing({
         undoable: true,
         bendRemovalSensitivity: 16,
-        enableMultipleAnchorRemovalOption: true
+        enableMultipleAnchorRemovalOption: true,
+        stickyAnchorTolerence: 20,
+        anchorShapeSizeFactor: 5,
+        enableAnchorSizeNotImpactByZoom:true,
+        enableRemoveAnchorMidOfNearLine:false,
+        enableCreateAnchorOnDrag:false
     });
 
     
