@@ -26,7 +26,6 @@
     "@azure/identity": "latest",
     "cytoscape": "3.18.1",
     "cytoscape-context-menus": "^4.0.0",
-    "cytoscape-edge-editing": "^3.0.2",
     "cytoscape-undo-redo": "^1.3.3",
     "express": "latest",
     "got": "^11.8.0",
