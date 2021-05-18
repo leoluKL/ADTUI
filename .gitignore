@@ -2,7 +2,3 @@
 /node_modules
 /.vscode
 /unused
-# exclude everything
-userGeneratedFiles/*
-# exception to the rule
-!userGeneratedFiles/.gitkeep 
