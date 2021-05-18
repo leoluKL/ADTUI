@@ -137,6 +137,33 @@ topologyDOM.prototype.init=function(){
                 .style({ 'font-size': fs, width:dimension ,height:dimension })
                 .update()
     })
+
+
+    var setOneTimeGrab = () => {
+        this.core.once("grab", (e) => {
+            var draggingNodes = this.core.collection()
+            if (e.target.isNode()) draggingNodes.merge(e.target)
+            var arr = this.core.$(":selected")
+            arr.forEach((ele) => {
+                if (ele.isNode()) draggingNodes.merge(ele)
+            })
+            var instance = this.core.edgeEditing('get');
+            instance.storeAnchorsAbsolutePosition(draggingNodes)
+            this.core.on("tapdrag", (e) => {
+                instance.keepAnchorsAbsolutePositionDuringMoving()
+            })
+            setOneTimeFree()
+        })
+    }
+    var setOneTimeFree = () => {
+        this.core.once("free", (e) => {
+            var instance = this.core.edgeEditing('get');
+            instance.resetAnchorsAbsolutePosition()
+            setOneTimeGrab()
+            this.core.on("tapdrag", (e) => {})
+        })
+    }
+    setOneTimeGrab()
     
 }
 
@@ -457,7 +484,6 @@ topologyDOM.prototype.applyNewLayout = function () {
             ,obj["cyedgebendeditingDistances"],obj["cyedgecontroleditingWeights"],obj["cyedgecontroleditingDistances"])
         }
     }
-
 }
 
 topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipID
