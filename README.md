@@ -59,6 +59,7 @@ The application is created as an single web page application that accesses azure
 It should. So it is in plan to create a native cloud host demonstration platform with those advanced capabilities.
 
 ### New Feature update
+- Ehance editing functionality so you can easily creat right angle edge segments (like 90 degree) and align nodes in horizontal or vertial level
 - Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
 ![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/saveEdge.jpg)
 
