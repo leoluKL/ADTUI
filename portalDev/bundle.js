@@ -2205,7 +2205,12 @@ topologyDOM.prototype.init=function(){
                 .update()
     })
 
-
+    var instance = this.core.edgeEditing('get');
+    var tapdragHandler=(e) => {
+        instance.keepAnchorsAbsolutePositionDuringMoving()
+        if(e.target.isNode && e.target.isNode()) this.draggingNode=e.target
+        this.smartPositionNode(e.position)
+    }
     var setOneTimeGrab = () => {
         this.core.once("grab", (e) => {
             var draggingNodes = this.core.collection()
@@ -2214,11 +2219,8 @@ topologyDOM.prototype.init=function(){
             arr.forEach((ele) => {
                 if (ele.isNode()) draggingNodes.merge(ele)
             })
-            var instance = this.core.edgeEditing('get');
             instance.storeAnchorsAbsolutePosition(draggingNodes)
-            this.core.on("tapdrag", (e) => {
-                instance.keepAnchorsAbsolutePositionDuringMoving()
-            })
+            this.core.on("tapdrag",tapdragHandler )
             setOneTimeFree()
         })
     }
@@ -2226,12 +2228,51 @@ topologyDOM.prototype.init=function(){
         this.core.once("free", (e) => {
             var instance = this.core.edgeEditing('get');
             instance.resetAnchorsAbsolutePosition()
+            this.draggingNode=null
             setOneTimeGrab()
-            this.core.on("tapdrag", (e) => {})
+            this.core.removeListener("tapdrag",tapdragHandler)
         })
     }
     setOneTimeGrab()
-    
+}
+
+topologyDOM.prototype.smartPositionNode = function (mousePosition) {
+    var zoomLevel=this.core.zoom()
+    if(!this.draggingNode) return
+    //comparing nodes set: its connectfrom nodes and their connectto nodes, its connectto nodes and their connectfrom nodes
+    var incomers=this.draggingNode.incomers()
+    var outerFromIncom= incomers.outgoers()
+    var outer=this.draggingNode.outgoers()
+    var incomFromOuter=outer.incomers()
+    var monitorSet=incomers.union(outerFromIncom).union(outer).union(incomFromOuter).filter('node').unmerge(this.draggingNode)
+
+    var returnExpectedPos=(diffArr,posArr)=>{
+        var minDistance=Math.min(...diffArr)
+        if(minDistance*zoomLevel < 10)  return posArr[diffArr.indexOf(minDistance)]
+        else return null;
+    }
+
+    var xDiff=[]
+    var xPos=[]
+    var yDiff=[]
+    var yPos=[]
+    monitorSet.forEach((ele)=>{
+        xDiff.push(Math.abs(ele.position().x-mousePosition.x))
+        xPos.push(ele.position().x)
+        yDiff.push(Math.abs(ele.position().y-mousePosition.y))
+        yPos.push(ele.position().y)
+    })
+    var prefX=returnExpectedPos(xDiff,xPos)
+    var prefY=returnExpectedPos(yDiff,yPos)
+    if(prefX!=null) {
+        this.draggingNode.position('x', prefX);
+    }
+    if(prefY!=null) {
+        this.draggingNode.position('y', prefY);
+    }
+    //console.log("----")
+    //monitorSet.forEach((ele)=>{console.log(ele.id())})
+    //console.log(monitorSet.size())
 }
 
 topologyDOM.prototype.selectFunction = function () {
