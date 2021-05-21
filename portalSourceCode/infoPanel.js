@@ -5,6 +5,8 @@ const modelManagerDialog = require("./modelManagerDialog");
 function infoPanel() {
     this.DOM=$("#infoPanel")
     this.DOM.css({"margin-top":"10px","margin-left":"3px"})
+    this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl key to select multiple in tree view</a>")
+
     this.selectedObjects=null;
 }
 

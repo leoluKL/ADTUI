@@ -22,7 +22,7 @@ function twinsTree(DOM, searchDOM) {
         this.broadcastMessage({"message":"selectGroupNode",info:nodeInfo})
     }
 
-    this.searchBox=$('<input type="text"/>').addClass("ui-corner-all");
+    this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("ui-corner-all");
     this.searchBox.css({"border":"solid 1px grey","height":"calc(100% - 4px)","width":"calc(100% - 7px)"})
     searchDOM.append(this.searchBox)
 

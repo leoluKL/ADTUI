@@ -21,6 +21,7 @@ span:focus {
 /* scrollbar style */
 ::-webkit-scrollbar {
     width: 9px;
+	height:9px;
 }
 ::-webkit-scrollbar-track {
     background:#F0F0F0;

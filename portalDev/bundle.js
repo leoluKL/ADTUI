@@ -83,10 +83,10 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         var querySpan=$("<span/>")
         rightSpan.append(querySpan)
         var nameLbl=$("<span style='padding-right:1em'>Name</span>")
-        var nameInput=$('<input/>').addClass("ui-corner-all");
+        var nameInput=$('<input  placeholder="newfilter1"/>').addClass("ui-corner-all");
         this.queryNameInput=nameInput;
         var queryLbl=$("<span style='display:block;padding-top:10px'>Query</span>")
-        var queryInput=$('<textarea style="width:calc(100% - 5px);overflow-y:auto;overflow-x:hidden;height:5em;font-size:10px"/>').addClass("ui-corner-all");
+        var queryInput=$('<textarea  placeholder="SELECT * FROM digitaltwins where IS_OF_MODEL(\'modelID\')" style="width:calc(100% - 5px);overflow-y:auto;overflow-x:hidden;height:5em;font-size:10px"/>').addClass("ui-corner-all");
         this.queryInput=queryInput;
 
         var saveBtn=$('<a class="ui-button ui-widget ui-corner-all" style="background-color:yellowgreen" href="#">Save</a>')
@@ -111,16 +111,16 @@ adtInstanceSelectionDialog.prototype.popup = function () {
 
 
         this.DOM.dialog({ 
-            dialogClass: "no-close",
+            //dialogClass: "no-close",
             modal: true,
             width:650
             ,height:500
             ,resizable:false
         })
         
-        if(this.previousSelectedADT!=null){
-            this.DOM.parent().find(".ui-dialog-titlebar-close").css("display","block");
-        }
+        //if(this.previousSelectedADT!=null){
+            //this.DOM.parent().find(".ui-dialog-titlebar-close").css("display","block");
+        //}
 
         if(this.previousSelectedADT!=null){
             switchADTSelector.val(this.previousSelectedADT)
@@ -222,11 +222,18 @@ adtInstanceSelectionDialog.prototype.testQuery=function(){
             return;
         }
         this.testTwinsInfo=data
-        data.forEach((oneNode)=>{
-            this.storedTwins[oneNode["$dtId"]] = oneNode;
-            var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey">'+oneNode["$dtId"]+'</td><td style="border-bottom:solid 1px lightgrey">'+oneNode['$metadata']['$model']+'</td></tr>')
+        if(data.length==0){
+            var tr=$('<tr><td style="color:gray">zero record</td><td style="border-bottom:solid 1px lightgrey"></td></tr>')
             this.testResultTable.append(tr)
-        })
+        }else{
+            var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey;font-weight:bold">ID</td><td style="border-bottom:solid 1px lightgrey;font-weight:bold">MODEL</td></tr>')
+            this.testResultTable.append(tr)
+            data.forEach((oneNode)=>{
+                this.storedTwins[oneNode["$dtId"]] = oneNode;
+                var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey">'+oneNode["$dtId"]+'</td><td style="border-bottom:solid 1px lightgrey">'+oneNode['$metadata']['$model']+'</td></tr>')
+                this.testResultTable.append(tr)
+            })    
+        }
     });
 }
 
@@ -462,6 +469,8 @@ const modelManagerDialog = require("./modelManagerDialog");
 function infoPanel() {
     this.DOM=$("#infoPanel")
     this.DOM.css({"margin-top":"10px","margin-left":"3px"})
+    this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl key to select multiple in tree view</a>")
+
     this.selectedObjects=null;
 }
 
@@ -1043,7 +1052,7 @@ function mainToolbar() {
 mainToolbar.prototype.updateLayoutSelector = function () {
     var currentLayoutName = this.switchLayoutSelector.val()
     this.switchLayoutSelector.html(
-        '<option disabled selected>Choose Layout...</option><option selected>[Donot Use Layout]</option>'
+        '<option disabled selected>Choose Layout...</option><option selected>[No Layout Specified]</option>'
     )
     for (var ind in editLayoutDialog.layoutJSON) {
         var anOption = $("<option>" + ind + "</option>")
@@ -1399,7 +1408,7 @@ modelManagerDialog.prototype.popup = async function() {
     modelList.selectable({
         selected: (event, ui) => {
             var modelName = $(ui.selected).data('modelName')
-            this.fillRightSpan(modelName)
+            if(modelName) this.fillRightSpan(modelName)
         }
     })
 
@@ -1409,6 +1418,8 @@ modelManagerDialog.prototype.popup = async function() {
     this.DOM.append(rightSpan)
     this.rightSpan=rightSpan;
     rightSpan.addClass("ui-accordion ui-widget ui-helper-reset")
+
+    rightSpan.html("<a style='display:block;font-style:italic;color:gray'>Choose a model to view infomration</a>")
 
     this.DOM.dialog({ 
         width:650
@@ -1729,15 +1740,22 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
             modelAnalyzer.analyze();
         }
         
-        var sortArr=[]
-        for(var modelName in this.models) sortArr.push(modelName)
-        sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
-        sortArr.forEach(oneModelName=>{
-            var oneModelItem=$('<li style="font-size:0.9em" class="ui-widget-content">'+oneModelName+'</li>')
-            oneModelItem.css("cursor","default")
-            oneModelItem.data("modelName", oneModelName)
-            this.modelList.append(oneModelItem)
-        })
+        if(data.length==0){
+            var zeroModelItem=$('<li style="font-size:0.9em;border:none" class="ui-widget-content">zero model record. Please import...</li>')
+            zeroModelItem.css("cursor","default")
+            this.modelList.append(zeroModelItem)
+        }else{
+            var sortArr=[]
+            for(var modelName in this.models) sortArr.push(modelName)
+            sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
+            sortArr.forEach(oneModelName=>{
+                var oneModelItem=$('<li style="font-size:0.9em" class="ui-widget-content">'+oneModelName+'</li>')
+                oneModelItem.css("cursor","default")
+                oneModelItem.data("modelName", oneModelName)
+                this.modelList.append(oneModelItem)
+            })
+        }
+        
         if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models })
     })
 }
@@ -2923,7 +2941,7 @@ function twinsTree(DOM, searchDOM) {
         this.broadcastMessage({"message":"selectGroupNode",info:nodeInfo})
     }
 
-    this.searchBox=$('<input type="text"/>').addClass("ui-corner-all");
+    this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("ui-corner-all");
     this.searchBox.css({"border":"solid 1px grey","height":"calc(100% - 4px)","width":"calc(100% - 7px)"})
     searchDOM.append(this.searchBox)
 

@@ -33,7 +33,7 @@ function mainToolbar() {
 mainToolbar.prototype.updateLayoutSelector = function () {
     var currentLayoutName = this.switchLayoutSelector.val()
     this.switchLayoutSelector.html(
-        '<option disabled selected>Choose Layout...</option><option selected>[Donot Use Layout]</option>'
+        '<option disabled selected>Choose Layout...</option><option selected>[No Layout Specified]</option>'
     )
     for (var ind in editLayoutDialog.layoutJSON) {
         var anOption = $("<option>" + ind + "</option>")

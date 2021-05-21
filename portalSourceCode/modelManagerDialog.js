@@ -48,7 +48,7 @@ modelManagerDialog.prototype.popup = async function() {
     modelList.selectable({
         selected: (event, ui) => {
             var modelName = $(ui.selected).data('modelName')
-            this.fillRightSpan(modelName)
+            if(modelName) this.fillRightSpan(modelName)
         }
     })
 
@@ -58,6 +58,8 @@ modelManagerDialog.prototype.popup = async function() {
     this.DOM.append(rightSpan)
     this.rightSpan=rightSpan;
     rightSpan.addClass("ui-accordion ui-widget ui-helper-reset")
+
+    rightSpan.html("<a style='display:block;font-style:italic;color:gray'>Choose a model to view infomration</a>")
 
     this.DOM.dialog({ 
         width:650
@@ -378,15 +380,22 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
             modelAnalyzer.analyze();
         }
         
-        var sortArr=[]
-        for(var modelName in this.models) sortArr.push(modelName)
-        sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
-        sortArr.forEach(oneModelName=>{
-            var oneModelItem=$('<li style="font-size:0.9em" class="ui-widget-content">'+oneModelName+'</li>')
-            oneModelItem.css("cursor","default")
-            oneModelItem.data("modelName", oneModelName)
-            this.modelList.append(oneModelItem)
-        })
+        if(data.length==0){
+            var zeroModelItem=$('<li style="font-size:0.9em;border:none" class="ui-widget-content">zero model record. Please import...</li>')
+            zeroModelItem.css("cursor","default")
+            this.modelList.append(zeroModelItem)
+        }else{
+            var sortArr=[]
+            for(var modelName in this.models) sortArr.push(modelName)
+            sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
+            sortArr.forEach(oneModelName=>{
+                var oneModelItem=$('<li style="font-size:0.9em" class="ui-widget-content">'+oneModelName+'</li>')
+                oneModelItem.css("cursor","default")
+                oneModelItem.data("modelName", oneModelName)
+                this.modelList.append(oneModelItem)
+            })
+        }
+        
         if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models })
     })
 }
