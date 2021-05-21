@@ -367,6 +367,7 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
     this.modelList.empty()
     for(var ind in this.models) delete this.models[ind]
     $.get("queryADT/listModels", (data, status) => {
+        if(data=="") data=[]
         data.forEach(oneItem=>{
             if(oneItem["displayName"]==null) oneItem["displayName"]=oneItem["@id"]
             this.models[oneItem["displayName"]] = oneItem

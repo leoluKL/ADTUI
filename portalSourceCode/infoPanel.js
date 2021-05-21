@@ -71,6 +71,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                         var IDInput=keyLabel.find("input")
                         if(IDInput) IDInput.val("")
                         $.post("queryADT/oneTwinInfo",{twinID:twinJson["$dtId"]}, (data)=> {
+                            if(data=="") return;
                             adtInstanceSelectionDialog.storedTwins[data["$dtId"]] = data;
                             this.broadcastMessage({ "message": "addNewTwin",twinInfo:data})
                         })                        
@@ -149,7 +150,8 @@ infoPanel.prototype.refreshInfomation=async function(){
         else queryArr.push({'$dtId':oneItem['$dtId']})
     })
 
-    $.post("queryADT/fetchInfomation",{"elements":queryArr},  (data)=> { 
+    $.post("queryADT/fetchInfomation",{"elements":queryArr},  (data)=> {
+        if(data=="") return;
         data.forEach(oneRe=>{
             if(oneRe["$relationshipId"]){//update storedOutboundRelationships
                 var srcID= oneRe['$sourceId']
@@ -246,6 +248,7 @@ infoPanel.prototype.deletePartialTwins= async function(IDArr){
     return new Promise((resolve, reject) => {
         try{
             $.post("editADT/deleteTwins",{arr:IDArr}, function (data) {
+                if(data=="") data=[]
                 resolve(data)
             });
         }catch(e){
@@ -261,6 +264,7 @@ infoPanel.prototype.deleteRelations=async function(relationsArr){
         arr.push({srcID:oneRelation['$sourceId'],relID:oneRelation['$relationshipId']})
     })
     $.post("editADT/deleteRelations",{"relations":arr},  (data)=> { 
+        if(data=="") data=[];
         adtInstanceSelectionDialog.storeTwinRelationships_remove(data)
         this.broadcastMessage({ "message": "relationsDeleted","relations":data})
     });
@@ -278,7 +282,7 @@ infoPanel.prototype.showOutBound=async function(){
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialOutbounds(smallArr)
-        
+        if(data=="") continue;
         //new twin's relationship should be stored as well
         adtInstanceSelectionDialog.storeTwinRelationships(data.newTwinRelations)
         
@@ -305,6 +309,7 @@ infoPanel.prototype.showInBound=async function(){
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialInbounds(smallArr)
+        if(data=="") continue;
         //new twin's relationship should be stored as well
         adtInstanceSelectionDialog.storeTwinRelationships(data.newTwinRelations)
         

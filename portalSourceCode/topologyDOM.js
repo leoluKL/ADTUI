@@ -724,6 +724,7 @@ topologyDOM.prototype.createConnections = function (resultActions) {
     })
 
     $.post("editADT/createRelations",{actions:resultActions}, (data, status) => {
+        if(data=="") return;
         adtInstanceSelectionDialog.storeTwinRelationships_append(data)
         this.drawRelations(data)
     })

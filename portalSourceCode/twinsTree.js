@@ -85,6 +85,7 @@ twinsTree.prototype.ADTDatasourceChange_append=function(twinQueryStr,twinsData){
     if (twinsData != null) this.appendAllTwins(twinsData)
     else {
         $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
+            if(data=="") return;
             data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
             this.appendAllTwins(data)
         })
@@ -101,6 +102,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
         if (twinsData != null) this.replaceAllTwins(twinsData)
         else {
             $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
+                if(data=="") data=[];
                 data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
                 this.replaceAllTwins(data)
             })
@@ -110,6 +112,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
         for (var id in this.modelIDMapToName) delete this.modelIDMapToName[id]
         //query to get all models
         $.get("queryADT/listModels", (data, status) => {
+            if(data=="") data=[]
             var tmpNameArr = []
             var tmpNameToObj = {}
             for (var i = 0; i < data.length; i++) {
@@ -130,6 +133,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
             if (twinsData != null) this.replaceAllTwins(twinsData)
             else {
                 $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
+                    if(data=="") data=[];
                     data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
                     this.replaceAllTwins(data)
                 })
@@ -186,6 +190,7 @@ twinsTree.prototype.fetchAllRelationships= async function(twinIDArr){
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialRelationships(smallArr)
+        if(data=="") continue;
         adtInstanceSelectionDialog.storeTwinRelationships(data) //store them in global available array
         this.broadcastMessage({ "message": "drawAllRelations",info:data})
     }

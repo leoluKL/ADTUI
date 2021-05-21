@@ -20,7 +20,7 @@ adtInstanceSelectionDialog.prototype.preparationFunc = async function () {
     return new Promise((resolve, reject) => {
         try{
             $.get("twinsFilter/readStartFilters", (data, status) => {
-                if(data!=null) this.filters=data;
+                if(data!=null && data!="") this.filters=data;
                 resolve()
             })
         }catch(e){
@@ -31,6 +31,7 @@ adtInstanceSelectionDialog.prototype.preparationFunc = async function () {
 
 adtInstanceSelectionDialog.prototype.popup = function () {
     $.get("queryADT/listADTInstance", (data, status) => {
+        if(data=="") data=[]
         var adtArr=data;
         if (adtArr.length == 0) return;
 
@@ -214,6 +215,7 @@ adtInstanceSelectionDialog.prototype.testQuery=function(){
     var queryStr= this.queryInput.val()
     if(queryStr=="") return;
     $.post("queryADT/allTwinsInfo",{query:queryStr}, (data)=> {
+        if(data=="") data=[]
         if(!Array.isArray(data)) {
             alert("Query is not correct!")
             return;

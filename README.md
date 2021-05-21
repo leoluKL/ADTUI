@@ -10,9 +10,10 @@ For out-of-the-box usage, directly install node library and run
 
 It will pop up a browser window with initial dialog to choose which ADT service instance you want to operate.
 
-For developer's usage, there is additional npm run option to use
-1. npm run dev  -  It will monitor change in frontend code change (in ./portalSourceCode) and refresh browser window automatically
-2. npm run production - It will minify the frontend code and put the code to folder portalProduction
+For developer's usage, there are additional npm run options to use
+1. npm run preparedev - This should be run one time if you want to program your own code. It will install watchify, browserify and uglify.
+2. npm run dev  -  It will monitor change in frontend code change (in ./portalSourceCode) and refresh browser window automatically
+3. npm run production - It will minify the frontend code and put the code to folder portalProduction
 
 ## Prerequisites
 
