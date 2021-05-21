@@ -12,7 +12,7 @@ It will pop up a browser window with initial dialog to choose which ADT service 
 
 For developer's usage, there are additional npm run options to use
 1. npm run preparedev - This should be run one time if you want to program your own code. It will install watchify, browserify and uglify.
-2. npm run dev  -  It will monitor change in frontend code change (in ./portalSourceCode) and refresh browser window automatically
+2. npm run dev  -  It will monitor change in frontend code (such as javascript files in ./portalSourceCode) and refresh browser window automatically
 3. npm run production - It will minify the frontend code and put the code to folder portalProduction
 
 ## Prerequisites
