@@ -1,0 +1,20 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: windows-latest
+
+steps:
+
+- task: AzureFileCopy@4
+  inputs:
+    SourcePath: 'spaPortal/**'
+    azureSubscription: 'leolu - azure internal subscription(c7b2c0ba-6f34-45b8-8764-079581e882ea)'
+    Destination: 'AzureBlob'
+    storage: 'azureiotrocksspa'
+    ContainerName: '$web'
