@@ -15,7 +15,7 @@ steps:
     azureSubscription: 'leolu - azure internal subscription(c7b2c0ba-6f34-45b8-8764-079581e882ea)'
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
-    inlineScript: 'az storage blob delete-batch --account-name azureiotrocksspa --source "$web"'
+    inlineScript: 'az storage blob delete-batch --account-name azureiotrocksspa --source "`$web"'
 - task: AzureFileCopy@4
   inputs:
     SourcePath: 'azureiotrocksB2C/spaPortal/**'
