@@ -1,61 +1,27 @@
-/**
- * Enter here the user flows and custom policies for your B2C application
- * To learn more about user flows, visit: https://docs.microsoft.com/en-us/azure/active-directory-b2c/user-flow-overview
- * To learn more about custom policies, visit: https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview
- */
-
-console.log("test")
- const b2cPolicies = {
-    signUpSignInName:"B2C_1_singupsignin_spaapp1",
-    signUpSignInAuthority:"https://azureiotb2c.b2clogin.com/azureiotb2c.onmicrosoft.com/B2C_1_singupsignin_spaapp1",
-    editProfileAuthority:"https://azureiotb2c.b2clogin.com/azureiotb2c.onmicrosoft.com/B2C_1_editprofile_spaapp1",
+const b2cPolicies = {
+    signUpSignInName: "B2C_1_singupsignin_spaapp1",
+    signUpSignInAuthority: "https://azureiotb2c.b2clogin.com/azureiotb2c.onmicrosoft.com/B2C_1_singupsignin_spaapp1",
+    editProfileAuthority: "https://azureiotb2c.b2clogin.com/azureiotb2c.onmicrosoft.com/B2C_1_editprofile_spaapp1",
     authorityDomain: "azureiotb2c.b2clogin.com"
 }
-// Create the main myMSALObj instance
-// configuration parameters are located at authConfig.js
-/**
- * Configuration object to be passed to MSAL instance on creation. 
- * For a full list of MSAL.js configuration parameters, visit:
- * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/configuration.md
- * For more details on using MSAL.js with Azure AD B2C, visit:
- * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/working-with-b2c.md 
- */
 
- const msalConfig = {
+const msalConfig = {
     auth: {
-      clientId: "f4693be5-601b-4d0e-9208-c35d9ad62387", // This is the ONLY mandatory field; everything else is optional.
-      authority: b2cPolicies.signUpSignInAuthority, // Choose sign-up/sign-in user-flow as your default.
-      knownAuthorities: [b2cPolicies.authorityDomain], // You must identify your tenant's domain as a known authority.
-      redirectUri: "https://azureiotrocksspa.z23.web.core.windows.net"
+        clientId: "f4693be5-601b-4d0e-9208-c35d9ad62387", // This is the ONLY mandatory field; everything else is optional.
+        authority: b2cPolicies.signUpSignInAuthority, // Choose sign-up/sign-in user-flow as your default.
+        knownAuthorities: [b2cPolicies.authorityDomain], // You must identify your tenant's domain as a known authority.
+        redirectUri: "https://azureiotrocksspa.z23.web.core.windows.net"
     },
     cache: {
-      cacheLocation: "sessionStorage", // Configures cache location. "sessionStorage" is more secure, but "localStorage" gives you SSO between tabs.
-      storeAuthStateInCookie: false, // If you wish to store cache items in cookies as well as browser cache, set this to "true".
+        cacheLocation: "sessionStorage", // Configures cache location. "sessionStorage" is more secure, but "localStorage" gives you SSO between tabs.
+        storeAuthStateInCookie: false, // If you wish to store cache items in cookies as well as browser cache, set this to "true".
     },
     system: {
-      loggerOptions: {
-        loggerCallback: (level, message, containsPii) => {
-          if (containsPii) {
-            return;
-          }
-          switch (level) {
-            case msal.LogLevel.Error:
-              console.error(message);
-              return;
-            case msal.LogLevel.Info:
-              console.info(message);
-              return;
-            case msal.LogLevel.Verbose:
-              console.debug(message);
-              return;
-            case msal.LogLevel.Warning:
-              console.warn(message);
-              return;
-          }
+        loggerOptions: {
+            loggerCallback: (level, message, containsPii) => {}
         }
-      }
     }
-  };
+};
 const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
 let accountId = "";
@@ -65,8 +31,8 @@ selectAccount(); // in case of page refresh and it might be ok to fetch account 
 const apiConfig = {
     b2cScopes: ["https://azureiotb2c.onmicrosoft.com/apifunc1/basic"],//["https://azureiotb2c.onmicrosoft.com/api/demo.read"]
     webApi: "https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1"
-  };
-  
+};
+
 
 function welcomeUser() { //basically it hide buttons (singin) and show buttons: signout,editprofile,callapibutton
     document.getElementById('label').classList.add('d-none');
@@ -101,8 +67,8 @@ function selectAccount() { //basically it used a logged in account and hide thos
             &&
             account.idTokenClaims.iss.toUpperCase().includes(b2cPolicies.authorityDomain.toUpperCase())
             &&
-            account.idTokenClaims.aud === msalConfig.auth.clientId 
-            );
+            account.idTokenClaims.aud === msalConfig.auth.clientId
+        );
 
         if (accounts.length > 1) {//means there is an account for this b2c application
             // localAccountId identifies the entity for which the token asserts information.
@@ -129,13 +95,13 @@ function handleResponse(response) {
      */
     console.log(response)
 
-    
+
     if (response !== null) {
         setAccount(response.account);
     } else {
         selectAccount();
     }
-    
+
 }
 
 function signIn() {
@@ -146,7 +112,7 @@ function signIn() {
     * https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
     */
     console.log("sign in")
-    myMSALObj.loginPopup({ scopes:[...apiConfig.b2cScopes]})//apiConfig.b2cScopes
+    myMSALObj.loginPopup({ scopes: [...apiConfig.b2cScopes] })//apiConfig.b2cScopes
         .then(handleResponse)
         .catch(error => {
             console.log(error);
@@ -215,7 +181,7 @@ function passTokenToApi() {
     getTokenPopup({
         scopes: apiConfig.b2cScopes,  // e.g. ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"]
         forceRefresh: false // Set this to "true" to skip a cached token and go to the server to get a new token
-      })
+    })
         .then(response => {
             if (response) {
                 console.log("access_token acquired at: " + new Date().toString());
@@ -231,11 +197,11 @@ function passTokenToApi() {
 function callApi(token) {
     $.ajax({
         type: 'GET',
-        headers: {"Authorization": `Bearer ${token}`},
+        headers: { "Authorization": `Bearer ${token}` },
         url: 'https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1?name=leo',
         crossDomain: true,
-        success: function(responseData, textStatus, jqXHR) {
-            $("#response").append($('<a style="display:block;font-size:10px">'+responseData+'</a>'))
+        success: function (responseData, textStatus, jqXHR) {
+            $("#response").append($('<a style="display:block;font-size:10px">' + responseData + '</a>'))
         },
         error: function (responseData, textStatus, errorThrown) {
         }
@@ -249,8 +215,8 @@ function callApi(token) {
  */
 function editProfile() {
     myMSALObj.loginPopup({
-        authority:b2cPolicies.editProfileAuthority,
-        loginHint:myMSALObj.getAccountByHomeId(accountId).username
+        authority: b2cPolicies.editProfileAuthority,
+        loginHint: myMSALObj.getAccountByHomeId(accountId).username
     })
         .catch(error => {
             console.log(error);
