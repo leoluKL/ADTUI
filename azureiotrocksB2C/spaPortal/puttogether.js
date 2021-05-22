@@ -1,3 +1,4 @@
+console.log("tttt")
 const b2cPolicies = {
     signUpSignInName: "B2C_1_singupsignin_spaapp1",
     signUpSignInAuthority: "https://azureiotb2c.b2clogin.com/azureiotb2c.onmicrosoft.com/B2C_1_singupsignin_spaapp1",
