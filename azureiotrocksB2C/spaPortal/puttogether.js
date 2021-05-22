@@ -1,4 +1,3 @@
-console.log("tttt")
 const b2cPolicies = {
     signUpSignInName: "B2C_1_singupsignin_spaapp1",
     signUpSignInAuthority: "https://azureiotb2c.b2clogin.com/azureiotb2c.onmicrosoft.com/B2C_1_singupsignin_spaapp1",
@@ -30,7 +29,6 @@ const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
 let accountId = "";
 let username = "";
-selectAccount(); // in case of page refresh and it might be ok to fetch account directly from cache
 
 const apiConfig = {
     b2cScopes: ["https://azureiotb2c.onmicrosoft.com/apifunc1/basic"],//["https://azureiotb2c.onmicrosoft.com/api/demo.read"]
@@ -58,7 +56,7 @@ function selectAccount() { //basically it used a logged in account and hide thos
     const currentAccounts = myMSALObj.getAllAccounts();
 
     if (currentAccounts.length < 1) { //when not singed in yet, no account defined
-        return;
+        signIn()
     } else if (currentAccounts.length > 1) { //means there is a cached signed in account
         /**
          * Due to the way MSAL caches account objects, the auth response from initiating a user-flow
@@ -115,7 +113,6 @@ function signIn() {
     * For more information about OIDC scopes, visit: 
     * https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
     */
-    console.log("sign in")
     myMSALObj.loginPopup({ scopes: [...apiConfig.b2cScopes] })//apiConfig.b2cScopes
         .then(handleResponse)
         .catch(error => {
@@ -226,3 +223,5 @@ function editProfile() {
             console.log(error);
         });
 }
+
+selectAccount();
