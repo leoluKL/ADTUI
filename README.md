@@ -57,7 +57,7 @@ The application is created as an single web page application that accesses azure
 - Azure indoor map view integration
 - Revit 3D Autocad BIM model integration
 
-It should. So it is in plan to create a native cloud host demonstration platform with those advanced capabilities.
+It should. [Azure IoT Rocks Platform](azureiotrocks-platform.md)
 
 ### New Feature update
 - Ehance editing functionality so you can easily creat right angle edge segments (like 90 degree) and align nodes in horizontal or vertial level
