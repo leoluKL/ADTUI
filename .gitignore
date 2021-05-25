@@ -6,3 +6,4 @@
 userGeneratedFiles/*
 # exception to the rule
 !userGeneratedFiles/.gitkeep 
+/azureiotrocksB2C/spaPortal/node_modules

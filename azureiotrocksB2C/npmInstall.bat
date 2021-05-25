@@ -1,3 +1,3 @@
-cd ./spaSourceCode
+cd ./spaPortal
 npm install
 cd ..
