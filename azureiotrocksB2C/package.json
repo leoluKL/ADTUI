@@ -1,0 +1,40 @@
+{
+  "name": "adtui",
+  "private": true,
+  "version": "1.1.0",
+  "description": "",
+  "devDependencies": {
+    "reload": "latest",
+    "url-parse": "^1.5.1"
+  },
+  "scripts": {
+    "preinstall": "npx npm-force-resolutions",
+    "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js",
+    "dev": "npm-run-all -p dev:* ",
+    "dev:bundleBrowserFile": "watchify .\\portalSourceCode\\main.js  --debug -o .\\portalDev\\bundle.js -v",
+    "dev:autoBrowser": "node ./backendSourceCode/server.js --dev",
+    "production": "npm-run-all production:* ",
+    "production:bundleBrowserFile": "browserify .\\portalSourceCode\\main.js  > .\\portalDev\\bundle.js",
+    "production:compress": "uglifyjs .\\portalDev\\bundle.js -cm -o .\\portalProduction\\bundle.min.js",
+    "production:assemblehtml": "node ./assembleIndexHtml.js",
+    "production:autoBrowser": "node ./backendSourceCode/server.js",
+    "start": "node ./backendSourceCode/server.js"
+  },
+  "dependencies": {
+    "@azure/arm-digitaltwins": "latest",
+    "@azure/digital-twins-core": "latest",
+    "@azure/identity": "latest",
+    "cytoscape": "3.18.1",
+    "cytoscape-context-menus": "^4.0.0",
+    "cytoscape-undo-redo": "^1.3.3",
+    "express": "latest",
+    "got": "^11.8.0",
+    "jquery": "^3.6.0",
+    "konva": "^7.0.3",
+    "npm-run-all": "latest",
+    "open": "^8.0.8"
+  },
+  "resolutions": {
+    "url-parse": "^1.5.1"
+  }
+}
