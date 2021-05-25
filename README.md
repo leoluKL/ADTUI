@@ -29,8 +29,8 @@ For developer's usage, there are additional npm run options (inside folder ./ADT
 4. A flexible data selection feature at the start so you do not need to wait a long loading time when there are many twins.
 5. Customizable twin and relationship visualization style, including importing image as twin's avarta    
 
-![Main UI](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/screenshot1.jpg)
-![Choose datasets](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/screenshot2.jpg)
+![Main UI](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/screenshot1.jpg)
+![Choose datasets](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/screenshot2.jpg)
 
 ## How To Use Tips
 1. Start with a set of twins data
