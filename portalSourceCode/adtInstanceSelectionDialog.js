@@ -42,7 +42,7 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         this.DOM.empty()
         this.contentDOM=$('<div class="w3-modal-content" style="width:650px"></div>')
         this.DOM.append(this.contentDOM)
-        this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Choose Data Set</div></div>'))
+        this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Choose1 Data Set</div></div>'))
         var closeButton=$('<button class="w3-bar-item w3-button w3-right" style="font-size:2em;padding-top:4px">×</button>')
         this.contentDOM.children(':first').append(closeButton)
         
