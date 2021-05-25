@@ -1,12 +1,15 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
+const simpleConfirmDialog = require("./simpleConfirmDialog")
+
 function modelManagerDialog() {
     this.visualDefinition={}
     this.models={}
-    if($("#modelManagerDialog").length==0){
-        this.DOM = $('<div id="modelManagerDialog" title="Models"></div>')
+    if(!this.DOM){
+        this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
         this.DOM.css("overflow","hidden")
         $("body").append(this.DOM)
+        this.DOM.hide()
     }
 }
 
@@ -24,12 +27,18 @@ modelManagerDialog.prototype.preparationFunc = async function () {
 }
 
 modelManagerDialog.prototype.popup = async function() {
+    this.DOM.show()
     this.DOM.empty()
+    this.contentDOM = $('<div style="width:650px"></div>')
+    this.DOM.append(this.contentDOM)
+    this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Digital Twin Models</div></div>'))
+    var closeButton = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em;padding-top:4px">×</button>')
+    this.contentDOM.children(':first').append(closeButton)
+    closeButton.on("click", () => { this.DOM.hide() })
 
-    var importModelsBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Import</a>')
+    var importModelsBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Import</button>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
-
-    this.DOM.append(importModelsBtn,actualImportModelsBtn)
+    this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn)
     importModelsBtn.on("click", ()=>{
         actualImportModelsBtn.trigger('click');
     });
@@ -38,37 +47,33 @@ modelManagerDialog.prototype.popup = async function() {
         this.readModelFilesContentAndImport(files)
     })
 
-    var leftSpan = $("<span/>")
-    this.DOM.append(leftSpan)
-    leftSpan.css({ "position": "absolute", left: "0px", bottom: "0px", top: "40px", border: "solid 1px grey", padding: "5px", "overflow-x": "hidden", "overflow-y": "auto", "width": "195px" })
-    var modelList = $("<ol  style='width:100%'/>")
+    var row2=$('<div class="w3-cell-row" style="margin-top:2px"></div>')
+    this.contentDOM.append(row2)
+    var leftSpan=$('<div class="w3-cell" style="width:240px;padding-right:5px"></div>')
+    row2.append(leftSpan)
+    leftSpan.append($('<div style="height:30px" class="w3-bar w3-red"><div class="w3-bar-item" style="">Models</div></div>'))
+    
+    var modelList = $('<ul class="w3-ul w3-hoverable">')
+    modelList.css({"overflow-x":"hidden","overflow-y":"auto","height":"420px", "border":"solid 1px lightgray"})
     leftSpan.append(modelList)
-    modelList.selectable();
     this.modelList = modelList;
-    modelList.selectable({
-        selected: (event, ui) => {
-            var modelName = $(ui.selected).data('modelName')
-            if(modelName) this.fillRightSpan(modelName)
-        }
-    })
+    
+    var rightSpan=$('<div class="w3-container w3-cell"></div>')
+    row2.append(rightSpan) 
+    var panelCardOut=$('<div class="w3-card-2 w3-white" style="margin-top:2px"></div>')
 
-    var rightSpan=$("<span/>") 
-    rightSpan.css({"position":"absolute",left:"210px",bottom: "0px",top:"5px",right:"0px",border:"solid 1px grey",padding:"5px",
-    "overflow-x": "hidden", "overflow-y": "auto"})
-    this.DOM.append(rightSpan)
-    this.rightSpan=rightSpan;
-    rightSpan.addClass("ui-accordion ui-widget ui-helper-reset")
+    this.modelButtonBar=$('<div class="w3-bar" style="height:35px"></div>')
+    panelCardOut.append(this.modelButtonBar)
 
-    rightSpan.html("<a style='display:block;font-style:italic;color:gray'>Choose a model to view infomration</a>")
+    rightSpan.append(panelCardOut)
+    var panelCard=$('<div style="width:400px;height:405px;overflow:auto;margin-top:2px"></div>')
+    panelCardOut.append(panelCard)
+    this.panelCard=panelCard;
 
-    this.DOM.dialog({ 
-        width:650
-        ,height:500
-        ,resizable:false
-        ,buttons: []
-    })
+    this.modelButtonBar.empty()
+    panelCard.html("<a style='display:block;font-style:italic;color:gray'>Choose a model to view infomration</a>")
+
     this.listModels()
-
 }
 
 modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {
@@ -108,14 +113,14 @@ modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {
 }
 
 modelManagerDialog.prototype.fillRightSpan=async function(modelName){
-    this.rightSpan.empty()
+    this.panelCard.empty()
     var modelID=this.models[modelName]['@id']
 
-    var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete</a>')
-    var importPicBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Upload Avarta</a>')
+    var delBtn = $('<button style="margin-bottom:2px" class="w3-button w3-light-gray w3-hover-pink w3-border-right">Delete Model</button>')
+    var importPicBtn = $('<button class="w3-button w3-light-gray w3-hover-amber w3-border-right">Upload Avarta</button>')
     var actualImportPicBtn =$('<input type="file" name="img" style="display:none"></input>')
-    var clearAvartaBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Clear Avarta</a>')
-    this.rightSpan.append(delBtn,importPicBtn,actualImportPicBtn,clearAvartaBtn)
+    var clearAvartaBtn = $('<button class="w3-button w3-light-gray w3-hover-pink w3-border-right">Clear Avarta</button>')
+    this.modelButtonBar.append(delBtn,importPicBtn,actualImportPicBtn,clearAvartaBtn)
 
     importPicBtn.on("click", ()=>{
         actualImportPicBtn.trigger('click');
@@ -144,18 +149,40 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
 
 
     delBtn.on("click",()=>{
-        $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
-            if(data==""){//successful
-                this.listModels("shouldBroadcast")
-                this.rightSpan.empty()
-                if(this.visualDefinition[adtInstanceSelectionDialog.selectedADT] && this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID] ){
-                    delete this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID]
-                    this.saveVisualDefinition()
-                }
-            }else{ //error happens
-                alert(data)
+        var confirmDialogDiv = new simpleConfirmDialog()
+
+        confirmDialogDiv.show(
+            { width: "250px" },
+            {
+                title: "Warning"
+                , content: "This will DELETE model \"" + modelID + "\""
+                , buttons: [
+                    {
+                        colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                            confirmDialogDiv.close();
+                            $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
+                                if(data==""){//successful
+                                    this.listModels("shouldBroadcast")
+                                    this.panelCard.empty()
+                                    if(this.visualDefinition[adtInstanceSelectionDialog.selectedADT] && this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID] ){
+                                        delete this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID]
+                                        this.saveVisualDefinition()
+                                    }
+                                }else{ //error happens
+                                    alert(data)
+                                }
+                            });
+                        }
+                    },
+                    {
+                        colorClass: "w3-gray", text: "Cancel", "clickFunc": () => {
+                            confirmDialogDiv.close()
+                        }
+                    }
+                ]
             }
-        });
+        )
+        
     })
     
     var VisualizationDOM=this.addAPartInRightSpan("Visualization")
@@ -224,7 +251,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
               definiedColor=visualJson[modelID]["relationships"][relatinshipName]
     }
 
-    var colorSelector=$('<select></select>')
+    var colorSelector=$('<select class="w3-border" style="outline:none"></select>')
     containerDiv.append(colorSelector)
     var colorArr=["Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
     colorArr.forEach((oneColorCode)=>{
@@ -299,30 +326,18 @@ modelManagerDialog.prototype.fillEditableProperties=function(jsonInfo,parentDom)
 
 
 modelManagerDialog.prototype.addAPartInRightSpan=function(partName){
-    var headerDOM=$('<h3 class="accordion-header ui-accordion-header ui-helper-reset ui-state-default ui-accordion-icons ui-corner-all"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-e"></span></h3>')
+    var headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align" style="font-weight:bold"></button>')
     headerDOM.text(partName)
-    var listDOM=$('<div class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom"></div>')
-    this.rightSpan.append(headerDOM,listDOM)
-    
-    headerDOM.on("click", ()=> {
-        var panel = listDOM;
-        var isOpen = panel.is(':visible');
-        if(!isOpen){
-            headerDOM.children(":first").removeClass("ui-icon-triangle-1-e")
-            headerDOM.children(":first").addClass("ui-icon-triangle-1-s")
-        }else{
-            headerDOM.children(":first").removeClass("ui-icon-triangle-1-s")
-            headerDOM.children(":first").addClass("ui-icon-triangle-1-e")
-        }
+    var listDOM=$('<div class="w3-container w3-hide w3-border w3-show" style="background-color:white"></div>')
+    this.panelCard.append(headerDOM,listDOM)
 
-        // open or close as necessary
-        panel[isOpen ? 'slideUp' : 'slideDown']()
-            // trigger the correct custom event
-            .trigger(isOpen ? 'hide' : 'show');
-
-        // stop the link from causing a pagescroll
+    headerDOM.on("click",(evt)=> {
+        if(listDOM.hasClass("w3-show")) listDOM.removeClass("w3-show")
+        else listDOM.addClass("w3-show")
+ 
         return false;
     });
+    
     return listDOM;
 }
 
@@ -365,6 +380,17 @@ modelManagerDialog.prototype.readOneFile= async function(aFile){
     })
 }
 
+modelManagerDialog.prototype.assignEventToOneModel=function(oneModel){
+    oneModel.on("click",(e)=>{
+        this.modelList.children().each((index,ele)=>{
+            $(ele).removeClass("w3-amber")
+        })
+        oneModel.addClass("w3-amber")
+        var modelName = oneModel.data('modelName')
+        if(modelName) this.fillRightSpan(modelName)
+    })
+}
+
 modelManagerDialog.prototype.listModels=function(shouldBroadcast){
     this.modelList.empty()
     for(var ind in this.models) delete this.models[ind]
@@ -381,18 +407,19 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
         }
         
         if(data.length==0){
-            var zeroModelItem=$('<li style="font-size:0.9em;border:none" class="ui-widget-content">zero model record. Please import...</li>')
-            zeroModelItem.css("cursor","default")
+            var zeroModelItem=$('<li style="font-size:0.9em">zero model record. Please import...</li>')
             this.modelList.append(zeroModelItem)
+            zeroModelItem.css("cursor","default")
         }else{
             var sortArr=[]
             for(var modelName in this.models) sortArr.push(modelName)
             sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
             sortArr.forEach(oneModelName=>{
-                var oneModelItem=$('<li style="font-size:0.9em" class="ui-widget-content">'+oneModelName+'</li>')
+                var oneModelItem=$('<li style="font-size:0.9em">'+oneModelName+'</li>')
                 oneModelItem.css("cursor","default")
                 oneModelItem.data("modelName", oneModelName)
                 this.modelList.append(oneModelItem)
+                this.assignEventToOneModel(oneModelItem)
             })
         }
         

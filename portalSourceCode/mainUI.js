@@ -13,9 +13,10 @@ function mainUI() {
     this.twinsTree= new twinsTree($("#treeHolder"),$("#treeSearch"))
     
     this.mainToolbar=mainToolbar
+    mainToolbar.render()
     this.topologyInstance=new topologyDOM($('#canvas'))
     this.topologyInstance.init()
-    this.infoPanel= new infoPanel()
+    this.infoPanel= infoPanel
 
     this.broadcastMessage() //initialize all ui components to have the broadcast capability
     this.prepareData()
@@ -64,8 +65,12 @@ mainUI.prototype.initUILayout = function () {
         , north__slidable: false	// OVERRIDE the pane-default of 'slidable=true'
         //, north__togglerLength_closed: '100%'	// toggle-button is full-width of resizer-bar
         , north__spacing_closed: 6		// big resizer-bar when open (zero height)
+        , north__spacing_open:0
         , north__resizable: false	// OVERRIDE the pane-default of 'resizable=true'
         , north__closable: false
+        , west__closable: false
+        , east__closable: false
+        
 
         //	some pane-size settings
         , west__minSize: 100
@@ -73,6 +78,9 @@ mainUI.prototype.initUILayout = function () {
         , east__minSize: 200
         , east__maxSize: .5 // 50% of layout width
         , center__minWidth: 100
+        ,east__closable: false
+        ,west__closable: false
+        ,east__initClosed:	true
     });
 
 
@@ -100,9 +108,10 @@ mainUI.prototype.initUILayout = function () {
             $d.enableSelection().data(s, false);
         //console.log('$.layout.enableTextSelection');
     };
-    $(".ui-layout-resizer")
-        .disableSelection() // affects only the resizer element
-        .on('mousedown', $.layout.disableTextSelection); // affects entire document
+    $(".ui-layout-resizer-north").hide()
+    $(".ui-layout-west").css("border-right","solid 1px lightGray")
+    $(".ui-layout-west").addClass("w3-card")
+
 }
 
 

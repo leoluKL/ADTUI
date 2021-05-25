@@ -706,7 +706,13 @@ $.layout.defaults = {
 	//,	size:					100			// MUST be pane-specific -initial size of pane
 	,	minSize:				0			// when manually resizing a pane
 	,	maxSize:				0			// ditto, 0 = no limit
-	,	spacing_open:			3			// space between pane and adjacent panes - when pane is 'open'
+	
+	
+	//LEO: this is how to control the resizer bar size............
+	,	spacing_open:			6			// space between pane and adjacent panes - when pane is 'open'
+	
+	
+	
 	,	spacing_closed:			6			// ditto - when pane is 'closed'
 	,	togglerLength_open:		50			// Length = WIDTH of toggler button on north/south sides - HEIGHT on east/west sides
 	,	togglerLength_closed: 	50			// 100% OR -1 means 'full height/width of resizer bar' - 0 means 'hidden'

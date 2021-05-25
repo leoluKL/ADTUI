@@ -105,7 +105,6 @@ modelAnalyzer.prototype.analyze=function(){
                 this.relationshipTypes[oneContent["name"]][modelID] = oneContent
                 oneContent.editableRelationshipProperties = {}
                 if (Array.isArray(oneContent.properties)) {
-                    //can reuse function expandEditableProperties even though now is todo relationship properties
                     this.expandEditableProperties(oneContent.editableRelationshipProperties, oneContent.properties, embeddedSchema)
                 }
             }

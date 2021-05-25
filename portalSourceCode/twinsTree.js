@@ -22,8 +22,8 @@ function twinsTree(DOM, searchDOM) {
         this.broadcastMessage({"message":"selectGroupNode",info:nodeInfo})
     }
 
-    this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("ui-corner-all");
-    this.searchBox.css({"border":"solid 1px grey","height":"calc(100% - 4px)","width":"calc(100% - 7px)"})
+    this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("w3-input");
+    this.searchBox.css({"outline":"none","height":"100%","width":"100%"}) 
     searchDOM.append(this.searchBox)
 
     this.searchBox.keyup((e)=>{

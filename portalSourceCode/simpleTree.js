@@ -2,8 +2,6 @@
 
 function simpleTree(DOM){
     this.DOM=DOM
-    this.DOM.addClass("ui-accordion ui-widget ui-helper-reset")
-
     this.groupNodes=[] //each group header is one node
     this.selectedNodes=[];
 }
@@ -211,12 +209,6 @@ function simpleTreeGroupNode(parentTree,obj){
     this.createDOM()
 }
 
-simpleTreeGroupNode.prototype.isOpen=function(){
-    var panel = this.headerDOM.next();
-    if(!panel) return false;
-    return  panel.is(':visible');
-}
-
 simpleTreeGroupNode.prototype.refreshName=function(){
     this.headerDOM.text(this.name+"("+this.childLeafNodes.length+")")
     if(this.childLeafNodes.length>0) this.headerDOM.css("font-weight","bold")
@@ -233,35 +225,30 @@ simpleTreeGroupNode.prototype.deleteSelf = function () {
 }
 
 simpleTreeGroupNode.prototype.createDOM=function(){
-    this.headerDOM=$('<h3 class="accordion-header ui-accordion-header ui-helper-reset ui-state-default ui-accordion-icons ui-corner-all"><span class="ui-accordion-header-icon ui-icon ui-icon-triangle-1-e"></span></h3>')
+    this.headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align"></button>')
     this.refreshName()
-    this.listDOM=$('<div class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom"></div>')
+    this.listDOM=$('<div class="w3-container w3-hide w3-border"></div>')
 
     this.headerDOM.on("click",(evt)=> {
-        if(this.isOpen()) this.shrink()
-        else this.expand() 
+        if(this.listDOM.hasClass("w3-show")) this.listDOM.removeClass("w3-show")
+        else this.listDOM.addClass("w3-show")
+
         this.parentTree.selectGroupNode(this)    
-        // stop the link from causing a pagescroll
         return false;
     });
 }
 
+simpleTreeGroupNode.prototype.isOpen=function(){
+    return  this.listDOM.hasClass("w3-show")
+}
+
+
 simpleTreeGroupNode.prototype.expand=function(){
-    var panel = this.listDOM;
-    var isOpen = this.isOpen()
-    if(isOpen) return;
-    this.headerDOM.children(":first").removeClass("ui-icon-triangle-1-e")
-            this.headerDOM.children(":first").addClass("ui-icon-triangle-1-s")
-    panel['slideDown']().trigger('show');
+    this.listDOM.addClass("w3-show")
 }
 
 simpleTreeGroupNode.prototype.shrink=function(){
-    var panel = this.listDOM;
-    var isOpen = this.isOpen()
-    if(!isOpen) return;
-    this.headerDOM.children(":first").removeClass("ui-icon-triangle-1-s")
-    this.headerDOM.children(":first").addClass("ui-icon-triangle-1-e")
-    panel['slideUp']().trigger('hide');
+    this.listDOM.removeClass("w3-show")
 }
 
 
@@ -300,7 +287,7 @@ simpleTreeLeafNode.prototype.deleteSelf = function () {
 }
 
 simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
-    this.DOM=$('<li style="padding-left:3px;padding-top:1px;cursor:default">'+this.name+'</li>')
+    this.DOM=$('<button class="w3-button w3-white" style="display:block;text-align:left;width:98%">'+this.name+'</button>')
     var clickF=(e)=>{
         this.highlight();
         var clickDetail=e.detail
@@ -317,10 +304,14 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
     })
 }
 simpleTreeLeafNode.prototype.highlight=function(){
-    this.DOM.css("background-color", "orange");
+    this.DOM.addClass("w3-orange")
+    this.DOM.addClass("w3-hover-amber")
+    this.DOM.removeClass("w3-white")
 }
 simpleTreeLeafNode.prototype.dim=function(){
-    this.DOM.css("background-color", "");
+    this.DOM.removeClass("w3-orange")
+    this.DOM.removeClass("w3-hover-amber")
+    this.DOM.addClass("w3-white")
 }
 
 

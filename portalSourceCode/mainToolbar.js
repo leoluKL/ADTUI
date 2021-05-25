@@ -1,48 +1,52 @@
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 const modelManagerDialog = require("./modelManagerDialog")
 const editLayoutDialog= require("./editLayoutDialog")
+const simpleSelectMenu= require("./simpleSelectMenu")
 
 
 function mainToolbar() {
-    this.switchADTInstanceBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Source</a>')
-    this.modelIOBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Models</a>')
-    this.showForgeViewBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">ForgeView</a>')
-    this.showGISViewBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">GISView</a>')
-    this.editLayoutBtn=$('<a class="ui-button ui-widget ui-corner-all" href="#">Edit Layout</a>')
-    this.switchLayoutSelector=$('<select></select>')
+}
+
+mainToolbar.prototype.render = function () {
+    $("#mainToolBar").addClass("w3-bar w3-red")
+    $("#mainToolBar").css({"z-index":100,"overflow":"visible"})
+
+    this.switchADTInstanceBtn=$('<a class="w3-bar-item w3-button" href="#">Source</a>')
+    this.modelIOBtn=$('<a class="w3-bar-item w3-button" href="#">Models</a>')
+    this.showForgeViewBtn=$('<a class="w3-bar-item w3-button w3-hover-none w3-text-light-grey w3-hover-text-light-grey" style="opacity:.35" href="#">ForgeView</a>')
+    this.showGISViewBtn=$('<a class="w3-bar-item w3-button w3-hover-none w3-text-light-grey w3-hover-text-light-grey" style="opacity:.35" href="#">GISView</a>')
+    this.editLayoutBtn=$('<a class="w3-bar-item w3-button" href="#"><i class="fa fa-edit"></i></a>')
+
+
+    this.switchLayoutSelector=new simpleSelectMenu("Layout")
 
     $("#mainToolBar").empty()
     $("#mainToolBar").append(this.switchADTInstanceBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
-        ,this.editLayoutBtn,this.switchLayoutSelector)
-
-    this.showForgeViewBtn.attr("disabled", true).addClass("ui-state-disabled");
-    this.showGISViewBtn.attr("disabled", true).addClass("ui-state-disabled");
+        ,this.switchLayoutSelector.DOM,this.editLayoutBtn)
 
     this.switchADTInstanceBtn.on("click",()=>{ adtInstanceSelectionDialog.popup() })
     this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })
     this.editLayoutBtn.on("click",()=>{ editLayoutDialog.popup() })
 
-    this.switchLayoutSelector.selectmenu({
-        select: (event, ui) => {
-            editLayoutDialog.currentLayoutName=ui.item.value
-            this.broadcastMessage({ "message": "layoutChange"})
-        }
-    });
+
+    this.switchLayoutSelector.callBack_clickOption=(optionText,optionValue)=>{
+        editLayoutDialog.currentLayoutName=optionValue
+        this.broadcastMessage({ "message": "layoutChange"})
+        if(optionValue=="[NA]") this.switchLayoutSelector.changeName("Layout","")
+        else this.switchLayoutSelector.changeName("Layout:",optionText)
+    }
 }
 
 mainToolbar.prototype.updateLayoutSelector = function () {
-    var currentLayoutName = this.switchLayoutSelector.val()
-    this.switchLayoutSelector.html(
-        '<option disabled selected>Choose Layout...</option><option selected>[No Layout Specified]</option>'
-    )
+    var curSelect=this.switchLayoutSelector.curSelectVal
+    this.switchLayoutSelector.clearOptions()
+    this.switchLayoutSelector.addOption('[No Layout Specified]','[NA]')
+
     for (var ind in editLayoutDialog.layoutJSON) {
-        var anOption = $("<option>" + ind + "</option>")
-        this.switchLayoutSelector.append(anOption)
+        this.switchLayoutSelector.addOption(ind)
     }
-    //restore back to previous value
-    if(currentLayoutName!=null) this.switchLayoutSelector.val(currentLayoutName)
-   
-    this.switchLayoutSelector.selectmenu("refresh");
+
+    if(curSelect!=null && this.switchLayoutSelector.findOption(curSelect)==null) this.switchLayoutSelector.changeName("Layout","")
 }
 
 mainToolbar.prototype.rxMessage=function(msgPayload){

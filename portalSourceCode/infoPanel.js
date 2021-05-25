@@ -1,17 +1,51 @@
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
-var modelAnlyzer=require("./modelAnalyzer");
-const modelManagerDialog = require("./modelManagerDialog");
+const simpleSelectMenu= require("./simpleSelectMenu")
+
 function infoPanel() {
-    this.DOM=$("#infoPanel")
-    this.DOM.css({"margin-top":"10px","margin-left":"3px"})
+    this.continerDOM=$('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
+    this.continerDOM.hide()
+    this.continerDOM.append($('<div style="height:50px" class="w3-bar w3-red"></div>'))
+
+    this.closeButton1=$('<button style="height:100%" class="w3-bar-item w3-button"><i class="fa fa-info-circle fa-2x" style="padding:2px"></i></button>')
+    this.closeButton2=$('<button class="w3-bar-item w3-button w3-right" style="font-size:2em">×</button>')
+    this.continerDOM.children(':first').append(this.closeButton1,this.closeButton2) 
+
+    this.isMinimized=false;
+    var buttonAnim=()=>{
+        if(!this.isMinimized){
+            this.continerDOM.animate({
+                right: "-250px",
+                height:"50px"
+            })
+            this.isMinimized=true;
+        }else{
+            this.continerDOM.animate({
+                right: "0px",
+                height: "70%"
+            })
+            this.isMinimized=false;
+        }
+    }
+    this.closeButton1.on("click",buttonAnim)
+    this.closeButton2.on("click",buttonAnim)
+
+    this.DOM=$('<div class="w3-container" style="postion:absolute;top:50px;height:calc(100% - 50px);overflow:auto"></div>')
+    this.continerDOM.css("background-color","rgba(255, 255, 255, 0.8)")
+    this.continerDOM.append(this.DOM)
+    $('body').append(this.continerDOM)
     this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl key to select multiple in tree view</a>")
 
     this.selectedObjects=null;
 }
 
-infoPanel.prototype.rxMessage=function(msgPayload){    
-    if(msgPayload.message=="selectNodes"){
+infoPanel.prototype.rxMessage=function(msgPayload){   
+    if(msgPayload.message=="ADTDatasourceDialog_closed"){
+        if(!this.continerDOM.is(":visible")) {
+            this.continerDOM.show()
+            this.continerDOM.addClass("w3-animate-right")
+        }
+    }else if(msgPayload.message=="selectNodes"){
         this.DOM.empty()
         var arr=msgPayload.info;
         this.selectedObjects=arr;
@@ -22,8 +56,11 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 this.drawButtons("singleNode")
                 this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
                 var modelName=singleElementInfo['$metadata']['$model']
-                this.drawEditable(this.DOM,modelAnalyzer.DTDLModels[modelName].editableProperties,singleElementInfo,[])
-                this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px","DarkGray")
+                
+                if(modelAnalyzer.DTDLModels[modelName]){
+                    this.drawEditable(this.DOM,modelAnalyzer.DTDLModels[modelName].editableProperties,singleElementInfo,[])
+                }
+                this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
             }else if(singleElementInfo["$sourceId"]){
                 this.drawButtons("singleRelationship")
                 this.drawStaticInfo(this.DOM,{
@@ -45,12 +82,13 @@ infoPanel.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="selectGroupNode"){
         this.DOM.empty()
         var modelID = msgPayload.info["@id"]
+        if(!modelAnalyzer.DTDLModels[modelID]) return;
         var twinJson = {
             "$metadata": {
                 "$model": modelID
             }
         }
-        var addBtn = $('<a class="ui-button ui-widget ui-corner-all" style="margin-bottom:10px" href="#">Add Twin</a>')
+        var addBtn =$('<button class="w3-button w3-green w3-hover-light-green w3-margin">Add Twin</button>')
         this.DOM.append(addBtn)
 
         addBtn.on("click",(e) => {
@@ -58,6 +96,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 alert("Please fill in name for the new digital twin")
                 return;
             }
+
             var componentsNameArr=modelAnalyzer.DTDLModels[modelID].includedComponents
             componentsNameArr.forEach(oneComponentName=>{ //adt service requesting all component appear by mandatory
                 if(twinJson[oneComponentName]==null)twinJson[oneComponentName]={}
@@ -94,28 +133,27 @@ infoPanel.prototype.rxMessage=function(msgPayload){
 }
 
 infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,sourceModel){
-    if(!modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]) return
+    if(!modelAnalyzer.DTDLModels[sourceModel] || !modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]) return
     return modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName].editableRelationshipProperties
 }
 
 infoPanel.prototype.drawButtons=function(selectType){
-    var refreshBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Refresh Information</a>')
-    refreshBtn.css({"display":"block","width":"120px"})
+    var refreshBtn=$('<button class="w3-bar-item w3-button w3-black"><i class="fa fa-refresh"></i></button>')
     refreshBtn.on("click",()=>{this.refreshInfomation()})
     this.DOM.append(refreshBtn)
 
     if(selectType=="singleRelationship"){
-        var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete</a>')
+        var delBtn =  $('<button style="width:80%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         this.DOM.append(delBtn)
         delBtn.on("click",()=>{this.deleteSelected()})
     }else if(selectType=="singleNode" || selectType=="multiple"){
-        var showInboundBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">Query Inbound</a>')
-        var showOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Query Outbound</a>')
-        var delBtn = $('<a class="ui-button ui-widget ui-corner-all" style="background-color:orangered" href="#">Delete All</a>')
-        var connectToBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Connect To</a>')
-        var connectFromBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">Connect From</a>')
-    
-        this.DOM.append(showInboundBtn, showOutBoundBtn, delBtn,connectToBtn,connectFromBtn)
+        var delBtn = $('<button style="width:80%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+        var connectToBtn =$('<button style="width:45%"  class="w3-button w3-border">Connect to</button>')
+        var connectFromBtn = $('<button style="width:45%" class="w3-button w3-border">Connect from</button>')
+        var showInboundBtn = $('<button  style="width:45%" class="w3-button w3-border">Query Inbound</button>')
+        var showOutBoundBtn = $('<button style="width:45%" class="w3-button w3-border">Query Outbound</button>')
+        
+        this.DOM.append(delBtn, connectToBtn,connectFromBtn , showInboundBtn, showOutBoundBtn)
     
         showOutBoundBtn.on("click",()=>{this.showOutBound()})
         showInboundBtn.on("click",()=>{this.showInBound()})  
@@ -131,10 +169,10 @@ infoPanel.prototype.drawButtons=function(selectType){
         if (element['$dtId']) numOfNode++
     });
     if(numOfNode>0){
-        var selectInboundBtn = $('<a class="ui-button ui-widget ui-corner-all" href="#">+Select Inbound</a>')
-        var selectOutBoundBtn = $('<a class="ui-button ui-widget ui-corner-all"  href="#">+Select Outbound</a>')
-        var coseLayoutBtn= $('<a class="ui-button ui-widget ui-corner-all"  href="#">Cose Layout</a>')
-        var hideBtn= $('<a class="ui-button ui-widget ui-corner-all"  href="#">Hide</a>')
+        var selectInboundBtn = $('<button class="w3-button w3-border">+Select Inbound</button>')
+        var selectOutBoundBtn = $('<button class="w3-button w3-border">+Select Outbound</button>')
+        var coseLayoutBtn= $('<button class="w3-button w3-border">COSE View</button>')
+        var hideBtn= $('<button class="w3-button w3-border">Hide</button>')
         this.DOM.append(selectInboundBtn, selectOutBoundBtn,coseLayoutBtn,hideBtn)
 
         selectInboundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectInbound"})})
@@ -397,10 +435,10 @@ infoPanel.prototype.drawMultipleObj=function(){
     this.DOM.append(textDiv)
 }
 
-infoPanel.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize,fontColor){
+infoPanel.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize){
     for(var ind in jsonInfo){
-        var keyDiv= $("<label style='display:block'><div style='background-color:#f6f6f6;border:solid 1px grey;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</div></label>")
-        keyDiv.css({"fontSize":fontSize,"color":fontColor})
+        var keyDiv= $("<label style='display:block'><div class='w3-border' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</div></label>")
+        keyDiv.css({"fontSize":fontSize,"color":"darkGray"})
         parent.append(keyDiv)
         keyDiv.css("padding-top",paddingTop)
 
@@ -413,7 +451,7 @@ infoPanel.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize,
             contentDOM.css("padding-top",".2em")
             contentDOM.text(jsonInfo[ind])
         }
-        contentDOM.css({"fontSize":fontSize,"color":fontColor})
+        contentDOM.css({"fontSize":fontSize,"color":"black"})
         keyDiv.append(contentDOM)
     }
 }
@@ -421,7 +459,7 @@ infoPanel.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize,
 infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,pathArr,isNewTwin){
     if(jsonInfo==null) return;
     for(var ind in jsonInfo){
-        var keyDiv= $("<label style='display:block'><div style='display:inline;padding:.1em .3em .1em .3em'>"+ind+"</div></label>")
+        var keyDiv= $("<label style='display:block'><div style='display:inline;padding:.1em .3em .1em .3em; font-weight:bold;color:black'>"+ind+"</div></label>")
         if(isNewTwin){
             if(ind=="$dtId") {
                 parent.prepend(keyDiv)
@@ -437,32 +475,13 @@ infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,path
         var contentDOM=$("<label style='padding-top:.2em'></label>")
         var newPath=pathArr.concat([ind])
         if(Array.isArray(jsonInfo[ind])){
-            var aSelectMenu=$('<select></select>')
-            contentDOM.append(aSelectMenu)
-            aSelectMenu.data("path", newPath)
-            aSelectMenu.append($("<option></option>"))
-            jsonInfo[ind].forEach((oneOption)=>{
-                var str =oneOption["displayName"]  || oneOption["enumValue"] 
-                var anOption=$("<option value='"+oneOption["enumValue"]+"'>"+str+"</option>")
-                aSelectMenu.append(anOption)
-            })
-            aSelectMenu.selectmenu({
-                change: (e, ui) => {
-                    this.editDTProperty(originElementInfo,$(e.target).data("path"),ui.item.value,"string",isNewTwin)
-                }
-            });
-            var val=this.searchValue(originElementInfo,newPath)
-            if(val!=null){
-                aSelectMenu.val(val);
-                aSelectMenu.selectmenu("refresh");
-            }           
+            this.drawDropdownOption(contentDOM,newPath,jsonInfo[ind],isNewTwin,originElementInfo)
         }else if(typeof(jsonInfo[ind])==="object") {
             contentDOM.css("display","block")
             contentDOM.css("padding-left","1em")
             this.drawEditable(contentDOM,jsonInfo[ind],originElementInfo,newPath,isNewTwin)
         }else {
-            var aInput=$('<input type="text"/>').addClass("ui-corner-all");
-            aInput.css("border","solid 1px grey")
+            var aInput=$('<input type="text" style="padding:2px;width:50%;outline:none;display:inline" placeholder="type: '+jsonInfo[ind]+'"/>').addClass("w3-input w3-border");  
             contentDOM.append(aInput)
             var val=this.searchValue(originElementInfo,newPath)
             if(val!=null) aInput.val(val)
@@ -474,6 +493,24 @@ infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,path
         }
         keyDiv.append(contentDOM)
     }
+}
+
+infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,isNewTwin,originElementInfo){
+    var aSelectMenu=new simpleSelectMenu("",{buttonCSS:{"padding":"4px 16px"}})
+    contentDOM.append(aSelectMenu.DOM)
+    aSelectMenu.DOM.data("path", newPath)
+    valueArr.forEach((oneOption)=>{
+        var str =oneOption["displayName"]  || oneOption["enumValue"] 
+        aSelectMenu.addOption(str)
+    })
+    aSelectMenu.callBack_clickOption=(optionText,optionValue)=>{
+        aSelectMenu.changeName(optionText)
+        this.editDTProperty(originElementInfo,aSelectMenu.DOM.data("path"),optionValue,"string",isNewTwin)
+    }
+    var val=this.searchValue(originElementInfo,newPath)
+    if(val!=null){
+        aSelectMenu.triggerOptionValue(val)
+    }    
 }
 
 infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataType,isNewTwin){
@@ -547,4 +584,4 @@ infoPanel.prototype.searchValue=function(originElementInfo,pathArr){
     return theJson //it should be the final value
 }
 
-module.exports = infoPanel;
+module.exports = new infoPanel();

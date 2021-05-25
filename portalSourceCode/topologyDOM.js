@@ -5,9 +5,11 @@ const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
 const editLayoutDialog = require("./editLayoutDialog")
 const formatter = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 3,      
+    minimumFractionDigits: 3,
     maximumFractionDigits: 3,
- });
+});
+const simpleSelectMenu = require("./simpleSelectMenu")
+
 
 function topologyDOM(DOM){
     this.DOM=DOM
@@ -57,32 +59,22 @@ topologyDOM.prototype.init=function(){
                     "width":this.defaultNodeSize,"height":this.defaultNodeSize,
                     'label': 'data(id)',
                     'opacity':0.9,
-                    'font-size':15
+                    'font-size':"12px",
+                    'font-family':'Geneva, Arial, Helvetica, sans-serif'
                     //,'background-image': function(ele){ return "images/cat.png"; }
                     ,'background-fit':'contain' //cover
                     //'background-color': function( ele ){ return ele.data('bg') }
                 }
             },
             {
-                selector: '.foo',
-                style: {
-                    'background-color': '#606',
-                    'label': 'data(id)',
-                    'shape':"ellipse",
-                    'background-image': function(ele){ return "images/"+ele.data("img")+".png"; }
-                    ,'background-fit':'contain' //cover
-                    //,'background-clip':'none'
-                }
-            },
-
-            {
                 selector: 'edge',
                 style: {
                     'width':2,
                     'line-color': '#888',
-                    'target-arrow-color': '#000',
+                    'target-arrow-color': '#555',
                     'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier'
+                    'curve-style': 'bezier',
+                    'arrow-scale':0.6
                 }
             },
             {selector: 'edge:selected',
@@ -224,13 +216,13 @@ topologyDOM.prototype.selectFunction = function () {
 topologyDOM.prototype.getFontSizeInCurrentZoom=function(){
     var curZoom=this.core.zoom()
     if(curZoom>1){
-        var maxFS=15
+        var maxFS=12
         var minFS=5
         var ratio= (maxFS/minFS-1)/9*(curZoom-1)+1
         var fs=Math.ceil(maxFS/ratio)
     }else{
         var maxFS=120
-        var minFS=15
+        var minFS=12
         var ratio= (maxFS/minFS-1)/9*(1/curZoom-1)+1
         var fs=Math.ceil(minFS*ratio)
     }
@@ -664,20 +656,17 @@ topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
             label.html("No usable connection type from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>")
         }else if(connectionTypes.length>1){ 
             label.html("From <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
-            var switchTypeSelector=$('<select></select>')
-            label.prepend(switchTypeSelector)
+            var switchTypeSelector=new simpleSelectMenu(" ")
+            label.prepend(switchTypeSelector.DOM)
             connectionTypes.forEach(oneType=>{
-                switchTypeSelector.append('<option>'+oneType+'</option>')
-                switchTypeSelector.append('<option>'+oneType+'test</option>')
+                switchTypeSelector.addOption(oneType)
             })
             resultActions.push({from:fromNode.id(),to:toNode.id(),connect:connectionTypes[0]})
-            switchTypeSelector.selectmenu({
-                appendTo: label,
-                width:80,
-                change: (event, ui) => {
-                    resultActions[index][2]=ui.item.value
-                }
-            });
+            switchTypeSelector.callBack_clickOption=(optionText,optionValue)=>{
+                resultActions[index][2]=optionText
+                switchTypeSelector.changeName(optionText)
+            }
+            switchTypeSelector.triggerOptionIndex(0)
         }else if(connectionTypes.length==1){
             resultActions.push({from:fromNode.id(),to:toNode.id(),connect:connectionTypes[0]})
             label.css("color","green")
