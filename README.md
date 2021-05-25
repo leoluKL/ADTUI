@@ -1,5 +1,5 @@
 # Azure Digital Twin UI Application
-Azure digital twin service can be utilized to IoT solutions that it utilizes DTDL language to create twins that map to real work scenerio. Though It works mainly as part of the backend service, there is need to have a convinient UI for models/twins creation. This software is for that purpose. It can be used in real-world scenerio by supporting large scale digital twins management.
+Azure digital twin service can be used in implementing IoT digital twin solutions. Though It works mainly as part of the backend service, there is need to have a convinient UI for models/twins creation. This software is for that purpose. It can be used in real-world scenerio by supporting large scale digital twins management.
 
 ## Getting Started
 
