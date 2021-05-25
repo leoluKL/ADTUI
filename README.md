@@ -4,13 +4,14 @@ Azure digital twin service can be utilized to IoT solutions that it utilizes DTD
 ## Getting Started
 
 For out-of-the-box usage, directly install node library and run
-1. in root folder, run "npm install"
-2. If you have not executed "az login", please run it before continue
+1. CD to folder ./ADTUIOriginal
+1. Run "npm install"
+2. Executed "az login" if you have not
 3. run "npm start"
 
 It will pop up a browser window with initial dialog to choose which ADT service instance you want to operate.
 
-For developer's usage, there are additional npm run options to use
+For developer's usage, there are additional npm run options (inside folder ./ADTUIOriginal) to use
 1. npm run preparedev - This should be run one time if you want to program your own code. It will install watchify, browserify and uglify.
 2. npm run dev  -  It will monitor change in frontend code (such as javascript files in ./portalSourceCode) and refresh browser window automatically
 3. npm run production - It will minify the frontend code and put the code to folder portalProduction

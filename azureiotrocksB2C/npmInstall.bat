@@ -1,3 +1,1 @@
-cd ./spaPortal
-npm install
-cd ..
+npm --prefix .\spaPortal run build

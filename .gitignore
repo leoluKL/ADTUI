@@ -1,9 +1,7 @@
-/temp
-/node_modules
+/ADTUIOriginal/node_modules
 /.vscode
-/unused
 # exclude everything
-userGeneratedFiles/*
+/ADTUIOriginal/userGeneratedFiles/*
 # exception to the rule
-!userGeneratedFiles/.gitkeep 
+!/ADTUIOriginal/userGeneratedFiles/.gitkeep 
 /azureiotrocksB2C/spaPortal/node_modules
