@@ -5,7 +5,7 @@ Azure digital twin service can be utilized to IoT solutions that it utilizes DTD
 
 For out-of-the-box usage, directly install node library and run
 1. in root folder, run "npm install"
-2. If you have not execute "az login", please run it before continue
+2. If you have not executed "az login", please run it before continue
 3. run "npm start"
 
 It will pop up a browser window with initial dialog to choose which ADT service instance you want to operate.
