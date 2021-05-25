@@ -60,9 +60,9 @@ The application is created as an single web page application that accesses azure
 It should. [Azure IoT Rocks Platform](azureiotrocks-platform.md)
 
 ### New Feature update
+- Rehaul UI to be align with the coming cloud host platform version
 - Ehance editing functionality so you can easily creat right angle edge segments (like 90 degree) and align nodes in horizontal or vertial level
 - Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
-![bending edge](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/libfiles/images/saveEdge.jpg)
 
 ## Purpose
 - A convinient application to use together with ADT cloud service
@@ -75,7 +75,7 @@ It should. [Azure IoT Rocks Platform](azureiotrocks-platform.md)
 * Crytoscape Edge Editing extension (https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing)
 * Azure Digital Twin Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/digital-twins-core/?view=azure-node-latest)
 * Azure Identity Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/identity/?view=azure-node-latest)
-* JQuery UI (https://jqueryui.com/)
+* W3.CSS (https://www.w3schools.com/w3css/default.asp)
 * JQuery UI Layout (http://layout.jquery-dev.com/)
 
 
