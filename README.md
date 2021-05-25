@@ -51,13 +51,13 @@ For developer's usage, there are additional npm run options to use
 
 ## Development
 ### Plan
-The application is created as an single web page application that accesses azure digital twin service remotely. Since this limitation, more advanced features, such as
+The application is created as an single web page application that accesses azure digital twin service remotely. Since this limitation, more advanced features, such as below are not implemented.
 - SingalR integration for live telemetry event
-- database storage and so on, are not created
+- database storage 
 - Azure indoor map view integration
 - Revit 3D Autocad BIM model integration
 
-It should. [Azure IoT Rocks Platform](azureiotrocks-platform.md)
+A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-platform.md)
 
 ### New Feature update
 - Rehaul UI to be align with the coming cloud host platform version
