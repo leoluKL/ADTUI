@@ -57,7 +57,7 @@ The application is created as an single web page application that accesses azure
 - Azure indoor map view integration
 - Revit 3D Autocad BIM model integration
 
-A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-platform.md)
+A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-platform.md) , which including ADT UI and other Azure IoT services. It is a B2C platform so anyone can use it for a taste of Azure IoT without need for Azure subscription.
 
 ### New Feature update
 - Rehaul UI to be align with the coming cloud host platform version
