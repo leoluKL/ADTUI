@@ -7,7 +7,7 @@
   "scripts": {
     "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js",
     "build":"npm install",
-    "dev": "watchify ..\\spaSourceCode\\main.js  --debug -o .\\bundle.js -v"
+    "dev": "watchify ..\\spaSourceCode\\mainUI.js  --debug -o .\\bundle.js -v"
   },
   "dependencies": {
     "cytoscape": "3.18.1",
