@@ -1,0 +1,10 @@
+{
+  "name": "azureiotrocksdigitaltwinmodule",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=6.9.1"
+  },
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}

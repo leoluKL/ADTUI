@@ -32,8 +32,9 @@ let username = "";
 selectAccount(); // in case of page refresh and it might be ok to fetch account directly from cache
 
 const apiConfig = {
-    b2cScopes: ["https://azureiotb2c.onmicrosoft.com/apifunc1/basic"],//["https://azureiotb2c.onmicrosoft.com/api/demo.read"]
-    webApi: "https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1"
+    //["https://azureiotb2c.onmicrosoft.com/apifunc1/basic"] ["https://azureiotb2c.onmicrosoft.com/api/demo.read"]
+    b2cScopes: ["https://azureiotb2c.onmicrosoft.com/digitaltwinmodule/operate"]
+    ,webApi: "https://azureiotrocksdigitaltwinmodule.azurewebsites.net/hello"//https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1?name=leo
 };
 
 
@@ -201,7 +202,7 @@ function callApi(token) {
     $.ajax({
         type: 'GET',
         headers: { "Authorization": `Bearer ${token}` },
-        url: 'https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1?name=leo',
+        url: apiConfig.webApi,
         crossDomain: true,
         success: function (responseData, textStatus, jqXHR) {
             $("#response").append($('<a style="display:block;font-size:10px">' + responseData + '</a>'))

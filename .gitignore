@@ -5,3 +5,4 @@
 # exception to the rule
 !/ADTUIOriginal/userGeneratedFiles/.gitkeep 
 /azureiotrocksB2C/spaPortal/node_modules
+/azureiotrocksB2C/digitalTwinModuleApp/node_modules

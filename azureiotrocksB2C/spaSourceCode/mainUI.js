@@ -31,18 +31,8 @@ function mainUI() {
 
     $('#signInBtn').on("click",()=>{this.signIn()})
 
-
-    /*sign out code
-    const logoutRequest = {
-        postLogoutRedirectUri: this.msalConfig.auth.redirectUri,
-        mainWindowRedirectUri: this.msalConfig.auth.redirectUri
-    };
-
-    this.myMSALObj.logoutPopup(logoutRequest);
-    */
-
     //in case of page refresh and it might be ok to fetch account directly from cache
-    this.fetchAccount(); 
+    this.fetchAccount("noAnimation"); 
 }
 
 mainUI.prototype.signIn=async function(){
@@ -55,7 +45,7 @@ mainUI.prototype.signIn=async function(){
     }
 }
 
-mainUI.prototype.fetchAccount=function(){
+mainUI.prototype.fetchAccount=function(noAnimation){
     const currentAccounts = this.myMSALObj.getAllAccounts();
     if (currentAccounts.length < 1) return;
     var foundAccount=null;
@@ -69,24 +59,26 @@ mainUI.prototype.fetchAccount=function(){
         }
     }
 
-    if(foundAccount) this.afterSignedIn(foundAccount)
-
+    this.afterSignedIn(null,noAnimation)
 }
 
-mainUI.prototype.afterSignedIn=function(account){
-    
-    //TODO: switch to next step UI with functionality modules
-    $('#headerPart').animate({height:"100vh"})
-    $('#githublink').animate({opacity:"0"})
-    $('#signInBtn').animate({opacity:"0"})
-    $('#footerPart').animate({opacity:"0"},()=>{this.showModuleButtons()})
-    $('#headerPart').animate({"padding":"15px"})
-    
+mainUI.prototype.afterSignedIn=function(anAccount,noAnimation){
+    if(noAnimation){
+        $('#headerPart').css({height:"100vh","padding":"15px"})
+        this.showModuleButtons()
+    }else{
+        $('#headerPart').animate({height:"100vh"})
+        $('#githublink').animate({opacity:"0"})
+        $('#signInBtn').animate({opacity:"0"})
+        $('#footerPart').animate({opacity:"0"},()=>{this.showModuleButtons()})
+        $('#headerPart').animate({"padding":"15px"})
+    }
 }
 
 mainUI.prototype.showModuleButtons=function(){
     $('#githublink').remove()
     $('#signInBtn').remove()
+    $('#descriptionPart').remove()
     $('#footerPart').remove()
 
     //$('#headerPart').empty()
