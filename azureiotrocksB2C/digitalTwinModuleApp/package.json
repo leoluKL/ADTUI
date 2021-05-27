@@ -4,6 +4,9 @@
   "engines": {
     "node": ">=6.9.1"
   },
+  "scripts": {
+    "start": "node ./index.js"
+  },
   "dependencies": {
     "express": "^4.14.0"
   }
