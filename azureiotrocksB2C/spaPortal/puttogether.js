@@ -37,6 +37,16 @@ const apiConfig = {
     ,webApi: "https://azureiotrocksdigitaltwinmodule.azurewebsites.net/hello"//https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1?name=leo
 };
 
+function isTestUsingLocalAPIServer(){
+    var strArr=window.location.href.split("?")
+    var isTest=(strArr.indexOf("test=1")!=-1)
+    return isTest
+}
+
+function getAPIURL(APIPart){
+    if(isTestUsingLocalAPIServer()) return "http://localhost:5000/"+APIPart
+    else return "https://azureiotrocksdigitaltwinmodule.azurewebsites.net/"+APIPart
+}
 
 function welcomeUser() { //basically it hide buttons (singin) and show buttons: signout,editprofile,callapibutton
     document.getElementById('label').classList.add('d-none');
@@ -57,6 +67,7 @@ function selectAccount() { //basically it used a logged in account and hide thos
     //https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-common/docs/Accounts.md
     const currentAccounts = myMSALObj.getAllAccounts();
 
+    if(isTestUsingLocalAPIServer())setAccount({})
     if (currentAccounts.length < 1) { //when not singed in yet, no account defined
         return;
     } else if (currentAccounts.length > 1) { //means there is a cached signed in account
@@ -182,27 +193,36 @@ function passTokenToApi() {
      * To learn more about how to work with scopes and resources, see: 
      * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/resources-and-scopes.md
      */
-    getTokenPopup({
-        scopes: apiConfig.b2cScopes,  // e.g. ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"]
-        forceRefresh: false // Set this to "true" to skip a cached token and go to the server to get a new token
-    })
-        .then(response => {
-            if (response) {
-                console.log("access_token acquired at: " + new Date().toString());
-                try {
-                    callApi(response.accessToken);
-                } catch (error) {
-                    console.log(error);
+    if(isTestUsingLocalAPIServer()){
+        callApi()
+    }
+    else{
+        getTokenPopup({
+            scopes: apiConfig.b2cScopes,  // e.g. ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"]
+            forceRefresh: false // Set this to "true" to skip a cached token and go to the server to get a new token
+        })
+            .then(response => {
+                if (response) {
+                    console.log("access_token acquired at: " + new Date().toString());
+                    try {
+                        callApi(response.accessToken);
+                    } catch (error) {
+                        console.log(error);
+                    }
                 }
-            }
-        });
+            });
+    }
+
+    
 }
 
 function callApi(token) {
+    var headersObj={}
+    if(!isTestUsingLocalAPIServer()) headersObj["Authorization"]=`Bearer ${token}`
     $.ajax({
         type: 'GET',
-        headers: { "Authorization": `Bearer ${token}` },
-        url: apiConfig.webApi,
+        "headers":headersObj,
+        url: getAPIURL("hello"),
         crossDomain: true,
         success: function (responseData, textStatus, jqXHR) {
             $("#response").append($('<a style="display:block;font-size:10px">' + responseData + '</a>'))

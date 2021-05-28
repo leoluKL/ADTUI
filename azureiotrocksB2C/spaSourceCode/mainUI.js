@@ -98,6 +98,24 @@ mainUI.prototype.showModuleButtons=function(){
     
         this.myMSALObj.logoutPopup(logoutRequest);
     })
+
+    deviceManageBtn.on("click",()=>{
+        window.open("spaindex2.html", "_blank");
+    })
+
+    //if this page is open in localhost environment, add three buttons to allow pages opening and using local running api app instead
+    // of cloud api app in azure app service. In production environment, these buttons will never show
+    if(window.location.href.startsWith("http://localhost")){
+        var deviceManageLocalAPIBtn=$('<button class="w3-button w3-dark-grey w3-card w3-padding-16 w3-margin-bottom" >Device Management(Local API)</button>')
+        var adtUILocalAPIBtn=$('<button class="w3-button w3-dark-grey w3-card w3-padding-16 w3-margin-bottom">Digital Twin(Local API)</button>')
+        var eventLogLocalAPIBtn=$('<button class="w3-button w3-dark-grey w3-card w3-padding-16 w3-margin-bottom">Event Log(Local API)</button>')
+        $('#middleDIV').append(deviceManageLocalAPIBtn,adtUILocalAPIBtn,eventLogLocalAPIBtn) 
+
+        deviceManageLocalAPIBtn.on("click",()=>{
+            window.open("spaindex2.html?test=1", "_blank");
+        })
+    }
+    
 }
 
 module.exports = new mainUI();

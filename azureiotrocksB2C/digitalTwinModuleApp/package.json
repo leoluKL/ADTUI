@@ -5,6 +5,7 @@
     "node": ">=6.9.1"
   },
   "scripts": {
+    "startLocal": "node ./index.js --local",
     "start": "node ./index.js"
   },
   "dependencies": {
