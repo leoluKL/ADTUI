@@ -11,9 +11,6 @@ const msalConfig = {
         authority: b2cPolicies.signUpSignInAuthority, // Choose sign-up/sign-in user-flow as your default.
         knownAuthorities: [b2cPolicies.authorityDomain], // You must identify your tenant's domain as a known authority.
         redirectUri: window.location.href
-        //redirectUri: "https://azureiotrocksspa.z23.web.core.windows.net"
-        //redirectUri: "http://localhost:5500/azureiotrocksB2C/spaPortal/spaindex.html"
-
     },
     cache: {
         cacheLocation: "sessionStorage", // Configures cache location. "sessionStorage" is more secure, but "localStorage" gives you SSO between tabs.
@@ -32,9 +29,7 @@ let username = "";
 selectAccount(); // in case of page refresh and it might be ok to fetch account directly from cache
 
 const apiConfig = {
-    //["https://azureiotb2c.onmicrosoft.com/apifunc1/basic"] ["https://azureiotb2c.onmicrosoft.com/api/demo.read"]
-    b2cScopes: ["https://azureiotb2c.onmicrosoft.com/digitaltwinmodule/operate"]
-    ,webApi: "https://azureiotrocksdigitaltwinmodule.azurewebsites.net/hello"//https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1?name=leo
+    b2cScopes: ["https://azureiotb2c.onmicrosoft.com/taskmastermodule/operation"]
 };
 
 function isTestUsingLocalAPIServer(){
@@ -45,7 +40,7 @@ function isTestUsingLocalAPIServer(){
 
 function getAPIURL(APIPart){
     if(isTestUsingLocalAPIServer()) return "http://localhost:5000/"+APIPart
-    else return "https://azureiotrocksdigitaltwinmodule.azurewebsites.net/"+APIPart
+    else return "https://azureiotrockstaskmastermodule.azurewebsites.net/"+APIPart
 }
 
 function welcomeUser() { //basically it hide buttons (singin) and show buttons: signout,editprofile,callapibutton
@@ -197,8 +192,9 @@ function passTokenToApi() {
         callApi()
     }
     else{
+        console.log(apiConfig.b2cScopes)
         getTokenPopup({
-            scopes: apiConfig.b2cScopes,  // e.g. ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"]
+            scopes: [...apiConfig.b2cScopes],  // e.g. ["https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read"]
             forceRefresh: false // Set this to "true" to skip a cached token and go to the server to get a new token
         })
             .then(response => {
@@ -222,7 +218,7 @@ function callApi(token) {
     $.ajax({
         type: 'GET',
         "headers":headersObj,
-        url: getAPIURL("hello"),
+        url: getAPIURL("tointernal"),
         crossDomain: true,
         success: function (responseData, textStatus, jqXHR) {
             $("#response").append($('<a style="display:block;font-size:10px">' + responseData + '</a>'))

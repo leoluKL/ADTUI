@@ -1,10 +1,20 @@
 const express = require('express');
+const { DefaultAzureCredential} = require("@azure/identity");
+const { DigitalTwinsClient } = require("@azure/digital-twins-core");
+
 
 const app = express();
 var myArgs = process.argv.slice(2);
 var localTestFlag = false;
 
+
+
 if (myArgs[0] == "--local") localTestFlag = true;
+
+if(localTestFlag){
+    require('dotenv').config() //loading environment variable in local developing environment
+}
+console.log(process.env.dbkey)
 
 //enable CORS (for testing only -remove in production/deployment)
 if(localTestFlag){
@@ -17,11 +27,27 @@ if(localTestFlag){
     });    
 }
 
+
+
 // API endpoint
+async function test(req,res){
+    var reArr=[]
+    const credential = new DefaultAzureCredential();
+
+    console.log(credential)
+    var aNewADTClient = new DigitalTwinsClient("https://adtleo.api.wcus.digitaltwins.azure.net", credential)
+    var models = await aNewADTClient.listModels([], true);
+    for await (const modelSet of models.byPage({ maxPageSize: 1000 })) { //should be only one page
+        //reArr=modelSet.value
+        modelSet.value.forEach(oneModel=>{console.log(oneModel.model["@id"]);reArr.push(oneModel.model["@id"])})
+    }
+
+    res.send(JSON.stringify(reArr))
+}
+
 app.get('/hello',
     (req, res) => {
-        console.log("receive a request")
-        res.status(200).send("hello test first time for dev op local development")
+        test(req,res)
     }
 );
 

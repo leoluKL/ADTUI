@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "/subscriptions/c7b2c0ba-6f34-45b8-8764-079581e882ea/resourceGroups/ADTB2C/providers/Microsoft.Web/sites/azureiotrocksdigitaltwinmodule",
-    "appService.deploySubpath": "digitalTwinModuleApp"
-}

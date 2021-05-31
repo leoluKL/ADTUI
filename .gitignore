@@ -1,8 +1,9 @@
-/ADTUIOriginal/node_modules
-/.vscode
+/**/.vscode
+
 # exclude everything
 /ADTUIOriginal/userGeneratedFiles/*
 # exception to the rule
 !/ADTUIOriginal/userGeneratedFiles/.gitkeep 
-/azureiotrocksB2C/spaPortal/node_modules
-/azureiotrocksB2C/digitalTwinModuleApp/node_modules
+
+/**/.env
+/**/node_modules

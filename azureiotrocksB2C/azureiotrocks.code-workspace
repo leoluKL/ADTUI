@@ -1,0 +1,22 @@
+{
+    "folders": [
+      {
+        "path": "dbOperationModuleApp"
+      },
+      {
+        "path": "digitalTwinModuleApp"
+      },
+      {
+        "path": "taskMaster"
+      },
+      {
+        "path": "spaPortal"
+      },
+      {
+        "path": "spaSourceCode"
+      }
+    ],
+    "settings": {
+      "liveServer.settings.multiRootWorkspaceName": "spaPortal"
+    }
+  }
