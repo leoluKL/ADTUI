@@ -17,6 +17,7 @@
       }
     ],
     "settings": {
-      "liveServer.settings.multiRootWorkspaceName": "spaPortal"
+      "liveServer.settings.multiRootWorkspaceName": "spaPortal",
+      "workbench.colorTheme": "Solarized Dark"
     }
   }

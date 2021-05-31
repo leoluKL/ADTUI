@@ -6,4 +6,6 @@
 !/ADTUIOriginal/userGeneratedFiles/.gitkeep 
 
 /**/.env
+
 /**/node_modules
+!/azureiotrocksB2C/spaPortal/node_modules 
