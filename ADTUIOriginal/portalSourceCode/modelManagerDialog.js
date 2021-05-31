@@ -71,7 +71,7 @@ modelManagerDialog.prototype.popup = async function() {
     this.panelCard=panelCard;
 
     this.modelButtonBar.empty()
-    panelCard.html("<a style='display:block;font-style:italic;color:gray'>Choose a model to view infomration</a>")
+    panelCard.html("<a style='display:block;font-style:italic;color:gray;padding-left:5px'>Choose a model to view infomration</a>")
 
     this.listModels()
 }

@@ -14,7 +14,8 @@
     "dev:bundleBrowserFile": "watchify .\\portalSourceCode\\main.js  --debug -o .\\portalDev\\bundle.js -v",
     "dev:autoBrowser": "node ./backendSourceCode/server.js --dev",
     "production": "npm-run-all production:* ",
-    "production:compress": "uglifyjs .\\portalDev\\bundle.js -cm -o .\\portalProduction\\bundle.min.js",
+    "production:compress": "browserify .\\portalSourceCode\\main.js --debug -o .\\portalProduction\\bundle.min.js",
+    "backup production:compress": "uglifyjs .\\portalDev\\bundle.js -cm -o .\\portalProduction\\bundle.min.js",
     "production:assemblehtml": "node ./assembleIndexHtml.js",
     "start": "node ./backendSourceCode/server.js"
   },
