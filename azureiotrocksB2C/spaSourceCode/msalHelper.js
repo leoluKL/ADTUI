@@ -66,7 +66,7 @@ msalHelper.prototype.getToken=async function(){
     try{
         if(this.storedToken!=null){
             var currTime=parseInt(new Date().getTime()/1000)
-            if(currTime+600 < this.storedTokenExp) return this.storedToken
+            if(currTime+60 < this.storedTokenExp) return this.storedToken
         }
         var tokenRequest={
             scopes: globalAppSettings.b2cScopes,
@@ -89,6 +89,7 @@ msalHelper.prototype.getToken=async function(){
             throw error;
         }
     }
+
     return response.accessToken;
 }
 

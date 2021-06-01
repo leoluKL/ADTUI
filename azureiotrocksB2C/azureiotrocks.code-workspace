@@ -14,7 +14,12 @@
       },
       {
         "path": "spaSourceCode"
+      },
+      {
+        "path": "designFiles"
       }
+      
+
     ],
     "settings": {
       "liveServer.settings.multiRootWorkspaceName": "spaPortal",
