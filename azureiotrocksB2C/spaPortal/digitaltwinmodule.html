@@ -15,6 +15,8 @@
 	<script type="text/javascript" src="libfiles/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="libfiles/jquery.layout-1.3.0.rc30.80.js"></script>
 
+	<script src="https://alcdn.msauth.net/browser/2.13.1/js/msal-browser.js" integrity="sha384-7hwr87O1w6buPsX92CwuRaz/wQzachgOEq+iLHv0ESavynv6rbYwKImSl7wUW3wV" crossorigin="anonymous"></script>
+
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">  
 </head>
 
@@ -31,13 +33,12 @@
 	</div>
 	<div class="w3-container ui-layout-center" id="canvas" style="overflow: hidden;"></div>
 
-	<script src="cytoscape/dist/cytoscape.min.js"></script>
-	<script src="konva/konva.min.js"></script>
-	<script src="cytoscape-context-menus/cytoscape-context-menus.js"></script>
-	<script src="cytoscape-undo-redo/cytoscape-undo-redo.js"></script>
-	<script src="cytoscape-edge-editing.js"></script>
+	<script src="node_modules/cytoscape/dist/cytoscape.min.js"></script>
+	<script src="node_modules/konva/konva.min.js"></script>
+	<script src="node_modules/cytoscape-context-menus/cytoscape-context-menus.js"></script>
+	<script src="node_modules/cytoscape-undo-redo/cytoscape-undo-redo.js"></script>
+	<script src="libfiles/cytoscape-edge-editing.js"></script>
 
-	<script src="/reload/reload.js"></script>
-    <script src="bundle.js"></script>
+    <script src="bundle.digitaltwinmodule.js"></script>
 </body>
 </html>

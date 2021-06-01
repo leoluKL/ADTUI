@@ -1,65 +1,16 @@
 //the Start page is the sign in page
+const globalAppSettings=require("./globalAppSettings")
+const msalHelper=require("./msalHelper")
+
 function mainUI() {
-    this.b2cPolicies = {
-        signUpSignInName: "B2C_1_singupsignin_spaapp1",
-        signUpSignInAuthority: "https://azureiotb2c.b2clogin.com/azureiotb2c.onmicrosoft.com/B2C_1_singupsignin_spaapp1",
-        authorityDomain: "azureiotb2c.b2clogin.com"
-    }
-    
-    this.msalConfig = {
-        auth: {
-            clientId: "f4693be5-601b-4d0e-9208-c35d9ad62387",
-            authority: this.b2cPolicies.signUpSignInAuthority,
-            knownAuthorities: [this.b2cPolicies.authorityDomain],
-            redirectUri: window.location.href
-        },
-        cache: {
-            cacheLocation: "sessionStorage", 
-            storeAuthStateInCookie: false
-        },
-        system: {
-            loggerOptions: {
-                loggerCallback: (level, message, containsPii) => {}
-            }
-        }
-    };
-    this.myMSALObj = new msal.PublicClientApplication(this.msalConfig);
-    this.apiConfig = {
-        b2cScopes: ["https://azureiotb2c.onmicrosoft.com/apifunc1/basic"],//["https://azureiotb2c.onmicrosoft.com/api/demo.read"]
-        webApi: "https://azureiotrocksapifunction.azurewebsites.net/api/HttpTrigger1"
-    };
-
-    $('#signInBtn').on("click",()=>{this.signIn()})
-
+    this.myMSALObj = new msal.PublicClientApplication(globalAppSettings.msalConfig);
+    $('#signInBtn').on("click",async ()=>{
+        var theAccount=await msalHelper.signIn()
+        if(theAccount!=null) this.afterSignedIn(theAccount);
+    })
     //in case of page refresh and it might be ok to fetch account directly from cache
-    this.fetchAccount("noAnimation"); 
-}
-
-mainUI.prototype.signIn=async function(){
-    try{
-        var response= await this.myMSALObj.loginPopup({ scopes: [...this.apiConfig.b2cScopes] })
-        if (response != null) this.afterSignedIn(response.account);
-        else  this.fetchAccount()
-    }catch(e){
-        if(e.errorCode!="user_cancelled") console.log(e)
-    }
-}
-
-mainUI.prototype.fetchAccount=function(noAnimation){
-    const currentAccounts = this.myMSALObj.getAllAccounts();
-    if (currentAccounts.length < 1) return;
-    var foundAccount=null;
-    for(var i=0;i<currentAccounts.length;i++){
-        var anAccount= currentAccounts[i]
-        if(anAccount.homeAccountId.toUpperCase().includes(this.b2cPolicies.signUpSignInName.toUpperCase())
-            && anAccount.idTokenClaims.iss.toUpperCase().includes(this.b2cPolicies.authorityDomain.toUpperCase())
-            && anAccount.idTokenClaims.aud === this.msalConfig.auth.clientId
-        ){
-            foundAccount= anAccount;
-        }
-    }
-
-    this.afterSignedIn(null,noAnimation)
+    var theAccount=msalHelper.fetchAccount(); 
+    if(theAccount!=null) this.afterSignedIn(theAccount,"noAnimation")
 }
 
 mainUI.prototype.afterSignedIn=function(anAccount,noAnimation){
@@ -91,16 +42,17 @@ mainUI.prototype.showModuleButtons=function(){
     $('#middleDIV').append(deviceManageBtn,adtUIBtn,eventLogBtn,logoutBtn) 
 
     logoutBtn.on("click",()=>{
+        //TODO: if logout from the modules page, should redirect to the spaindex.html page
         const logoutRequest = {
-            postLogoutRedirectUri: this.msalConfig.auth.redirectUri,
-            mainWindowRedirectUri: this.msalConfig.auth.redirectUri
+            postLogoutRedirectUri: globalAppSettings.logoutRedirectUri,
+            mainWindowRedirectUri: globalAppSettings.logoutRedirectUri
         };
     
         this.myMSALObj.logoutPopup(logoutRequest);
     })
 
-    deviceManageBtn.on("click",()=>{
-        window.open("spaindex2.html", "_blank");
+    adtUIBtn.on("click",()=>{
+        window.open("digitaltwinmodule.html", "_blank");
     })
 
     //if this page is open in localhost environment, add three buttons to allow pages opening and using local running api app instead
@@ -111,8 +63,8 @@ mainUI.prototype.showModuleButtons=function(){
         var eventLogLocalAPIBtn=$('<button class="w3-button w3-dark-grey w3-card w3-padding-16 w3-margin-bottom">Event Log(Local API)</button>')
         $('#middleDIV').append(deviceManageLocalAPIBtn,adtUILocalAPIBtn,eventLogLocalAPIBtn) 
 
-        deviceManageLocalAPIBtn.on("click",()=>{
-            window.open("spaindex2.html?test=1", "_blank");
+        adtUILocalAPIBtn.on("click",()=>{
+            window.open("digitaltwinmodule.html?test=1", "_blank");
         })
     }
     

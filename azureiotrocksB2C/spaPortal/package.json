@@ -5,9 +5,11 @@
   "description": "",
   "devDependencies": {},
   "scripts": {
-    "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js",
-    "build":"npm install",
-    "dev": "watchify ..\\spaSourceCode\\mainUI.js  --debug -o .\\bundle.js -v"
+    "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js & npm install -g npm-run-all",
+    "build": "npm install",
+    "bundleSPAMain": "watchify ..\\spaSourceCode\\mainUI.js  --debug -o .\\bundle.js -v",
+    "bundleDigitaltwinModule": "watchify ..\\spaSourceCode\\digitaltwinmodule\\digitaltwinmoduleUI.js  --debug -o .\\bundle.digitaltwinmodule.js -v",
+    "dev":"npm-run-all --parallel bundleSPAMain bundleDigitaltwinModule"
   },
   "dependencies": {
     "cytoscape": "3.18.1",

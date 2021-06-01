@@ -398,14 +398,6 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
         if(data=="") data=[]
         data.forEach(oneItem=>{
             if(oneItem["displayName"]==null) oneItem["displayName"]=oneItem["@id"]
-            if($.isPlainObject(oneItem["displayName"])){
-                if(oneItem["displayName"]["en"]) oneItem["displayName"]=oneItem["displayName"]["en"]
-                else oneItem["displayName"]=JSON.stringify(oneItem["displayName"])
-            }
-            if(this.models[oneItem["displayName"]]!=null){
-                //repeated model display name
-                oneItem["displayName"]=oneItem["@id"]
-            }  
             this.models[oneItem["displayName"]] = oneItem
         })
         if(shouldBroadcast){

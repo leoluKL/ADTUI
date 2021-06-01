@@ -117,16 +117,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
             var tmpNameToObj = {}
             for (var i = 0; i < data.length; i++) {
                 if(data[i]["displayName"]==null) data[i]["displayName"]=data[i]["@id"]
-                if($.isPlainObject(data[i]["displayName"])){
-                    if(data[i]["displayName"]["en"]) data[i]["displayName"]=data[i]["displayName"]["en"]
-                    else data[i]["displayName"]=JSON.stringify(data[i]["displayName"])
-                }
-                if(tmpNameToObj[data[i]["displayName"]]!=null){
-                    //repeated model display name
-                    data[i]["displayName"]=data[i]["@id"]
-                }  
                 this.modelIDMapToName[data[i]["@id"]] = data[i]["displayName"]
-                
                 tmpNameArr.push(data[i]["displayName"])
                 tmpNameToObj[data[i]["displayName"]] = data[i]
             }

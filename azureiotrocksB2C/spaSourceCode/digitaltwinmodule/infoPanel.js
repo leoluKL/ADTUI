@@ -32,11 +32,6 @@ function infoPanel() {
 
     this.DOM=$('<div class="w3-container" style="postion:absolute;top:50px;height:calc(100% - 50px);overflow:auto"></div>')
     this.continerDOM.css("background-color","rgba(255, 255, 255, 0.8)")
-    this.continerDOM.hover(() => {
-        this.continerDOM.css("background-color", "rgba(255, 255, 255, 1)")
-    }, () => {
-        this.continerDOM.css("background-color", "rgba(255, 255, 255, 0.8)")
-    });
     this.continerDOM.append(this.DOM)
     $('body').append(this.continerDOM)
     this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl key to select multiple in tree view</a>")
