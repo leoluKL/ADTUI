@@ -1,6 +1,6 @@
 <mxfile>
     <diagram id="OykpfW0tRos3SIhlruFu" name="Start Flow">
-        <mxGraphModel dx="2477" dy="867" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1669" dy="359" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -352,7 +352,7 @@
                 <mxCell id="110" value="" style="group" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="-737" y="200" width="65" height="52" as="geometry"/>
                 </mxCell>
-                <mxCell id="111" value="UI" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=img/lib/azure2/general/Browser.svg;" parent="110" vertex="1">
+                <mxCell id="111" value="UI" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=img/lib/azure2/general/Browser.svg;labelBackgroundColor=none;" parent="110" vertex="1">
                     <mxGeometry width="65" height="52" as="geometry"/>
                 </mxCell>
                 <mxCell id="112" value="" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.user;" parent="110" vertex="1">
@@ -389,42 +389,42 @@
         </mxGraphModel>
     </diagram>
     <diagram id="Il95dyNv0lLAlT9e44i3" name="User operation Flow">
-        &#xa;        &#xa;&#xa;
+        &#xa;        &#xa;        &#xa;&#xa;&#xa;
         <mxGraphModel dx="2676" dy="-580" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
-            &#xa;            &#xa;&#xa;
+            &#xa;            &#xa;            &#xa;&#xa;&#xa;
             <root>
-                &#xa;                &#xa;&#xa;
+                &#xa;                &#xa;                &#xa;&#xa;&#xa;
                 <mxCell id="_aQ1-7uvJlDMOSvxAPLI-0"/>
-                &#xa;                &#xa;&#xa;
+                &#xa;                &#xa;                &#xa;&#xa;&#xa;
                 <mxCell id="_aQ1-7uvJlDMOSvxAPLI-1" parent="_aQ1-7uvJlDMOSvxAPLI-0"/>
-                &#xa;                &#xa;&#xa;
+                &#xa;                &#xa;                &#xa;&#xa;&#xa;
                 <mxCell id="n3-5ooOO3G14AsCO114j-0" value="2. Digital Twin Module Functionalities" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fontColor=#ffffff;strokeColor=#3700CC;fillColor=#6a00ff;fontSize=18;" parent="_aQ1-7uvJlDMOSvxAPLI-1" vertex="1">
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                     <mxGeometry x="-1630" y="1383" width="324" height="60" as="geometry"/>
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                 </mxCell>
-                &#xa;                &#xa;&#xa;
+                &#xa;                &#xa;                &#xa;&#xa;&#xa;
                 <mxCell id="n3-5ooOO3G14AsCO114j-1" value="3. Device Management Module Functionalities" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fontColor=#ffffff;strokeColor=#3700CC;fillColor=#6a00ff;fontSize=18;" parent="_aQ1-7uvJlDMOSvxAPLI-1" vertex="1">
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                     <mxGeometry x="-1632" y="1694" width="324" height="60" as="geometry"/>
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                 </mxCell>
-                &#xa;                &#xa;&#xa;
+                &#xa;                &#xa;                &#xa;&#xa;&#xa;
                 <mxCell id="n3-5ooOO3G14AsCO114j-2" value="4. Event Logs Module Functionalities" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fontColor=#ffffff;strokeColor=#3700CC;fillColor=#6a00ff;fontSize=18;" parent="_aQ1-7uvJlDMOSvxAPLI-1" vertex="1">
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                     <mxGeometry x="-1632" y="2046" width="324" height="60" as="geometry"/>
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                 </mxCell>
-                &#xa;                &#xa;&#xa;
+                &#xa;                &#xa;                &#xa;&#xa;&#xa;
                 <mxCell id="iPUSHePjCTIqgq3_0Xjm-0" value="Page 2" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=40;labelBackgroundColor=#ffffff;fontColor=#1A1A1A;fontStyle=1" parent="_aQ1-7uvJlDMOSvxAPLI-1" vertex="1">
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                     <mxGeometry x="-1632" y="1132" width="139" height="52" as="geometry"/>
-                    &#xa;                    &#xa;&#xa;
+                    &#xa;                    &#xa;                    &#xa;&#xa;&#xa;
                 </mxCell>
-                &#xa;                &#xa;&#xa;
+                &#xa;                &#xa;                &#xa;&#xa;&#xa;
             </root>
-            &#xa;            &#xa;&#xa;
+            &#xa;            &#xa;            &#xa;&#xa;&#xa;
         </mxGraphModel>
-        &#xa;        &#xa;&#xa;
+        &#xa;        &#xa;        &#xa;&#xa;&#xa;
     </diagram>
 </mxfile>
