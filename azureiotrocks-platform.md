@@ -1,3 +1,3 @@
 UNDER CONSTRUCTION
 
-![Architecture](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/architecture.jpg)
+![Architecture](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/azureiotrocksB2C/designFiles/architeture.drawio.svg)
