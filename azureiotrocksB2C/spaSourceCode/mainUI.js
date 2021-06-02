@@ -10,10 +10,11 @@ function mainUI() {
     })
     //in case of page refresh and it might be ok to fetch account directly from cache
     var theAccount=msalHelper.fetchAccount(); 
+
     if(theAccount!=null) this.afterSignedIn(theAccount,"noAnimation")
 }
 
-mainUI.prototype.afterSignedIn=function(anAccount,noAnimation){
+mainUI.prototype.afterSignedIn=async function(anAccount,noAnimation){
     if(noAnimation){
         $('#headerPart').css({height:"100vh","padding":"15px"})
         this.showModuleButtons()
@@ -24,6 +25,12 @@ mainUI.prototype.afterSignedIn=function(anAccount,noAnimation){
         $('#footerPart').animate({opacity:"0"},()=>{this.showModuleButtons()})
         $('#headerPart').animate({"padding":"15px"})
     }
+
+    //also notify taskmaster to check user info in cosmosDB, incase it is new user, create the user in cosmosDB
+    var res=await msalHelper.callAPI("accountManagement/fetchUserAccount")
+    console.log(res)
+    //var res=await msalHelper.callAPI("fetchUserAccount")
+
 }
 
 mainUI.prototype.showModuleButtons=function(){

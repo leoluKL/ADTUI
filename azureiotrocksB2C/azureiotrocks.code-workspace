@@ -7,6 +7,9 @@
         "path": "digitalTwinModuleApp"
       },
       {
+        "path": "iothubOperationModuleApp"
+      },
+      {
         "path": "taskMaster"
       },
       {
@@ -18,8 +21,6 @@
       {
         "path": "designFiles"
       }
-      
-
     ],
     "settings": {
       "liveServer.settings.multiRootWorkspaceName": "spaPortal",

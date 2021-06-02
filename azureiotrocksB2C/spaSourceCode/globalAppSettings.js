@@ -28,7 +28,7 @@ const globalAppSettings={
         }
     },
     "isLocalTest":isLocalTest,
-    "taskMasterAPIURI":((isLocalTest)?"http://localhost:5000/":"https://azureiotrockstaskmastermodule.azurewebsites.net/")
+    "taskMasterAPIURI":((isLocalTest)?"http://localhost:5002/":"https://azureiotrockstaskmastermodule.azurewebsites.net/")
 }
 
 module.exports = globalAppSettings;
