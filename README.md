@@ -1,3 +1,9 @@
+# Notice
+The project moves its focus toward cloud native end to end IoT platform demonstration. It is designed to be B2C platform to prompt Azure IoT services through practical product implementation.
+Refer to readme in [Azure IoT Rocks Platform](azureiotrocks-platform.md)
+Original ADTUI is still in the repository with below original introduction.
+
+
 # Azure Digital Twin UI Application
 Azure digital twin service can be used in implementing IoT digital twin solutions. Though It works mainly as part of the backend service, there is need to have a convinient UI for models/twins creation. This software is for that purpose. It can be used in real-world scenerio by supporting large scale digital twins management.
 
