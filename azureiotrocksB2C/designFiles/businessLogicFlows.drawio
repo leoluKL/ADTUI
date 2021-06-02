@@ -1,6 +1,6 @@
 <mxfile>
     <diagram id="OykpfW0tRos3SIhlruFu" name="Start Flow">
-        <mxGraphModel dx="1669" dy="359" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="2286" dy="743" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -347,7 +347,7 @@
                     <mxGeometry x="-781" y="78" width="139" height="52" as="geometry"/>
                 </mxCell>
                 <mxCell id="109" value="Icon Description" style="whiteSpace=wrap;html=1;verticalAlign=top;align=left;fontSize=16;fillColor=#6d8764;strokeColor=#3A5431;fontColor=#ffffff;spacingLeft=6;" parent="1" vertex="1">
-                    <mxGeometry x="-774" y="164" width="1192" height="251" as="geometry"/>
+                    <mxGeometry x="-774" y="164" width="1029" height="251" as="geometry"/>
                 </mxCell>
                 <mxCell id="110" value="" style="group" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="-737" y="200" width="65" height="52" as="geometry"/>
