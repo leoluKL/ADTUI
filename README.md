@@ -1,6 +1,6 @@
 # Notice
 The project moves its focus toward cloud native end to end IoT platform demonstration. It is designed to be B2C platform to prompt Azure IoT services through practical product implementation.
-Refer to readme in [Azure IoT Rocks Platform](azureiotrocks-platform.md)
+Refer to readme in [Azure IoT Rocks Platform](azureiotrocks-platform.md).<br/>
 Original ADTUI is still in the repository with below original introduction.
 
 
