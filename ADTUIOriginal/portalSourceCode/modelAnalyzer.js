@@ -13,6 +13,7 @@ modelAnalyzer.prototype.clearAllModels=function(){
 modelAnalyzer.prototype.addModels=function(arr){
     arr.forEach((ele)=>{
         var modelID= ele["@id"]
+        ele["original"]=JSON.stringify(ele)
         this.DTDLModels[modelID]=ele
     })
 }

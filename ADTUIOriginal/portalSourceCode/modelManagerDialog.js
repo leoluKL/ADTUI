@@ -1,6 +1,7 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
+const modelEditorDialog = require("./modelEditorDialog")
 
 function modelManagerDialog() {
     this.visualDefinition={}
@@ -38,7 +39,8 @@ modelManagerDialog.prototype.popup = async function() {
 
     var importModelsBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Import</button>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
-    this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn)
+    var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create Model</button>')
+    this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn, modelEditorBtn)
     importModelsBtn.on("click", ()=>{
         actualImportModelsBtn.trigger('click');
     });
@@ -46,6 +48,11 @@ modelManagerDialog.prototype.popup = async function() {
         var files = evt.target.files; // FileList object
         this.readModelFilesContentAndImport(files)
     })
+    modelEditorBtn.on("click",()=>{
+        this.DOM.hide()
+        modelEditorDialog.popup()
+    })
+
 
     var row2=$('<div class="w3-cell-row" style="margin-top:2px"></div>')
     this.contentDOM.append(row2)

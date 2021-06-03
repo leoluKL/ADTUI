@@ -14,8 +14,10 @@ function simpleSelectMenu(buttonName,options){
     if(options.width) this.button.css("width",options.width)
     if(options.buttonCSS) this.button.css(options.buttonCSS)
 
-
-    this.optionContentDOM=$('<div class="w3-dropdown-content w3-bar-block w3-card-4">')
+    this.optionContentDOM=$('<div class="w3-dropdown-content w3-bar-block w3-card-4"></div>')
+    if(options.optionListHeight) this.optionContentDOM.css({height:options.optionListHeight+"px","overflow-y":"auto","overflow-x":"visible"})
+    if(options.optionListMarginTop) this.optionContentDOM.css({"margin-top":options.optionListMarginTop+"px"})
+    
     this.DOM.append(this.button,this.optionContentDOM)
     this.curSelectVal=null;
 
@@ -37,6 +39,12 @@ simpleSelectMenu.prototype.findOption=function(optionValue){
     }
 }
 
+simpleSelectMenu.prototype.addOptionArr=function(arr){
+    arr.forEach(element => {
+        this.addOption(element)
+    });
+}
+
 simpleSelectMenu.prototype.addOption=function(optionText,optionValue){
     var optionItem=$('<a href="#" class="w3-bar-item w3-button">'+optionText+'</a>')
     this.optionContentDOM.append(optionItem)
@@ -53,7 +61,7 @@ simpleSelectMenu.prototype.addOption=function(optionText,optionValue){
                 this.DOM.removeClass('w3-dropdown-click')
             }, 100);
         }
-        this.callBack_clickOption(optionText,optionItem.data("optionValue"))
+        this.callBack_clickOption(optionText,optionItem.data("optionValue"),"realMouseClick")
     })
 }
 
