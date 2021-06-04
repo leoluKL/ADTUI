@@ -67,6 +67,7 @@ The application is created as an single web page application that accesses azure
 A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-platform.md) , which including ADT UI and other Azure IoT services. It is a B2C platform so anyone can use it for a taste of Azure IoT without need for Azure subscription.
 
 ### New Feature update
+- ADT DTDL model can be created with GUI in application
 - Rehaul UI to be align with the coming cloud host platform version
 - Ehance editing functionality so you can easily creat right angle edge segments (like 90 degree) and align nodes in horizontal or vertial level
 - Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
