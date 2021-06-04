@@ -1,0 +1,31 @@
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="822px" height="62px" viewBox="-0.5 -0.5 822 62" content="&lt;mxfile&gt;&lt;diagram name=&quot;Device management Module&quot; id=&quot;nd4w3zrOMeUb75JFzV23&quot;&gt;rZTLcqswDIafhiUdgpv0dJukl0Uv00nPnJnuHBDgqbEYYwI5T18Z24G0m3amZIH8yZJs6ScR29TDneZN9Yg5yChN8iFi2yhN06vLhF6WHB2JU8YcKbXIHUsmsBP/wcFFoJ3IofXMIYMojWjOYYZKQWbOGNca+/NtBcr8DDS8hC9gl3H5lf4Tuakc/bNMJn4PoqxC5UXiPXuevZcaO+XrRSkrxse5ax5y+f1txXPsZ4jdRGyjEY2z6mED0jY3tO366fDW8iXcv+zih33593WIIXbJbn8ScrqhBmV+N7Uf9YHLzreTXdB6CweRARmPXFH/aluXFph30tLbTmVGoOJSGEGzd+0xxzAS6lRjzUZjBi3Nd91XwsCu4ZnFPSmRWGVqSasFmdMonjsjhQLPC1RmgxL1mJddbu2PeGs0vkPwKLQB60JI+RlRvFcsS2g9lgDbkCR4/altNbpOqciWUFCb15LvQa5PJ5udw8uEzkE3Eqp8GAO2cboi9s1h+aEeQBsYZkr2w7sDrMHoI23x3nixuvZBxyBltnSgnwk/fBDVTPQrL2Huv7XylH0SDBleM2E5SXv0zf5A2M0H&lt;/diagram&gt;&lt;/mxfile&gt;" style="background-color: rgb(255, 255, 255);">
+    <defs/>
+    <g>
+        <rect x="0" y="0" width="821" height="60" fill="none" stroke="none" pointer-events="all"/>
+        <path d="M 82 0 L 82 60 M 739 0 L 739 60" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe flex-start; width: 680px; height: 1px; padding-top: 30px; margin-left: 58px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
+                            <div style="display: inline-block; font-size: 30px; font-family: Helvetica; color: #4D4D4D; line-height: 1.2; pointer-events: all; font-weight: bold; background-color: #ffffff; white-space: normal; word-wrap: normal; ">
+                                3. Device Management Module Functionalities
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="58" y="39" fill="#4D4D4D" font-family="Helvetica" font-size="30px" font-weight="bold">
+                    3. Device Management Module Functionalities
+                </text>
+            </switch>
+        </g>
+    </g>
+    <switch>
+        <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>
+        <a transform="translate(0,-5)" xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems" target="_blank">
+            <text text-anchor="middle" font-size="10px" x="50%" y="100%">
+                Viewer does not support full SVG 1.1
+            </text>
+        </a>
+    </switch>
+</svg>
