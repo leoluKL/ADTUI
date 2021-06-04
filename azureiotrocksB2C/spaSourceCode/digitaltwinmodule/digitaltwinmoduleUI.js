@@ -3,6 +3,7 @@ const topologyDOM=require("./topologyDOM.js")
 const twinsTree=require("./twinsTree")
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 const modelManagerDialog = require("./modelManagerDialog")
+const modelEditorDialog = require("./modelEditorDialog")
 const editLayoutDialog = require("./editLayoutDialog")
 const mainToolbar = require("./mainToolbar")
 const infoPanel= require("./infoPanel");
@@ -52,7 +53,7 @@ digitaltwinmoduleUI.prototype.assignBroadcastMessage=function(uiComponent){
 }
 
 digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[this.twinsTree,adtInstanceSelectionDialog,modelManagerDialog,editLayoutDialog,
+    var componentsArr=[this.twinsTree,adtInstanceSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
          this.mainToolbar,this.topologyInstance,this.infoPanel]
 
     if(source==null){

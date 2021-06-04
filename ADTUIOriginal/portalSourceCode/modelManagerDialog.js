@@ -121,6 +121,7 @@ modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {
 
 modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     this.panelCard.empty()
+    this.modelButtonBar.empty()
     var modelID=this.models[modelName]['@id']
 
     var delBtn = $('<button style="margin-bottom:2px" class="w3-button w3-light-gray w3-hover-pink w3-border-right">Delete Model</button>')
@@ -363,7 +364,6 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
         }
     }
     if(fileContentArr.length==0) return;
-    console.log(fileContentArr)
     $.post("editADT/importModels",{"models":fileContentArr}, (data)=> {
         if (data == "") {//successful
             this.listModels("shouldBroadCast")
@@ -440,6 +440,10 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
         
         if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models })
     })
+}
+
+modelManagerDialog.prototype.rxMessage=function(msgPayload){
+    if(msgPayload.message=="ADTModelEdited") this.listModels("shouldBroadcast")
 }
 
 

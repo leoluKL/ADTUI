@@ -24,15 +24,29 @@ modelEditorDialog.prototype.popup = async function() {
     var importButton =$('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green w3-right" style="height:100%">Import</button>')
     buttonRow.append(importButton)
 
+    importButton.on("click", () => {
+        var modelToBeImported = [this.dtdlobj]
+        $.post("editADT/importModels", { "models": modelToBeImported }, (data) => {
+            if (data == "") {//successful
+                alert("Model "+ this.dtdlobj["displayName"]+" is created!")
+                this.broadcastMessage({ "message": "ADTModelEdited"})
+                modelAnalyzer.addModels(modelToBeImported)
+                this.popup() //refresh content
+            } else { //error happens
+                alert(data)
+            }
+        });
+    })
+
     var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;font-size:1.2em;">Model Template</div>')
     buttonRow.append(lable)
     var modelTemplateSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1.2em",colorClass:"w3-light-gray",buttonCSS:{"padding":"5px 10px"},"optionListHeight":300})
     buttonRow.append(modelTemplateSelector.DOM)
     modelTemplateSelector.callBack_clickOption=(optionText,optionValue)=>{
         modelTemplateSelector.changeName(optionText)
-        this.chooseTemplate(optionText)
+        this.chooseTemplate(optionValue)
     }
-    modelTemplateSelector.addOption("New")
+    modelTemplateSelector.addOption("New Model...","New")
     for(var modelName in modelAnalyzer.DTDLModels){
         modelTemplateSelector.addOption(modelName)
     }
@@ -40,7 +54,7 @@ modelEditorDialog.prototype.popup = async function() {
     var panelHeight="450px"
     var row2=$('<div class="w3-cell-row" style="margin:2px"></div>')
     this.contentDOM.append(row2)
-    var leftSpan=$('<div class="w3-border" style="width:330px;padding-right:5px;height:'+panelHeight+';overflow:auto"></div>')
+    var leftSpan=$('<div class="w3-card" style="padding:5px;width:330px;padding-right:5px;height:'+panelHeight+';overflow:auto"></div>')
     row2.append(leftSpan)
     this.leftSpan=leftSpan
 
@@ -58,7 +72,7 @@ modelEditorDialog.prototype.chooseTemplate=function(tempalteName){
         this.dtdlobj=JSON.parse(modelAnalyzer.DTDLModels[tempalteName]["original"])
     }else{
         this.dtdlobj = {
-            "@id": "dtmi:yournamespace:yourmodelID;1",
+            "@id": "dtmi:aNameSpace:aModelID;1",
             "@context": ["dtmi:dtdl:context;2"],
             "@type": "Interface",
             "displayName": "New Model",
@@ -67,6 +81,9 @@ modelEditorDialog.prototype.chooseTemplate=function(tempalteName){
                     "@type": "Property",
                     "name": "attribute1",
                     "schema": "double"
+                },{
+                    "@type": "Relationship",
+                    "name": "link"
                 }
             ]
         }
@@ -74,6 +91,7 @@ modelEditorDialog.prototype.chooseTemplate=function(tempalteName){
     this.leftSpan.empty()
 
     this.refreshDTDL()
+    this.leftSpan.append($('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Model ID & Name<p style="position:absolute;text-align:left;font-weight:normal;top:-10px;width:200px" class="w3-text w3-tag w3-tiny">model ID contains namespace, a model string and a version number</p></div></div>'))
     new idRow(this.dtdlobj,this.leftSpan,()=>{this.refreshDTDL()})
     new displayNameRow(this.dtdlobj,this.leftSpan,()=>{this.refreshDTDL()})
 
@@ -88,36 +106,227 @@ modelEditorDialog.prototype.chooseTemplate=function(tempalteName){
 
 modelEditorDialog.prototype.refreshDTDL=function(){
     this.dtdlScriptPanel.empty()
-    this.dtdlScriptPanel.append($('<pre id="json">'+JSON.stringify(this.dtdlobj,null,2)+'</pre>'))
+    this.dtdlScriptPanel.append($('<div style="height:20px;width:100px" class="w3-bar w3-gray">Generated DTDL</div>'))
+    this.dtdlScriptPanel.append($('<pre style="color:gray">'+JSON.stringify(this.dtdlobj,null,2)+'</pre>'))
 }
 
 module.exports = new modelEditorDialog();
 
-function parametersRow(dtdlObj,parentDOM,refreshDTDLF){
-    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item" style="font-size:1.2em;padding-left:2px;font-weight:bold">Parameters</div></div>')
+
+function baseClassesRow(dtdlObj,parentDOM,refreshDTDLF){
+    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item  w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Base Classes<p style="position:absolute;text-align:left;top:-10px;font-weight:normal;width:200px" class="w3-text w3-tag w3-tiny">Base class model\'s parameters and relationship type are inherited</p></div></div>')
+
     var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
     rowDOM.append(addButton)
     parentDOM.append(rowDOM)
-    this.contentDOM=$('<div></div>')
-    rowDOM.append(this.contentDOM)
-    this.dtdlObj=dtdlObj;
-    this.refreshDTDLF=refreshDTDLF
-    addButton.on("click",()=>{this.addParameter()})
+    var contentDOM=$('<div style="padding-left:10px"></div>')
+    rowDOM.append(contentDOM)
+    addButton.on("click",()=>{
+        var newObj = "unknown"
+        dtdlObj.push(newObj)
+        new singleBaseclassRow(newObj,contentDOM,refreshDTDLF,dtdlObj)
+        refreshDTDLF()
+    })
+    //check existed content initially from template and trigger their drawing
+    dtdlObj.forEach(element => {
+        new singleBaseclassRow(element,contentDOM,refreshDTDLF,dtdlObj)
+    });
+}
+
+function singleBaseclassRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
+    var DOM = $('<div class="w3-cell-row"></div>')
+    var baseClassNameInput=$('<input type="text" style="outline:none;display:inline;width:220px;padding:4px"  placeholder="base model id"/>').addClass("w3-bar-item w3-input w3-border");
+    var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
+    DOM.append(baseClassNameInput,removeButton)
+
+    removeButton.on("click",()=>{
+        for (var i =0;i< parentDtdlObj.length; i++) {
+            if (parentDtdlObj[i] == dtdlObj) {
+                parentDtdlObj.splice(i, 1);
+                break;
+            }
+        }
+        DOM.remove()
+        refreshDTDLF()
+    })
+
+    parentDOM.append(DOM)
+
+    baseClassNameInput.val(dtdlObj)
+    baseClassNameInput.on("change",()=>{
+        for (var i =0;i< parentDtdlObj.length; i++) {
+            if (parentDtdlObj[i] == dtdlObj) {
+                parentDtdlObj[i]=baseClassNameInput.val()
+                break;
+            }
+        }
+        refreshDTDLF()
+    })
+}
+
+function componentsRow(dtdlObj,parentDOM,refreshDTDLF){
+    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item  w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Components<p style="position:absolute;text-align:left;top:-10px;font-weight:normal;width:200px" class="w3-text w3-tag w3-tiny">Component model\'s parameters are embedded under a name</p></div></div>')
+
+    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
+    rowDOM.append(addButton)
+    parentDOM.append(rowDOM)
+    var contentDOM=$('<div style="padding-left:10px"></div>')
+    rowDOM.append(contentDOM)
+
+    addButton.on("click",()=>{
+        var newObj = {
+            "@type": "Component",
+            "name": "SomeComponent",
+            "schema":"dtmi:someComponentModel;1"
+        }
+        dtdlObj.push(newObj)
+        new singleComponentRow(newObj,contentDOM,refreshDTDLF,dtdlObj)
+        refreshDTDLF()
+    })
+    //check existed content initially from template and trigger their drawing
+    dtdlObj.forEach(element => {
+        if(element["@type"]!="Component") return
+        new singleComponentRow(element,contentDOM,refreshDTDLF,dtdlObj)
+    });
+}
+
+function singleComponentRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
+    var DOM = $('<div class="w3-cell-row"></div>')
+    var componentNameInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="component name"/>').addClass("w3-bar-item w3-input w3-border");
+    var schemaInput=$('<input type="text" style="outline:none;display:inline;width:160px;padding:4px"  placeholder="component model id..."/>').addClass("w3-bar-item w3-input w3-border");
+    var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
+    DOM.append(componentNameInput,schemaInput,removeButton)
+
+    removeButton.on("click",()=>{
+        for (var i =0;i< parentDtdlObj.length; i++) {
+            if (parentDtdlObj[i] === dtdlObj) {
+                parentDtdlObj.splice(i, 1);
+                break;
+            }
+        }
+        DOM.remove()
+        refreshDTDLF()
+    })
+
+    parentDOM.append(DOM)
+
+    componentNameInput.val(dtdlObj["name"])
+    schemaInput.val(dtdlObj["schema"]||"")
+
+    componentNameInput.on("change",()=>{
+        dtdlObj["name"]=componentNameInput.val()
+        refreshDTDLF()
+    })
+    schemaInput.on("change",()=>{
+        dtdlObj["schema"]=schemaInput.val()
+        refreshDTDLF()
+    })
+}
+
+function relationsRow(dtdlObj,parentDOM,refreshDTDLF){
+    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Relationship Types<p style="position:absolute;text-align:left;top:-10px;font-weight:normal;width:200px" class="w3-text w3-tag w3-tiny">Relationship can have its own parameters</p></div></div>')
+
+
+    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
+    rowDOM.append(addButton)
+    parentDOM.append(rowDOM)
+    var contentDOM=$('<div style="padding-left:10px"></div>')
+    rowDOM.append(contentDOM)
+
+    addButton.on("click",()=>{
+        var newObj = {
+            "@type": "Relationship",
+            "name": "relation1",
+        }
+        dtdlObj.push(newObj)
+        new singleRelationTypeRow(newObj,contentDOM,refreshDTDLF,dtdlObj)
+        refreshDTDLF()
+    })
+
+    //check existed content initially from template and trigger their drawing
+    dtdlObj.forEach(element => {
+        if(element["@type"]!="Relationship") return
+        new singleRelationTypeRow(element,contentDOM,refreshDTDLF,dtdlObj)
+    });
+}
+
+function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
+    var DOM = $('<div class="w3-cell-row"></div>')
+    var relationNameInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="relation name"/>').addClass("w3-bar-item w3-input w3-border");
+    var targetModelID=$('<input type="text" style="outline:none;display:inline;width:160px;padding:4px"  placeholder="(optional)target model"/>').addClass("w3-bar-item w3-input w3-border");
+    var addButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-cog fa-lg"></i></button>')
+    var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
+    DOM.append(relationNameInput,targetModelID,addButton,removeButton)
+
+    removeButton.on("click",()=>{
+        for (var i =0;i< parentDtdlObj.length; i++) {
+            if (parentDtdlObj[i] === dtdlObj) {
+                parentDtdlObj.splice(i, 1);
+                break;
+            }
+        }
+        DOM.remove()
+        refreshDTDLF()
+    })
+
+    var contentDOM=$('<div style="padding-left:10px"></div>')
+    DOM.append(contentDOM)
+    parentDOM.append(DOM)
+
+    relationNameInput.val(dtdlObj["name"])
+    targetModelID.val(dtdlObj["target"]||"")
+
+    addButton.on("click",()=>{
+        if(! dtdlObj["properties"]) dtdlObj["properties"]=[]
+        var newObj = {
+            "name": "newP",
+            "schema": "double"
+        }
+        dtdlObj["properties"].push(newObj)
+        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj["properties"])
+        refreshDTDLF()
+    })
+
+    relationNameInput.on("change",()=>{
+        dtdlObj["name"]=relationNameInput.val()
+        refreshDTDLF()
+    })
+    targetModelID.on("change",()=>{
+        if(targetModelID.val()=="") delete dtdlObj["target"]
+        else dtdlObj["target"]=targetModelID.val()
+        refreshDTDLF()
+    })
+    if(dtdlObj["properties"] && dtdlObj["properties"].length>0){
+        var properties=dtdlObj["properties"]
+        properties.forEach(oneProperty=>{
+            new singleParameterRow(oneProperty,contentDOM,refreshDTDLF,dtdlObj["properties"])
+        })
+    }
+}
+
+function parametersRow(dtdlObj,parentDOM,refreshDTDLF){
+    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Parameters</div></div>')
+    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
+    rowDOM.append(addButton)
+    parentDOM.append(rowDOM)
+    var contentDOM=$('<div style="padding-left:10px"></div>')
+    rowDOM.append(contentDOM)
+    addButton.on("click",()=>{
+        var newObj = {
+            "@type": "Property",
+            "name": "newP",
+            "schema": "double"
+        }
+        dtdlObj.push(newObj)
+        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj,"topLevel")
+        refreshDTDLF()
+    })
 
     //check existed content initially from template and trigger their drawing
     dtdlObj.forEach(element => {
         if(element["@type"]!="Property") return
-        new singleParameterRow(element,this.contentDOM,this.refreshDTDLF,dtdlObj,"topLevel")
+        new singleParameterRow(element,contentDOM,refreshDTDLF,dtdlObj,"topLevel")
     });
-}
-parametersRow.prototype.addParameter=function(){
-    var newObj = {
-        "@type": "Property",
-        "name": "newP",
-        "schema": "double"
-    }
-    this.dtdlObj.push(newObj)
-    new singleParameterRow(newObj,this.contentDOM,this.refreshDTDLF,this.dtdlObj,"topLevel")
 }
 
 function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLevel){
@@ -126,7 +335,7 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
     var enumValueInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="str1,str2,..."/>').addClass("w3-bar-item w3-input w3-border");
     var addButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-plus fa-lg"></i></button>')
     var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
-    var ptypeSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1.2em",colorClass:"w3-light-gray w3-bar-item",buttonCSS:{"padding":"2px 5px"},"optionListHeight":300,"isClickable":1,"optionListMarginTop":30})
+    var ptypeSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1em",colorClass:"w3-light-gray w3-bar-item",buttonCSS:{"padding":"4px 5px"},"optionListHeight":300,"isClickable":1,"optionListMarginTop":-100,"optionListMarginLeft":60})
     ptypeSelector.addOptionArr(["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"])
     DOM.append(parameterNameInput,ptypeSelector.DOM,enumValueInput,addButton,removeButton)
 
@@ -201,7 +410,6 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
     ptypeSelector.triggerOptionValue(schema)
     if(schema=="Enum"){
         var enumArr=dtdlObj["schema"]["enumValues"]
-        console.log(dtdlObj)
         if(enumArr!=null){
             var inputStr=""
             enumArr.forEach(oneEnumValue=>{inputStr+=oneEnumValue.enumValue+","})
@@ -214,33 +422,6 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
             new singleParameterRow(oneField,contentDOM,refreshDTDLF,dtdlObj["schema"]["fields"])
         })
     }
-}
-
-function relationsRow(dtdlObj,parentDOM,refreshDTDLF){
-    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item" style="font-size:1.2em;padding-left:2px;font-weight:bold">Relationship Types</div></div>')
-    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
-    rowDOM.append(addButton)
-    parentDOM.append(rowDOM)
-    this.contentDOM=$('<div></div>')
-    rowDOM.append(this.contentDOM)
-}
-
-function componentsRow(dtdlObj,parentDOM,refreshDTDLF){
-    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item" style="font-size:1.2em;padding-left:2px;font-weight:bold">Components</div></div>')
-    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
-    rowDOM.append(addButton)
-    parentDOM.append(rowDOM)
-    this.contentDOM=$('<div></div>')
-    rowDOM.append(this.contentDOM)
-}
-
-function baseClassesRow(dtdlObj,parentDOM,refreshDTDLF){
-    var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item" style="font-size:1.2em;padding-left:2px;font-weight:bold">Base Classes</div></div>')
-    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
-    rowDOM.append(addButton)
-    parentDOM.append(rowDOM)
-    this.contentDOM=$('<div></div>')
-    rowDOM.append(this.contentDOM)
 }
 
 

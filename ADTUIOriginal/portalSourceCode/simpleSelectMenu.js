@@ -17,6 +17,7 @@ function simpleSelectMenu(buttonName,options){
     this.optionContentDOM=$('<div class="w3-dropdown-content w3-bar-block w3-card-4"></div>')
     if(options.optionListHeight) this.optionContentDOM.css({height:options.optionListHeight+"px","overflow-y":"auto","overflow-x":"visible"})
     if(options.optionListMarginTop) this.optionContentDOM.css({"margin-top":options.optionListMarginTop+"px"})
+    if(options.optionListMarginLeft) this.optionContentDOM.css({"margin-left":options.optionListMarginLeft+"px"})
     
     this.DOM.append(this.button,this.optionContentDOM)
     this.curSelectVal=null;
