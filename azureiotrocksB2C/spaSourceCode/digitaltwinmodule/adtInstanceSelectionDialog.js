@@ -15,21 +15,8 @@ function adtInstanceSelectionDialog() {
         this.DOM = $('<div class="w3-modal" style="display:block;z-index:101"></div>')
         this.DOM.css("overflow","hidden")
         $("body").append(this.DOM)
+        this.DOM.hide()
     }
-}
-
-
-adtInstanceSelectionDialog.prototype.preparationFunc = async function () {
-    return new Promise((resolve, reject) => {
-        try{
-            $.get("twinsFilter/readStartFilters", (data, status) => {
-                if(data!=null && data!="") this.filters=data;
-                resolve()
-            })
-        }catch(e){
-            reject(e)
-        }
-    })
 }
 
 adtInstanceSelectionDialog.prototype.popup = function () {

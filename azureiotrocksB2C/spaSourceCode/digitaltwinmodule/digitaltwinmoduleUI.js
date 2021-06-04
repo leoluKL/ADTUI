@@ -35,16 +35,25 @@ digitaltwinmoduleUI.prototype.prepareData=async function(){
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
     var res=await msalHelper.callAPI("digitaltwin/fetchUserData")
 
-    console.log(res)
-    //
-    /*
-    var promiseArr=[
-        modelManagerDialog.preparationFunc(),
-        adtInstanceSelectionDialog.preparationFunc()
-    ]
-    await Promise.allSettled(promiseArr);
-    */
-    //adtInstanceSelectionDialog.popup()
+    var modelsArr=[]
+    var twinsArr=[]
+    res.forEach(element => {
+        if(element.type=="visualSchema") modelManagerDialog.storeVisualSchema(element.detail)
+        else if(element.type=="DTModel") modelsArr.push(element)
+        else if(element.type=="DTTwin") twinsArr.push(element)
+    });
+
+    if(modelsArr.length==0){
+        //directly popup to model management dialog allow user import or create model
+        modelManagerDialog.popup()
+        //pop up welcome screen
+        var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
+        popWin.html(`Welcome, ${msalHelper.userName}! Firstly, you may consider importing a few twin model files or creating twin models from scratch. <br/><br/>Click to continue...`)
+        $("body").append(popWin)
+        popWin.on("click",()=>{popWin.remove()})
+    }else{
+        //TODO: start up dialog to choose models and twins
+    }
 }
 
 

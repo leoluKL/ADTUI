@@ -14,17 +14,8 @@ function modelManagerDialog() {
     }
 }
 
-modelManagerDialog.prototype.preparationFunc = async function () {
-    return new Promise((resolve, reject) => {
-        try{
-            $.get("visualDefinition/readVisualDefinition", (data, status) => {
-                if(data!="" && typeof(data)==="object") this.visualDefinition=data;
-                resolve()
-            })
-        }catch(e){
-            reject(e)
-        }
-    })
+modelManagerDialog.prototype.storeVisualSchema = function (visualSchema) {
+    this.visualDefinition=visualSchema;
 }
 
 modelManagerDialog.prototype.popup = async function() {
@@ -80,7 +71,7 @@ modelManagerDialog.prototype.popup = async function() {
     this.modelButtonBar.empty()
     panelCard.html("<a style='display:block;font-style:italic;color:gray;padding-left:5px'>Choose a model to view infomration</a>")
 
-    this.listModels()
+    //this.listModels()
 }
 
 modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {

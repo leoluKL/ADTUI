@@ -20,7 +20,8 @@ msalHelper.prototype.signIn=async function(){
 msalHelper.prototype.setAccount=function(theAccount){
     if(theAccount==null)return;
     this.accountId = theAccount.homeAccountId;
-    this.username = theAccount.username;
+    this.accountName = theAccount.username;
+    this.userName=theAccount.name;
 }
 
 msalHelper.prototype.fetchAccount=function(noAnimation){
