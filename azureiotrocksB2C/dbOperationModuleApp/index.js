@@ -23,6 +23,7 @@ app.use(express.urlencoded({extended: true}));
 
 //define sub routers for http requests
 app.use("/userAccount", require("./routerUserAccount"))
+app.use("/queryData", require("./routerQueryData"))
 
 const port = process.env.PORT || 5001;
 

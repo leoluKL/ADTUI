@@ -27,10 +27,7 @@ mainUI.prototype.afterSignedIn=async function(anAccount,noAnimation){
     }
 
     //also notify taskmaster to check user info in cosmosDB, incase it is new user, create the user in cosmosDB
-    var res=await msalHelper.callAPI("accountManagement/fetchUserAccount")
-    console.log(res)
-    //var res=await msalHelper.callAPI("fetchUserAccount")
-
+    msalHelper.callAPI("accountManagement/fetchUserAccount")
 }
 
 mainUI.prototype.showModuleButtons=function(){
