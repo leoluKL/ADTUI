@@ -1,6 +1,7 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
+const modelEditorDialog = require("./modelEditorDialog")
 
 function modelManagerDialog() {
     this.visualDefinition={}
@@ -38,7 +39,8 @@ modelManagerDialog.prototype.popup = async function() {
 
     var importModelsBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Import</button>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
-    this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn)
+    var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create Model</button>')
+    this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn, modelEditorBtn)
     importModelsBtn.on("click", ()=>{
         actualImportModelsBtn.trigger('click');
     });
@@ -46,6 +48,11 @@ modelManagerDialog.prototype.popup = async function() {
         var files = evt.target.files; // FileList object
         this.readModelFilesContentAndImport(files)
     })
+    modelEditorBtn.on("click",()=>{
+        this.DOM.hide()
+        modelEditorDialog.popup()
+    })
+
 
     var row2=$('<div class="w3-cell-row" style="margin-top:2px"></div>')
     this.contentDOM.append(row2)
@@ -114,6 +121,7 @@ modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {
 
 modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     this.panelCard.empty()
+    this.modelButtonBar.empty()
     var modelID=this.models[modelName]['@id']
 
     var delBtn = $('<button style="margin-bottom:2px" class="w3-button w3-light-gray w3-hover-pink w3-border-right">Delete Model</button>')
@@ -356,7 +364,6 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
         }
     }
     if(fileContentArr.length==0) return;
-    console.log(fileContentArr)
     $.post("editADT/importModels",{"models":fileContentArr}, (data)=> {
         if (data == "") {//successful
             this.listModels("shouldBroadCast")
@@ -433,6 +440,10 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
         
         if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models })
     })
+}
+
+modelManagerDialog.prototype.rxMessage=function(msgPayload){
+    if(msgPayload.message=="ADTModelEdited") this.listModels("shouldBroadcast")
 }
 
 
