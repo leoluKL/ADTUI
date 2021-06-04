@@ -12,7 +12,7 @@ routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
     })
 }
 
-routerAccountManagement.prototype.fetchUserData =async function(req,res) {
+routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
     //fetch digital twins, dtdl models and the visualization data (from both cosmosdb and ADT )
     var url = process.env.dboperationAPIURL
     var reqBody={
@@ -20,7 +20,7 @@ routerAccountManagement.prototype.fetchUserData =async function(req,res) {
 	}
     var {body} = await got.post(url+"queryData/userData", {json:reqBody,responseType: 'json'});
 
-    //TODO:extract the models ID, twins ID and query their detail from ADT
+    //TODO:extract the models ID, twins ID and query models detail from ADT, skip twins detail as there maybe too many
     res.send(body)
 }
 

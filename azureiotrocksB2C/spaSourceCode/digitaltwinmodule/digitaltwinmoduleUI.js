@@ -34,6 +34,7 @@ digitaltwinmoduleUI.prototype.prepareData=async function(){
     var theAccount=msalHelper.fetchAccount();
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
     var res=await msalHelper.callAPI("digitaltwin/fetchUserData")
+
     console.log(res)
     //
     /*
