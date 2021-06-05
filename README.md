@@ -25,6 +25,11 @@ For developer's usage, there are additional npm run options (inside folder ./ADT
 ## Prerequisites
 
 - An Azure Digital Twin service subscription in any of your Azure subscriptions
+```diff
+- NOTE: You must go to access control page of your Azure digital twin service, 
+- and assign role "Azure Digital Twin Data Owner" to the account you use to sign in with azure cli. 
+- It might take a few minutes to take effect after your assign the role.
+```
 - Azure CLI
 - Nodejs
 
