@@ -8,10 +8,7 @@ if (myArgs[0] == "--local") localTestFlag = true;
 
 if(localTestFlag){
     require('dotenv').config() //loading environment variable in local developing environment
-}
-
-//enable CORS (for testing only -remove in production/deployment)
-if(localTestFlag){
+    //enable CORS (for testing only -remove in production/deployment)
     console.log("Local test environment....")
     app.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', 'http://localhost:5500');

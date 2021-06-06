@@ -4,6 +4,7 @@ const got = require('got');
 function routerDigitalTwin(){
     this.router = express.Router();
     this.useRoute("fetchUserData")
+    this.useRoute("importModels","isPost")
 }
 
 routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
@@ -14,14 +15,24 @@ routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
 
 routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
     //fetch digital twins, dtdl models and the visualization data (from both cosmosdb and ADT )
-    var url = process.env.dboperationAPIURL
-    var reqBody={
-		account:req.authInfo.emails[0]
-	}
-    var {body} = await got.post(url+"queryData/userData", {json:reqBody,responseType: 'json'});
+    var reqBody={ account:req.authInfo.emails[0]	}
+    var {body} = await got.post(process.env.dboperationAPIURL+"queryData/userData", {json:reqBody,responseType: 'json'});
 
     //TODO:extract the models ID, twins ID and query models detail from ADT, skip twins detail as there maybe too many
     res.send(body)
+}
+
+routerDigitalTwin.prototype.importModels =async function(req,res) {
+    var resFromAPI = await got.post(process.env.digitaltwinoperationAPIURL+"editADT/importModels", {json:req.body,responseType: 'json'});
+
+    if(resFromAPI.statusCode!=200){
+        //fail, return the response body to frontend
+        res.status(resFromAPI.statusCode);
+        res.send(resFromAPI.body);
+    }else{
+        res.status(200)
+        res.end()
+    }
 }
 
 

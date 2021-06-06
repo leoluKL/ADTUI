@@ -1,8 +1,4 @@
 const express = require('express');
-const { DefaultAzureCredential} = require("@azure/identity");
-const { DigitalTwinsClient } = require("@azure/digital-twins-core");
-
-
 const app = express();
 
 var myArgs = process.argv.slice(2);
@@ -19,33 +15,15 @@ if(localTestFlag){
         next();
     });    
 }
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 
 
-
-// API endpoint
-async function test(req,res){
-    var reArr=[]
-    const credential = new DefaultAzureCredential();
-
-    console.log(credential)
-    var aNewADTClient = new DigitalTwinsClient("https://adtleo.api.wcus.digitaltwins.azure.net", credential)
-    var models = await aNewADTClient.listModels([], true);
-    for await (const modelSet of models.byPage({ maxPageSize: 1000 })) { //should be only one page
-        //reArr=modelSet.value
-        modelSet.value.forEach(oneModel=>{console.log(oneModel.model["@id"]);reArr.push(oneModel.model["@id"])})
-    }
-
-    res.send(JSON.stringify(reArr))
-}
-
-app.get('/hello',
-    (req, res) => {
-        test(req,res)
-    }
-);
-
-const port = process.env.PORT || 5000;
+//define sub routers for http requests
+app.use("/editADT", require("./routerEditADT"))
+app.use("/queryADT", require("./routerQueryADT"))
+const port = process.env.PORT || 5004;
 
 app.listen(port, () => {
-    console.log('Listening on port ' + port);
+    console.log('digitaltwinmodule Listening on port ' + port);
 });

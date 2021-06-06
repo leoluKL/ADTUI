@@ -1,6 +1,4 @@
 const express = require('express');
-require('dotenv').config()
-
 const app = express();
 
 var myArgs = process.argv.slice(2);
@@ -28,5 +26,5 @@ app.use("/queryData", require("./routerQueryData"))
 const port = process.env.PORT || 5001;
 
 app.listen(port, () => {
-    console.log('Listening on port ' + port);
+    console.log('dboperationmodule Listening on port ' + port);
 });
