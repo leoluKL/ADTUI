@@ -19,4 +19,14 @@ cosmosdbhelper.prototype.insertRecord=async function (containerID,docObj){
     return item;
 }
 
+cosmosdbhelper.prototype.insertRecords=async function (containerID,docsArr){
+    var promiseArr=[]
+    docsArr.forEach(oneDoc=>{
+        promiseArr.push(this.insertRecord(containerID,oneDoc))
+    })
+    var results=await Promise.allSettled(promiseArr);
+}
+
+
+
 module.exports = new cosmosdbhelper();
