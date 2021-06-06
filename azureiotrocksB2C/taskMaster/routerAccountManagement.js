@@ -16,7 +16,7 @@ routerAccountManagement.prototype.fetchUserAccount =async function(req,res) {
     //var url = "http://localhost:5001/"
     var url = process.env.dboperationAPIURL
     var reqBody={
-		account:req.authInfo.emails[0],
+		account:req.authInfo.account,
         name:req.authInfo.name,
         country:req.authInfo.country,
         idp:req.authInfo.idp

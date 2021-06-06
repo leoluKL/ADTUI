@@ -16,17 +16,20 @@ routerInsertData.prototype.newModels =async function(req,res) {
     var accountID=req.body.account
     var models=req.body.models
 
-    var newModelDocuments=[]
-    models.forEach(element => {
-        var aDocument={type:"DTModel","accountID":accountID,displayName:element["displayName"]
-                        ,creationTS:new Date().getTime(),id:element["@id"]}
-        newModelDocuments.push(aDocument)
-    });
+    try {
+        var newModelDocuments = []
+        models.forEach(element => {
+            var aDocument = {
+                type: "DTModel", "accountID": accountID, displayName: element["displayName"]
+                , creationTS: new Date().getTime(), id: element["@id"]
+            }
+            newModelDocuments.push(aDocument)
+        });
 
-    try{
-        await cosmosdbhelper.insertRecords("appuser",newModelDocuments)
+
+        await cosmosdbhelper.insertRecords("appuser", newModelDocuments)
         res.end()
-    }catch(e){
+    } catch (e) {
         res.status(400).send(e.message)
     }
 }

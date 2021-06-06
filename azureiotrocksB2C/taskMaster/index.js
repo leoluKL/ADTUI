@@ -41,12 +41,13 @@ if(!localTestFlag){
         if(bearerToken!=null){
             bearerToken= bearerToken.substring("Bearer ".length);
             req.authInfo=parseJwt(bearerToken)
+            req.authInfo.account=req.authInfo.emails[0]
         }
         next();
     });
 }else{
     app.use((req, res, next) => {
-        req.authInfo={emails:["test@gmail.com"], name: "testaccount", country: "Singapore", idp: "google.com"}
+        req.authInfo={emails:["test@gmail.com"],account:"test@gmail.com", name: "testaccount", country: "Singapore", idp: "google.com"}
         next();
     });
 }
