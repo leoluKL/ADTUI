@@ -1,5 +1,6 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const simpleSelectMenu= require("./simpleSelectMenu")
+const msalHelper=require("../msalHelper")
 
 function modelEditorDialog() {
     if(!this.DOM){
@@ -24,8 +25,11 @@ modelEditorDialog.prototype.popup = async function() {
     var importButton =$('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green w3-right" style="height:100%">Import</button>')
     buttonRow.append(importButton)
 
-    importButton.on("click", () => {
+    importButton.on("click", async () => {
         var modelToBeImported = [this.dtdlobj]
+        var response=await msalHelper.callAPI("editADT/importModels","POST", { "models": modelToBeImported })
+        console.log(response)
+        /*
         $.post("editADT/importModels", { "models": modelToBeImported }, (data) => {
             if (data == "") {//successful
                 alert("Model "+ this.dtdlobj["displayName"]+" is created!")
@@ -36,6 +40,7 @@ modelEditorDialog.prototype.popup = async function() {
                 alert(data)
             }
         });
+        */
     })
 
     var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;font-size:1.2em;">Model Template</div>')

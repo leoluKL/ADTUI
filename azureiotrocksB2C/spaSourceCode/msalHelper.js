@@ -48,7 +48,7 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
         headersObj["Authorization"]=`Bearer ${token}`
     } 
     return new Promise((resolve, reject) => {
-        $.ajax({
+        var ajaxContent={
             type: RESTMethod || 'GET',
             "headers":headersObj,
             url: globalAppSettings.taskMasterAPIURI+APIString,
@@ -59,7 +59,9 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
             error: function (responseData, textStatus, errorThrown) {
                 reject(responseData)
             }
-        });
+        }
+        if(RESTMethod=="POST") ajaxContent.data=payload
+        $.ajax(ajaxContent);
     })
 }
 
