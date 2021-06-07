@@ -28,7 +28,7 @@ routerEditADT.prototype.deleteModels =async function(req,res) {
     var models=req.body.models;
     
     try{
-        models.forEach(element => {
+        models.forEach(async element => {
             await adtHelper.ADTClient.deleteModel(element["@id"])
         });
         res.status(200).end()
