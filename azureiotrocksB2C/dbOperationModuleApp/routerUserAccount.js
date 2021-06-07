@@ -18,7 +18,13 @@ routerUserAccount.prototype.basic =async function(req,res) {
     var queryStr='SELECT * FROM c where '
     queryStr+=`c.accountID='${accountID}'`
     queryStr+=` and c.profile.idp='${idp}'`
-    var queryResult=await cosmosdbhelper.query('appuser',queryStr)
+    try{
+        var queryResult=await cosmosdbhelper.query('appuser',queryStr)
+    }catch(e){
+        res.status(400).send(e.message)
+        return;
+    }
+    
 
     if(queryResult.length==0){
         //create the new account record in database and return it

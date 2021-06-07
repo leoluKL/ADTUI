@@ -17,12 +17,9 @@ routerEditADT.prototype.importModels =async function(req,res) {
     
     try{
         re = await adtHelper.ADTClient.createModels(models)
-        res.status(200)
-        res.end()
+        res.status(200).end()
     }catch(e){
-        res.statusCode = 400;
-        if(e.message!=null && e.message!="") res.send(e.message)
-        else res.send(e.name)
+        res.status(400).send(e.message);
     }
 }
 

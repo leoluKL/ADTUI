@@ -27,20 +27,16 @@ modelEditorDialog.prototype.popup = async function() {
 
     importButton.on("click", async () => {
         var modelToBeImported = [this.dtdlobj]
-        var response=await msalHelper.callAPI("digitaltwin/importModels","POST", { "models": modelToBeImported })
-        console.log(response)
-        /*
-        $.post("editADT/importModels", { "models": modelToBeImported }, (data) => {
-            if (data == "") {//successful
-                alert("Model "+ this.dtdlobj["displayName"]+" is created!")
-                this.broadcastMessage({ "message": "ADTModelEdited"})
-                modelAnalyzer.addModels(modelToBeImported)
-                this.popup() //refresh content
-            } else { //error happens
-                alert(data)
-            }
-        });
-        */
+        try {
+            var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": modelToBeImported })
+
+            alert("Model " + this.dtdlobj["displayName"] + " is created!")
+            this.broadcastMessage({ "message": "ADTModelEdited" })
+            modelAnalyzer.addModels(modelToBeImported)
+            this.popup() //refresh content
+        }catch(e){
+            alert(e.responseText)
+        }        
     })
 
     var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;font-size:1.2em;">Model Template</div>')

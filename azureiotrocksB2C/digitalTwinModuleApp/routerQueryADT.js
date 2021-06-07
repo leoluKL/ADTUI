@@ -22,7 +22,7 @@ routerQueryADT.prototype.listModels =async function(req,res) {
         }
         res.send(reArr)
     }catch(e){
-        res.end()
+        res.status(400).send(e.message);
     }
 }
 
