@@ -45,6 +45,8 @@ routerDigitalTwin.prototype.importModels =async function(req,res) {
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         //roll back ADT operation by deleting those models and revert to frontend
+        console.error("roll back and remove inserted model in ADT...")
+        await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteModels", {json:req.body,responseType: 'json'});
     }
 }
 
