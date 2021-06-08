@@ -1,5 +1,5 @@
 const modelAnalyzer=require("./modelAnalyzer")
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
+const startSelectionDialog = require("./startSelectionDialog")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const modelEditorDialog = require("./modelEditorDialog")
 
@@ -14,9 +14,6 @@ function modelManagerDialog() {
     }
 }
 
-modelManagerDialog.prototype.storeVisualSchema = function (visualSchema) {
-    this.visualDefinition=visualSchema;
-}
 
 modelManagerDialog.prototype.popup = async function() {
     this.DOM.show()
@@ -131,7 +128,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
         var dataUrl= await this.resizeImgFile(theFile,70)
         if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
 
-        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
         if(!visualJson[modelID]) visualJson[modelID]={}
         visualJson[modelID].avarta=dataUrl
         this.saveVisualDefinition()
@@ -139,7 +136,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     })
 
     clearAvartaBtn.on("click", ()=>{
-        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
         if(visualJson[modelID]) delete visualJson[modelID].avarta 
         if(this.avartaImg) this.avartaImg.removeAttr('src');
         this.saveVisualDefinition()
@@ -163,8 +160,8 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
                                 if(data==""){//successful
                                     this.listModels("shouldBroadcast")
                                     this.panelCard.empty()
-                                    if(this.visualDefinition[adtInstanceSelectionDialog.selectedADT] && this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID] ){
-                                        delete this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID]
+                                    if(this.visualDefinition[startSelectionDialog.selectedADT] && this.visualDefinition[startSelectionDialog.selectedADT][modelID] ){
+                                        delete this.visualDefinition[startSelectionDialog.selectedADT][modelID]
                                         this.saveVisualDefinition()
                                     }
                                 }else{ //error happens
@@ -221,7 +218,7 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     
     var avartaImg=$("<img></img>")
     rightPart.append(avartaImg)
-    var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
     if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)
     this.avartaImg=avartaImg;
 
@@ -240,7 +237,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     containerDiv.append(contentDOM)
 
     var definiedColor=null
-    var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
     if(relatinshipName==null){
         if(visualJson && visualJson[modelID] && visualJson[modelID].color) definiedColor=visualJson[modelID].color
     }else{
@@ -265,9 +262,9 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value
         colorSelector.css("color",selectColorCode)
-        if(!this.visualDefinition[adtInstanceSelectionDialog.selectedADT]) 
-            this.visualDefinition[adtInstanceSelectionDialog.selectedADT]={}
-        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        if(!this.visualDefinition[startSelectionDialog.selectedADT]) 
+            this.visualDefinition[startSelectionDialog.selectedADT]={}
+        var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
 
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
@@ -435,6 +432,7 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
 
 modelManagerDialog.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="ADTModelEdited") this.listModels("shouldBroadcast")
+    else if(msgPayload.message=="fetchVisualSchema") this.visualDefinition=msgPayload.data
 }
 
 

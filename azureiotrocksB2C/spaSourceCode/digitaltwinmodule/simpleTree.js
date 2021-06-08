@@ -163,7 +163,7 @@ simpleTree.prototype.insertGroupNode=function(obj,index){
 simpleTree.prototype.addGroupNode=function(obj){
     var aNewGroupNode = new simpleTreeGroupNode(this,obj)
     var existGroupNode= this.findGroupNode(aNewGroupNode.name)
-    if(existGroupNode!=null) return;
+    if(existGroupNode!=null) return existGroupNode;
     this.groupNodes.push(aNewGroupNode);
     this.DOM.append(aNewGroupNode.headerDOM)
     this.DOM.append(aNewGroupNode.listDOM)

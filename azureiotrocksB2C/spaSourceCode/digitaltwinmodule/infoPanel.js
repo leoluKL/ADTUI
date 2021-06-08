@@ -1,6 +1,7 @@
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
 const simpleSelectMenu= require("./simpleSelectMenu")
+const simpleConfirmDialog = require("./simpleConfirmDialog")
+const globalCache = require("./globalCache")
 
 function infoPanel() {
     this.continerDOM=$('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
@@ -45,7 +46,7 @@ function infoPanel() {
 }
 
 infoPanel.prototype.rxMessage=function(msgPayload){   
-    if(msgPayload.message=="ADTDatasourceDialog_closed"){
+    if(msgPayload.message=="startSelectionDialog_closed"){
         if(!this.continerDOM.is(":visible")) {
             this.continerDOM.show()
             this.continerDOM.addClass("w3-animate-right")
@@ -118,7 +119,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                         if(IDInput) IDInput.val("")
                         $.post("queryADT/oneTwinInfo",{twinID:twinJson["$dtId"]}, (data)=> {
                             if(data=="") return;
-                            adtInstanceSelectionDialog.storedTwins[data["$dtId"]] = data;
+                            globalCache.storedTwins[data["$dtId"]] = data;
                             this.broadcastMessage({ "message": "addNewTwin",twinInfo:data})
                         })                        
                     }
@@ -201,8 +202,8 @@ infoPanel.prototype.refreshInfomation=async function(){
             if(oneRe["$relationshipId"]){//update storedOutboundRelationships
                 var srcID= oneRe['$sourceId']
                 var relationshipId= oneRe['$relationshipId']
-                if(adtInstanceSelectionDialog.storedOutboundRelationships[srcID]!=null){
-                    var relations=adtInstanceSelectionDialog.storedOutboundRelationships[srcID]
+                if(globalCache.storedOutboundRelationships[srcID]!=null){
+                    var relations=globalCache.storedOutboundRelationships[srcID]
                     relations.forEach(oneStoredRelation=>{
                         if(oneStoredRelation['$relationshipId']==relationshipId){
                             //update all content
@@ -212,8 +213,8 @@ infoPanel.prototype.refreshInfomation=async function(){
                 }
             }else{//update storedTwins
                 var twinID= oneRe['$dtId']
-                if(adtInstanceSelectionDialog.storedTwins[twinID]!=null){
-                    for(var ind in oneRe){ adtInstanceSelectionDialog.storedTwins[twinID][ind]=oneRe[ind] }
+                if(globalCache.storedTwins[twinID]!=null){
+                    for(var ind in oneRe){ globalCache.storedTwins[twinID][ind]=oneRe[ind] }
                 }
             }
         })
@@ -244,7 +245,7 @@ infoPanel.prototype.deleteSelected=async function(){
             relationsArr.splice(i,1)
         }
     }
-    var confirmDialogDiv=$("<div/>")
+    var confirmDialogDiv = new simpleConfirmDialog()
     var dialogStr=""
     var twinNumber=twinIDArr.length;
     var relationsNumber = relationsArr.length;
@@ -252,27 +253,28 @@ infoPanel.prototype.deleteSelected=async function(){
     if(twinNumber>0 && relationsNumber>0) dialogStr+=" and additional "
     if(relationsNumber>0) dialogStr +=  relationsNumber+" relation"+((relationsNumber>1)?"s":"" )
     dialogStr+=" will be deleted. Please confirm"
-    confirmDialogDiv.text(dialogStr)
-    $('body').append(confirmDialogDiv)
-    confirmDialogDiv.dialog({
-        buttons: [
-          {
-            text: "Confirm",
-            click: ()=> {
-                if(twinIDArr.length>0) this.deleteTwins(twinIDArr)
-                if(relationsArr.length>0) this.deleteRelations(relationsArr)
-                confirmDialogDiv.dialog( "destroy" );
-                this.DOM.empty()
-            }
-          },
-          {
-            text: "Cancel",
-            click: ()=> {
-                confirmDialogDiv.dialog( "destroy" );
-            }
-          }
-        ]
-      }); 
+    confirmDialogDiv.show(
+        { width: "350px" },
+        {
+            title: "Confirm"
+            , content:dialogStr
+            , buttons: [
+                {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                        if (twinIDArr.length > 0) this.deleteTwins(twinIDArr)
+                        if (relationsArr.length > 0) this.deleteRelations(relationsArr)
+                        confirmDialogDiv.close()
+                        this.DOM.empty()
+                    }
+                },
+                {
+                    colorClass: "w3-gray", text: "Cancel", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                    }
+                }
+            ]
+        }
+    )
 }
 
 infoPanel.prototype.deleteTwins=async function(twinIDArr){   
@@ -281,8 +283,8 @@ infoPanel.prototype.deleteTwins=async function(twinIDArr){
         var result=await this.deletePartialTwins(smallArr)
 
         result.forEach((oneID)=>{
-            delete adtInstanceSelectionDialog.storedTwins[oneID]
-            delete adtInstanceSelectionDialog.storedOutboundRelationships[oneID]
+            delete globalCache.storedTwins[oneID]
+            delete globalCache.storedOutboundRelationships[oneID]
         });
 
         this.broadcastMessage({ "message": "twinsDeleted",twinIDArr:result})
@@ -310,7 +312,7 @@ infoPanel.prototype.deleteRelations=async function(relationsArr){
     })
     $.post("editADT/deleteRelations",{"relations":arr},  (data)=> { 
         if(data=="") data=[];
-        adtInstanceSelectionDialog.storeTwinRelationships_remove(data)
+        globalCache.storeTwinRelationships_remove(data)
         this.broadcastMessage({ "message": "relationsDeleted","relations":data})
     });
     
@@ -329,12 +331,12 @@ infoPanel.prototype.showOutBound=async function(){
         var data=await this.fetchPartialOutbounds(smallArr)
         if(data=="") continue;
         //new twin's relationship should be stored as well
-        adtInstanceSelectionDialog.storeTwinRelationships(data.newTwinRelations)
+        globalCache.storeTwinRelationships(data.newTwinRelations)
         
         data.childTwinsAndRelations.forEach(oneSet=>{
             for(var ind in oneSet.childTwins){
                 var oneTwin=oneSet.childTwins[ind]
-                adtInstanceSelectionDialog.storedTwins[ind]=oneTwin
+                globalCache.storedTwins[ind]=oneTwin
             }
         })
         this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
@@ -356,15 +358,15 @@ infoPanel.prototype.showInBound=async function(){
         var data=await this.fetchPartialInbounds(smallArr)
         if(data=="") continue;
         //new twin's relationship should be stored as well
-        adtInstanceSelectionDialog.storeTwinRelationships(data.newTwinRelations)
+        globalCache.storeTwinRelationships(data.newTwinRelations)
         
         //data.newTwinRelations.forEach(oneRelation=>{console.log(oneRelation['$sourceId']+"->"+oneRelation['$targetId'])})
-        //console.log(adtInstanceSelectionDialog.storedOutboundRelationships["default"])
+        //console.log(globalCache.storedOutboundRelationships["default"])
 
         data.childTwinsAndRelations.forEach(oneSet=>{
             for(var ind in oneSet.childTwins){
                 var oneTwin=oneSet.childTwins[ind]
-                adtInstanceSelectionDialog.storedTwins[ind]=oneTwin
+                globalCache.storedTwins[ind]=oneTwin
             }
         })
         this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
@@ -378,11 +380,11 @@ infoPanel.prototype.fetchPartialOutbounds= async function(IDArr){
             var knownTargetTwins={}
             IDArr.forEach(oneID=>{
                 knownTargetTwins[oneID]=1 //itself also is known
-                var outBoundRelation=adtInstanceSelectionDialog.storedOutboundRelationships[oneID]
+                var outBoundRelation=globalCache.storedOutboundRelationships[oneID]
                 if(outBoundRelation){
                     outBoundRelation.forEach(oneRelation=>{
                         var targetID=oneRelation["$targetId"]
-                        if(adtInstanceSelectionDialog.storedTwins[targetID]!=null) knownTargetTwins[targetID]=1
+                        if(globalCache.storedTwins[targetID]!=null) knownTargetTwins[targetID]=1
                     })
                 }
             })
@@ -406,13 +408,13 @@ infoPanel.prototype.fetchPartialInbounds= async function(IDArr){
                 IDDict[oneID]=1
                 knownSourceTwins[oneID]=1 //itself also is known
             })
-            for(var twinID in adtInstanceSelectionDialog.storedOutboundRelationships){
-                var relations=adtInstanceSelectionDialog.storedOutboundRelationships[twinID]
+            for(var twinID in globalCache.storedOutboundRelationships){
+                var relations=globalCache.storedOutboundRelationships[twinID]
                 relations.forEach(oneRelation=>{
                     var targetID=oneRelation['$targetId']
                     var srcID=oneRelation['$sourceId']
                     if(IDDict[targetID]!=null){
-                        if(adtInstanceSelectionDialog.storedTwins[srcID]!=null) knownSourceTwins[srcID]=1
+                        if(globalCache.storedTwins[srcID]!=null) knownSourceTwins[srcID]=1
                     }
                 })
             }

@@ -1,7 +1,7 @@
 'use strict';
 const topologyDOM=require("./topologyDOM.js")
 const twinsTree=require("./twinsTree")
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
+const startSelectionDialog = require("./startSelectionDialog")
 const modelManagerDialog = require("./modelManagerDialog")
 const modelEditorDialog = require("./modelEditorDialog")
 const editLayoutDialog = require("./editLayoutDialog")
@@ -9,17 +9,16 @@ const mainToolbar = require("./mainToolbar")
 const infoPanel= require("./infoPanel");
 const globalAppSettings = require("../globalAppSettings.js");
 const msalHelper=require("../msalHelper")
+const globalCache=require("./globalCache")
 
 function digitaltwinmoduleUI() {
     this.initUILayout()
 
     this.twinsTree= new twinsTree($("#treeHolder"),$("#treeSearch"))
     
-    this.mainToolbar=mainToolbar
     mainToolbar.render()
     this.topologyInstance=new topologyDOM($('#canvas'))
     this.topologyInstance.init()
-    this.infoPanel= infoPanel
 
     this.broadcastMessage() //initialize all ui components to have the broadcast capability
 
@@ -27,48 +26,32 @@ function digitaltwinmoduleUI() {
     this.myMSALObj = new msal.PublicClientApplication(globalAppSettings.msalConfig);
 
 
-    this.prepareData()
-}
-
-digitaltwinmoduleUI.prototype.prepareData=async function(){
     var theAccount=msalHelper.fetchAccount();
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
-    var res=await msalHelper.callAPI("digitaltwin/fetchUserData")
-
-    var modelsArr=[]
-    var twinsArr=[]
-    res.forEach(element => {
-        if(element.type=="visualSchema") modelManagerDialog.storeVisualSchema(element.detail)
-        else if(element.type=="DTModel") modelsArr.push(element)
-        else if(element.type=="DTTwin") twinsArr.push(element)
-    });
-
-    if(modelsArr.length==0){
-        //directly popup to model management dialog allow user import or create model
-        modelManagerDialog.popup()
-        //pop up welcome screen
-        var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
-        popWin.html(`Welcome, ${msalHelper.userName}! Firstly, you may consider importing a few twin model files or creating twin models from scratch. <br/><br/>Click to continue...`)
-        $("body").append(popWin)
-        popWin.on("click",()=>{popWin.remove()})
-    }else{
-        //TODO: start up dialog to choose models and twins
-    }
-}
-
-
-digitaltwinmoduleUI.prototype.assignBroadcastMessage=function(uiComponent){
-    uiComponent.broadcastMessage=(msgObj)=>{this.broadcastMessage(uiComponent,msgObj)}
+    
+    startSelectionDialog.loadData().then(re=>{
+        if(globalCache.DBModelsArr.length==0){
+            //directly popup to model management dialog allow user import or create model
+            modelManagerDialog.popup()
+            //pop up welcome screen
+            var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
+            popWin.html(`Welcome, ${msalHelper.userName}! Firstly, you may consider importing a few twin model files or creating twin models from scratch. <br/><br/>Click to continue...`)
+            $("body").append(popWin)
+            popWin.on("click",()=>{popWin.remove()})
+        }else{
+            startSelectionDialog.popup()
+        }
+    })
 }
 
 digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[this.twinsTree,adtInstanceSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
-         this.mainToolbar,this.topologyInstance,this.infoPanel]
+    var componentsArr=[this.twinsTree,startSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
+         mainToolbar,this.topologyInstance,infoPanel]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){
             var theComponent=componentsArr[i]
-            this.assignBroadcastMessage(theComponent)
+            theComponent.broadcastMessage=(msgObj)=>{this.broadcastMessage(theComponent,msgObj)}
         }
     }else{
         for(var i=0;i<componentsArr.length;i++){
@@ -136,7 +119,6 @@ digitaltwinmoduleUI.prototype.initUILayout = function () {
     $(".ui-layout-resizer-north").hide()
     $(".ui-layout-west").css("border-right","solid 1px lightGray")
     $(".ui-layout-west").addClass("w3-card")
-
 }
 
 

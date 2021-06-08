@@ -1,6 +1,7 @@
 const simpleTree=require("./simpleTree")
 const modelAnalyzer=require("./modelAnalyzer")
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
+const msalHelper = require("../msalHelper")
+const globalCache = require("./globalCache")
 
 function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM)
@@ -40,8 +41,8 @@ function twinsTree(DOM, searchDOM) {
 }
 
 twinsTree.prototype.rxMessage=function(msgPayload){
-    if(msgPayload.message=="ADTDatasourceChange_replace") this.ADTDatasourceChange_replace(msgPayload.query, msgPayload.twins,msgPayload.ADTInstanceDoesNotChange)
-    else if(msgPayload.message=="ADTDatasourceChange_append") this.ADTDatasourceChange_append(msgPayload.query, msgPayload.twins)
+    if(msgPayload.message=="startSelection_replace") this.loadStartSelection(msgPayload.twinIDs,msgPayload.modelIDs,"replace")
+    else if(msgPayload.message=="startSelection_append") this.loadStartSelection(msgPayload.twinIDs,msgPayload.modelIDs,"append")
     else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
     else if(msgPayload.message=="ADTModelsChange") this.refreshModels(msgPayload.models)
     else if(msgPayload.message=="addNewTwin") this.drawOneTwin(msgPayload.twinInfo)
@@ -81,19 +82,66 @@ twinsTree.prototype.refreshModels=function(modelsData){
 }
 
 
-twinsTree.prototype.ADTDatasourceChange_append=function(twinQueryStr,twinsData){
+
+twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOrAppend){
+    if(replaceOrAppend=="replace") this.tree.clearAllLeafNodes()
+
+    //list all models, add model to twintree group node if it is not there, or remove deleted models
+    for (var id in this.modelIDMapToName) delete this.modelIDMapToName[id]
+    try{
+        var data= await msalHelper.callAPI("digitaltwin/listModelsForIDs","POST",modelIDs)
+    }catch(e){
+        alert(e.responseText)
+        return;
+    }
+    
+    var tmpNameToObj = {}
+    for (var i = 0; i < data.length; i++) {
+        if (data[i]["displayName"] == null) data[i]["displayName"] = data[i]["@id"]
+        if ($.isPlainObject(data[i]["displayName"])) {
+            if (data[i]["displayName"]["en"]) data[i]["displayName"] = data[i]["displayName"]["en"]
+            else data[i]["displayName"] = JSON.stringify(data[i]["displayName"])
+        }
+        if (tmpNameToObj[data[i]["displayName"]] != null) {
+            //repeated model display name
+            data[i]["displayName"] = data[i]["@id"]
+        }
+        this.modelIDMapToName[data[i]["@id"]] = data[i]["displayName"]
+        tmpNameToObj[data[i]["displayName"]] = data[i]
+    }
+    this.refreshModels(tmpNameToObj)
+    
+    modelAnalyzer.clearAllModels();
+    modelAnalyzer.addModels(data)
+    modelAnalyzer.analyze();
+    //add new twins under the model group node
+    try{
+        var twinsdata= await msalHelper.callAPI("digitaltwin/listTwinsForIDs","POST",twinIDs)
+    }catch(e){
+        alert(e.responseText)
+        return;
+    }
+    
+}
+
+twinsTree.prototype.startSelection_append=function(twinIDs){
+   
+
+
     if (twinsData != null) this.appendAllTwins(twinsData)
     else {
         $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
             if(data=="") return;
-            data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+            data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
             this.appendAllTwins(data)
         })
     }
 }
 
-twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,ADTInstanceDoesNotChange){
+twinsTree.prototype.startSelection_replace=function(twinIDs){
     var theTree= this.tree;
+    this.tree.clearAllLeafNodes()
+    this.startSelection_append(twinIDs)
 
     if (ADTInstanceDoesNotChange) {
         //keep all group node as model is the same, only fetch all leaf node again
@@ -103,7 +151,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
         else {
             $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
                 if(data=="") data=[];
-                data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+                data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
                 this.replaceAllTwins(data)
             })
         }
@@ -113,37 +161,13 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
         //query to get all models
         $.get("queryADT/listModels", (data, status) => {
             if(data=="") data=[]
-            var tmpNameArr = []
-            var tmpNameToObj = {}
-            for (var i = 0; i < data.length; i++) {
-                if(data[i]["displayName"]==null) data[i]["displayName"]=data[i]["@id"]
-                if($.isPlainObject(data[i]["displayName"])){
-                    if(data[i]["displayName"]["en"]) data[i]["displayName"]=data[i]["displayName"]["en"]
-                    else data[i]["displayName"]=JSON.stringify(data[i]["displayName"])
-                }
-                if(tmpNameToObj[data[i]["displayName"]]!=null){
-                    //repeated model display name
-                    data[i]["displayName"]=data[i]["@id"]
-                }  
-                this.modelIDMapToName[data[i]["@id"]] = data[i]["displayName"]
-                
-                tmpNameArr.push(data[i]["displayName"])
-                tmpNameToObj[data[i]["displayName"]] = data[i]
-            }
-            tmpNameArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
-            tmpNameArr.forEach(modelName => {
-                var newGroup = theTree.addGroupNode(tmpNameToObj[modelName])
-                newGroup.shrink()
-            })
-            modelAnalyzer.clearAllModels();
-            modelAnalyzer.addModels(data)
-            modelAnalyzer.analyze();
+            
 
             if (twinsData != null) this.replaceAllTwins(twinsData)
             else {
                 $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
                     if(data=="") data=[];
-                    data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+                    data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
                     this.replaceAllTwins(data)
                 })
             }
@@ -164,43 +188,12 @@ twinsTree.prototype.drawOneTwin= function(twinInfo){
     this.tree.addLeafnodeToGroup(groupName,twinInfo,"skipRepeat")
 }
 
-twinsTree.prototype.appendAllTwins= function(data){
-    var twinIDArr=[]
-    //check if any current leaf node does not have stored outbound relationship data yet
-    this.tree.groupNodes.forEach((gNode)=>{
-        gNode.childLeafNodes.forEach(leafNode=>{
-            var nodeId=leafNode.leafInfo["$dtId"]
-            if(adtInstanceSelectionDialog.storedOutboundRelationships[nodeId]==null) twinIDArr.push(nodeId)
-        })
-    })
-
-    this.broadcastMessage({ "message": "appendAllTwins",info:data})
-    for(var i=0;i<data.length;i++){
-        var groupName=this.modelIDMapToName[data[i]["$metadata"]["$model"]]
-        this.tree.addLeafnodeToGroup(groupName,data[i],"skipRepeat")
-        twinIDArr.push(data[i]["$dtId"])
-    }
-
-    this.fetchAllRelationships(twinIDArr)
-}
-
-twinsTree.prototype.replaceAllTwins= function(data){
-    var twinIDArr=[]
-    this.broadcastMessage({ "message": "replaceAllTwins",info:data})
-    for(var i=0;i<data.length;i++){
-        var groupName=this.modelIDMapToName[data[i]["$metadata"]["$model"]]
-        this.tree.addLeafnodeToGroup(groupName,data[i])
-        twinIDArr.push(data[i]["$dtId"])
-    }
-    this.fetchAllRelationships(twinIDArr)
-}
-
 twinsTree.prototype.fetchAllRelationships= async function(twinIDArr){
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialRelationships(smallArr)
         if(data=="") continue;
-        adtInstanceSelectionDialog.storeTwinRelationships(data) //store them in global available array
+        globalCache.storeTwinRelationships(data) //store them in global available array
         this.broadcastMessage({ "message": "drawAllRelations",info:data})
     }
 }

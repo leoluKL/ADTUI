@@ -1,15 +1,13 @@
 'use strict';
 
-const modelManagerDialog = require("./modelManagerDialog");
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
-const editLayoutDialog = require("./editLayoutDialog")
 const formatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 3,
     maximumFractionDigits: 3,
 });
 const simpleSelectMenu = require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
+const globalCache = require("./globalCache")
 
 
 function topologyDOM(DOM){
@@ -368,8 +366,8 @@ topologyDOM.prototype.drawRelations=function(relationsData){
 topologyDOM.prototype.reviewStoredRelationshipsToDraw=function(){
     //check the storedOutboundRelationships again and maybe some of them can be drawn now since targetNode is available
     var storedRelationArr=[]
-    for(var twinID in adtInstanceSelectionDialog.storedOutboundRelationships){
-        storedRelationArr=storedRelationArr.concat(adtInstanceSelectionDialog.storedOutboundRelationships[twinID])
+    for(var twinID in globalCache.storedOutboundRelationships){
+        storedRelationArr=storedRelationArr.concat(globalCache.storedOutboundRelationships[twinID])
     }
     this.drawRelations(storedRelationArr)
 }
@@ -393,10 +391,10 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
         relationsInfo.forEach((oneRelation)=>{
             var srcID=oneRelation['$sourceId']
             var targetID=oneRelation['$targetId']
-            if(adtInstanceSelectionDialog.storedTwins[srcID])
-                twinsInfo[srcID] = adtInstanceSelectionDialog.storedTwins[srcID]
-            if(adtInstanceSelectionDialog.storedTwins[targetID])
-                twinsInfo[targetID] = adtInstanceSelectionDialog.storedTwins[targetID]    
+            if(globalCache.storedTwins[srcID])
+                twinsInfo[srcID] = globalCache.storedTwins[srcID]
+            if(globalCache.storedTwins[targetID])
+                twinsInfo[targetID] = globalCache.storedTwins[targetID]    
         })
     })
     var tmpArr=[]
@@ -408,7 +406,7 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
 }
 
 topologyDOM.prototype.applyVisualDefinition=function(){
-    var visualJson=modelManagerDialog.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition[globalCache.selectedADT]
     if(visualJson==null) return;
     for(var modelID in visualJson){
         if(visualJson[modelID].color){
@@ -439,7 +437,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="drawAllRelations"){
         var edges= this.drawRelations(msgPayload.info)
         if(edges!=null) {
-            if(editLayoutDialog.currentLayoutName==null)  this.noPosition_cose()
+            if(globalCache.currentLayoutName==null)  this.noPosition_cose()
         }
     }else if(msgPayload.message=="addNewTwin") {
         this.drawTwins([msgPayload.twinInfo],"animation")
@@ -480,9 +478,9 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
 }
 
 topologyDOM.prototype.applyNewLayout = function () {
-    var layoutName=editLayoutDialog.currentLayoutName
+    var layoutName=globalCache.currentLayoutName
     
-    var layoutDetail= editLayoutDialog.layoutJSON[layoutName]
+    var layoutDetail= globalCache.layoutJSON[layoutName]
     
     //remove all bending edge 
     this.core.edges().forEach(oneEdge=>{
@@ -546,9 +544,9 @@ topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipI
 
 
 topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
-    var layoutDict=editLayoutDialog.layoutJSON[layoutName]
+    var layoutDict=globalCache.layoutJSON[layoutName]
     if(!layoutDict){
-        layoutDict=editLayoutDialog.layoutJSON[layoutName]={}
+        layoutDict=globalCache.layoutJSON[layoutName]={}
     }
     
     if(this.core.nodes().size()==0) return;
@@ -584,7 +582,7 @@ topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
         }
     })
 
-    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(editLayoutDialog.layoutJSON)})
+    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(globalCache.layoutJSON)})
     this.broadcastMessage({ "message": "layoutsUpdated"})
 }
 
@@ -702,7 +700,7 @@ topologyDOM.prototype.createConnections = function (resultActions) {
     // for each resultActions, calculate the appendix index, to avoid same ID is used for existed connections
     resultActions.forEach(oneAction=>{
         var maxExistedConnectionNumber=0
-        var existedRelations=adtInstanceSelectionDialog.storedOutboundRelationships[oneAction.from]
+        var existedRelations=globalCache.storedOutboundRelationships[oneAction.from]
         if(existedRelations==null) existedRelations=[]
         existedRelations.forEach(oneRelation=>{
             var oneRelationID=oneRelation['$relationshipId']
@@ -716,7 +714,7 @@ topologyDOM.prototype.createConnections = function (resultActions) {
 
     $.post("editADT/createRelations",{actions:resultActions}, (data, status) => {
         if(data=="") return;
-        adtInstanceSelectionDialog.storeTwinRelationships_append(data)
+        globalCache.storeTwinRelationships_append(data)
         this.drawRelations(data)
     })
 }

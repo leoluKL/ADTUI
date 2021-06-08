@@ -1,4 +1,4 @@
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
+const startSelectionDialog = require("./startSelectionDialog")
 const modelManagerDialog = require("./modelManagerDialog")
 const editLayoutDialog= require("./editLayoutDialog")
 const simpleSelectMenu= require("./simpleSelectMenu")
@@ -24,13 +24,13 @@ mainToolbar.prototype.render = function () {
     $("#mainToolBar").append(this.switchADTInstanceBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
         ,this.switchLayoutSelector.DOM,this.editLayoutBtn)
 
-    this.switchADTInstanceBtn.on("click",()=>{ adtInstanceSelectionDialog.popup() })
+    this.switchADTInstanceBtn.on("click",()=>{ startSelectionDialog.popup() })
     this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })
     this.editLayoutBtn.on("click",()=>{ editLayoutDialog.popup() })
 
 
     this.switchLayoutSelector.callBack_clickOption=(optionText,optionValue)=>{
-        editLayoutDialog.currentLayoutName=optionValue
+        globalCache.currentLayoutName=optionValue
         this.broadcastMessage({ "message": "layoutChange"})
         if(optionValue=="[NA]") this.switchLayoutSelector.changeName("Layout","")
         else this.switchLayoutSelector.changeName("Layout:",optionText)
@@ -42,7 +42,7 @@ mainToolbar.prototype.updateLayoutSelector = function () {
     this.switchLayoutSelector.clearOptions()
     this.switchLayoutSelector.addOption('[No Layout Specified]','[NA]')
 
-    for (var ind in editLayoutDialog.layoutJSON) {
+    for (var ind in globalCache.layoutJSON) {
         this.switchLayoutSelector.addOption(ind)
     }
 

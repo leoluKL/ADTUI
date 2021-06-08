@@ -1,15 +1,11 @@
 const simpleSelectMenu= require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
+const globalCache = require("./globalCache")
 
 function adtInstanceSelectionDialog() {
     this.filters={}
     this.previousSelectedADT=null
-    this.selectedADT=null;
     this.testTwinsInfo=null;
-
-    //stored purpose for global usage
-    this.storedOutboundRelationships={}
-    this.storedTwins={}
 
     if(!this.DOM){
         this.DOM = $('<div class="w3-modal" style="display:block;z-index:101"></div>')
@@ -141,12 +137,12 @@ adtInstanceSelectionDialog.prototype.setADTInstance=function(selectedADT){
         replaceButton.on("click",()=> { this.useFilterToReplace()  }  )
         this.buttonHolder.append(replaceButton)
     }
-    this.selectedADT = selectedADT
+    globalCache.selectedADT = selectedADT
     this.listFilters(selectedADT)
     this.chooseOneFilter("","")
     $.ajaxSetup({
         headers: {
-            'adtInstance': this.selectedADT
+            'adtInstance': globalCache.selectedADT
         }
     });
 }
@@ -168,8 +164,8 @@ adtInstanceSelectionDialog.prototype.delQuery=function(){
                         this.queryNameInput.val("")
                         this.queryInput.val("")
                         this.testResultTable.empty()
-                        delete this.filters[this.selectedADT][queryName]
-                        this.listFilters(this.selectedADT)
+                        delete this.filters[globalCache.selectedADT][queryName]
+                        this.listFilters(globalCache.selectedADT)
                         this.chooseOneFilter("", "")
                         $.post("twinsFilter/saveStartFilters", { filters: this.filters })
                         confirmDialogDiv.close();
@@ -191,8 +187,8 @@ adtInstanceSelectionDialog.prototype.saveQuery=function(){
         return
     }
 
-    this.filters[this.selectedADT][queryName]=queryStr
-    this.listFilters(this.selectedADT)
+    this.filters[globalCache.selectedADT][queryName]=queryStr
+    this.listFilters(globalCache.selectedADT)
 
     this.filterList.children().each((index,ele)=>{
         if($(ele).data("filterName")==queryName) {
@@ -222,7 +218,7 @@ adtInstanceSelectionDialog.prototype.testQuery=function(){
             var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey;font-weight:bold">ID</td><td style="border-bottom:solid 1px lightgrey;font-weight:bold">MODEL</td></tr>')
             this.testResultTable.append(tr)
             data.forEach((oneNode)=>{
-                this.storedTwins[oneNode["$dtId"]] = oneNode;
+                globalCache.storedTwins[oneNode["$dtId"]] = oneNode;
                 var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey">'+oneNode["$dtId"]+'</td><td style="border-bottom:solid 1px lightgrey">'+oneNode['$metadata']['$model']+'</td></tr>')
                 this.testResultTable.append(tr)
             })    
@@ -247,7 +243,7 @@ adtInstanceSelectionDialog.prototype.listFilters=function(adtInstanceName){
         this.assignEventToOneFilter(oneFilter)
         
         oneFilter.on("dblclick",(e)=>{
-            if(this.previousSelectedADT == this.selectedADT) this.useFilterToAppend();
+            if(this.previousSelectedADT == globalCache.selectedADT) this.useFilterToAppend();
             else this.useFilterToReplace();
         })
     }
@@ -273,7 +269,7 @@ adtInstanceSelectionDialog.prototype.useFilterToAppend=function(){
     if(this.previousSelectedADT==null){
         this.broadcastMessage({ "message": "ADTDatasourceChange_replace", "query": this.queryInput.val(), "twins":this.testTwinsInfo })
     }else{
-        this.previousSelectedADT=this.selectedADT
+        this.previousSelectedADT=globalCache.selectedADT
         this.broadcastMessage({ "message": "ADTDatasourceChange_append", "query": this.queryInput.val(), "twins":this.testTwinsInfo })
     }
     this.closeDialog()
@@ -284,52 +280,18 @@ adtInstanceSelectionDialog.prototype.closeDialog=function(){
     this.broadcastMessage({ "message": "ADTDatasourceDialog_closed"})
 }
 
-adtInstanceSelectionDialog.prototype.storeTwinRelationships_remove=function(relationsData){
-    relationsData.forEach((oneRelationship)=>{
-        var srcID=oneRelationship["srcID"]
-        if(this.storedOutboundRelationships[srcID]){
-            var arr=this.storedOutboundRelationships[srcID]
-            for(var i=0;i<arr.length;i++){
-                if(arr[i]['$relationshipId']==oneRelationship["relID"]){
-                    arr.splice(i,1)
-                    break;
-                }
-            }
-        }
-    })
-}
-
-adtInstanceSelectionDialog.prototype.storeTwinRelationships_append=function(relationsData){
-    relationsData.forEach((oneRelationship)=>{
-        if(!this.storedOutboundRelationships[oneRelationship['$sourceId']])
-            this.storedOutboundRelationships[oneRelationship['$sourceId']]=[]
-        this.storedOutboundRelationships[oneRelationship['$sourceId']].push(oneRelationship)
-    })
-}
-
-adtInstanceSelectionDialog.prototype.storeTwinRelationships=function(relationsData){
-    relationsData.forEach((oneRelationship)=>{
-        var twinID=oneRelationship['$sourceId']
-        this.storedOutboundRelationships[twinID]=[]
-    })
-
-    relationsData.forEach((oneRelationship)=>{
-        this.storedOutboundRelationships[oneRelationship['$sourceId']].push(oneRelationship)
-    })
-}
-
 adtInstanceSelectionDialog.prototype.useFilterToReplace=function(){
     if(this.queryInput.val()==""){
         alert("Please fill in query to fetch data from digital twin service..")
         return;
     }
     var ADTInstanceDoesNotChange=true
-    if(this.previousSelectedADT!=this.selectedADT){
-        for(var ind in this.storedOutboundRelationships) delete this.storedOutboundRelationships[ind]
-        for(var ind in this.storedTwins) delete this.storedTwins[ind]
+    if(this.previousSelectedADT!=globalCache.selectedADT){
+        for(var ind in globalCache.storedOutboundRelationships) delete globalCache.storedOutboundRelationships[ind]
+        for(var ind in globalCache.storedTwins) delete globalCache.storedTwins[ind]
         ADTInstanceDoesNotChange=false
     }
-    this.previousSelectedADT=this.selectedADT
+    this.previousSelectedADT=globalCache.selectedADT
     this.broadcastMessage({ "message": "ADTDatasourceChange_replace", "query": this.queryInput.val()
     , "twins":this.testTwinsInfo, "ADTInstanceDoesNotChange":ADTInstanceDoesNotChange })
     

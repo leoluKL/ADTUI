@@ -5,6 +5,8 @@ function routerDigitalTwin(){
     this.router = express.Router();
     this.useRoute("fetchUserData")
     this.useRoute("importModels","isPost")
+    this.useRoute("listModelsForIDs","isPost")
+    this.useRoute("listTwinsForIDs","isPost")
 }
 
 routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
@@ -26,6 +28,27 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
     //TODO:extract the models ID, twins ID and query models detail from ADT, skip twins detail as there maybe too many
     res.send(body)
 }
+
+routerDigitalTwin.prototype.listModelsForIDs =async function(req,res) {
+    try{
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listModelsForIDs", {json:req.body,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.send(body)
+}
+
+routerDigitalTwin.prototype.listTwinsForIDs =async function(req,res) {
+    try{
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listTwinsForIDs", {json:req.body,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.send(body)
+}
+
 
 routerDigitalTwin.prototype.importModels =async function(req,res) {
     try{

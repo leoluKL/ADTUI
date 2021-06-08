@@ -1,6 +1,6 @@
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 const simpleSelectMenu= require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
+const globalCache = require("./globalCache")
 
 function editLayoutDialog() {
     if(!this.DOM){
@@ -8,12 +8,10 @@ function editLayoutDialog() {
         $("body").append(this.DOM)
         this.DOM.hide()
     }
-    this.layoutJSON={}
-    this.currentLayoutName=null
 }
 
 editLayoutDialog.prototype.getCurADTName=function(){
-    var adtName = adtInstanceSelectionDialog.selectedADT
+    var adtName = globalCache.selectedADT
     var str = adtName.replace("https://", "")
     return str
 }
@@ -22,8 +20,8 @@ editLayoutDialog.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="ADTDatasourceChange_replace") {
         try{
             $.post("layout/readLayouts",{adtName:this.getCurADTName()}, (data, status) => {
-                if(data!="" && typeof(data)==="object") this.layoutJSON=data;
-                else this.layoutJSON={};
+                if(data!="" && typeof(data)==="object") globalCache.layoutJSON=data;
+                else globalCache.layoutJSON={};
                 this.broadcastMessage({ "message": "layoutsUpdated"})
             })
         }catch(e){
@@ -36,7 +34,7 @@ editLayoutDialog.prototype.rxMessage=function(msgPayload){
 editLayoutDialog.prototype.refillOptions = function () {
     this.switchLayoutSelector.clearOptions()
     
-    for(var ind in this.layoutJSON){
+    for(var ind in globalCache.layoutJSON){
         this.switchLayoutSelector.addOption(ind)
     }
 }
@@ -58,7 +56,7 @@ editLayoutDialog.prototype.popup = function () {
     saveAsNewBtn.on("click",()=>{this.saveIntoLayout(nameInput.val())})
 
 
-    if(!jQuery.isEmptyObject(this.layoutJSON)){
+    if(!jQuery.isEmptyObject(globalCache.layoutJSON)){
         var lbl=$('<div class="w3-bar w3-padding-16" style="text-align:center;">- OR -</div>')
         this.DOM.append(lbl) 
         var switchLayoutSelector=new simpleSelectMenu("",{fontSize:"1em",colorClass:"w3-light-gray",width:"120px"})
@@ -75,8 +73,8 @@ editLayoutDialog.prototype.popup = function () {
         saveAsBtn.on("click",()=>{this.saveIntoLayout(switchLayoutSelector.curSelectVal)})
         deleteBtn.on("click",()=>{this.deleteLayout(switchLayoutSelector.curSelectVal)})
 
-        if(this.currentLayoutName!=null){
-            switchLayoutSelector.triggerOptionValue(this.currentLayoutName)
+        if(globalCache.currentLayoutName!=null){
+            switchLayoutSelector.triggerOptionValue(globalCache.currentLayoutName)
         }else{
             switchLayoutSelector.triggerOptionIndex(0)
         }
@@ -109,10 +107,10 @@ editLayoutDialog.prototype.deleteLayout = function (layoutName) {
             , buttons:[
                 {
                     colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
-                        delete this.layoutJSON[layoutName]
-                        if (layoutName == this.currentLayoutName) this.currentLayoutName = null
+                        delete globalCache.layoutJSON[layoutName]
+                        if (layoutName == globalCache.currentLayoutName) globalCache.currentLayoutName = null
                         this.broadcastMessage({ "message": "layoutsUpdated" })
-                        $.post("layout/saveLayouts", { "adtName": this.getCurADTName(), "layouts": JSON.stringify(this.layoutJSON) })
+                        $.post("layout/saveLayouts", { "adtName": this.getCurADTName(), "layouts": JSON.stringify(globalCache.layoutJSON) })
                         confirmDialogDiv.close();
                         this.refillOptions()
                         this.switchLayoutSelector.triggerOptionIndex(0)

@@ -1,6 +1,7 @@
 const simpleTree=require("./simpleTree")
 const modelAnalyzer=require("./modelAnalyzer")
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
+const globalCache = require("./globalCache")
+
 
 function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM)
@@ -86,7 +87,7 @@ twinsTree.prototype.ADTDatasourceChange_append=function(twinQueryStr,twinsData){
     else {
         $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
             if(data=="") return;
-            data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+            data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
             this.appendAllTwins(data)
         })
     }
@@ -103,7 +104,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
         else {
             $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
                 if(data=="") data=[];
-                data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+                data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
                 this.replaceAllTwins(data)
             })
         }
@@ -143,7 +144,7 @@ twinsTree.prototype.ADTDatasourceChange_replace=function(twinQueryStr,twinsData,
             else {
                 $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
                     if(data=="") data=[];
-                    data.forEach((oneNode)=>{adtInstanceSelectionDialog.storedTwins[oneNode["$dtId"]] = oneNode});
+                    data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
                     this.replaceAllTwins(data)
                 })
             }
@@ -170,7 +171,7 @@ twinsTree.prototype.appendAllTwins= function(data){
     this.tree.groupNodes.forEach((gNode)=>{
         gNode.childLeafNodes.forEach(leafNode=>{
             var nodeId=leafNode.leafInfo["$dtId"]
-            if(adtInstanceSelectionDialog.storedOutboundRelationships[nodeId]==null) twinIDArr.push(nodeId)
+            if(globalCache.storedOutboundRelationships[nodeId]==null) twinIDArr.push(nodeId)
         })
     })
 
@@ -200,7 +201,7 @@ twinsTree.prototype.fetchAllRelationships= async function(twinIDArr){
         var smallArr= twinIDArr.splice(0, 100);
         var data=await this.fetchPartialRelationships(smallArr)
         if(data=="") continue;
-        adtInstanceSelectionDialog.storeTwinRelationships(data) //store them in global available array
+        globalCache.storeTwinRelationships(data) //store them in global available array
         this.broadcastMessage({ "message": "drawAllRelations",info:data})
     }
 }

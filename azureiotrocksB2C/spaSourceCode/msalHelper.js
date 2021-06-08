@@ -46,12 +46,14 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
     if(!globalAppSettings.isLocalTest){
         var token=await this.getToken()
         headersObj["Authorization"]=`Bearer ${token}`
-    } 
+    }
     return new Promise((resolve, reject) => {
         var ajaxContent={
             type: RESTMethod || 'GET',
             "headers":headersObj,
             url: globalAppSettings.taskMasterAPIURI+APIString,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
             crossDomain: true,
             success: function (responseData, textStatus, jqXHR) {
                 resolve(responseData)
@@ -60,7 +62,7 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
                 reject(responseData)
             }
         }
-        if(RESTMethod=="POST") ajaxContent.data=payload
+        if(RESTMethod=="POST") ajaxContent.data= JSON.stringify(payload)
         $.ajax(ajaxContent);
     })
 }

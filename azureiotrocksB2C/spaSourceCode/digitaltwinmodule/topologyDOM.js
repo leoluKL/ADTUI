@@ -1,15 +1,13 @@
 'use strict';
 
-const modelManagerDialog = require("./modelManagerDialog");
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
-const editLayoutDialog = require("./editLayoutDialog")
 const formatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 3,
     maximumFractionDigits: 3,
 });
 const simpleSelectMenu = require("./simpleSelectMenu")
-
+const simpleConfirmDialog = require("./simpleConfirmDialog")
+const globalCache = require("./globalCache")
 
 function topologyDOM(DOM){
     this.DOM=DOM
@@ -367,8 +365,8 @@ topologyDOM.prototype.drawRelations=function(relationsData){
 topologyDOM.prototype.reviewStoredRelationshipsToDraw=function(){
     //check the storedOutboundRelationships again and maybe some of them can be drawn now since targetNode is available
     var storedRelationArr=[]
-    for(var twinID in adtInstanceSelectionDialog.storedOutboundRelationships){
-        storedRelationArr=storedRelationArr.concat(adtInstanceSelectionDialog.storedOutboundRelationships[twinID])
+    for(var twinID in globalCache.storedOutboundRelationships){
+        storedRelationArr=storedRelationArr.concat(globalCache.storedOutboundRelationships[twinID])
     }
     this.drawRelations(storedRelationArr)
 }
@@ -392,10 +390,10 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
         relationsInfo.forEach((oneRelation)=>{
             var srcID=oneRelation['$sourceId']
             var targetID=oneRelation['$targetId']
-            if(adtInstanceSelectionDialog.storedTwins[srcID])
-                twinsInfo[srcID] = adtInstanceSelectionDialog.storedTwins[srcID]
-            if(adtInstanceSelectionDialog.storedTwins[targetID])
-                twinsInfo[targetID] = adtInstanceSelectionDialog.storedTwins[targetID]    
+            if(globalCache.storedTwins[srcID])
+                twinsInfo[srcID] = globalCache.storedTwins[srcID]
+            if(globalCache.storedTwins[targetID])
+                twinsInfo[targetID] = globalCache.storedTwins[targetID]    
         })
     })
     var tmpArr=[]
@@ -407,7 +405,8 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
 }
 
 topologyDOM.prototype.applyVisualDefinition=function(){
-    var visualJson=modelManagerDialog.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    //TODO:to change
+    //var visualJson=modelManagerDialog.visualDefinition[startSelectionDialog.selectedADT]
     if(visualJson==null) return;
     for(var modelID in visualJson){
         if(visualJson[modelID].color){
@@ -424,9 +423,8 @@ topologyDOM.prototype.applyVisualDefinition=function(){
 }
 
 topologyDOM.prototype.rxMessage=function(msgPayload){
-    if(msgPayload.message=="ADTDatasourceChange_replace"){
+    if(msgPayload.message=="startSelection_replace"){
         this.core.nodes().remove()
-        this.applyVisualDefinition()
     }else if(msgPayload.message=="replaceAllTwins") {
         this.core.nodes().remove()
         var eles= this.drawTwins(msgPayload.info)
@@ -438,7 +436,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="drawAllRelations"){
         var edges= this.drawRelations(msgPayload.info)
         if(edges!=null) {
-            if(editLayoutDialog.currentLayoutName==null)  this.noPosition_cose()
+            if(globalCache.currentLayoutName==null)  this.noPosition_cose()
         }
     }else if(msgPayload.message=="addNewTwin") {
         this.drawTwins([msgPayload.twinInfo],"animation")
@@ -479,9 +477,9 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
 }
 
 topologyDOM.prototype.applyNewLayout = function () {
-    var layoutName=editLayoutDialog.currentLayoutName
+    var layoutName=globalCache.currentLayoutName
     
-    var layoutDetail= editLayoutDialog.layoutJSON[layoutName]
+    var layoutDetail= globalCache.layoutJSON[layoutName]
     
     //remove all bending edge 
     this.core.edges().forEach(oneEdge=>{
@@ -545,9 +543,9 @@ topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipI
 
 
 topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
-    var layoutDict=editLayoutDialog.layoutJSON[layoutName]
+    var layoutDict=globalCache.layoutJSON[layoutName]
     if(!layoutDict){
-        layoutDict=editLayoutDialog.layoutJSON[layoutName]={}
+        layoutDict=globalCache.layoutJSON[layoutName]={}
     }
     
     if(this.core.nodes().size()==0) return;
@@ -583,7 +581,7 @@ topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
         }
     })
 
-    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(editLayoutDialog.layoutJSON)})
+    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(globalCache.layoutJSON)})
     this.broadcastMessage({ "message": "layoutsUpdated"})
 }
 
@@ -644,8 +642,29 @@ topologyDOM.prototype.addConnections = function (targetNode) {
 }
 
 topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
-    var confirmDialogDiv =  $('<div title="Add connections"></div>')
+    var confirmDialogDiv = new simpleConfirmDialog()
     var resultActions=[]
+    confirmDialogDiv.show(
+        { width: "450px" },
+        {
+            title: "Add connections"
+            , content: ""
+            , buttons: [
+                {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                        confirmDialogDiv.close();
+                        this.createConnections(resultActions)
+                    }
+                },
+                {
+                    colorClass: "w3-gray", text: "Cancel", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                    }
+                }
+            ]
+        }
+    )
+    confirmDialogDiv.dialogDiv.empty()
     preparationInfo.forEach((oneRow,index)=>{
         var fromNode=oneRow.from
         var toNode=oneRow.to
@@ -672,35 +691,15 @@ topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
             label.css("color","green")
             label.html("Add <b>"+connectionTypes[0]+"</b> connection from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
         }
-        confirmDialogDiv.append(label)
+        confirmDialogDiv.dialogDiv.append(label)
     })
-
-    $('body').append(confirmDialogDiv)
-    confirmDialogDiv.dialog({
-        width:450
-        ,height:300
-        ,resizable:false
-        ,buttons: [
-            {
-                text: "Confirm",
-                click: () => {
-                    this.createConnections(resultActions)
-                    confirmDialogDiv.dialog("destroy")
-                }
-            },
-            {
-                text: "Cancel",
-                click: () => { confirmDialogDiv.dialog("destroy") }
-            }
-        ]
-    });
 }
 
 topologyDOM.prototype.createConnections = function (resultActions) {
     // for each resultActions, calculate the appendix index, to avoid same ID is used for existed connections
     resultActions.forEach(oneAction=>{
         var maxExistedConnectionNumber=0
-        var existedRelations=adtInstanceSelectionDialog.storedOutboundRelationships[oneAction.from]
+        var existedRelations=globalCache.storedOutboundRelationships[oneAction.from]
         if(existedRelations==null) existedRelations=[]
         existedRelations.forEach(oneRelation=>{
             var oneRelationID=oneRelation['$relationshipId']
@@ -714,7 +713,7 @@ topologyDOM.prototype.createConnections = function (resultActions) {
 
     $.post("editADT/createRelations",{actions:resultActions}, (data, status) => {
         if(data=="") return;
-        adtInstanceSelectionDialog.storeTwinRelationships_append(data)
+        globalCache.storeTwinRelationships_append(data)
         this.drawRelations(data)
     })
 }

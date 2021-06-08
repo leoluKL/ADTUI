@@ -1,10 +1,9 @@
 const modelAnalyzer=require("./modelAnalyzer")
-const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const modelEditorDialog = require("./modelEditorDialog")
+const globalCache = require("./globalCache")
 
 function modelManagerDialog() {
-    this.visualDefinition={}
     this.models={}
     if(!this.DOM){
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
@@ -18,7 +17,7 @@ modelManagerDialog.prototype.preparationFunc = async function () {
     return new Promise((resolve, reject) => {
         try{
             $.get("visualDefinition/readVisualDefinition", (data, status) => {
-                if(data!="" && typeof(data)==="object") this.visualDefinition=data;
+                if(data!="" && typeof(data)==="object") globalCache.visualDefinition=data;
                 resolve()
             })
         }catch(e){
@@ -140,7 +139,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
         var dataUrl= await this.resizeImgFile(theFile,70)
         if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
 
-        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        var visualJson=globalCache.visualDefinition[globalCache.selectedADT]
         if(!visualJson[modelID]) visualJson[modelID]={}
         visualJson[modelID].avarta=dataUrl
         this.saveVisualDefinition()
@@ -148,7 +147,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     })
 
     clearAvartaBtn.on("click", ()=>{
-        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        var visualJson=globalCache.visualDefinition[globalCache.selectedADT]
         if(visualJson[modelID]) delete visualJson[modelID].avarta 
         if(this.avartaImg) this.avartaImg.removeAttr('src');
         this.saveVisualDefinition()
@@ -172,8 +171,8 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
                                 if(data==""){//successful
                                     this.listModels("shouldBroadcast")
                                     this.panelCard.empty()
-                                    if(this.visualDefinition[adtInstanceSelectionDialog.selectedADT] && this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID] ){
-                                        delete this.visualDefinition[adtInstanceSelectionDialog.selectedADT][modelID]
+                                    if(globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][modelID] ){
+                                        delete globalCache.visualDefinition[globalCache.selectedADT][modelID]
                                         this.saveVisualDefinition()
                                     }
                                 }else{ //error happens
@@ -230,7 +229,7 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     
     var avartaImg=$("<img></img>")
     rightPart.append(avartaImg)
-    var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition[globalCache.selectedADT]
     if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)
     this.avartaImg=avartaImg;
 
@@ -249,7 +248,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     containerDiv.append(contentDOM)
 
     var definiedColor=null
-    var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition[globalCache.selectedADT]
     if(relatinshipName==null){
         if(visualJson && visualJson[modelID] && visualJson[modelID].color) definiedColor=visualJson[modelID].color
     }else{
@@ -273,10 +272,10 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     }
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value
-        colorSelector.css("color",selectColorCode)
-        if(!this.visualDefinition[adtInstanceSelectionDialog.selectedADT]) 
-            this.visualDefinition[adtInstanceSelectionDialog.selectedADT]={}
-        var visualJson=this.visualDefinition[adtInstanceSelectionDialog.selectedADT]
+        colorSelector.css("color", selectColorCode)
+        if (!globalCache.visualDefinition[globalCache.selectedADT])
+            globalCache.visualDefinition[globalCache.selectedADT] = {}
+        var visualJson = globalCache.visualDefinition[globalCache.selectedADT]
 
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
@@ -292,7 +291,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 }
 
 modelManagerDialog.prototype.saveVisualDefinition=function(){
-    $.post("visualDefinition/saveVisualDefinition",{visualDefinitionJson:this.visualDefinition})
+    $.post("visualDefinition/saveVisualDefinition",{visualDefinitionJson:globalCache.visualDefinition})
 }
 
 modelManagerDialog.prototype.fillRelationshipInfo=function(validRelationships,parentDom){
