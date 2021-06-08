@@ -3,7 +3,7 @@ const adtHelper=require("./adtHelper")
 
 function routerQueryADT(){
     this.router = express.Router();
-    this.useRoute("listModels")
+    this.useRoute("listModelsForIDs","post")
 }
 
 routerQueryADT.prototype.useRoute=function(routeStr,isPost){
@@ -12,15 +12,20 @@ routerQueryADT.prototype.useRoute=function(routeStr,isPost){
     })
 }
 
-routerQueryADT.prototype.listModels =async function(req,res) {
+routerQueryADT.prototype.listModelsForIDs =async function(req,res) {
     try{
-        var reArr=[]
-        var models = await adtHelper.ADTClient.listModels([], true);
-        for await (const modelSet of models.byPage({ maxPageSize: 1000 })) { //should be only one page
-            //reArr=modelSet.value
-            modelSet.value.forEach(oneModel=>{reArr.push(oneModel.model)})
-        }
-        res.send(reArr)
+        var IDArr=req.body;
+        var promiseArr=[]
+        IDArr.forEach(oneID=>{
+            promiseArr.push(adtHelper.ADTClient.getModel(oneID, true))
+        })
+        var results=await Promise.allSettled(promiseArr);
+        var resArr=[]
+        results.forEach(oneResult=>{
+            if(oneResult["status"]=="fulfilled") resArr.push(oneResult.value.model)
+        })
+
+        res.send(resArr)
     }catch(e){
         res.status(400).send(e.message);
     }
