@@ -4,6 +4,7 @@ const adtHelper=require("./adtHelper")
 function routerQueryADT(){
     this.router = express.Router();
     this.useRoute("listModelsForIDs","post")
+    this.useRoute("listTwinsForIDs","post")
 }
 
 routerQueryADT.prototype.useRoute=function(routeStr,isPost){
@@ -23,6 +24,26 @@ routerQueryADT.prototype.listModelsForIDs =async function(req,res) {
         var resArr=[]
         results.forEach(oneResult=>{
             if(oneResult["status"]=="fulfilled") resArr.push(oneResult.value.model)
+        })
+
+        res.send(resArr)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+}
+
+routerQueryADT.prototype.listTwinsForIDs =async function(req,res) {
+    try{
+        var IDArr=req.body;
+        var promiseArr=[]
+        IDArr.forEach(oneID=>{
+            promiseArr.push(adtHelper.ADTClient.getDigitalTwin(oneID))
+        })
+        var results=await Promise.allSettled(promiseArr);
+        
+        var resArr=[]
+        results.forEach(oneResult=>{
+            if(oneResult["status"]=="fulfilled") resArr.push(oneResult.value.body)
         })
 
         res.send(resArr)
