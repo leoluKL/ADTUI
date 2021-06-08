@@ -13,6 +13,7 @@ simpleConfirmDialog.prototype.show=function(cssOptions,otherOptions){
     var dialogDiv=$('<div class="w3-container" style="margin-top:10px;margin-bottom:10px"></div>')
     dialogDiv.text(otherOptions.content)
     this.DOM.append(dialogDiv)
+    this.dialogDiv=dialogDiv
 
     this.bottomBar=$('<div class="w3-bar"></div>')
     this.DOM.append(this.bottomBar)

@@ -1,6 +1,7 @@
 const adtInstanceSelectionDialog = require("./adtInstanceSelectionDialog");
 const modelAnalyzer = require("./modelAnalyzer");
 const simpleSelectMenu= require("./simpleSelectMenu")
+const simpleConfirmDialog = require("./simpleConfirmDialog")
 
 function infoPanel() {
     this.continerDOM=$('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
@@ -244,7 +245,8 @@ infoPanel.prototype.deleteSelected=async function(){
             relationsArr.splice(i,1)
         }
     }
-    var confirmDialogDiv=$("<div/>")
+
+    var confirmDialogDiv = new simpleConfirmDialog()
     var dialogStr=""
     var twinNumber=twinIDArr.length;
     var relationsNumber = relationsArr.length;
@@ -252,27 +254,28 @@ infoPanel.prototype.deleteSelected=async function(){
     if(twinNumber>0 && relationsNumber>0) dialogStr+=" and additional "
     if(relationsNumber>0) dialogStr +=  relationsNumber+" relation"+((relationsNumber>1)?"s":"" )
     dialogStr+=" will be deleted. Please confirm"
-    confirmDialogDiv.text(dialogStr)
-    $('body').append(confirmDialogDiv)
-    confirmDialogDiv.dialog({
-        buttons: [
-          {
-            text: "Confirm",
-            click: ()=> {
-                if(twinIDArr.length>0) this.deleteTwins(twinIDArr)
-                if(relationsArr.length>0) this.deleteRelations(relationsArr)
-                confirmDialogDiv.dialog( "destroy" );
-                this.DOM.empty()
-            }
-          },
-          {
-            text: "Cancel",
-            click: ()=> {
-                confirmDialogDiv.dialog( "destroy" );
-            }
-          }
-        ]
-      }); 
+    confirmDialogDiv.show(
+        { width: "350px" },
+        {
+            title: "Confirm"
+            , content:dialogStr
+            , buttons: [
+                {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                        if (twinIDArr.length > 0) this.deleteTwins(twinIDArr)
+                        if (relationsArr.length > 0) this.deleteRelations(relationsArr)
+                        confirmDialogDiv.close()
+                        this.DOM.empty()
+                    }
+                },
+                {
+                    colorClass: "w3-gray", text: "Cancel", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                    }
+                }
+            ]
+        }
+    )
 }
 
 infoPanel.prototype.deleteTwins=async function(twinIDArr){   

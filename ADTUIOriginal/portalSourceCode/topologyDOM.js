@@ -9,6 +9,7 @@ const formatter = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 3,
 });
 const simpleSelectMenu = require("./simpleSelectMenu")
+const simpleConfirmDialog = require("./simpleConfirmDialog")
 
 
 function topologyDOM(DOM){
@@ -644,8 +645,29 @@ topologyDOM.prototype.addConnections = function (targetNode) {
 }
 
 topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
-    var confirmDialogDiv =  $('<div title="Add connections"></div>')
+    var confirmDialogDiv = new simpleConfirmDialog()
     var resultActions=[]
+    confirmDialogDiv.show(
+        { width: "450px" },
+        {
+            title: "Add connections"
+            , content: ""
+            , buttons: [
+                {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                        confirmDialogDiv.close();
+                        this.createConnections(resultActions)
+                    }
+                },
+                {
+                    colorClass: "w3-gray", text: "Cancel", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                    }
+                }
+            ]
+        }
+    )
+    confirmDialogDiv.dialogDiv.empty()
     preparationInfo.forEach((oneRow,index)=>{
         var fromNode=oneRow.from
         var toNode=oneRow.to
@@ -672,28 +694,8 @@ topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
             label.css("color","green")
             label.html("Add <b>"+connectionTypes[0]+"</b> connection from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
         }
-        confirmDialogDiv.append(label)
+        confirmDialogDiv.dialogDiv.append(label)
     })
-
-    $('body').append(confirmDialogDiv)
-    confirmDialogDiv.dialog({
-        width:450
-        ,height:300
-        ,resizable:false
-        ,buttons: [
-            {
-                text: "Confirm",
-                click: () => {
-                    this.createConnections(resultActions)
-                    confirmDialogDiv.dialog("destroy")
-                }
-            },
-            {
-                text: "Cancel",
-                click: () => { confirmDialogDiv.dialog("destroy") }
-            }
-        ]
-    });
 }
 
 topologyDOM.prototype.createConnections = function (resultActions) {
