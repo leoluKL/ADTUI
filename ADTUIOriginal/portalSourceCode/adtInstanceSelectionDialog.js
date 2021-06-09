@@ -138,6 +138,8 @@ adtInstanceSelectionDialog.prototype.setADTInstance=function(selectedADT){
         this.buttonHolder.append(replaceButton)
     }
     globalCache.selectedADT = selectedADT
+    if (!globalCache.visualDefinition[globalCache.selectedADT])
+            globalCache.visualDefinition[globalCache.selectedADT] = {}
     this.listFilters(selectedADT)
     this.chooseOneFilter("","")
     $.ajaxSetup({

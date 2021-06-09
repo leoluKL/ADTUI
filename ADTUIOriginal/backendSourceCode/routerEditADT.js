@@ -47,6 +47,7 @@ routerEditADT.prototype.createRelations =async function(adtClient,req,res) {
             succeedList.push(oneSet.value.body) 
         }
     })
+    //console.log(results)
     res.send(succeedList)
 }
 
@@ -106,7 +107,6 @@ routerEditADT.prototype.batchImportTwins = async function (adtClient, req, res) 
     })
     var results=await Promise.allSettled(promiseArr);
 
-
     var succeedList=[]
     results.forEach((oneSet,index)=>{
         if(oneSet.status=="fulfilled") {
@@ -114,6 +114,7 @@ routerEditADT.prototype.batchImportTwins = async function (adtClient, req, res) 
             succeedList.push(oneSet.value.body) 
         }
     })
+    console.log(results)
     res.send(succeedList)
 }
 

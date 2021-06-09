@@ -166,6 +166,7 @@ infoPanel.prototype.drawButtons=function(selectType){
     actualImportTwinsBtn.change((evt)=>{
         var files = evt.target.files; // FileList object
         this.readTwinsFilesContentAndImport(files)
+        actualImportTwinsBtn.val("")
     })
     if(selectType==null) return;
 
@@ -295,6 +296,7 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
     var numOfTwins=twinsImportResult.length
     var numOfRelations=relationsImportResult.length
     var str="Add "+numOfTwins+ " node"+((numOfTwins<=1)?"":"s")+", "+numOfRelations+" relationship"+((numOfRelations<=1)?"":"s")
+    str+=`. (Raw twin records:${importTwins.length}); Raw relations records:${importRelations.length})`
     var confirmDialogDiv = new simpleConfirmDialog()
     confirmDialogDiv.show(
         { width: "200px" },

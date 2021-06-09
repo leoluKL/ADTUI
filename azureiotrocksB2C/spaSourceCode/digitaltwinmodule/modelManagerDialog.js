@@ -36,6 +36,7 @@ modelManagerDialog.prototype.popup = async function() {
     actualImportModelsBtn.change((evt)=>{
         var files = evt.target.files; // FileList object
         this.readModelFilesContentAndImport(files)
+        actualImportModelsBtn.val("")
     })
     modelEditorBtn.on("click",()=>{
         this.DOM.hide()
@@ -141,6 +142,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
         visualJson[modelID].avarta=dataUrl
         this.saveVisualDefinition()
         this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"avarta":dataUrl })
+        actualImportPicBtn.val("")
     })
 
     clearAvartaBtn.on("click", ()=>{
