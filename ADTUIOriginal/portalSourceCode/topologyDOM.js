@@ -79,13 +79,13 @@ topologyDOM.prototype.init=function(){
             {selector: 'edge:selected',
             style: {
                 'width': 3,
-                'line-color': 'red',
+                'line-color': 'LawnGreen',
                 'target-arrow-color': 'red',
                 'source-arrow-color': 'red'
             }},
             {selector: 'node:selected',
             style: {
-                'border-color':"red",
+                'border-color':"LawnGreen",
                 'border-width':2,
                 'background-color': 'Gray'
             }}
