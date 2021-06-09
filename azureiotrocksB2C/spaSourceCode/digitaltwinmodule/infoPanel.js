@@ -40,8 +40,9 @@ function infoPanel() {
     });
     this.continerDOM.append(this.DOM)
     $('body').append(this.continerDOM)
-    this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl key to select multiple in tree view</a>")
+    this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press ctrl key to select multiple in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:5px'>Import twins data by clicking button below</a>")
 
+    this.drawButtons(null)
     this.selectedObjects=null;
 }
 
@@ -144,16 +145,35 @@ infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,
 }
 
 infoPanel.prototype.drawButtons=function(selectType){
-    var refreshBtn=$('<button class="w3-bar-item w3-button w3-black"><i class="fa fa-refresh"></i></button>')
-    refreshBtn.on("click",()=>{this.refreshInfomation()})
-    this.DOM.append(refreshBtn)
+    var impBtn=$('<button class="w3-bar-item w3-button w3-blue"><i class="fa fa-arrow-circle-o-down"></i></button>')
+    var actualImportTwinsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
+    if(selectType!=null){
+        var refreshBtn=$('<button class="w3-bar-item w3-button w3-black"><i class="fa fa-refresh"></i></button>')
+        var expBtn=$('<button class="w3-bar-item w3-button w3-green"><i class="fa fa-arrow-circle-o-up"></i></button>')    
+        this.DOM.append(refreshBtn,expBtn,impBtn,actualImportTwinsBtn)
+        refreshBtn.on("click",()=>{this.refreshInfomation()})
+        expBtn.on("click",()=>{
+            //find out the twins in selection and their connections (filter both src and target within the selected twins)
+            //and export them
+            this.exportSelected()
+        })    
+    }else{
+        this.DOM.append(impBtn,actualImportTwinsBtn)
+    }
+    
+    impBtn.on("click",()=>{actualImportTwinsBtn.trigger('click');})
+    actualImportTwinsBtn.change((evt)=>{
+        var files = evt.target.files; // FileList object
+        this.readTwinsFilesContentAndImport(files)
+    })
+    if(selectType==null) return;
 
     if(selectType=="singleRelationship"){
-        var delBtn =  $('<button style="width:80%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+        var delBtn =  $('<button style="width:50%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         this.DOM.append(delBtn)
         delBtn.on("click",()=>{this.deleteSelected()})
     }else if(selectType=="singleNode" || selectType=="multiple"){
-        var delBtn = $('<button style="width:80%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+        var delBtn = $('<button style="width:50%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         var connectToBtn =$('<button style="width:45%"  class="w3-button w3-border">Connect to</button>')
         var connectFromBtn = $('<button style="width:45%" class="w3-button w3-border">Connect from</button>')
         var showInboundBtn = $('<button  style="width:45%" class="w3-button w3-border">Query Inbound</button>')
@@ -186,6 +206,137 @@ infoPanel.prototype.drawButtons=function(selectType){
         coseLayoutBtn.on("click",()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
         hideBtn.on("click",()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
     }
+}
+
+infoPanel.prototype.exportSelected=async function(){
+    var arr=this.selectedObjects;
+    if(arr.length==0) return;
+    var twinIDArr=[]
+    var twinToBeStored=[]
+    var twinIDs={}
+    arr.forEach(element => {
+        if (element['$sourceId']) return
+        twinIDArr.push(element['$dtId'])
+        var anExpTwin={}
+        anExpTwin["$metadata"]={"$model":element["$metadata"]["$model"]}
+        for(var ind in element){
+            if(ind=="$metadata" || ind=="$etag") continue 
+            else anExpTwin[ind]=element[ind]
+        }
+        twinToBeStored.push(anExpTwin)
+        twinIDs[element['$dtId']]=1
+    });
+    var relationsToBeStored=[]
+    twinIDArr.forEach(oneID=>{
+        var relations=globalCache.storedOutboundRelationships[oneID]
+        if(!relations) return;
+        relations.forEach(oneRelation=>{
+            var targetID=oneRelation["$targetId"]
+            if(twinIDs[targetID]) {
+                var obj={}
+                for(var ind in oneRelation){
+                    if(ind =="$etag"||ind =="$relationshipId"||ind =="$sourceId"||ind =="sourceModel") continue
+                    obj[ind]=oneRelation[ind]
+                }
+                var oneAction={"$srcId":oneID,
+                                "$relationshipId":oneRelation["$relationshipId"],
+                                "obj":obj}
+                relationsToBeStored.push(oneAction)
+            }
+        })
+    })
+    var finalJSON={"twins":twinToBeStored,"relations":relationsToBeStored}
+    var pom = $("<a></a>")
+    pom.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(finalJSON)));
+    pom.attr('download', "exportTwinsData.json");
+    pom[0].click()
+}
+
+infoPanel.prototype.readOneFile= async function(aFile){
+    return new Promise((resolve, reject) => {
+        try{
+            var reader = new FileReader();
+            reader.onload = ()=> {
+                resolve(reader.result)
+            };
+            reader.readAsText(aFile);
+        }catch(e){
+            reject(e)
+        }
+    })
+}
+infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
+    var importTwins=[]
+    var importRelations=[]
+    for (var i = 0, f; f = files[i]; i++) {
+        // Only process json files.
+        if (f.type!="application/json") continue;
+        try{
+            var str= await this.readOneFile(f)
+            var obj=JSON.parse(str)
+            if(obj.twins) importTwins=importTwins.concat(obj.twins)
+            if(obj.relations) importRelations=importRelations.concat(obj.relations)
+        }catch(err){
+            alert(err)
+        }
+    }
+
+    var twinsImportResult= await this.batchImportTwins(importTwins)
+    twinsImportResult.forEach(data=>{
+        globalCache.storedTwins[data["$dtId"]] = data;
+    })
+    this.broadcastMessage({ "message": "addNewTwins",twinsInfo:twinsImportResult})
+
+    var relationsImportResult=await this.batchImportRelations(importRelations)
+    globalCache.storeTwinRelationships_append(relationsImportResult)
+    this.broadcastMessage({ "message": "drawAllRelations",info:relationsImportResult})
+
+    var numOfTwins=twinsImportResult.length
+    var numOfRelations=relationsImportResult.length
+    var str="Add "+numOfTwins+ " node"+((numOfTwins<=1)?"":"s")+", "+numOfRelations+" relationship"+((numOfRelations<=1)?"":"s")
+    var confirmDialogDiv = new simpleConfirmDialog()
+    confirmDialogDiv.show(
+        { width: "200px" },
+        {
+            title: "Import Result"
+            , content:str
+            , buttons: [
+                {
+                    colorClass: "w3-gray", text: "Ok", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                    }
+                }
+            ]
+        }
+    )
+}
+
+infoPanel.prototype.batchImportTwins=async function(twins){
+    return new Promise((resolve, reject) => {
+        if(twins.length==0) resolve([])
+        try{
+            $.post("editADT/batchImportTwins",{"twins":JSON.stringify(twins)}, (data)=> {
+                if (data == "") data=[]
+                resolve(data)
+            });
+        }catch(e){
+            reject(e)
+        }
+    })
+}
+
+infoPanel.prototype.batchImportRelations=async function(relations){
+    return new Promise((resolve, reject) => {
+        if(relations.length==0) resolve([])
+        try{
+            $.post("editADT/createRelations",{"actions":JSON.stringify(relations)}, (data)=> {
+                if (data == "") data=[]
+                resolve(data)
+            });
+        }catch(e){
+            reject(e)
+        }
+    })
 }
 
 infoPanel.prototype.refreshInfomation=async function(){
@@ -265,6 +416,7 @@ infoPanel.prototype.deleteSelected=async function(){
                         if (relationsArr.length > 0) this.deleteRelations(relationsArr)
                         confirmDialogDiv.close()
                         this.DOM.empty()
+                        this.drawButtons(null)
                     }
                 },
                 {

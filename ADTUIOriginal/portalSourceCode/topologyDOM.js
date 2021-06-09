@@ -439,6 +439,8 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         }
     }else if(msgPayload.message=="addNewTwin") {
         this.drawTwins([msgPayload.twinInfo],"animation")
+    }else if(msgPayload.message=="addNewTwins") {
+        this.drawTwins(msgPayload.twinsInfo,"animation")
     }else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
     else if(msgPayload.message=="selectNodes"){
         this.core.nodes().unselect()
@@ -709,8 +711,19 @@ topologyDOM.prototype.createConnections = function (resultActions) {
         })
         oneAction.IDindex=maxExistedConnectionNumber
     })
+    var finalActions=[]
+    resultActions.forEach(oneAction=>{
+        var oneFinalAction={}
+        oneFinalAction["$srcId"]=oneAction["from"]
+        oneFinalAction["$relationshipId"]=oneAction["from"]+";"+oneAction["to"]+";"+oneAction["connect"]+";"+oneAction["IDindex"]
+        oneFinalAction["obj"]={
+            "$targetId": oneAction["to"],
+            "$relationshipName": oneAction["connect"]
+        }
+        finalActions.push(oneFinalAction)
+    })
 
-    $.post("editADT/createRelations",{actions:resultActions}, (data, status) => {
+    $.post("editADT/createRelations",{actions:JSON.stringify(finalActions)}, (data, status) => {
         if(data=="") return;
         globalCache.storeTwinRelationships_append(data)
         this.drawRelations(data)

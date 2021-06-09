@@ -8,6 +8,7 @@ function routerEditADT(adtClients){
     this.useRoute("importModels","isPost")
     this.useRoute("deleteModel","isPost")
     this.useRoute("upsertDigitalTwin","isPost")
+    this.useRoute("batchImportTwins","isPost")
     this.useRoute("deleteTwins","isPost")
     this.useRoute("createRelations","isPost")
     this.useRoute("deleteRelations","isPost")
@@ -32,16 +33,12 @@ routerEditADT.prototype.deleteRelations =async function(adtClient,req,res) {
 }
 
 routerEditADT.prototype.createRelations =async function(adtClient,req,res) {
-    var actions=req.body.actions;
+    var actions=JSON.parse(req.body.actions);
     var promiseArr=[]
     actions.forEach(oneAction=>{
-        var relationshipID=oneAction["from"]+";"+oneAction["to"]+";"+oneAction["connect"]+";"+oneAction["IDindex"]
-        var obj={
-            "$targetId": oneAction["to"],
-            "$relationshipName": oneAction["connect"]
-          }
-        promiseArr.push(adtClient.upsertRelationship(oneAction["from"],relationshipID,obj))
+        promiseArr.push(adtClient.upsertRelationship(oneAction["$srcId"],oneAction["$relationshipId"],oneAction["obj"]))
     })
+
     var results=await Promise.allSettled(promiseArr);
     var succeedList=[]
     results.forEach((oneSet,index)=>{
@@ -97,6 +94,27 @@ routerEditADT.prototype.useRoute=function(routeStr,isPost){
         if (!adtClient) res.end()
         this[routeStr](adtClient,req,res)
     })
+}
+
+routerEditADT.prototype.batchImportTwins = async function (adtClient, req, res) {
+    var promiseArr=[]
+    var twins=JSON.parse(req.body.twins);
+    var idArr=[]
+    twins.forEach(oneTwin=>{
+        idArr.push(oneTwin['$dtId'])
+        promiseArr.push(adtClient.upsertDigitalTwin(oneTwin['$dtId'], JSON.stringify(oneTwin)))
+    })
+    var results=await Promise.allSettled(promiseArr);
+
+
+    var succeedList=[]
+    results.forEach((oneSet,index)=>{
+        if(oneSet.status=="fulfilled") {
+            //console.log(JSON.stringify(oneSet,null,2))
+            succeedList.push(oneSet.value.body) 
+        }
+    })
+    res.send(succeedList)
 }
 
 routerEditADT.prototype.upsertDigitalTwin = async function (adtClient, req, res) {

@@ -46,6 +46,9 @@ twinsTree.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
     else if(msgPayload.message=="ADTModelsChange") this.refreshModels(msgPayload.models)
     else if(msgPayload.message=="addNewTwin") this.drawOneTwin(msgPayload.twinInfo)
+    else if(msgPayload.message=="addNewTwins") {
+        msgPayload.twinsInfo.forEach(oneTwinInfo=>{this.drawOneTwin(oneTwinInfo)})
+    }
     else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
 }
 
