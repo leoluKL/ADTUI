@@ -373,14 +373,12 @@ topologyDOM.prototype.reviewStoredRelationshipsToDraw=function(){
 
 topologyDOM.prototype.drawTwinsAndRelations=function(data){
     var twinsAndRelations=data.childTwinsAndRelations
-    var combineTwins=this.core.collection()
 
     //draw those new twins first
     twinsAndRelations.forEach(oneSet=>{
         var twinInfoArr=[]
         for(var ind in oneSet.childTwins) twinInfoArr.push(oneSet.childTwins[ind])
         var eles=this.drawTwins(twinInfoArr,"animation")
-        combineTwins=combineTwins.union(eles)
     })
 
     //draw those known twins from the relationships

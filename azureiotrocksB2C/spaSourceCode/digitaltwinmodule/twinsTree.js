@@ -182,7 +182,25 @@ twinsTree.prototype.drawTwinsAndRelations= function(data){
             this.drawOneTwin(oneTwin)
         }
     })
+    
+    //draw those known twins from the relationships
+    var twinsInfo={}
+    data.childTwinsAndRelations.forEach(oneSet=>{
+        var relationsInfo=oneSet["relationships"]
+        relationsInfo.forEach((oneRelation)=>{
+            var srcID=oneRelation['$sourceId']
+            var targetID=oneRelation['$targetId']
+            if(globalCache.storedTwins[srcID])
+                twinsInfo[srcID] = globalCache.storedTwins[srcID]
+            if(globalCache.storedTwins[targetID])
+                twinsInfo[targetID] = globalCache.storedTwins[targetID]    
+        })
+    })
+    var tmpArr=[]
+    for(var twinID in twinsInfo) tmpArr.push(twinsInfo[twinID])
+    tmpArr.forEach(oneTwin=>{this.drawOneTwin(oneTwin)})
 }
+
 twinsTree.prototype.drawOneTwin= function(twinInfo){
     var groupName=this.modelIDMapToName[twinInfo["$metadata"]["$model"]]
     this.tree.addLeafnodeToGroup(groupName,twinInfo,"skipRepeat")
