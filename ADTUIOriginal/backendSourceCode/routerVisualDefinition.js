@@ -29,6 +29,7 @@ routerVisualDefinition.prototype.readVisualDefinition=function(req,res){
 routerVisualDefinition.prototype.saveVisualDefinition=function(req,res){
     var visualDefinitionJson=req.body.visualDefinitionJson
     fs.writeFile(visualDefinitionFile, JSON.stringify(visualDefinitionJson), err => {if(err) console.log(err) });
+    res.end()
 }
 
 module.exports = () => { return (new routerVisualDefinition()).router }
