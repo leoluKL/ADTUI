@@ -28,7 +28,8 @@ modelManagerDialog.prototype.popup = async function() {
     var importModelsBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Import</button>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
     var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create Model</button>')
-    this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn, modelEditorBtn)
+    var exportModelBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Download Models</button>')
+    this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn, modelEditorBtn,exportModelBtn)
     importModelsBtn.on("click", ()=>{
         actualImportModelsBtn.trigger('click');
     });
@@ -40,7 +41,14 @@ modelManagerDialog.prototype.popup = async function() {
         this.DOM.hide()
         modelEditorDialog.popup()
     })
-
+    exportModelBtn.on("click", () => {
+        var modelArr=[]
+        for(var modelName in this.models) modelArr.push(this.models[modelName])
+        var pom = $("<a></a>")
+        pom.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(modelArr)));
+        pom.attr('download', "exportModels.json");
+        pom[0].click()
+    })
 
     var row2=$('<div class="w3-cell-row" style="margin-top:2px"></div>')
     this.contentDOM.append(row2)
@@ -346,7 +354,8 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
         try{
             var str= await this.readOneFile(f)
             var obj=JSON.parse(str)
-            fileContentArr.push(obj)
+            if(Array.isArray(obj)) fileContentArr=fileContentArr.concat(obj)
+            else fileContentArr.push(obj)
         }catch(err){
             alert(err)
         }
