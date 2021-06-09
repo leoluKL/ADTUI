@@ -5,6 +5,9 @@ function simpleSelectMenu(buttonName,options){
         this.DOM=$('<div class="w3-dropdown-click"></div>')
     }else{
         this.DOM=$('<div class="w3-dropdown-hover "></div>')
+        this.DOM.on("mouseover",(e)=>{
+            this.adjustDropDownPosition()
+        })
     }
     
     this.button=$('<button class="w3-button" style="outline: none;"><a>'+buttonName+'</a><a style="font-weight:bold;padding-left:2px"></a><i class="fa fa-caret-down" style="padding-left:3px"></i></button>')
@@ -13,6 +16,7 @@ function simpleSelectMenu(buttonName,options){
     if(options.colorClass) this.button.addClass(options.colorClass)
     if(options.width) this.button.css("width",options.width)
     if(options.buttonCSS) this.button.css(options.buttonCSS)
+    if(options.adjustPositionAnchor) this.adjustPositionAnchor=options.adjustPositionAnchor
 
     this.optionContentDOM=$('<div class="w3-dropdown-content w3-bar-block w3-card-4"></div>')
     if(options.optionListHeight) this.optionContentDOM.css({height:options.optionListHeight+"px","overflow-y":"auto","overflow-x":"visible"})
@@ -24,10 +28,19 @@ function simpleSelectMenu(buttonName,options){
 
     if(options.isClickable){
         this.button.on("click",(e)=>{
+            this.adjustDropDownPosition()
             if(this.optionContentDOM.hasClass("w3-show"))  this.optionContentDOM.removeClass("w3-show")
             else this.optionContentDOM.addClass("w3-show")
         })    
     }
+}
+
+simpleSelectMenu.prototype.adjustDropDownPosition=function(){
+    if(!this.adjustPositionAnchor) return;
+    var offset=this.DOM.offset()
+    var newTop=offset.top-this.adjustPositionAnchor.top
+    var newLeft=offset.left-this.adjustPositionAnchor.left
+    this.optionContentDOM.css({"top":newTop+"px","left":newLeft+"px"})
 }
 
 simpleSelectMenu.prototype.findOption=function(optionValue){

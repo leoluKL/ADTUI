@@ -97,8 +97,8 @@ modelEditorDialog.prototype.chooseTemplate=function(tempalteName){
     new displayNameRow(this.dtdlobj,this.leftSpan,()=>{this.refreshDTDL()})
 
     if(!this.dtdlobj["contents"])this.dtdlobj["contents"]=[]
-    new parametersRow(this.dtdlobj["contents"],this.leftSpan,()=>{this.refreshDTDL()})
-    new relationsRow(this.dtdlobj["contents"],this.leftSpan,()=>{this.refreshDTDL()})
+    new parametersRow(this.dtdlobj["contents"],this.leftSpan,()=>{this.refreshDTDL()},this.DOM.offset())
+    new relationsRow(this.dtdlobj["contents"],this.leftSpan,()=>{this.refreshDTDL()},this.DOM.offset())
     new componentsRow(this.dtdlobj["contents"],this.leftSpan,()=>{this.refreshDTDL()})
 
     if(!this.dtdlobj["extends"])this.dtdlobj["extends"]=[]
@@ -224,7 +224,7 @@ function singleComponentRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
     })
 }
 
-function relationsRow(dtdlObj,parentDOM,refreshDTDLF){
+function relationsRow(dtdlObj,parentDOM,refreshDTDLF,dialogOffset){
     var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Relationship Types<p style="position:absolute;text-align:left;top:-10px;font-weight:normal;width:200px" class="w3-text w3-tag w3-tiny">Relationship can have its own parameters</p></div></div>')
 
 
@@ -240,18 +240,18 @@ function relationsRow(dtdlObj,parentDOM,refreshDTDLF){
             "name": "relation1",
         }
         dtdlObj.push(newObj)
-        new singleRelationTypeRow(newObj,contentDOM,refreshDTDLF,dtdlObj)
+        new singleRelationTypeRow(newObj,contentDOM,refreshDTDLF,dtdlObj,dialogOffset)
         refreshDTDLF()
     })
 
     //check existed content initially from template and trigger their drawing
     dtdlObj.forEach(element => {
         if(element["@type"]!="Relationship") return
-        new singleRelationTypeRow(element,contentDOM,refreshDTDLF,dtdlObj)
+        new singleRelationTypeRow(element,contentDOM,refreshDTDLF,dtdlObj,dialogOffset)
     });
 }
 
-function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
+function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,dialogOffset){
     var DOM = $('<div class="w3-cell-row"></div>')
     var relationNameInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="relation name"/>').addClass("w3-bar-item w3-input w3-border");
     var targetModelID=$('<input type="text" style="outline:none;display:inline;width:160px;padding:4px"  placeholder="(optional)target model"/>').addClass("w3-bar-item w3-input w3-border");
@@ -284,7 +284,7 @@ function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
             "schema": "double"
         }
         dtdlObj["properties"].push(newObj)
-        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj["properties"])
+        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj["properties"],null,dialogOffset)
         refreshDTDLF()
     })
 
@@ -300,12 +300,12 @@ function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
     if(dtdlObj["properties"] && dtdlObj["properties"].length>0){
         var properties=dtdlObj["properties"]
         properties.forEach(oneProperty=>{
-            new singleParameterRow(oneProperty,contentDOM,refreshDTDLF,dtdlObj["properties"])
+            new singleParameterRow(oneProperty,contentDOM,refreshDTDLF,dtdlObj["properties"],null,dialogOffset)
         })
     }
 }
 
-function parametersRow(dtdlObj,parentDOM,refreshDTDLF){
+function parametersRow(dtdlObj,parentDOM,refreshDTDLF,dialogOffset){
     var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Parameters</div></div>')
     var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px">+</button>')
     rowDOM.append(addButton)
@@ -319,24 +319,25 @@ function parametersRow(dtdlObj,parentDOM,refreshDTDLF){
             "schema": "double"
         }
         dtdlObj.push(newObj)
-        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj,"topLevel")
+        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj,"topLevel",dialogOffset)
         refreshDTDLF()
     })
 
     //check existed content initially from template and trigger their drawing
     dtdlObj.forEach(element => {
         if(element["@type"]!="Property") return
-        new singleParameterRow(element,contentDOM,refreshDTDLF,dtdlObj,"topLevel")
+        new singleParameterRow(element,contentDOM,refreshDTDLF,dtdlObj,"topLevel",dialogOffset)
     });
 }
 
-function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLevel){
+function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLevel,dialogOffset){
     var DOM = $('<div class="w3-cell-row"></div>')
     var parameterNameInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="parameter name"/>').addClass("w3-bar-item w3-input w3-border");
     var enumValueInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="str1,str2,..."/>').addClass("w3-bar-item w3-input w3-border");
     var addButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-plus fa-lg"></i></button>')
     var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
-    var ptypeSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1em",colorClass:"w3-light-gray w3-bar-item",buttonCSS:{"padding":"4px 5px"},"optionListHeight":300,"isClickable":1,"optionListMarginTop":-100,"optionListMarginLeft":60})
+    var ptypeSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1em",colorClass:"w3-light-gray w3-bar-item",buttonCSS:{"padding":"4px 5px"},"optionListHeight":300,"isClickable":1,"optionListMarginTop":-150,"optionListMarginLeft":60,
+    "adjustPositionAnchor":dialogOffset})
     ptypeSelector.addOptionArr(["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"])
     DOM.append(parameterNameInput,ptypeSelector.DOM,enumValueInput,addButton,removeButton)
 
@@ -387,7 +388,7 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
             "schema": "double"
         }
         dtdlObj["schema"]["fields"].push(newObj)
-        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj["schema"]["fields"])
+        new singleParameterRow(newObj,contentDOM,refreshDTDLF,dtdlObj["schema"]["fields"],null,dialogOffset)
         refreshDTDLF()
     })
 
@@ -420,7 +421,7 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
     }else if(schema=="Object"){
         var fields=dtdlObj["schema"]["fields"]
         fields.forEach(oneField=>{
-            new singleParameterRow(oneField,contentDOM,refreshDTDLF,dtdlObj["schema"]["fields"])
+            new singleParameterRow(oneField,contentDOM,refreshDTDLF,dtdlObj["schema"]["fields"],null,dialogOffset)
         })
     }
 }
