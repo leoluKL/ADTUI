@@ -137,6 +137,7 @@ routerEditADT.prototype.upsertDigitalTwin = async function (adtClient, req, res)
 
 routerEditADT.prototype.importModels =async function(adtClient,req,res) {
     var models=req.body.models;
+    console.log(models)
     try{
         re = await adtClient.createModels(models)
         res.end()

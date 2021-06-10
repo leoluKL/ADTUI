@@ -162,9 +162,9 @@ infoPanel.prototype.drawButtons=function(selectType){
     }
     
     impBtn.on("click",()=>{actualImportTwinsBtn.trigger('click');})
-    actualImportTwinsBtn.change((evt)=>{
+    actualImportTwinsBtn.change(async (evt)=>{
         var files = evt.target.files; // FileList object
-        this.readTwinsFilesContentAndImport(files)
+        await this.readTwinsFilesContentAndImport(files)
         actualImportTwinsBtn.val("")
     })
     if(selectType==null) return;

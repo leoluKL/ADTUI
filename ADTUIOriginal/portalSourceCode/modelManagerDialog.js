@@ -44,9 +44,9 @@ modelManagerDialog.prototype.popup = async function() {
     importModelsBtn.on("click", ()=>{
         actualImportModelsBtn.trigger('click');
     });
-    actualImportModelsBtn.change((evt)=>{
+    actualImportModelsBtn.change(async (evt)=>{
         var files = evt.target.files; // FileList object
-        this.readModelFilesContentAndImport(files)
+        await this.readModelFilesContentAndImport(files)
         actualImportModelsBtn.val("")
     })
     modelEditorBtn.on("click",()=>{
