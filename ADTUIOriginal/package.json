@@ -35,6 +35,7 @@
   },
   "resolutions": {
     "url-parse": "^1.5.1",
-    "ws": "^7.4.6"
+    "ws": "^7.4.6",
+    "normalize-url": ">=4.5.1"
   }
 }
