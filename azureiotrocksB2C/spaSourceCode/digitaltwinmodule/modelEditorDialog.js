@@ -253,8 +253,8 @@ function relationsRow(dtdlObj,parentDOM,refreshDTDLF,dialogOffset){
 
 function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,dialogOffset){
     var DOM = $('<div class="w3-cell-row"></div>')
-    var relationNameInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="relation name"/>').addClass("w3-bar-item w3-input w3-border");
-    var targetModelID=$('<input type="text" style="outline:none;display:inline;width:160px;padding:4px"  placeholder="(optional)target model"/>').addClass("w3-bar-item w3-input w3-border");
+    var relationNameInput=$('<input type="text" style="outline:none;display:inline;width:90px;padding:4px"  placeholder="relation name"/>').addClass("w3-bar-item w3-input w3-border");
+    var targetModelID=$('<input type="text" style="outline:none;display:inline;width:140px;padding:4px"  placeholder="(optional)target model"/>').addClass("w3-bar-item w3-input w3-border");
     var addButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-cog fa-lg"></i></button>')
     var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
     DOM.append(relationNameInput,targetModelID,addButton,removeButton)

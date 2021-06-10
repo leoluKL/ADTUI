@@ -1,6 +1,6 @@
 function simpleConfirmDialog(){
     this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:102" class="w3-card-4"></div>')
-    this.DOM.css("overflow","hidden")
+    //this.DOM.css("overflow","hidden")
 }
 
 simpleConfirmDialog.prototype.show=function(cssOptions,otherOptions){
