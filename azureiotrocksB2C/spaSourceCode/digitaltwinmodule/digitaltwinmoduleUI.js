@@ -51,7 +51,7 @@ digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){
             var theComponent=componentsArr[i]
-            theComponent.broadcastMessage=(msgObj)=>{this.broadcastMessage(theComponent,msgObj)}
+            this.assignBroadcastMessage(theComponent)
         }
     }else{
         for(var i=0;i<componentsArr.length;i++){
@@ -59,6 +59,10 @@ digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
             if(theComponent.rxMessage && theComponent!=source) theComponent.rxMessage(msgPayload)
         }
     }
+}
+
+digitaltwinmoduleUI.prototype.assignBroadcastMessage=function(uiComponent){
+    uiComponent.broadcastMessage=(msgObj)=>{this.broadcastMessage(uiComponent,msgObj)}
 }
 
 digitaltwinmoduleUI.prototype.initUILayout = function () {

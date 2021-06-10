@@ -274,7 +274,7 @@ simpleTreeGroupNode.prototype.addNode=function(obj,skipRepeat){
 function simpleTreeLeafNode(parentGroupNode,obj){
     this.parentGroupNode=parentGroupNode
     this.leafInfo=obj;
-    this.name=this.leafInfo["$dtId"]
+    this.name=this.leafInfo["displayName"] ||  this.leafInfo["$dtId"]
     this.createLeafNodeDOM()
 }
 

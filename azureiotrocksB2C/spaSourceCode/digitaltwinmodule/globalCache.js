@@ -3,11 +3,32 @@ function globalCache(){
     this.storedTwins = {}
     //stored data, seperately from ADT service and from cosmosDB service
     this.DBModelsArr = []
+    this.modelIDMapToName={}
     this.DBTwinsArr = []
+    this.twinIDMapToDisplayName={}
 
     this.currentLayoutName=null
     this.layoutJSON={}
 }
+
+globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
+    this.DBTwinsArr.length=0
+    this.DBTwinsArr=this.DBTwinsArr.concat(DBTwinsArr)
+    for(var ind in this.twinIDMapToDisplayName) delete this.twinIDMapToDisplayName[ind]
+    this.DBTwinsArr.forEach(oneDBTwin=>{
+        this.twinIDMapToDisplayName[oneDBTwin["id"]]=oneDBTwin["displayName"]
+    })
+}
+
+globalCache.prototype.storeDBModelsArr=function(DBModelsArr){
+    this.DBModelsArr.length=0
+    this.DBModelsArr=this.DBModelsArr.concat(DBModelsArr)
+    for(var ind in this.modelIDMapToName) delete this.modelIDMapToName[ind]
+    this.DBModelsArr.forEach(oneDBModel=>{
+        this.modelIDMapToName[oneDBModel["id"]]=oneDBModel["displayName"]
+    })
+}
+
 
 globalCache.prototype.storeTwinRelationships=function(relationsData){
     relationsData.forEach((oneRelationship)=>{

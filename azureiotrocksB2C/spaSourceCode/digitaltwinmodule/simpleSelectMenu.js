@@ -111,7 +111,7 @@ simpleSelectMenu.prototype.clearOptions=function(optionText,optionValue){
     this.curSelectVal=null;
 }
 
-simpleSelectMenu.prototype.callBack_clickOption=function(optiontext,optionValue){
+simpleSelectMenu.prototype.callBack_clickOption=function(optiontext,optionValue,realMouseClick){
 
 }
 

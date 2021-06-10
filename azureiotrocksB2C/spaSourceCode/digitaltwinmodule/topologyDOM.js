@@ -314,11 +314,12 @@ topologyDOM.prototype.drawTwins=function(twinsData,animation){
         var originalInfo=twinsData[i];
         var newNode={data:{},group:"nodes"}
         newNode.data["originalInfo"]= originalInfo;
-        newNode.data["id"]=originalInfo['$dtId']
+        newNode.data["id"]=originalInfo['displayName']
         var modelID=originalInfo['$metadata']['$model']
         newNode.data["modelID"]=modelID
         arr.push(newNode)
     }
+
     var eles = this.core.add(arr)
     if(eles.size()==0) return eles
     this.noPosition_grid(eles)

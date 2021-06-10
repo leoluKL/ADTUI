@@ -5,7 +5,6 @@ const globalCache = require("./globalCache")
 
 function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM)
-    this.modelIDMapToName={}
 
     this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
         var infoArr=[]
@@ -85,98 +84,63 @@ twinsTree.prototype.refreshModels=function(modelsData){
 }
 
 
-
 twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOrAppend){
     if(replaceOrAppend=="replace") this.tree.clearAllLeafNodes()
 
     //list all models, add model to twintree group node if it is not there, or remove deleted models
-    for (var id in this.modelIDMapToName) delete this.modelIDMapToName[id]
-    try{
-        var data= await msalHelper.callAPI("digitaltwin/listModelsForIDs","POST",modelIDs)
-    }catch(e){
+    try {
+        var data = await msalHelper.callAPI("digitaltwin/listModelsForIDs", "POST", modelIDs)
+        var tmpNameToObj = {}
+        for (var i = 0; i < data.length; i++) {
+            if (data[i]["displayName"] == null) data[i]["displayName"] = data[i]["@id"]
+            if ($.isPlainObject(data[i]["displayName"])) {
+                if (data[i]["displayName"]["en"]) data[i]["displayName"] = data[i]["displayName"]["en"]
+                else data[i]["displayName"] = JSON.stringify(data[i]["displayName"])
+            }
+            if (tmpNameToObj[data[i]["displayName"]] != null) {
+                //repeated model display name
+                data[i]["displayName"] = data[i]["@id"]
+            }
+            tmpNameToObj[data[i]["displayName"]] = data[i]
+        }
+        this.refreshModels(tmpNameToObj)
+
+        modelAnalyzer.clearAllModels();
+        modelAnalyzer.addModels(data)
+        modelAnalyzer.analyze();
+    } catch (e) {
         alert(e.responseText)
-        return;
     }
     
-    var tmpNameToObj = {}
-    for (var i = 0; i < data.length; i++) {
-        if (data[i]["displayName"] == null) data[i]["displayName"] = data[i]["@id"]
-        if ($.isPlainObject(data[i]["displayName"])) {
-            if (data[i]["displayName"]["en"]) data[i]["displayName"] = data[i]["displayName"]["en"]
-            else data[i]["displayName"] = JSON.stringify(data[i]["displayName"])
-        }
-        if (tmpNameToObj[data[i]["displayName"]] != null) {
-            //repeated model display name
-            data[i]["displayName"] = data[i]["@id"]
-        }
-        this.modelIDMapToName[data[i]["@id"]] = data[i]["displayName"]
-        tmpNameToObj[data[i]["displayName"]] = data[i]
-    }
-    this.refreshModels(tmpNameToObj)
-    
-    modelAnalyzer.clearAllModels();
-    modelAnalyzer.addModels(data)
-    modelAnalyzer.analyze();
     //add new twins under the model group node
     try{
-        var twinsdata= await msalHelper.callAPI("digitaltwin/listTwinsForIDs","POST",twinIDs)
-    }catch(e){
-        alert(e.responseText)
-        return;
-    }
-    
-}
-
-twinsTree.prototype.startSelection_append=function(twinIDs){
-   
-
-
-    if (twinsData != null) this.appendAllTwins(twinsData)
-    else {
-        $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
-            if(data=="") return;
-            data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
-            this.appendAllTwins(data)
-        })
-    }
-}
-
-twinsTree.prototype.startSelection_replace=function(twinIDs){
-    var theTree= this.tree;
-    this.tree.clearAllLeafNodes()
-    this.startSelection_append(twinIDs)
-
-    if (ADTInstanceDoesNotChange) {
-        //keep all group node as model is the same, only fetch all leaf node again
-        //remove all leaf nodes
-        this.tree.clearAllLeafNodes()
-        if (twinsData != null) this.replaceAllTwins(twinsData)
-        else {
-            $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
-                if(data=="") data=[];
-                data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
-                this.replaceAllTwins(data)
+        var twinsdata = await msalHelper.callAPI("digitaltwin/listTwinsForIDs", "POST", twinIDs)
+        var twinIDArr = []
+        //check if any current leaf node does not have stored outbound relationship data yet
+        this.tree.groupNodes.forEach((gNode) => {
+            gNode.childLeafNodes.forEach(leafNode => {
+                var nodeId = leafNode.leafInfo["$dtId"]
+                if (globalCache.storedOutboundRelationships[nodeId] == null) twinIDArr.push(nodeId)
             })
-        }
-    }else{
-        theTree.removeAllNodes()
-        for (var id in this.modelIDMapToName) delete this.modelIDMapToName[id]
-        //query to get all models
-        $.get("queryADT/listModels", (data, status) => {
-            if(data=="") data=[]
-            
-
-            if (twinsData != null) this.replaceAllTwins(twinsData)
-            else {
-                $.post("queryADT/allTwinsInfo", { query: twinQueryStr }, (data) => {
-                    if(data=="") data=[];
-                    data.forEach((oneNode)=>{globalCache.storedTwins[oneNode["$dtId"]] = oneNode});
-                    this.replaceAllTwins(data)
-                })
-            }
         })
+
+        for (var i = 0; i < twinsdata.length; i++) {
+            twinsdata[i]["displayName"]= globalCache.twinIDMapToDisplayName[twinsdata[i]["$dtId"]]
+            var groupName = globalCache.modelIDMapToName[twinsdata[i]["$metadata"]["$model"]]
+            this.tree.addLeafnodeToGroup(groupName, twinsdata[i], "skipRepeat")
+            twinIDArr.push(twinsdata[i]["$dtId"])
+        }
+        if(replaceOrAppend=="replace") this.broadcastMessage({ "message": "replaceAllTwins", info: twinsdata })
+        else this.broadcastMessage({ "message": "appendAllTwins", info: twinsdata })
+        //TODO:continue fetch relationships of twins
+        //this.fetchAllRelationships(twinIDArr)
+    } catch (e) {
+        console.log(e)
+        alert(e.responseText)
     }
 }
+
+
 
 twinsTree.prototype.drawTwinsAndRelations= function(data){
     data.childTwinsAndRelations.forEach(oneSet=>{
@@ -205,7 +169,7 @@ twinsTree.prototype.drawTwinsAndRelations= function(data){
 }
 
 twinsTree.prototype.drawOneTwin= function(twinInfo){
-    var groupName=this.modelIDMapToName[twinInfo["$metadata"]["$model"]]
+    var groupName=globalCache.modelIDMapToName[twinInfo["$metadata"]["$model"]]
     this.tree.addLeafnodeToGroup(groupName,twinInfo,"skipRepeat")
 }
 

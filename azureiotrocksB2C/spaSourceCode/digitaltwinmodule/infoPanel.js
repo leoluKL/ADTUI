@@ -46,7 +46,7 @@ function infoPanel() {
     this.selectedObjects=null;
 }
 
-infoPanel.prototype.rxMessage=function(msgPayload){   
+infoPanel.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="startSelectionDialog_closed"){
         if(!this.continerDOM.is(":visible")) {
             this.continerDOM.show()
@@ -663,9 +663,9 @@ infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,isNe
         var str =oneOption["displayName"]  || oneOption["enumValue"] 
         aSelectMenu.addOption(str)
     })
-    aSelectMenu.callBack_clickOption=(optionText,optionValue)=>{
+    aSelectMenu.callBack_clickOption=(optionText,optionValue,realMouseClick)=>{
         aSelectMenu.changeName(optionText)
-        this.editDTProperty(originElementInfo,aSelectMenu.DOM.data("path"),optionValue,"string",isNewTwin)
+        if(realMouseClick) this.editDTProperty(originElementInfo,aSelectMenu.DOM.data("path"),optionValue,"string",isNewTwin)
     }
     var val=this.searchValue(originElementInfo,newPath)
     if(val!=null){
