@@ -2,7 +2,7 @@ const { DefaultAzureCredential, InteractiveBrowserCredential } = require("@azure
 const { AzureDigitalTwinsManagementClient } = require("@azure/arm-digitaltwins");
 const { DigitalTwinsClient } = require("@azure/digital-twins-core");
 const got = require('got');
-
+var myArgs = process.argv.slice(2);
 
 var adtClients={}
 
@@ -45,7 +45,16 @@ async function listAllADTInstances(credential) {
         }
     });
     var bodyObj = JSON.parse(re.body)
+
+    var preferSubscription=null
+    for(var i=0;i<myArgs.length;i++){
+        if(myArgs[i]=="--subscription"){
+            preferSubscription=myArgs[i+1]
+        }
+    }
     for (var i = 0; i < bodyObj.value.length; i++) {
+        if(preferSubscription!=null && bodyObj.value[i].subscriptionId!=preferSubscription) continue
+        //console.log(bodyObj.value[i].subscriptionId)
         var aNewADTManagementClient = new AzureDigitalTwinsManagementClient(credential, bodyObj.value[i].subscriptionId)
         
         if(Object.keys(adtClients).length === 0){

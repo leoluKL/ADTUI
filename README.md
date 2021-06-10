@@ -15,6 +15,9 @@ For out-of-the-box usage, directly install node library and run
 2. Executed "az login" if you have not
 3. run "npm start"
 
+NOTE: if you want to specify the azure subscription id to start the tool, please use command as below (replace with your preferred azure subscription id)
+node .\backendSourceCode\server.js --subscription c7b211ba-6f34-45b8-8764-079581e882ea
+
 It will pop up a browser window with initial dialog to choose which ADT service instance you want to operate.
 
 For developer's usage, there are additional npm run options (inside folder ./ADTUIOriginal) to use
