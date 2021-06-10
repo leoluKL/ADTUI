@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express')
-const http = require('http')
 const path = require('path')
 const reload = require('reload')
 const fs = require('fs')
@@ -45,7 +44,7 @@ httpServerHelper.prototype.createHTTPServer=function(){
     app.use("/visualDefinition", require("./routerVisualDefinition")())
     app.use("/layout", require("./routerLayoutStore")())
 
-    var server = http.createServer(app)
+    
     if(devFlag){
         var delayReloadFlag=null;
         var triggerReload=(reloadReturned)=>{
@@ -61,12 +60,12 @@ httpServerHelper.prototype.createHTTPServer=function(){
         }
         reload(app).then(function (reloadReturned) {
             // Reload started, start web server
-            server.listen(app.get('port'), function () {
+            app.listen(app.get('port'), () => {
                 console.log('Web server listening on port ' + app.get('port'))
                 open('http://localhost:' + app.get('port'), function (err) {
                     if (err) throw err;
                 });
-            })
+            });
         
             fs.watch(publicDir, (eventType, filename) => {triggerReload(reloadReturned)});
             fs.watch(path.join(__dirname, '../css/'), (eventType, filename) => {triggerReload(reloadReturned)});
@@ -74,12 +73,12 @@ httpServerHelper.prototype.createHTTPServer=function(){
             console.error('Reload could not start, could not start server/sample app', err)
         })
     }else{
-        server.listen(app.get('port'), function () {
+        app.listen(app.get('port'), () => {
             console.log('Web server listening on port ' + app.get('port'))
             open('http://localhost:' + app.get('port'), function (err) {
                 if (err) throw err;
             });
-        })
+        });
     }
 }
 
