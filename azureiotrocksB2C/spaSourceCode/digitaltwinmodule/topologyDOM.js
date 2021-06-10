@@ -452,7 +452,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         var arr=msgPayload.info;
         var mouseClickDetail=msgPayload.mouseClickDetail;
         arr.forEach(element => {
-            var aTwin= this.core.nodes("#"+element['$dtId'])
+            var aTwin= this.core.nodes("#"+element['displayName'])
             aTwin.select()
             if(mouseClickDetail!=2) this.animateANode(aTwin) //ignore double click second click
         });
