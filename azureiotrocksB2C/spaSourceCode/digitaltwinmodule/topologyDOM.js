@@ -78,13 +78,13 @@ topologyDOM.prototype.init=function(){
             {selector: 'edge:selected',
             style: {
                 'width': 3,
-                'line-color': 'LawnGreen',
+                'line-color': 'red',
                 'target-arrow-color': 'red',
                 'source-arrow-color': 'red'
             }},
             {selector: 'node:selected',
             style: {
-                'border-color':"LawnGreen",
+                'border-color':"red",
                 'border-width':2,
                 'background-color': 'Gray'
             }}
@@ -123,9 +123,13 @@ topologyDOM.prototype.init=function(){
         var fs=this.getFontSizeInCurrentZoom();
         var dimension=this.getNodeSizeInCurrentZoom();
         this.core.style()
-                .selector('node')
-                .style({ 'font-size': fs, width:dimension ,height:dimension })
-                .update()
+            .selector('node')
+            .style({ 'font-size': fs, width: dimension, height: dimension })
+            .update()
+        this.core.style()
+            .selector('node:selected')
+            .style({ 'border-width': Math.ceil(dimension / 15) })
+            .update()
     })
 
     var instance = this.core.edgeEditing('get');
