@@ -376,13 +376,15 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
         }
     }
     if(fileContentArr.length==0) return;
-    $.post("editADT/importModels",{"models":fileContentArr}, (data)=> {
+    
+    $.post("editADT/importModels",{"models":JSON.stringify(fileContentArr)}, (data)=> {
         if (data == "") {//successful
             this.listModels("shouldBroadCast")
         } else { //error happens
             alert(data)
         }
     });
+    
 }
 
 modelManagerDialog.prototype.readOneFile= async function(aFile){
