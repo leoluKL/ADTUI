@@ -55,7 +55,7 @@ routerQueryADT.prototype.listTwinsForIDs =async function(req,res) {
 
 routerQueryADT.prototype.getRelationshipsFromTwinIDs =async function(req,res) {
     try{
-        var twinIDArr=req.body.arr;
+        var twinIDArr=req.body;
         var reArr=[]
         var promiseArr=[]
     
@@ -84,7 +84,7 @@ routerQueryADT.prototype.querySingleTwinRelations = async function (twinID) {
         }
         return oneSet;
     }catch(e){
-        return e;
+        throw e;
     }
 }
 
