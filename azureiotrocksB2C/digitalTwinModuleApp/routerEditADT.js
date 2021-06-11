@@ -7,6 +7,7 @@ function routerEditADT(){
     this.useRoute("deleteModels","isPost")
     this.useRoute("changeAttribute","isPost")
     this.useRoute("upsertDigitalTwin","isPost")
+    this.useRoute("deleteTwinWithoutConnection","isPost")
 }
 
 routerEditADT.prototype.useRoute=function(routeStr,isPost){
@@ -22,6 +23,16 @@ routerEditADT.prototype.upsertDigitalTwin =async function(req,res) {
         var twinID=obj['$dtId']
         var re = await adtHelper.ADTClient.upsertDigitalTwin(twinID, newTwin)
         res.send(re.body)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+}
+
+routerEditADT.prototype.deleteTwinWithoutConnection =async function(req,res) {
+    var twinID = req.body.twinID;
+    try{
+        var result=await adtHelper.ADTClient.deleteDigitalTwin(twinID)
+        res.end()
     }catch(e){
         res.status(400).send(e.message);
     }
