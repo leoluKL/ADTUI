@@ -61,7 +61,7 @@ routerQueryADT.prototype.getRelationshipsFromTwinIDs =async function(req,res) {
     
         for(var i=0;i<twinIDArr.length;i++){
             var twinID = twinIDArr[i];
-            promiseArr.push(this.querySingleTwinRelations(adtClient,twinID))
+            promiseArr.push(this.querySingleTwinRelations(twinID))
         }
         var results=await Promise.all(promiseArr);
         results.forEach(oneSet=>{
@@ -73,6 +73,19 @@ routerQueryADT.prototype.getRelationshipsFromTwinIDs =async function(req,res) {
         res.status(400).send(e.message);
     }
     
+}
+
+routerQueryADT.prototype.querySingleTwinRelations = async function (twinID) {
+    var oneSet = []
+    var relationships = await adtHelper.ADTClient.listRelationships(twinID)
+    try{
+        for await (let page of relationships.byPage({ maxPageSize: 1000 })) { //it is strange that i must set maxPagesize as 1 to only have one page
+            oneSet=oneSet.concat(page.value)
+        }
+        return oneSet;
+    }catch(e){
+        return e;
+    }
 }
 
 
