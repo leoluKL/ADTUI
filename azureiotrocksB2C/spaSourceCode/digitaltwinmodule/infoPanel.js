@@ -564,8 +564,21 @@ infoPanel.prototype.showInBound=async function(){
             })
         }
 
-        console.log({ arr: smallArr, "knownSources": knownSourceTwins })
-        
+        try{
+            var data = await msalHelper.callAPI("digitaltwin/queryInBound", "POST",  { arr: smallArr, "knownSources": knownSourceTwins })
+            //new twin's relationship should be stored as well
+            globalCache.storeTwinRelationships(data.newTwinRelations)
+            data.childTwinsAndRelations.forEach(oneSet=>{
+                for(var ind in oneSet.childTwins){
+                    var oneTwin=oneSet.childTwins[ind]
+                    globalCache.storeSingleADTTwin(oneTwin)
+                }
+            })
+            this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
+        }catch(e){
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
+        }
     }
 }
 
