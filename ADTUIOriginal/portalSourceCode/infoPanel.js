@@ -56,6 +56,13 @@ infoPanel.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="selectNodes"){
         this.DOM.empty()
         var arr=msgPayload.info;
+
+        if(arr==null || arr.length==0){
+            this.drawButtons(null)
+            this.selectedObjects=[];
+            return;
+        }
+
         this.selectedObjects=arr;
         if(arr.length==1){
             var singleElementInfo=arr[0];

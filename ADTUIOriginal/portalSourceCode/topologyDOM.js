@@ -88,6 +88,13 @@ topologyDOM.prototype.init=function(){
                 'border-color':"red",
                 'border-width':2,
                 'background-color': 'Gray'
+            }},
+            {selector: 'node.hover',
+            style: {
+                'background-blacken':0.5
+            }},{selector: 'edge.hover',
+            style: {
+                'width':5
             }}
             
         ]
@@ -118,6 +125,14 @@ topologyDOM.prototype.init=function(){
 
     this.core.on('cxttap',(e)=>{
         this.cancelTargetNodeMode()
+    })
+
+    this.core.on('mouseover',e=>{
+
+        this.mouseOverFunction(e)
+    })
+    this.core.on('mouseout',e=>{
+        this.mouseOutFunction(e)
     })
     
     this.core.on('zoom',(e)=>{
@@ -203,9 +218,28 @@ topologyDOM.prototype.smartPositionNode = function (mousePosition) {
     //console.log(monitorSet.size())
 }
 
+topologyDOM.prototype.mouseOverFunction= function (e) {
+    if(!e.target.data) return
+    var info=e.target.data().originalInfo
+    if(info==null) return;
+    if(this.lastHoverTarget) this.lastHoverTarget.removeClass("hover")
+    this.lastHoverTarget=e.target
+    e.target.addClass("hover")
+    this.broadcastMessage({ "message": "selectNodes", "info": [info] })
+}
+
+topologyDOM.prototype.mouseOutFunction= function (e) {
+    this.selectFunction()
+    if(this.lastHoverTarget){
+        this.lastHoverTarget.removeClass("hover")
+        this.lastHoverTarget=null;
+    } 
+
+}
+
+
 topologyDOM.prototype.selectFunction = function () {
     var arr = this.core.$(":selected")
-    if (arr.length == 0) return
     var re = []
     arr.forEach((ele) => { re.push(ele.data().originalInfo) })
     this.broadcastMessage({ "message": "selectNodes", info: re })
