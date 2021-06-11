@@ -7,6 +7,7 @@ function routerDigitalTwin(){
     this.useRoute("importModels","isPost")
     this.useRoute("listModelsForIDs","isPost")
     this.useRoute("listTwinsForIDs","isPost")
+    this.useRoute("changeAttribute","isPost")
 }
 
 routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
@@ -42,6 +43,16 @@ routerDigitalTwin.prototype.listModelsForIDs =async function(req,res) {
 routerDigitalTwin.prototype.listTwinsForIDs =async function(req,res) {
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listTwinsForIDs", {json:req.body,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.send(body)
+}
+
+routerDigitalTwin.prototype.changeAttribute =async function(req,res) {
+    try{
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"editADT/changeAttribute", {json:req.body,responseType: 'json'});
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         return;

@@ -705,6 +705,8 @@ infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataTy
         var payLoad={"jsonPatch":JSON.stringify(jsonPatch),"twinID":twinID,"relationshipID":relationshipID}
     }
     
+    console.log(payLoad)
+    /*
     $.post("editADT/changeAttribute",payLoad
         ,  (data)=> {
             if(data!="") {
@@ -714,7 +716,7 @@ infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataTy
                 //successful editing, update the node original info
                 this.updateOriginObjectValue(originElementInfo,path,newVal)
             }
-        });
+        });*/
 }
 
 infoPanel.prototype.updateOriginObjectValue=function(nodeInfo,pathArr,newVal){
