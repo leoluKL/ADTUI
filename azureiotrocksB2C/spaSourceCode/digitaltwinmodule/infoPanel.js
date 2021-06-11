@@ -155,7 +155,7 @@ infoPanel.prototype.addTwin=async function(twinJson){
         var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST",  {"newTwinJson":JSON.stringify(twinJson)})
     }catch(e){
         console.log(e)
-        alert(e.responseText)
+        if(e.responseText) alert(e.responseText)
     }
 
     globalCache.storeSingleDBTwin(data.DBTwin)
@@ -382,7 +382,7 @@ infoPanel.prototype.refreshInfomation=async function(){
         })
     }catch(e){
         console.log(e)
-        alert(e.responseText)
+        if(e.responseText) alert(e.responseText)
     }
 
     while(twinIDs.length>0){
@@ -394,7 +394,7 @@ infoPanel.prototype.refreshInfomation=async function(){
             this.broadcastMessage({ "message": "drawAllRelations", info: data })
         } catch (e) {
             console.log(e)
-            alert(e.responseText)
+            if(e.responseText) alert(e.responseText)
         }
     }
     if(this.selectedObjects.length==1) this.rxMessage({ "message": "selectNodes", info: this.selectedObjects })
@@ -505,21 +505,35 @@ infoPanel.prototype.showOutBound=async function(){
     });
     
     while(twinIDArr.length>0){
-        var smallArr= twinIDArr.splice(0, 100);
-        var data=await this.fetchPartialOutbounds(smallArr)
-        if(data=="") continue;
-        //new twin's relationship should be stored as well
-        globalCache.storeTwinRelationships(data.newTwinRelations)
-        
-        data.childTwinsAndRelations.forEach(oneSet=>{
-            for(var ind in oneSet.childTwins){
-                var oneTwin=oneSet.childTwins[ind]
-                globalCache.storeSingleADTTwin(oneTwin)
+        var smallArr = twinIDArr.splice(0, 100);
+
+        var knownTargetTwins = {}
+        smallArr.forEach(oneID => {
+            knownTargetTwins[oneID] = 1 //itself also is known
+            var outBoundRelation = globalCache.storedOutboundRelationships[oneID]
+            if (outBoundRelation) {
+                outBoundRelation.forEach(oneRelation => {
+                    var targetID = oneRelation["$targetId"]
+                    if (globalCache.storedTwins[targetID] != null) knownTargetTwins[targetID] = 1
+                })
             }
         })
-        this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
-        
 
+        try{
+            var data = await msalHelper.callAPI("digitaltwin/queryOutBound", "POST",  { arr: smallArr, "knownTargets": knownTargetTwins })
+            //new twin's relationship should be stored as well
+            globalCache.storeTwinRelationships(data.newTwinRelations)
+            data.childTwinsAndRelations.forEach(oneSet=>{
+                for(var ind in oneSet.childTwins){
+                    var oneTwin=oneSet.childTwins[ind]
+                    globalCache.storeSingleADTTwin(oneTwin)
+                }
+            })
+            this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
+        }catch(e){
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
+        }
     }
 }
 
@@ -533,77 +547,26 @@ infoPanel.prototype.showInBound=async function(){
     
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
-        var data=await this.fetchPartialInbounds(smallArr)
-        if(data=="") continue;
-        //new twin's relationship should be stored as well
-        globalCache.storeTwinRelationships(data.newTwinRelations)
-        
-        //data.newTwinRelations.forEach(oneRelation=>{console.log(oneRelation['$sourceId']+"->"+oneRelation['$targetId'])})
-        //console.log(globalCache.storedOutboundRelationships["default"])
-
-        data.childTwinsAndRelations.forEach(oneSet=>{
-            for(var ind in oneSet.childTwins){
-                var oneTwin=oneSet.childTwins[ind]
-                globalCache.storeSingleADTTwin(oneTwin)
-            }
+        var knownSourceTwins = {}
+        var IDDict = {}
+        smallArr.forEach(oneID => {
+            IDDict[oneID] = 1
+            knownSourceTwins[oneID] = 1 //itself also is known
         })
-        this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
-    }
-}
-
-infoPanel.prototype.fetchPartialOutbounds= async function(IDArr){
-    return new Promise((resolve, reject) => {
-        try{
-            //find out those existed outbound with known target Twins so they can be excluded from query
-            var knownTargetTwins={}
-            IDArr.forEach(oneID=>{
-                knownTargetTwins[oneID]=1 //itself also is known
-                var outBoundRelation=globalCache.storedOutboundRelationships[oneID]
-                if(outBoundRelation){
-                    outBoundRelation.forEach(oneRelation=>{
-                        var targetID=oneRelation["$targetId"]
-                        if(globalCache.storedTwins[targetID]!=null) knownTargetTwins[targetID]=1
-                    })
+        for (var twinID in globalCache.storedOutboundRelationships) {
+            var relations = globalCache.storedOutboundRelationships[twinID]
+            relations.forEach(oneRelation => {
+                var targetID = oneRelation['$targetId']
+                var srcID = oneRelation['$sourceId']
+                if (IDDict[targetID] != null) {
+                    if (globalCache.storedTwins[srcID] != null) knownSourceTwins[srcID] = 1
                 }
             })
-
-            $.post("queryADT/showOutBound",{arr:IDArr,"knownTargets":knownTargetTwins}, function (data) {
-                resolve(data)
-            });
-        }catch(e){
-            reject(e)
         }
-    })
-}
 
-infoPanel.prototype.fetchPartialInbounds= async function(IDArr){
-    return new Promise((resolve, reject) => {
-        try{
-            //find out those existed inbound with known source Twins so they can be excluded from query
-            var knownSourceTwins={}
-            var IDDict={}
-            IDArr.forEach(oneID=>{
-                IDDict[oneID]=1
-                knownSourceTwins[oneID]=1 //itself also is known
-            })
-            for(var twinID in globalCache.storedOutboundRelationships){
-                var relations=globalCache.storedOutboundRelationships[twinID]
-                relations.forEach(oneRelation=>{
-                    var targetID=oneRelation['$targetId']
-                    var srcID=oneRelation['$sourceId']
-                    if(IDDict[targetID]!=null){
-                        if(globalCache.storedTwins[srcID]!=null) knownSourceTwins[srcID]=1
-                    }
-                })
-            }
-
-            $.post("queryADT/showInBound",{arr:IDArr,"knownSources":knownSourceTwins}, function (data) {
-                resolve(data)
-            });
-        }catch(e){
-            reject(e)
-        }
-    })
+        console.log({ arr: smallArr, "knownSources": knownSourceTwins })
+        
+    }
 }
 
 infoPanel.prototype.drawMultipleObj=function(){
@@ -736,7 +699,7 @@ infoPanel.prototype.editDTProperty=async function(originElementInfo,path,newVal,
         this.updateOriginObjectValue(originElementInfo,path,newVal)
     }catch(e){
         console.log(e)
-        alert(e.responseText) 
+        if(e.responseText) alert(e.responseText)
     }
     
 }

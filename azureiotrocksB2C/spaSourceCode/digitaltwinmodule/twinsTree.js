@@ -109,7 +109,8 @@ twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOr
         modelAnalyzer.addModels(data)
         modelAnalyzer.analyze();
     } catch (e) {
-        alert(e.responseText)
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
     }
     
     //add new twins under the model group node
@@ -137,7 +138,7 @@ twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOr
         this.fetchAllRelationships(twinIDArr)
     } catch (e) {
         console.log(e)
-        alert(e.responseText)
+        if(e.responseText) alert(e.responseText)
     }
 }
 
@@ -183,7 +184,8 @@ twinsTree.prototype.fetchAllRelationships= async function(twinIDArr){
             globalCache.storeTwinRelationships(data) //store them in global available array
             this.broadcastMessage({ "message": "drawAllRelations", info: data })
         } catch (e) {
-            alert(e.responseText)
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
         }
     }
 }

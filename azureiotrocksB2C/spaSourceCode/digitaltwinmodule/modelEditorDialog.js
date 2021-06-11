@@ -35,7 +35,8 @@ modelEditorDialog.prototype.popup = async function() {
             modelAnalyzer.addModels(modelToBeImported)
             this.popup() //refresh content
         }catch(e){
-            alert(e.responseText)
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
         }        
     })
 

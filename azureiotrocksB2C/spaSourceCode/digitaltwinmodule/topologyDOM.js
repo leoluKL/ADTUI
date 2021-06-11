@@ -8,6 +8,7 @@ const formatter = new Intl.NumberFormat('en-US', {
 const simpleSelectMenu = require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const globalCache = require("./globalCache")
+const msalHelper=require("../msalHelper")
 
 function topologyDOM(DOM){
     this.DOM=DOM
@@ -721,14 +722,14 @@ topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
             connectionTypes.forEach(oneType=>{
                 switchTypeSelector.addOption(oneType)
             })
-            resultActions.push({from:fromNode.id(),to:toNode.id(),connect:connectionTypes[0]})
+            resultActions.push({from:fromNode.data().originalInfo["$dtId"] ,to:toNode.data().originalInfo["$dtId"],connect:connectionTypes[0]})
             switchTypeSelector.callBack_clickOption=(optionText,optionValue)=>{
                 resultActions[index][2]=optionText
                 switchTypeSelector.changeName(optionText)
             }
             switchTypeSelector.triggerOptionIndex(0)
         }else if(connectionTypes.length==1){
-            resultActions.push({from:fromNode.id(),to:toNode.id(),connect:connectionTypes[0]})
+            resultActions.push({from:fromNode.data().originalInfo["$dtId"] ,to:toNode.data().originalInfo["$dtId"],connect:connectionTypes[0]})
             label.css("color","green")
             label.html("Add <b>"+connectionTypes[0]+"</b> connection from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
         }
@@ -736,39 +737,34 @@ topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
     })
 }
 
-topologyDOM.prototype.createConnections = function (resultActions) {
+topologyDOM.prototype.createConnections = async function (resultActions) {
     // for each resultActions, calculate the appendix index, to avoid same ID is used for existed connections
-    resultActions.forEach(oneAction=>{
-        var maxExistedConnectionNumber=0
-        var existedRelations=globalCache.storedOutboundRelationships[oneAction.from]
-        if(existedRelations==null) existedRelations=[]
-        existedRelations.forEach(oneRelation=>{
-            var oneRelationID=oneRelation['$relationshipId']
-            if(oneRelation["$targetId"]!=oneAction.to) return
-            var lastIndex= oneRelationID.split(";").pop()
-            lastIndex=parseInt(lastIndex)
-            if(maxExistedConnectionNumber<=lastIndex) maxExistedConnectionNumber=lastIndex+1
-        })
-        oneAction.IDindex=maxExistedConnectionNumber
-    })
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
 
     var finalActions=[]
     resultActions.forEach(oneAction=>{
         var oneFinalAction={}
         oneFinalAction["$srcId"]=oneAction["from"]
-        oneFinalAction["$relationshipId"]=oneAction["from"]+";"+oneAction["to"]+";"+oneAction["connect"]+";"+oneAction["IDindex"]
+        oneFinalAction["$relationshipId"]=uuidv4();
         oneFinalAction["obj"]={
             "$targetId": oneAction["to"],
             "$relationshipName": oneAction["connect"]
         }
         finalActions.push(oneFinalAction)
     })
-
-    $.post("editADT/createRelations",{actions:JSON.stringify(finalActions)}, (data, status) => {
-        if(data=="") return;
-        globalCache.storeTwinRelationships_append(data)
-        this.drawRelations(data)
-    })
+    try{
+        var data = await msalHelper.callAPI("digitaltwin/createRelations", "POST",  {actions:JSON.stringify(finalActions)})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
+    globalCache.storeTwinRelationships_append(data)
+    this.drawRelations(data)
 }
 
 

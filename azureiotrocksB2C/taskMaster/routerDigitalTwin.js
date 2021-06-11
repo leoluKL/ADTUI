@@ -11,6 +11,8 @@ function routerDigitalTwin(){
     this.useRoute("listTwinsForIDs","isPost")
     this.useRoute("changeAttribute","isPost")
     this.useRoute("getRelationshipsFromTwinIDs","isPost")
+    this.useRoute("createRelations","isPost")
+    this.useRoute("queryOutBound","isPost")
 }
 
 routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
@@ -36,6 +38,26 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
 routerDigitalTwin.prototype.listModelsForIDs =async function(req,res) {
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listModelsForIDs", {json:req.body,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.send(body)
+}
+
+routerDigitalTwin.prototype.queryOutBound =async function(req,res) {
+    try{
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/queryOutBound", {json:req.body,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.send(body)
+}
+
+routerDigitalTwin.prototype.createRelations =async function(req,res) {
+    try{
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"editADT/createRelations", {json:req.body,responseType: 'json'});
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         return;

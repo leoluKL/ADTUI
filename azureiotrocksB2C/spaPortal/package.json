@@ -9,7 +9,7 @@
     "build": "npm install",
     "bundleSPAMain": "watchify ..\\spaSourceCode\\mainUI.js  --debug -o .\\bundle.js -v",
     "bundleDigitaltwinModule": "watchify ..\\spaSourceCode\\digitaltwinmodule\\digitaltwinmoduleUI.js  --debug -o .\\bundle.digitaltwinmodule.js -v",
-    "dev":"npm-run-all --parallel bundleSPAMain bundleDigitaltwinModule"
+    "dev": "npm-run-all --parallel bundleSPAMain bundleDigitaltwinModule"
   },
   "dependencies": {
     "cytoscape": "3.18.1",
