@@ -2,6 +2,7 @@ const modelAnalyzer = require("./modelAnalyzer");
 const simpleSelectMenu= require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const globalCache = require("./globalCache")
+const msalHelper = require("../msalHelper")
 
 function infoPanel() {
     this.continerDOM=$('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
@@ -61,26 +62,39 @@ infoPanel.prototype.rxMessage=function(msgPayload){
             
             if(singleElementInfo["$dtId"]){// select a node
                 this.drawButtons("singleNode")
-                this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
+                
+                //instead of draw the $dtId, draw display name instead
+                //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
+                this.drawStaticInfo(this.DOM,{"name":singleElementInfo["displayName"]},"1em","13px")
+
+
                 var modelName=singleElementInfo['$metadata']['$model']
                 
                 if(modelAnalyzer.DTDLModels[modelName]){
                     this.drawEditable(this.DOM,modelAnalyzer.DTDLModels[modelName].editableProperties,singleElementInfo,[])
                 }
-                this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
+                //instead of drawing the original infomration, draw more meaningful one
+                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
+                this.drawStaticInfo(this.DOM,{"Model":singleElementInfo["$metadata"]["$model"]},"1em","10px")
+                for(var ind in singleElementInfo["$metadata"]){
+                    if(ind == "$model") continue;
+                    var tmpObj={}
+                    tmpObj[ind]=singleElementInfo["$metadata"][ind]
+                    this.drawStaticInfo(this.DOM,tmpObj,"1em","10px")
+                }
             }else if(singleElementInfo["$sourceId"]){
                 this.drawButtons("singleRelationship")
                 this.drawStaticInfo(this.DOM,{
-                    "$sourceId":singleElementInfo["$sourceId"],
-                    "$targetId":singleElementInfo["$targetId"],
-                    "$relationshipName":singleElementInfo["$relationshipName"],
-                    "$relationshipId":singleElementInfo["$relationshipId"]
+                    "From":globalCache.twinIDMapToDisplayName[singleElementInfo["$sourceId"]],
+                    "To":globalCache.twinIDMapToDisplayName[singleElementInfo["$targetId"]],
+                    "Relationship Type":singleElementInfo["$relationshipName"]
+                    //,"$relationshipId":singleElementInfo["$relationshipId"]
                 },"1em","13px")
                 var relationshipName=singleElementInfo["$relationshipName"]
                 var sourceModel=singleElementInfo["sourceModel"]
                 
                 this.drawEditable(this.DOM,this.getRelationShipEditableProperties(relationshipName,sourceModel),singleElementInfo,[])
-                this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
+                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
             }
         }else if(arr.length>1){
             this.drawButtons("multiple")
@@ -109,7 +123,39 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 if(twinJson[oneComponentName]==null)twinJson[oneComponentName]={}
                 twinJson[oneComponentName]["$metadata"]= {}
             })
-            $.post("editADT/upsertDigitalTwin", {"newTwinJson":JSON.stringify(twinJson)}
+            this.addTwin(twinJson)
+        })
+
+        this.drawStaticInfo(this.DOM,{
+            "Model":modelID
+        })
+
+        addBtn.data("twinJson",twinJson)
+        var copyProperty=JSON.parse(JSON.stringify(modelAnalyzer.DTDLModels[modelID].editableProperties))
+        copyProperty['$dtId']="string"
+        this.drawEditable(this.DOM,copyProperty,twinJson,[],"newTwin")
+        //console.log(modelAnalyzer.DTDLModels[modelID]) 
+    }
+}
+
+infoPanel.prototype.addTwin=function(twinJson){
+    console.log({"newTwinJson":JSON.stringify(twinJson)})
+    return;
+
+    //generate uuid for the twin, add the twin to ADT
+    //if successful, then store the twin to cosmosDB as well
+    //if not successful, then roll back by deleting the twin from ADT
+    
+
+
+    /*
+    try{
+        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST",  {"newTwinJson":JSON.stringify(twinJson)})
+    }catch(e){
+        console.log(e)
+        alert(e.responseText)
+    }
+    $.post("editADT/upsertDigitalTwin", {"newTwinJson":JSON.stringify(twinJson)}
                 , (data) => {
                     if (data != "") {//not successful editing
                         alert(data)
@@ -124,19 +170,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                             this.broadcastMessage({ "message": "addNewTwin",twinInfo:data})
                         })                        
                     }
-                });
-        })
-
-        this.drawStaticInfo(this.DOM,{
-            "Model":modelID
-        })
-
-        addBtn.data("twinJson",twinJson)
-        var copyProperty=JSON.parse(JSON.stringify(modelAnalyzer.DTDLModels[modelID].editableProperties))
-        copyProperty['$dtId']="string"
-        this.drawEditable(this.DOM,copyProperty,twinJson,[],"newTwin")
-        //console.log(modelAnalyzer.DTDLModels[modelID]) 
-    }
+                });*/
 }
 
 infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,sourceModel){
@@ -341,39 +375,35 @@ infoPanel.prototype.batchImportRelations=async function(relations){
 }
 
 infoPanel.prototype.refreshInfomation=async function(){
-    var arr=this.selectedObjects;
-    var queryArr=[]
-    arr.forEach(oneItem=>{
-        if(oneItem['$relationshipId']) queryArr.push({'$sourceId':oneItem['$sourceId'],'$relationshipId':oneItem['$relationshipId']})
-        else queryArr.push({'$dtId':oneItem['$dtId']})
-    })
-
-    $.post("queryADT/fetchInfomation",{"elements":queryArr},  (data)=> {
-        if(data=="") return;
-        data.forEach(oneRe=>{
-            if(oneRe["$relationshipId"]){//update storedOutboundRelationships
-                var srcID= oneRe['$sourceId']
-                var relationshipId= oneRe['$relationshipId']
-                if(globalCache.storedOutboundRelationships[srcID]!=null){
-                    var relations=globalCache.storedOutboundRelationships[srcID]
-                    relations.forEach(oneStoredRelation=>{
-                        if(oneStoredRelation['$relationshipId']==relationshipId){
-                            //update all content
-                            for(var ind in oneRe){ oneStoredRelation[ind]=oneRe[ind] }
-                        }
-                    })
-                }
-            }else{//update storedTwins
-                var twinID= oneRe['$dtId']
-                if(globalCache.storedTwins[twinID]!=null){
-                    for(var ind in oneRe){ globalCache.storedTwins[twinID][ind]=oneRe[ind] }
-                }
+    var twinIDs=[]
+    this.selectedObjects.forEach(oneItem=>{  if(oneItem['$dtId']) twinIDs.push(oneItem['$dtId'])  })
+    try{
+        var twinsdata = await msalHelper.callAPI("digitaltwin/listTwinsForIDs", "POST", twinIDs)
+        twinsdata.forEach(oneRe=>{
+            var twinID= oneRe['$dtId']
+            if(globalCache.storedTwins[twinID]!=null){
+                for(var ind in oneRe){ globalCache.storedTwins[twinID][ind]=oneRe[ind] }
             }
         })
-        
-        //redraw infopanel if needed
-        if(this.selectedObjects.length==1) this.rxMessage({ "message": "selectNodes", info: this.selectedObjects })
-    });
+    }catch(e){
+        console.log(e)
+        alert(e.responseText)
+    }
+
+    while(twinIDs.length>0){
+        var smallArr= twinIDs.splice(0, 100);
+        try{
+            var data = await msalHelper.callAPI("digitaltwin/getRelationshipsFromTwinIDs", "POST", smallArr)
+            if (data == "") continue;
+            globalCache.storeTwinRelationships(data) //store them in global available array
+            this.broadcastMessage({ "message": "drawAllRelations", info: data })
+        } catch (e) {
+            console.log(e)
+            alert(e.responseText)
+        }
+    }
+    if(this.selectedObjects.length==1) this.rxMessage({ "message": "selectNodes", info: this.selectedObjects })
+
 }
 
 
@@ -673,7 +703,7 @@ infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,isNe
     }    
 }
 
-infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataType,isNewTwin){
+infoPanel.prototype.editDTProperty=async function(originElementInfo,path,newVal,dataType,isNewTwin){
     if(["double","boolean","float","integer","long"].includes(dataType)) newVal=Number(newVal)
 
     //{ "op": "add", "path": "/x", "value": 30 }
@@ -705,16 +735,15 @@ infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataTy
         var payLoad={"jsonPatch":JSON.stringify(jsonPatch),"twinID":twinID,"relationshipID":relationshipID}
     }
     
-    $.post("editADT/changeAttribute",payLoad
-        ,  (data)=> {
-            if(data!="") {
-                //not successful editing
-                alert(data)
-            }else{
-                //successful editing, update the node original info
-                this.updateOriginObjectValue(originElementInfo,path,newVal)
-            }
-        });
+    
+    try{
+        await msalHelper.callAPI("digitaltwin/changeAttribute", "POST", payLoad)
+        this.updateOriginObjectValue(originElementInfo,path,newVal)
+    }catch(e){
+        console.log(e)
+        alert(e.responseText) 
+    }
+    
 }
 
 infoPanel.prototype.updateOriginObjectValue=function(nodeInfo,pathArr,newVal){

@@ -53,7 +53,6 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
             "headers":headersObj,
             url: globalAppSettings.taskMasterAPIURI+APIString,
             contentType: "application/json; charset=utf-8",
-            dataType: "json",
             crossDomain: true,
             success: function (responseData, textStatus, jqXHR) {
                 resolve(responseData)

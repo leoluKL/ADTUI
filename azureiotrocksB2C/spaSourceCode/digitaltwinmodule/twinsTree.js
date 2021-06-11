@@ -177,29 +177,14 @@ twinsTree.prototype.fetchAllRelationships= async function(twinIDArr){
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
         try{
-            var data=await msalHelper.callAPI("digitaltwin/getRelationshipsFromTwinIDs", "POST", smallArr)
-        }catch(e){
+            var data = await msalHelper.callAPI("digitaltwin/getRelationshipsFromTwinIDs", "POST", smallArr)
+            if (data == "") continue;
+            globalCache.storeTwinRelationships(data) //store them in global available array
+            this.broadcastMessage({ "message": "drawAllRelations", info: data })
+        } catch (e) {
             alert(e.responseText)
         }
-        if(data=="") continue;
-        
-        console.log(data)
-        globalCache.storeTwinRelationships(data) //store them in global available array
-        this.broadcastMessage({ "message": "drawAllRelations",info:data})
     }
-}
-
-twinsTree.prototype.fetchPartialRelationships= async function(IDArr){
-    return new Promise((resolve, reject) => {
-        try{
-            var data=await msalHelper.callAPI("digitaltwin/getRelationshipsFromTwinIDs", "POST", {arr:IDArr})
-            $.post("queryADT/getRelationshipsFromTwinIDs",{arr:IDArr}, function (data) {
-                resolve(data)
-            });
-        }catch(e){
-            reject(e)
-        }
-    })
 }
 
 module.exports = twinsTree;

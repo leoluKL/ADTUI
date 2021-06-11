@@ -65,8 +65,9 @@ routerDigitalTwin.prototype.listTwinsForIDs =async function(req,res) {
 
 routerDigitalTwin.prototype.changeAttribute =async function(req,res) {
     try{
-        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"editADT/changeAttribute", {json:req.body,responseType: 'json'});
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"editADT/changeAttribute", {json:req.body});
     }catch(e){
+        console.log(e.response)
         res.status(e.response.statusCode).send(e.response.body);
         return;
     }

@@ -6,12 +6,25 @@ function routerEditADT(){
     this.useRoute("importModels","isPost")
     this.useRoute("deleteModels","isPost")
     this.useRoute("changeAttribute","isPost")
+    this.useRoute("upsertDigitalTwin","isPost")
 }
 
 routerEditADT.prototype.useRoute=function(routeStr,isPost){
     this.router[(isPost)?"post":"get"]("/"+routeStr,(req,res)=>{
         this[routeStr](req,res)
     })
+}
+
+routerEditADT.prototype.upsertDigitalTwin =async function(req,res) {
+    var newTwin = req.body.newTwinJson;
+    try{
+        var obj=JSON.parse(newTwin)
+        var twinID=obj['$dtId']
+        var re = await adtHelper.ADTClient.upsertDigitalTwin(twinID, newTwin)
+        res.send(re.body)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
 }
 
 routerEditADT.prototype.importModels =async function(req,res) {

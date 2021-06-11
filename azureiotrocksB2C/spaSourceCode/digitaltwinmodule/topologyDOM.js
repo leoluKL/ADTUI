@@ -342,8 +342,10 @@ topologyDOM.prototype.drawRelations=function(relationsData){
         var aRelation={data:{},group:"edges"}
         aRelation.data["originalInfo"]=originalInfo
         aRelation.data["id"]=theID
-        aRelation.data["source"]=originalInfo['$sourceId']
-        aRelation.data["target"]=originalInfo['$targetId']
+        aRelation.data["source"]=globalCache.twinIDMapToDisplayName[originalInfo['$sourceId']]
+        aRelation.data["target"]=globalCache.twinIDMapToDisplayName[originalInfo['$targetId']]
+
+
         if(this.core.$("#"+aRelation.data["source"]).length==0 || this.core.$("#"+aRelation.data["target"]).length==0) continue
         var sourceNode=this.core.$("#"+aRelation.data["source"])
         var sourceModel=sourceNode[0].data("originalInfo")['$metadata']['$model']
