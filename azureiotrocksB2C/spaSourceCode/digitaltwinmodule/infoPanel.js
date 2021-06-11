@@ -705,8 +705,6 @@ infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataTy
         var payLoad={"jsonPatch":JSON.stringify(jsonPatch),"twinID":twinID,"relationshipID":relationshipID}
     }
     
-    console.log(payLoad)
-    
     $.post("editADT/changeAttribute",payLoad
         ,  (data)=> {
             if(data!="") {

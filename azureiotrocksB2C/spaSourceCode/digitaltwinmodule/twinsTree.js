@@ -132,8 +132,8 @@ twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOr
         }
         if(replaceOrAppend=="replace") this.broadcastMessage({ "message": "replaceAllTwins", info: twinsdata })
         else this.broadcastMessage({ "message": "appendAllTwins", info: twinsdata })
-        //TODO:continue fetch relationships of twins
-        //this.fetchAllRelationships(twinIDArr)
+        
+        this.fetchAllRelationships(twinIDArr)
     } catch (e) {
         console.log(e)
         alert(e.responseText)
@@ -184,9 +184,11 @@ twinsTree.prototype.fetchAllRelationships= async function(twinIDArr){
 }
 
 twinsTree.prototype.fetchPartialRelationships= async function(IDArr){
+    console.log(IDArr)
+    return
     return new Promise((resolve, reject) => {
         try{
-            $.post("queryADT/allRelationships",{arr:IDArr}, function (data) {
+            $.post("queryADT/getRelationshipsFromTwinIDs",{arr:IDArr}, function (data) {
                 resolve(data)
             });
         }catch(e){

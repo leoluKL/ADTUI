@@ -5,6 +5,7 @@ function routerQueryADT(){
     this.router = express.Router();
     this.useRoute("listModelsForIDs","post")
     this.useRoute("listTwinsForIDs","post")
+    this.useRoute("getRelationshipsFromTwinIDs","post")
 }
 
 routerQueryADT.prototype.useRoute=function(routeStr,isPost){
@@ -50,6 +51,28 @@ routerQueryADT.prototype.listTwinsForIDs =async function(req,res) {
     }catch(e){
         res.status(400).send(e.message);
     }
+}
+
+routerQueryADT.prototype.getRelationshipsFromTwinIDs =async function(req,res) {
+    try{
+        var twinIDArr=req.body.arr;
+        var reArr=[]
+        var promiseArr=[]
+    
+        for(var i=0;i<twinIDArr.length;i++){
+            var twinID = twinIDArr[i];
+            promiseArr.push(this.querySingleTwinRelations(adtClient,twinID))
+        }
+        var results=await Promise.all(promiseArr);
+        results.forEach(oneSet=>{
+            reArr=reArr.concat(oneSet)
+        })
+    
+        res.send(reArr)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+    
 }
 
 
