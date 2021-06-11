@@ -124,8 +124,8 @@ twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOr
             })
         })
 
+        globalCache.storeADTTwins(twinsdata)
         for (var i = 0; i < twinsdata.length; i++) {
-            twinsdata[i]["displayName"]= globalCache.twinIDMapToDisplayName[twinsdata[i]["$dtId"]]
             var groupName = globalCache.modelIDMapToName[twinsdata[i]["$metadata"]["$model"]]
             this.tree.addLeafnodeToGroup(groupName, twinsdata[i], "skipRepeat")
             twinIDArr.push(twinsdata[i]["$dtId"])
@@ -133,6 +133,7 @@ twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOr
         if(replaceOrAppend=="replace") this.broadcastMessage({ "message": "replaceAllTwins", info: twinsdata })
         else this.broadcastMessage({ "message": "appendAllTwins", info: twinsdata })
         
+
         this.fetchAllRelationships(twinIDArr)
     } catch (e) {
         console.log(e)

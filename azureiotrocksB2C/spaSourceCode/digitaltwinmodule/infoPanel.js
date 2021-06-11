@@ -94,6 +94,11 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 var sourceModel=singleElementInfo["sourceModel"]
                 
                 this.drawEditable(this.DOM,this.getRelationShipEditableProperties(relationshipName,sourceModel),singleElementInfo,[])
+                for(var ind in singleElementInfo["$metadata"]){
+                    var tmpObj={}
+                    tmpObj[ind]=singleElementInfo["$metadata"][ind]
+                    this.drawStaticInfo(this.DOM,tmpObj,"1em","10px")
+                }
                 //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
             }
         }else if(arr.length>1){
@@ -138,39 +143,23 @@ infoPanel.prototype.rxMessage=function(msgPayload){
     }
 }
 
-infoPanel.prototype.addTwin=function(twinJson){
-    console.log({"newTwinJson":JSON.stringify(twinJson)})
-    return;
-
-    //generate uuid for the twin, add the twin to ADT
-    //if successful, then store the twin to cosmosDB as well
-    //if not successful, then roll back by deleting the twin from ADT
-    
-
-
-    /*
+infoPanel.prototype.addTwin=async function(twinJson){
+    //ask taskmaster to add the twin
     try{
         var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST",  {"newTwinJson":JSON.stringify(twinJson)})
     }catch(e){
         console.log(e)
         alert(e.responseText)
     }
-    $.post("editADT/upsertDigitalTwin", {"newTwinJson":JSON.stringify(twinJson)}
-                , (data) => {
-                    if (data != "") {//not successful editing
-                        alert(data)
-                    } else {
-                        //successful editing, update the node original info
-                        var keyLabel=this.DOM.find('#NEWTWIN_IDLabel')
-                        var IDInput=keyLabel.find("input")
-                        if(IDInput) IDInput.val("")
-                        $.post("queryADT/oneTwinInfo",{twinID:twinJson["$dtId"]}, (data)=> {
-                            if(data=="") return;
-                            globalCache.storedTwins[data["$dtId"]] = data;
-                            this.broadcastMessage({ "message": "addNewTwin",twinInfo:data})
-                        })                        
-                    }
-                });*/
+
+    globalCache.storeSingleDBTwin(data.DBTwin)
+    //successful editing, update the node original info
+    var keyLabel = this.DOM.find('#NEWTWIN_IDLabel')
+    var IDInput = keyLabel.find("input")
+    if (IDInput) IDInput.val("")
+    
+    globalCache.storeSingleADTTwin(data.ADTTwin)
+    this.broadcastMessage({ "message": "addNewTwin", twinInfo: data.ADTTwin })
 }
 
 infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,sourceModel){
@@ -318,7 +307,7 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
 
     var twinsImportResult= await this.batchImportTwins(importTwins)
     twinsImportResult.forEach(data=>{
-        globalCache.storedTwins[data["$dtId"]] = data;
+        globalCache.storeSingleADTTwin(data)
     })
     this.broadcastMessage({ "message": "addNewTwins",twinsInfo:twinsImportResult})
 
@@ -382,7 +371,7 @@ infoPanel.prototype.refreshInfomation=async function(){
         twinsdata.forEach(oneRe=>{
             var twinID= oneRe['$dtId']
             if(globalCache.storedTwins[twinID]!=null){
-                for(var ind in oneRe){ globalCache.storedTwins[twinID][ind]=oneRe[ind] }
+                for(var ind in oneRe)  globalCache.storeSingleADTTwin(oneRe[ind])
             }
         })
     }catch(e){
@@ -519,7 +508,7 @@ infoPanel.prototype.showOutBound=async function(){
         data.childTwinsAndRelations.forEach(oneSet=>{
             for(var ind in oneSet.childTwins){
                 var oneTwin=oneSet.childTwins[ind]
-                globalCache.storedTwins[ind]=oneTwin
+                globalCache.storeSingleADTTwin(oneTwin)
             }
         })
         this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})
@@ -549,7 +538,7 @@ infoPanel.prototype.showInBound=async function(){
         data.childTwinsAndRelations.forEach(oneSet=>{
             for(var ind in oneSet.childTwins){
                 var oneTwin=oneSet.childTwins[ind]
-                globalCache.storedTwins[ind]=oneTwin
+                globalCache.storeSingleADTTwin(oneTwin)
             }
         })
         this.broadcastMessage({ "message": "drawTwinsAndRelations",info:data})

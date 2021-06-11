@@ -11,6 +11,29 @@ function globalCache(){
     this.layoutJSON={}
 }
 
+globalCache.prototype.storeADTTwins=function(twinsData){
+    twinsData.forEach((oneNode)=>{this.storeSingleADTTwin(oneNode)});
+}
+
+globalCache.prototype.storeSingleADTTwin=function(oneNode){
+    this.storedTwins[oneNode["$dtId"]] = oneNode
+    oneNode["displayName"]= this.twinIDMapToDisplayName[oneNode["$dtId"]]
+}
+
+
+globalCache.prototype.storeSingleDBTwin=function(DBTwin){
+    for(var i=0;i<this.DBTwinsArr.length;i++){
+        var oneDBTwin=this.DBTwinsArr[i]
+        if(oneDBTwin["id"]==DBTwin["id"]){
+            this.DBTwinsArr.splice(i,1)
+            break;
+        }
+    }
+    this.DBTwinsArr.push(DBTwin)
+
+    this.twinIDMapToDisplayName[DBTwin["id"]]=DBTwin["displayName"]
+}
+
 globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
     this.DBTwinsArr.length=0
     this.DBTwinsArr=this.DBTwinsArr.concat(DBTwinsArr)
