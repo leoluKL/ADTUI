@@ -8,6 +8,7 @@ function routerEditADT(){
     this.useRoute("changeAttribute","isPost")
     this.useRoute("upsertDigitalTwin","isPost")
     this.useRoute("deleteTwinWithoutConnection","isPost")
+    this.useRoute("createRelations","isPost")
 }
 
 routerEditADT.prototype.useRoute=function(routeStr,isPost){
@@ -26,6 +27,29 @@ routerEditADT.prototype.upsertDigitalTwin =async function(req,res) {
     }catch(e){
         res.status(400).send(e.message);
     }
+}
+
+routerEditADT.prototype.createRelations =async function(req,res) {
+    var actions=JSON.parse(req.body.actions);
+    var promiseArr=[]
+    actions.forEach(oneAction=>{
+        promiseArr.push(adtHelper.ADTClient.upsertRelationship(oneAction["$srcId"],oneAction["$relationshipId"],oneAction["obj"]))
+    })
+
+    try{
+        var results=await Promise.allSettled(promiseArr);
+        var succeedList=[]
+        results.forEach((oneSet,index)=>{
+            if(oneSet.status=="fulfilled") {
+                //console.log(JSON.stringify(oneSet,null,2))
+                succeedList.push(oneSet.value.body) 
+            }
+        })
+        res.send(succeedList)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+    
 }
 
 routerEditADT.prototype.deleteTwinWithoutConnection =async function(req,res) {
