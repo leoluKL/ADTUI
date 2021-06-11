@@ -47,7 +47,7 @@ routerInsertData.prototype.newTwin =async function(req,res) {
             ,"modelID":ADTTwin['$metadata']['$model']
         }
         var re = await cosmosdbhelper.insertRecord("appuser", aDocument)
-        res.end()
+        res.send(aDocument)
     } catch (e) {
         res.status(400).send(e.message)
     }
