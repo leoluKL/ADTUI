@@ -706,7 +706,7 @@ infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataTy
     }
     
     console.log(payLoad)
-    /*
+    
     $.post("editADT/changeAttribute",payLoad
         ,  (data)=> {
             if(data!="") {
@@ -716,7 +716,7 @@ infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataTy
                 //successful editing, update the node original info
                 this.updateOriginObjectValue(originElementInfo,path,newVal)
             }
-        });*/
+        });
 }
 
 infoPanel.prototype.updateOriginObjectValue=function(nodeInfo,pathArr,newVal){
