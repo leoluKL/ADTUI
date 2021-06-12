@@ -23,6 +23,7 @@ app.use(express.urlencoded({extended: true}));
 app.use("/userAccount", require("./routerUserAccount"))
 app.use("/queryData", require("./routerQueryData"))
 app.use("/insertData", require("./routerInsertData"))
+app.use("/deleteData", require("./routerDeleteData"))
 
 const port = process.env.PORT || 5001;
 
