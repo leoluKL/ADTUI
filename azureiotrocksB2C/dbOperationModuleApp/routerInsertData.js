@@ -15,7 +15,7 @@ routerInsertData.prototype.useRoute=function(routeStr,isPost){
 
 routerInsertData.prototype.newModels =async function(req,res) {
     var accountID=req.body.account
-    var models=req.body.models
+    var models=JSON.parse(req.body.models)
 
     try {
         var newModelDocuments = []
