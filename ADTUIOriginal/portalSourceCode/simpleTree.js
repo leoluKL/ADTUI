@@ -1,5 +1,4 @@
 'use strict';
-
 function simpleTree(DOM,options){
     this.DOM=DOM
     this.groupNodes=[] //each group header is one node
@@ -218,7 +217,7 @@ function simpleTreeGroupNode(parentTree,obj){
     this.createDOM()
 }
 
-simpleTreeGroupNode.prototype.refreshName=function(){
+simpleTreeGroupNode.prototype.refreshName=function(){ //⬢▉⚫
     this.headerDOM.empty()
     var nameDiv=$("<div style='display:inline;padding-right:3px'></div>")
     nameDiv.text(this.name)
@@ -229,9 +228,15 @@ simpleTreeGroupNode.prototype.refreshName=function(){
     }else{
         this.headerDOM.css("font-weight","normal")
     } 
+
+    if(this.parentTree.options.groupNodeIconFunc){
+        var iconLabel=this.parentTree.options.groupNodeIconFunc(this)
+        this.headerDOM.append(iconLabel)
+    }
+    
     var numberlabel=$("<label style='display:inline;background-color:"+lblColor
         +";color:white;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+this.childLeafNodes.length+"</label>")
-    this.headerDOM.append(nameDiv,numberlabel)
+    this.headerDOM.append(nameDiv,numberlabel) 
     
     this.checkOptionHideEmptyGroup()
 }

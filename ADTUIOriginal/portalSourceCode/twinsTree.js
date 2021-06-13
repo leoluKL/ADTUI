@@ -7,6 +7,27 @@ function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM)
     this.modelIDMapToName={}
 
+    this.tree.options.groupNodeIconFunc=(gn)=>{
+        var modelClass=gn.info["@id"]
+        var colorCode="gray"
+        var shape="ellipse"
+        var avatar=null
+        if(globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][modelClass]){
+            var visualJson =globalCache.visualDefinition[globalCache.selectedADT][modelClass]
+            var colorCode= visualJson.color || "gray"
+            var shape=  visualJson.shape || "ellipse"
+            var avarta= visualJson.avarta 
+        }
+        var fontsize={"ellipse":"130%","round-rectangle":"90%","hexagon":"120%"}[shape]
+        shape={"ellipse":"●","round-rectangle":"▉","hexagon":"⬢"}[shape]
+        
+        var lblHTML="<label style='display:inline;color:"+colorCode+";font-size:"+fontsize+";font-weight:normal;border-radius: 2px;'>"+shape+"</label>"
+
+        if(avarta) lblHTML+="<img src='"+avarta+"' style='height:20px'/>"
+
+        return $(lblHTML)
+    }
+
     this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
         var infoArr=[]
         nodesArr.forEach((item, index) =>{
@@ -68,6 +89,11 @@ twinsTree.prototype.rxMessage=function(msgPayload){
         msgPayload.twinsInfo.forEach(oneTwinInfo=>{this.drawOneTwin(oneTwinInfo)})
     }
     else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
+    else if(msgPayload.message=="visualDefinitionChange"){
+        if(!msgPayload.srcModelID){ // change model class visualization
+            this.tree.groupNodes.forEach(gn=>{gn.refreshName()})
+        } 
+    }
 }
 
 twinsTree.prototype.deleteTwins=function(twinIDArr){

@@ -317,9 +317,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     }
     shapeSelector.change((eve)=>{
         var selectShape=eve.target.value
-        if (!globalCache.visualDefinition[globalCache.selectedADT])
-            globalCache.visualDefinition[globalCache.selectedADT] = {}
-        var visualJson = globalCache.visualDefinition[globalCache.selectedADT]
+        var visualJson = globalCache.visualDefinition["default"]
 
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
