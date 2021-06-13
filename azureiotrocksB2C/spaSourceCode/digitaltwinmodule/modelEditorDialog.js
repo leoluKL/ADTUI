@@ -26,15 +26,14 @@ modelEditorDialog.prototype.popup = async function() {
     var importButton =$('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green w3-right" style="height:100%">Import</button>')
     buttonRow.append(importButton)
 
-    importButton.on("click", async () => {
+    importButton.on("click", async () => {F
         var modelToBeImported = [this.dtdlobj]
         try {
-            var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": modelToBeImported })
+            var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) })
 
             alert("Model \"" + this.dtdlobj["displayName"] + "\" is created!")
             this.broadcastMessage({ "message": "ADTModelEdited" })
-            modelAnalyzer.addModels(modelToBeImported)
-            console.log(globalCache.modelIDMapToName)
+            modelAnalyzer.addModels(modelToBeImported) //add so immediatley the list can show the new models
             this.popup() //refresh content
         }catch(e){
             console.log(e)

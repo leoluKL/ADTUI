@@ -182,7 +182,10 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
                             confirmDialogDiv.close();
                             $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
                                 if(data==""){//successful
-                                    this.listModels("shouldBroadcast")
+                                    delete modelAnalyzer.DTDLModels[modelID]
+                                    delete this.models[modelName]
+                                    this.tree.deleteLeafNode(modelName)
+                                    this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models})
                                     this.panelCard.empty()
                                     if(globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][modelID] ){
                                         delete globalCache.visualDefinition[globalCache.selectedADT][modelID]

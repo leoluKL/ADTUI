@@ -63,7 +63,7 @@ modelManagerDialog.prototype.popup = async function() {
     leftSpan.append(modelList)
     this.modelList = modelList;
     
-    var rightSpan=$('<div class="w3-container w3-cell"></div>')
+    var rightSpan=$('<div class="w3-container w3-cell" style="padding:0px"></div>')
     row2.append(rightSpan) 
     var panelCardOut=$('<div class="w3-card-2 w3-white" style="margin-top:2px"></div>')
 
@@ -71,7 +71,7 @@ modelManagerDialog.prototype.popup = async function() {
     panelCardOut.append(this.modelButtonBar)
 
     rightSpan.append(panelCardOut)
-    var panelCard=$('<div style="width:400px;height:405px;overflow:auto;margin-top:2px"></div>')
+    var panelCard=$('<div style="width:410px;height:412px;overflow:auto;margin-top:2px"></div>')
     panelCardOut.append(panelCard)
     this.panelCard=panelCard;
 
@@ -178,7 +178,9 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
                             confirmDialogDiv.close();
                             try{
                                 await msalHelper.callAPI("digitaltwin/deleteModel", "POST", { "model": modelID })
-                                this.listModels("shouldBroadcast")
+                                delete modelAnalyzer.DTDLModels[modelID]
+                                this.tree.deleteLeafNode(globalCache.modelIDMapToName[modelID])
+                                this.broadcastMessage({ "message": "ADTModelsChange"})
                                 this.panelCard.empty()
                                 //TODO: clear the visualization setting of this deleted model
                                 /*
@@ -375,13 +377,13 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
         }
     }
     if(fileContentArr.length==0) return;
-    $.post("editADT/importModels",{"models":JSON.stringify(fileContentArr)}, (data)=> {
-        if (data == "") {//successful
-            this.listModels("shouldBroadCast")
-        } else { //error happens
-            alert(data)
-        }
-    });
+    try {
+        var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", {"models":JSON.stringify(fileContentArr)})
+        this.listModels("shouldBroadCast")
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }  
 }
 
 modelManagerDialog.prototype.readOneFile= async function(aFile){
