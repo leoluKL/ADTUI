@@ -435,7 +435,7 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
             this.modelList.append(zeroModelItem)
             zeroModelItem.css("cursor","default")
         }else{
-            this.tree=new simpleTree(this.modelList,{"leafNameProperty":"displayName","noMultipleSelectAllowed":true})
+            this.tree=new simpleTree(this.modelList,{"leafNameProperty":"displayName","noMultipleSelectAllowed":true,"hideEmptyGroup":true})
 
             this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
                 var theNode=nodesArr[0]

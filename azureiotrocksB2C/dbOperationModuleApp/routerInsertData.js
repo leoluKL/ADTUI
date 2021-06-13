@@ -5,6 +5,7 @@ function routerInsertData(){
     this.router = express.Router();
     this.useRoute("newModels","post")
     this.useRoute("newTwin","post")
+    this.useRoute("updateVisualSchema","post")
 }
 
 routerInsertData.prototype.useRoute=function(routeStr,isPost){
@@ -48,6 +49,23 @@ routerInsertData.prototype.newTwin =async function(req,res) {
         }
         var re = await cosmosdbhelper.insertRecord("appuser", aDocument)
         res.send(aDocument)
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+}
+
+routerInsertData.prototype.updateVisualSchema =async function(req,res) {
+    var accountID=req.body.account
+    var visualDefinitionJson = JSON.parse(req.body.visualDefinitionJson)
+    try {
+        var re=await cosmosdbhelper.insertRecord("appuser",{
+            id:"VisualSchema.default"
+            ,"type":"visualSchema"
+            ,"accountID":accountID
+            ,"name":"default"
+            ,"detail":visualDefinitionJson
+        })
+        res.end()
     } catch (e) {
         res.status(400).send(e.message)
     }

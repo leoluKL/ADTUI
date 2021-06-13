@@ -24,6 +24,7 @@
     ],
     "settings": {
       "liveServer.settings.multiRootWorkspaceName": "spaPortal",
-      "workbench.colorTheme": "Noctis Obscuro"
+      "workbench.colorTheme": "Noctis Obscuro",
+      "terminal.integrated.rightClickBehavior": "default"
     }
   }
