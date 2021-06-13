@@ -76,7 +76,7 @@ routerEditADT.prototype.deleteTwinWithoutConnection =async function(req,res) {
 }
 
 routerEditADT.prototype.importModels =async function(req,res) {
-    var models=req.body.models;
+    var models=JSON.parse(req.body.models);
     
     try{
         re = await adtHelper.ADTClient.createModels(models)
