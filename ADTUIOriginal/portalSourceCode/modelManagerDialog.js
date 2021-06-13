@@ -1,5 +1,6 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
+const simpleTree= require("./simpleTree")
 const modelEditorDialog = require("./modelEditorDialog")
 const globalCache = require("./globalCache")
 
@@ -401,20 +402,11 @@ modelManagerDialog.prototype.readOneFile= async function(aFile){
     })
 }
 
-modelManagerDialog.prototype.assignEventToOneModel=function(oneModel){
-    oneModel.on("click",(e)=>{
-        this.modelList.children().each((index,ele)=>{
-            $(ele).removeClass("w3-amber")
-        })
-        oneModel.addClass("w3-amber")
-        var modelName = oneModel.data('modelName')
-        if(modelName) this.fillRightSpan(modelName)
-    })
-}
 
 modelManagerDialog.prototype.listModels=function(shouldBroadcast){
     this.modelList.empty()
     for(var ind in this.models) delete this.models[ind]
+
     $.get("queryADT/listModels", (data, status) => {
         if(data=="") data=[]
         data.forEach(oneItem=>{
@@ -440,20 +432,47 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
             this.modelList.append(zeroModelItem)
             zeroModelItem.css("cursor","default")
         }else{
-            var sortArr=[]
-            for(var modelName in this.models) sortArr.push(modelName)
-            sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
-            sortArr.forEach(oneModelName=>{
-                var oneModelItem=$('<li style="font-size:0.9em">'+oneModelName+'</li>')
-                oneModelItem.css("cursor","default")
-                oneModelItem.data("modelName", oneModelName)
-                this.modelList.append(oneModelItem)
-                this.assignEventToOneModel(oneModelItem)
+            this.tree=new simpleTree(this.modelList,{"leafNameProperty":"displayName","noMultipleSelectAllowed":true})
+
+            this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
+                var theNode=nodesArr[0]
+                this.fillRightSpan(theNode.leafInfo["displayName"])
+            }
+
+            var groupNameList={}
+            for(var modelName in this.models)  {
+                var modelID= this.models[modelName]["@id"]
+                groupNameList[this.modelNameToGroupName(modelID)]=1
+            }
+            var modelgroupSortArr=Object.keys(groupNameList)
+            modelgroupSortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
+            modelgroupSortArr.forEach(oneGroupName=>{
+                this.tree.addGroupNode({displayName:oneGroupName})
             })
+
+            for(var modelName in this.models){
+                var modelID= this.models[modelName]["@id"]
+                var gn=this.modelNameToGroupName(modelID)
+                this.tree.addLeafnodeToGroup(gn,this.models[modelName])
+            }
+
+            this.tree.sortAllLeaves()
         }
         
         if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models })
     })
+
+
+    
+    //var g1 = this.tree.addGroupNode({displayName:"test"})
+    //this.tree.addLeafnodeToGroup("test",{"displayName":"haha"},"skipRepeat")
+    //return;
+}
+
+modelManagerDialog.prototype.modelNameToGroupName=function(modelName){
+    var nameParts=modelName.split(":")
+    if(nameParts.length>=2)  return nameParts[1]
+    else return "Others"
 }
 
 modelManagerDialog.prototype.rxMessage=function(msgPayload){

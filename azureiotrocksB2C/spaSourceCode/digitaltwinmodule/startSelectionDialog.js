@@ -10,21 +10,6 @@ function startSelectionDialog() {
     }
 }
 
-startSelectionDialog.prototype.loadData = async function () {
-    var res=await msalHelper.callAPI("digitaltwin/fetchUserData")
-
-    var dbtwins=[]
-    var dbmodels=[]
-    res.forEach(element => {
-        if(element.type=="visualSchema") {
-            this.broadcastMessage({ "message": "fetchVisualSchema","data":element.detail})
-        }else if(element.type=="DTModel") dbmodels.push(element)
-        else if(element.type=="DTTwin") dbtwins.push(element)
-    });
-    globalCache.storeDBTwinsArr(dbtwins)
-    globalCache.storeDBModelsArr(dbmodels)
-}
-
 startSelectionDialog.prototype.popup = async function() {
     this.DOM.show()
     this.DOM.empty()

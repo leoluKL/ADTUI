@@ -27,6 +27,24 @@ function twinsTree(DOM, searchDOM) {
     this.searchBox.css({"outline":"none","height":"100%","width":"100%"}) 
     searchDOM.append(this.searchBox)
 
+    var hideOrShowEmptyGroup=$('<button style="height:20px;border:none;padding-left:2px" class="w3-block w3-tiny w3-hover-red w3-amber">Hide Empty Models</button>')
+    searchDOM.append(hideOrShowEmptyGroup)
+    DOM.css("top","50px")
+    hideOrShowEmptyGroup.attr("status","show")
+    hideOrShowEmptyGroup.on("click",()=>{
+        if(hideOrShowEmptyGroup.attr("status")=="show"){
+            hideOrShowEmptyGroup.attr("status","hide")
+            hideOrShowEmptyGroup.text("Show Empty Models")
+            this.tree.options.hideEmptyGroup=true
+        }else{
+            hideOrShowEmptyGroup.attr("status","show")
+            hideOrShowEmptyGroup.text("Hide Empty Models")
+            delete this.tree.options.hideEmptyGroup
+        }
+        this.tree.groupNodes.forEach(oneGroupNode=>{oneGroupNode.checkOptionHideEmptyGroup()})
+    })
+
+
     this.searchBox.keyup((e)=>{
         if(e.keyCode == 13)
         {

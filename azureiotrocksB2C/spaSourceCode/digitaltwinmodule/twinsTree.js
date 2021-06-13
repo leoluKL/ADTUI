@@ -4,7 +4,7 @@ const msalHelper = require("../msalHelper")
 const globalCache = require("./globalCache")
 
 function twinsTree(DOM, searchDOM) {
-    this.tree=new simpleTree(DOM)
+    this.tree=new simpleTree(DOM,{"leafNameProperty":"displayName"})
 
     this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
         var infoArr=[]
@@ -25,7 +25,22 @@ function twinsTree(DOM, searchDOM) {
     this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("w3-input");
     this.searchBox.css({"outline":"none","height":"100%","width":"100%"}) 
     searchDOM.append(this.searchBox)
-
+    var hideOrShowEmptyGroup=$('<button style="height:20px;border:none;padding-left:2px" class="w3-block w3-tiny w3-hover-red w3-amber">Hide Empty Models</button>')
+    searchDOM.append(hideOrShowEmptyGroup)
+    DOM.css("top","50px")
+    hideOrShowEmptyGroup.attr("status","show")
+    hideOrShowEmptyGroup.on("click",()=>{
+        if(hideOrShowEmptyGroup.attr("status")=="show"){
+            hideOrShowEmptyGroup.attr("status","hide")
+            hideOrShowEmptyGroup.text("Show Empty Models")
+            this.tree.options.hideEmptyGroup=true
+        }else{
+            hideOrShowEmptyGroup.attr("status","show")
+            hideOrShowEmptyGroup.text("Hide Empty Models")
+            delete this.tree.options.hideEmptyGroup
+        }
+        this.tree.groupNodes.forEach(oneGroupNode=>{oneGroupNode.checkOptionHideEmptyGroup()})
+    })
     this.searchBox.keyup((e)=>{
         if(e.keyCode == 13)
         {
@@ -43,7 +58,7 @@ twinsTree.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="startSelection_replace") this.loadStartSelection(msgPayload.twinIDs,msgPayload.modelIDs,"replace")
     else if(msgPayload.message=="startSelection_append") this.loadStartSelection(msgPayload.twinIDs,msgPayload.modelIDs,"append")
     else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
-    else if(msgPayload.message=="ADTModelsChange") this.refreshModels(msgPayload.models)
+    else if(msgPayload.message=="ADTModelsChange") this.refreshModels()
     else if(msgPayload.message=="addNewTwin") this.drawOneTwin(msgPayload.twinInfo)
     else if(msgPayload.message=="addNewTwins") {
         msgPayload.twinsInfo.forEach(oneTwinInfo=>{this.drawOneTwin(oneTwinInfo)})
@@ -57,7 +72,12 @@ twinsTree.prototype.deleteTwins=function(twinIDArr){
     })
 }
 
-twinsTree.prototype.refreshModels=function(modelsData){
+twinsTree.prototype.refreshModels=function(){
+    var modelsData={}
+    for(var modelID in modelAnalyzer.DTDLModels){
+        var oneModel=modelAnalyzer.DTDLModels[modelID]
+        modelsData[oneModel["displayName"]] = oneModel
+    }
     //delete all group nodes of deleted models
     this.tree.groupNodes.forEach((gnode)=>{
         if(modelsData[gnode.name]==null){
@@ -87,31 +107,8 @@ twinsTree.prototype.refreshModels=function(modelsData){
 twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOrAppend){
     if(replaceOrAppend=="replace") this.tree.clearAllLeafNodes()
 
-    //list all models, add model to twintree group node if it is not there, or remove deleted models
-    try {
-        var data = await msalHelper.callAPI("digitaltwin/listModelsForIDs", "POST", modelIDs)
-        var tmpNameToObj = {}
-        for (var i = 0; i < data.length; i++) {
-            if (data[i]["displayName"] == null) data[i]["displayName"] = data[i]["@id"]
-            if ($.isPlainObject(data[i]["displayName"])) {
-                if (data[i]["displayName"]["en"]) data[i]["displayName"] = data[i]["displayName"]["en"]
-                else data[i]["displayName"] = JSON.stringify(data[i]["displayName"])
-            }
-            if (tmpNameToObj[data[i]["displayName"]] != null) {
-                //repeated model display name
-                data[i]["displayName"] = data[i]["@id"]
-            }
-            tmpNameToObj[data[i]["displayName"]] = data[i]
-        }
-        this.refreshModels(tmpNameToObj)
-
-        modelAnalyzer.clearAllModels();
-        modelAnalyzer.addModels(data)
-        modelAnalyzer.analyze();
-    } catch (e) {
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-    }
+    
+    this.refreshModels()
     
     //add new twins under the model group node
     try{

@@ -1,6 +1,7 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const simpleSelectMenu= require("./simpleSelectMenu")
 const msalHelper=require("../msalHelper")
+const globalCache = require("./globalCache")
 
 function modelEditorDialog() {
     if(!this.DOM){
@@ -33,6 +34,7 @@ modelEditorDialog.prototype.popup = async function() {
             alert("Model \"" + this.dtdlobj["displayName"] + "\" is created!")
             this.broadcastMessage({ "message": "ADTModelEdited" })
             modelAnalyzer.addModels(modelToBeImported)
+            console.log(globalCache.modelIDMapToName)
             this.popup() //refresh content
         }catch(e){
             console.log(e)

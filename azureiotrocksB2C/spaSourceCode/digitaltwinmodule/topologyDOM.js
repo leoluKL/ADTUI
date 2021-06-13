@@ -446,7 +446,7 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
 
 topologyDOM.prototype.applyVisualDefinition=function(){
     //TODO:to change
-    //var visualJson=modelManagerDialog.visualDefinition[startSelectionDialog.selectedADT]
+    //var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
     if(visualJson==null) return;
     for(var modelID in visualJson){
         if(visualJson[modelID].color){

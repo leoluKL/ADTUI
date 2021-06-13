@@ -1,11 +1,12 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const startSelectionDialog = require("./startSelectionDialog")
+const simpleTree= require("./simpleTree")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const modelEditorDialog = require("./modelEditorDialog")
+const globalCache = require("./globalCache")
+const msalHelper=require("../msalHelper")
 
 function modelManagerDialog() {
-    this.visualDefinition={}
-    this.models={}
     if(!this.DOM){
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
         this.DOM.css("overflow","hidden")
@@ -44,7 +45,7 @@ modelManagerDialog.prototype.popup = async function() {
     })
     exportModelBtn.on("click", () => {
         var modelArr=[]
-        for(var modelName in this.models) modelArr.push(this.models[modelName])
+        for(var modelID in modelAnalyzer.DTDLModels) modelArr.push(JSON.parse(modelAnalyzer.DTDLModels[modelID]["original"]))
         var pom = $("<a></a>")
         pom.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(modelArr)));
         pom.attr('download', "exportModels.json");
@@ -77,7 +78,7 @@ modelManagerDialog.prototype.popup = async function() {
     this.modelButtonBar.empty()
     panelCard.html("<a style='display:block;font-style:italic;color:gray;padding-left:5px'>Choose a model to view infomration</a>")
 
-    //this.listModels()
+    this.listModels()
 }
 
 modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {
@@ -116,10 +117,9 @@ modelManagerDialog.prototype.resizeImgFile = async function(theFile,max_size) {
     })
 }
 
-modelManagerDialog.prototype.fillRightSpan=async function(modelName){
+modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     this.panelCard.empty()
     this.modelButtonBar.empty()
-    var modelID=this.models[modelName]['@id']
 
     var delBtn = $('<button style="margin-bottom:2px" class="w3-button w3-light-gray w3-hover-pink w3-border-right">Delete Model</button>')
     var importPicBtn = $('<button class="w3-button w3-light-gray w3-hover-amber w3-border-right">Upload Avarta</button>')
@@ -137,7 +137,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
         var dataUrl= await this.resizeImgFile(theFile,70)
         if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
 
-        var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
+        var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
         if(!visualJson[modelID]) visualJson[modelID]={}
         visualJson[modelID].avarta=dataUrl
         this.saveVisualDefinition()
@@ -146,7 +146,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     })
 
     clearAvartaBtn.on("click", ()=>{
-        var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
+        var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
         if(visualJson[modelID]) delete visualJson[modelID].avarta 
         if(this.avartaImg) this.avartaImg.removeAttr('src');
         this.saveVisualDefinition()
@@ -157,27 +157,39 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     delBtn.on("click",()=>{
         var confirmDialogDiv = new simpleConfirmDialog()
 
+        //check how many twins are under this model ID
+        var numberOfTwins=0
+        globalCache.DBTwinsArr.forEach(oneDBTwin=>{
+            if(oneDBTwin["modelID"]==modelID) numberOfTwins++
+        })
+
+        var contentStr="This will DELETE model \"" + modelID + "\". "
+        contentStr+="(There "+((numberOfTwins>1)?("are "+numberOfTwins+" twins"):("is "+numberOfTwins+" twin") ) + " of this model."
+        if(numberOfTwins>0) contentStr+=" You may still delete the model, but please import a model with this modelID to ensure normal operation)"
+        else contentStr+=")"
         confirmDialogDiv.show(
-            { width: "250px" },
+            { width: "350px" },
             {
                 title: "Warning"
-                , content: "This will DELETE model \"" + modelID + "\""
+                , content: contentStr
                 , buttons: [
                     {
-                        colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                        colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": async () => {
                             confirmDialogDiv.close();
-                            $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
-                                if(data==""){//successful
-                                    this.listModels("shouldBroadcast")
-                                    this.panelCard.empty()
-                                    if(this.visualDefinition[startSelectionDialog.selectedADT] && this.visualDefinition[startSelectionDialog.selectedADT][modelID] ){
-                                        delete this.visualDefinition[startSelectionDialog.selectedADT][modelID]
-                                        this.saveVisualDefinition()
-                                    }
-                                }else{ //error happens
-                                    alert(data)
-                                }
-                            });
+                            try{
+                                await msalHelper.callAPI("digitaltwin/deleteModel", "POST", { "model": modelID })
+                                this.listModels("shouldBroadcast")
+                                this.panelCard.empty()
+                                //TODO: clear the visualization setting of this deleted model
+                                /*
+                                if (globalCache.visualDefinition[startSelectionDialog.selectedADT] && globalCache.visualDefinition[startSelectionDialog.selectedADT][modelID]) {
+                                    delete globalCache.visualDefinition[startSelectionDialog.selectedADT][modelID]
+                                    this.saveVisualDefinition()
+                                }*/
+                            }catch(e){
+                                console.log(e)
+                                if(e.responseText) alert(e.responseText)
+                            }   
                         }
                     },
                     {
@@ -196,7 +208,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     var baseClassesDOM=this.addAPartInRightSpan("Base Classes")
     var originalDefinitionDOM=this.addAPartInRightSpan("Original Definition")
 
-    var str=JSON.stringify(this.models[modelName],null,2)
+    var str=JSON.stringify(JSON.parse(modelAnalyzer.DTDLModels[modelID]["original"]),null,2)
     originalDefinitionDOM.append($('<pre id="json">'+str+'</pre>'))
 
     var edittableProperties=modelAnalyzer.DTDLModels[modelID].editableProperties
@@ -228,7 +240,7 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     
     var avartaImg=$("<img></img>")
     rightPart.append(avartaImg)
-    var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
     if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)
     this.avartaImg=avartaImg;
 
@@ -247,7 +259,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     containerDiv.append(contentDOM)
 
     var definiedColor=null
-    var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
     if(relatinshipName==null){
         if(visualJson && visualJson[modelID] && visualJson[modelID].color) definiedColor=visualJson[modelID].color
     }else{
@@ -272,9 +284,9 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value
         colorSelector.css("color",selectColorCode)
-        if(!this.visualDefinition[startSelectionDialog.selectedADT]) 
-            this.visualDefinition[startSelectionDialog.selectedADT]={}
-        var visualJson=this.visualDefinition[startSelectionDialog.selectedADT]
+        if(!globalCache.visualDefinition[startSelectionDialog.selectedADT]) 
+            globalCache.visualDefinition[startSelectionDialog.selectedADT]={}
+        var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
 
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
@@ -290,7 +302,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 }
 
 modelManagerDialog.prototype.saveVisualDefinition=function(){
-    $.post("visualDefinition/saveVisualDefinition",{visualDefinitionJson:this.visualDefinition})
+    $.post("visualDefinition/saveVisualDefinition",{visualDefinitionJson:globalCache.visualDefinition})
 }
 
 modelManagerDialog.prototype.fillRelationshipInfo=function(validRelationships,parentDom){
@@ -386,64 +398,50 @@ modelManagerDialog.prototype.readOneFile= async function(aFile){
     })
 }
 
-modelManagerDialog.prototype.assignEventToOneModel=function(oneModel){
-    oneModel.on("click",(e)=>{
-        this.modelList.children().each((index,ele)=>{
-            $(ele).removeClass("w3-amber")
+
+modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
+    this.modelList.empty()
+    await globalCache.loadUserData()
+
+    if(jQuery.isEmptyObject(modelAnalyzer.DTDLModels)){
+        var zeroModelItem=$('<li style="font-size:0.9em">zero model record. Please import...</li>')
+        this.modelList.append(zeroModelItem)
+        zeroModelItem.css("cursor","default")
+    }else{
+        this.tree = new simpleTree(this.modelList, { "leafNameProperty": "displayName", "noMultipleSelectAllowed": true })
+
+        this.tree.callback_afterSelectNodes = (nodesArr, mouseClickDetail) => {
+            var theNode = nodesArr[0]
+            this.fillRightSpan(theNode.leafInfo["@id"])
+        }
+
+        var groupNameList = {}
+        for (var modelID in modelAnalyzer.DTDLModels) groupNameList[this.modelNameToGroupName(modelID)] = 1
+        var modelgroupSortArr = Object.keys(groupNameList)
+        modelgroupSortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
+        modelgroupSortArr.forEach(oneGroupName => {
+            this.tree.addGroupNode({ displayName: oneGroupName })
         })
-        oneModel.addClass("w3-amber")
-        var modelName = oneModel.data('modelName')
-        if(modelName) this.fillRightSpan(modelName)
-    })
+
+        for (var modelID in modelAnalyzer.DTDLModels) {
+            var gn = this.modelNameToGroupName(modelID)
+            this.tree.addLeafnodeToGroup(gn, JSON.parse(modelAnalyzer.DTDLModels[modelID]["original"]))
+        }
+
+        this.tree.sortAllLeaves()
+    }
+    
+    if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange"})
 }
 
-modelManagerDialog.prototype.listModels=function(shouldBroadcast){
-    this.modelList.empty()
-    for(var ind in this.models) delete this.models[ind]
-    $.get("queryADT/listModels", (data, status) => {
-        if(data=="") data=[]
-        data.forEach(oneItem=>{
-            if(oneItem["displayName"]==null) oneItem["displayName"]=oneItem["@id"]
-            if($.isPlainObject(oneItem["displayName"])){
-                if(oneItem["displayName"]["en"]) oneItem["displayName"]=oneItem["displayName"]["en"]
-                else oneItem["displayName"]=JSON.stringify(oneItem["displayName"])
-            }
-            if(this.models[oneItem["displayName"]]!=null){
-                //repeated model display name
-                oneItem["displayName"]=oneItem["@id"]
-            }  
-            this.models[oneItem["displayName"]] = oneItem
-        })
-        if(shouldBroadcast){
-            modelAnalyzer.clearAllModels();
-            modelAnalyzer.addModels(data)
-            modelAnalyzer.analyze();
-        }
-        
-        if(data.length==0){
-            var zeroModelItem=$('<li style="font-size:0.9em">zero model record. Please import...</li>')
-            this.modelList.append(zeroModelItem)
-            zeroModelItem.css("cursor","default")
-        }else{
-            var sortArr=[]
-            for(var modelName in this.models) sortArr.push(modelName)
-            sortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
-            sortArr.forEach(oneModelName=>{
-                var oneModelItem=$('<li style="font-size:0.9em">'+oneModelName+'</li>')
-                oneModelItem.css("cursor","default")
-                oneModelItem.data("modelName", oneModelName)
-                this.modelList.append(oneModelItem)
-                this.assignEventToOneModel(oneModelItem)
-            })
-        }
-        
-        if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models })
-    })
+modelManagerDialog.prototype.modelNameToGroupName=function(modelName){
+    var nameParts=modelName.split(":")
+    if(nameParts.length>=2)  return nameParts[1]
+    else return "Others"
 }
 
 modelManagerDialog.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="ADTModelEdited") this.listModels("shouldBroadcast")
-    else if(msgPayload.message=="fetchVisualSchema") this.visualDefinition=msgPayload.data
 }
 
 

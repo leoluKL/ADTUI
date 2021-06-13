@@ -6,7 +6,7 @@ function modelAnalyzer(){
 }
 
 modelAnalyzer.prototype.clearAllModels=function(){
-    console.log("clear all model info")
+    //console.log("clear all model info")
     for(var id in this.DTDLModels) delete this.DTDLModels[id]
 }
 
@@ -92,7 +92,7 @@ modelAnalyzer.prototype.expandEditableProperties=function(parentObj,dataInfo,emb
 
 
 modelAnalyzer.prototype.analyze=function(){
-    console.log("analyze model info")
+    //console.log("analyze model info")
     //analyze all relationship types
     for (var id in this.relationshipTypes) delete this.relationshipTypes[id]
     for (var modelID in this.DTDLModels) {

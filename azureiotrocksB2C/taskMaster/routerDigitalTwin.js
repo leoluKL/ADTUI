@@ -14,6 +14,7 @@ function routerDigitalTwin(){
     this.useRoute("createRelations","isPost")
     this.useRoute("queryOutBound","isPost")
     this.useRoute("queryInBound","isPost")
+    this.useRoute("deleteModel","isPost")
 }
 
 routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
@@ -163,6 +164,25 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
         console.error("roll back twin creation for "+originTwinID)
         await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteTwinWithoutConnection", {json:{"twinID":twinUUID}});
     }    
+}
+
+
+routerDigitalTwin.prototype.deleteModel =async function(req,res) {
+    try{
+        await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteModel", {json:req.body});
+    }catch(e){
+        console.log(e.response.body);
+    }
+
+    var dbReq={"model":req.body.model, "account":req.authInfo.account}
+    try{
+        await got.post(process.env.dboperationAPIURL+"deleteData/deleteModel",{json:dbReq});
+        //task is successful
+        res.status(200).end()
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        //TODO: What should be done if model is deteled in ADT but not in cosmosDB?
+    }
 }
 
 routerDigitalTwin.prototype.importModels =async function(req,res) {

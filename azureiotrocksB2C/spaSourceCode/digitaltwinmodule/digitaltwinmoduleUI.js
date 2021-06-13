@@ -28,8 +28,15 @@ function digitaltwinmoduleUI() {
 
     var theAccount=msalHelper.fetchAccount();
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
-    
-    startSelectionDialog.loadData().then(re=>{
+    //test if the account is really usable
+    msalHelper.getToken().then(res=>{
+        //console.log(res)
+    }).catch(e=>{
+        window.open(globalAppSettings.logoutRedirectUri,"_self")
+    })
+
+
+    globalCache.loadUserData().then(re=>{
         if(globalCache.DBModelsArr.length==0){
             //directly popup to model management dialog allow user import or create model
             modelManagerDialog.popup()
