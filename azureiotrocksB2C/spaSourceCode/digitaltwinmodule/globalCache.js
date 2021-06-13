@@ -15,7 +15,7 @@ function globalCache(){
     this.currentLayoutName=null
     this.layoutJSON={}
 
-    this.visualDefinition={}
+    this.visualDefinition={"default":{}}
 }
 
 globalCache.prototype.loadUserData = async function () {
@@ -29,8 +29,10 @@ globalCache.prototype.loadUserData = async function () {
     var dbtwins=[]
     var dbmodels=[]
     res.forEach(element => {
-        if(element.type=="visualSchema") this.visualDefinition=element.detail
-        else if(element.type=="DTModel") dbmodels.push(element)
+        if(element.type=="visualSchema") {
+            //TODO: now there is only one "default" schema to use
+            this.visualDefinition[element.name]=element.detail
+        }else if(element.type=="DTModel") dbmodels.push(element)
         else if(element.type=="DTTwin") dbtwins.push(element)
     });
     this.storeDBTwinsArr(dbtwins)

@@ -48,6 +48,8 @@ function digitaltwinmoduleUI() {
         }else{
             startSelectionDialog.popup()
         }
+        this.broadcastMessage(this,{ "message": "visualDefinitionRefresh"})
+
     })
 }
 

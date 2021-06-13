@@ -137,7 +137,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
         var dataUrl= await this.resizeImgFile(theFile,70)
         if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
 
-        var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
+        var visualJson=globalCache.visualDefinition["default"]
         if(!visualJson[modelID]) visualJson[modelID]={}
         visualJson[modelID].avarta=dataUrl
         this.saveVisualDefinition()
@@ -146,7 +146,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     })
 
     clearAvartaBtn.on("click", ()=>{
-        var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
+        var visualJson=globalCache.visualDefinition["default"]
         if(visualJson[modelID]) delete visualJson[modelID].avarta 
         if(this.avartaImg) this.avartaImg.removeAttr('src');
         this.saveVisualDefinition()
@@ -184,8 +184,8 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
                                 this.panelCard.empty()
                                 //TODO: clear the visualization setting of this deleted model
                                 /*
-                                if (globalCache.visualDefinition[startSelectionDialog.selectedADT] && globalCache.visualDefinition[startSelectionDialog.selectedADT][modelID]) {
-                                    delete globalCache.visualDefinition[startSelectionDialog.selectedADT][modelID]
+                                if (globalCache.visualDefinition["default"][modelID]) {
+                                    delete globalCache.visualDefinition["default"][modelID]
                                     this.saveVisualDefinition()
                                 }*/
                             }catch(e){
@@ -242,7 +242,7 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     
     var avartaImg=$("<img></img>")
     rightPart.append(avartaImg)
-    var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition["default"]
     if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)
     this.avartaImg=avartaImg;
 
@@ -261,7 +261,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     containerDiv.append(contentDOM)
 
     var definiedColor=null
-    var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition["default"]
     if(relatinshipName==null){
         if(visualJson && visualJson[modelID] && visualJson[modelID].color) definiedColor=visualJson[modelID].color
     }else{
@@ -286,9 +286,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value
         colorSelector.css("color",selectColorCode)
-        if(!globalCache.visualDefinition[startSelectionDialog.selectedADT]) 
-            globalCache.visualDefinition[startSelectionDialog.selectedADT]={}
-        var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
+        var visualJson=globalCache.visualDefinition["default"]
 
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
@@ -303,8 +301,13 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     })
 }
 
-modelManagerDialog.prototype.saveVisualDefinition=function(){
-    $.post("visualDefinition/saveVisualDefinition",{visualDefinitionJson:globalCache.visualDefinition})
+modelManagerDialog.prototype.saveVisualDefinition=async function(){
+    try{
+        await msalHelper.callAPI("digitaltwin/saveVisualDefinition", "POST", {"visualDefinitionJson":JSON.stringify(globalCache.visualDefinition["default"])})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
 }
 
 modelManagerDialog.prototype.fillRelationshipInfo=function(validRelationships,parentDom){
@@ -410,7 +413,8 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
         this.modelList.append(zeroModelItem)
         zeroModelItem.css("cursor","default")
     }else{
-        this.tree = new simpleTree(this.modelList, { "leafNameProperty": "displayName", "noMultipleSelectAllowed": true })
+        this.tree = new simpleTree(this.modelList, { "leafNameProperty": "displayName"
+            , "noMultipleSelectAllowed": true,"hideEmptyGroup":true })
 
         this.tree.callback_afterSelectNodes = (nodesArr, mouseClickDetail) => {
             var theNode = nodesArr[0]

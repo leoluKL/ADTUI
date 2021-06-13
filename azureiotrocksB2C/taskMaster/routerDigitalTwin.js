@@ -15,6 +15,7 @@ function routerDigitalTwin(){
     this.useRoute("queryOutBound","isPost")
     this.useRoute("queryInBound","isPost")
     this.useRoute("deleteModel","isPost")
+    this.useRoute("saveVisualDefinition","isPost")
 }
 
 routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
@@ -32,8 +33,6 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
         res.status(e.response.statusCode).send(e.response.body);
         return;
     }
-    
-    //TODO:extract the models ID, twins ID and query models detail from ADT, skip twins detail as there maybe too many
     res.send(body)
 }
 
@@ -205,6 +204,18 @@ routerDigitalTwin.prototype.importModels =async function(req,res) {
         //roll back ADT operation by deleting those models and revert to frontend
         console.error("roll back and remove inserted model in ADT...")
         await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteModels", {json:req.body,responseType: 'json'});
+    }
+}
+
+routerDigitalTwin.prototype.saveVisualDefinition =async function(req,res) {
+    var reqBody=req.body
+    reqBody.account=req.authInfo.account
+    
+    try{
+        await got.post(process.env.dboperationAPIURL+"insertData/updateVisualSchema", {json:reqBody});
+        res.end()
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
     }
 }
 

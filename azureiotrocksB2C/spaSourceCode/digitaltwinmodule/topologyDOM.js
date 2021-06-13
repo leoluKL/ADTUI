@@ -445,8 +445,7 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
 }
 
 topologyDOM.prototype.applyVisualDefinition=function(){
-    //TODO:to change
-    //var visualJson=globalCache.visualDefinition[startSelectionDialog.selectedADT]
+    var visualJson=globalCache.visualDefinition["default"]
     if(visualJson==null) return;
     for(var modelID in visualJson){
         if(visualJson[modelID].color){
@@ -469,6 +468,8 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         this.core.nodes().remove()
         var eles= this.drawTwins(msgPayload.info)
         this.core.center(eles)
+    }else if(msgPayload.message=="visualDefinitionRefresh") {
+        this.applyVisualDefinition()
     }else if(msgPayload.message=="appendAllTwins") {
         var eles= this.drawTwins(msgPayload.info,"animate")
         this.core.center(eles)
