@@ -260,15 +260,17 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     var contentDOM=$("<label style='margin-right:10px'>"+nameStr+"</label>")
     containerDiv.append(contentDOM)
 
-    var definiedColor=null
+    var definedColor=null
+    var definedShape=null
     var visualJson=globalCache.visualDefinition["default"]
     if(relatinshipName==null){
-        if(visualJson && visualJson[modelID] && visualJson[modelID].color) definiedColor=visualJson[modelID].color
+        if(visualJson[modelID] && visualJson[modelID].color) definedColor=visualJson[modelID].color
+        if(visualJson[modelID] && visualJson[modelID].shape) definedShape=visualJson[modelID].shape
     }else{
-        if(visualJson && visualJson[modelID]
-             && visualJson[modelID]["relationships"]
-              && visualJson[modelID]["relationships"][relatinshipName])
-              definiedColor=visualJson[modelID]["relationships"][relatinshipName]
+        if (visualJson[modelID] && visualJson[modelID]["rels"] && visualJson[modelID]["rels"][relatinshipName]) {
+            if (visualJson[modelID]["rels"][relatinshipName].color) definedColor = visualJson[modelID]["rels"][relatinshipName].color
+            if (visualJson[modelID]["rels"][relatinshipName].shape) definedShape = visualJson[modelID]["rels"][relatinshipName].shape
+        }
     }
 
     var colorSelector=$('<select class="w3-border" style="outline:none"></select>')
@@ -279,9 +281,9 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         colorSelector.append(anOption)
         anOption.css("color",oneColorCode)
     })
-    if(definiedColor!=null) {
-        colorSelector.val(definiedColor)
-        colorSelector.css("color",definiedColor)
+    if(definedColor!=null) {
+        colorSelector.val(definedColor)
+        colorSelector.css("color",definedColor)
     }
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value
@@ -293,12 +295,45 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
             visualJson[modelID].color=selectColorCode
             this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"color":selectColorCode })
         }else{
-            if(!visualJson[modelID]["relationships"]) visualJson[modelID]["relationships"]={}
-            visualJson[modelID]["relationships"][relatinshipName]=selectColorCode
+            if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
+            if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
+            visualJson[modelID]["rels"][relatinshipName].color=selectColorCode
             this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"color":selectColorCode })
         }
         this.saveVisualDefinition()
     })
+    var shapeSelector = $('<select class="w3-border" style="outline:none"></select>')
+    containerDiv.append(shapeSelector)
+    if(relatinshipName==null){
+        shapeSelector.append($("<option value='ellipse'>◯</option>"))
+        shapeSelector.append($("<option value='round-rectangle' style='font-size:120%'>▢</option>"))
+        shapeSelector.append($("<option value='hexagon' style='font-size:130%'>⬡</option>"))
+    }else{
+        shapeSelector.append($("<option value='solid'>→</option>"))
+        shapeSelector.append($("<option value='dotted'>⇢</option>"))
+    }
+    if(definedShape!=null) {
+        shapeSelector.val(definedShape)
+    }
+    shapeSelector.change((eve)=>{
+        var selectShape=eve.target.value
+        if (!globalCache.visualDefinition[globalCache.selectedADT])
+            globalCache.visualDefinition[globalCache.selectedADT] = {}
+        var visualJson = globalCache.visualDefinition[globalCache.selectedADT]
+
+        if(!visualJson[modelID]) visualJson[modelID]={}
+        if(!relatinshipName) {
+            visualJson[modelID].shape=selectShape
+            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"shape":selectShape })
+        }else{
+            if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
+            if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
+            visualJson[modelID]["rels"][relatinshipName].shape=selectShape
+            this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"shape":selectShape })
+        }
+        this.saveVisualDefinition()
+    })
+    
 }
 
 modelManagerDialog.prototype.saveVisualDefinition=async function(){

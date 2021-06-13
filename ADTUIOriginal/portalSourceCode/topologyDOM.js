@@ -295,10 +295,24 @@ topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode){
         .style({'background-color': colorCode})
         .update()   
 }
+topologyDOM.prototype.updateModelTwinShape=function(modelID,shape){
+    this.core.style()
+        .selector('node[modelID = "'+modelID+'"]')
+        .style({'shape': shape})
+        .update()   
+}
+
+
 topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){
     this.core.style()
         .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
         .style({'line-color': colorCode})
+        .update()   
+}
+topologyDOM.prototype.updateRelationshipShape=function(srcModelID,relationshipName,shape){
+    this.core.style()
+        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
+        .style({'line-style': shape})
         .update()   
 }
 
@@ -445,15 +459,17 @@ topologyDOM.prototype.applyVisualDefinition=function(){
     var visualJson=globalCache.visualDefinition[globalCache.selectedADT]
     if(visualJson==null) return;
     for(var modelID in visualJson){
-        if(visualJson[modelID].color){
-            this.updateModelTwinColor(modelID,visualJson[modelID].color)
-        }
-        if(visualJson[modelID].avarta){
-            this.updateModelAvarta(modelID,visualJson[modelID].avarta)
-        }
-        if(visualJson[modelID].relationships){
-            for(var relationshipName in visualJson[modelID].relationships)
-                this.updateRelationshipColor(modelID,relationshipName,visualJson[modelID].relationships[relationshipName])
+        if(visualJson[modelID].color) this.updateModelTwinColor(modelID,visualJson[modelID].color)
+        if(visualJson[modelID].shape) this.updateModelTwinShape(modelID,visualJson[modelID].shape)
+        if(visualJson[modelID].avarta) this.updateModelAvarta(modelID,visualJson[modelID].avarta)
+        if(visualJson[modelID].rels){
+            for(var relationshipName in visualJson[modelID].rels)
+                if(visualJson[modelID]["rels"][relationshipName].color){
+                    this.updateRelationshipColor(modelID,relationshipName,visualJson[modelID]["rels"][relationshipName].color)
+                }
+                if(visualJson[modelID]["rels"][relationshipName].shape){
+                    this.updateRelationshipShape(modelID,relationshipName,visualJson[modelID]["rels"][relationshipName].shape)
+                }
         }
     }
 }
@@ -497,9 +513,13 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
             this.core.center(topoNode)
         }
     }else if(msgPayload.message=="visualDefinitionChange"){
-        if(msgPayload.srcModelID) this.updateRelationshipColor(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.color)
+        if(msgPayload.srcModelID){
+            if(msgPayload.color) this.updateRelationshipColor(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.color)
+            else if(msgPayload.shape) this.updateRelationshipShape(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.shape)
+        } 
         else{
             if(msgPayload.color) this.updateModelTwinColor(msgPayload.modelID,msgPayload.color)
+            else if(msgPayload.shape) this.updateModelTwinShape(msgPayload.modelID,msgPayload.shape)
             else if(msgPayload.avarta) this.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
             else if(msgPayload.noAvarta)  this.updateModelAvarta(msgPayload.modelID,null)
         } 
