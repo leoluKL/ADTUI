@@ -18,6 +18,7 @@ function routerDigitalTwin(){
     this.useRoute("saveVisualDefinition","isPost")
     this.useRoute("saveLayout","isPost")
     this.useRoute("deleteLayout","isPost")
+    this.useRoute("deleteRelations","isPost")
 }
 
 
@@ -175,6 +176,19 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
     }    
 }
 
+routerDigitalTwin.prototype.deleteRelations =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
+    var dtPayload=req.body
+    try{
+        var {body} = await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteRelations", {json:dtPayload,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.send(body)
+}
+
+
 routerDigitalTwin.prototype.deleteLayout =async function(req,res) {
     var dbReq={"layoutName":req.body.layoutName, "account":req.authInfo.account}
     try{
@@ -186,6 +200,7 @@ routerDigitalTwin.prototype.deleteLayout =async function(req,res) {
         //TODO: What should be done if model is deteled in ADT but not in cosmosDB?
     }
 }
+
 
 
 routerDigitalTwin.prototype.deleteModel =async function(req,res) {
