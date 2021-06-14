@@ -297,6 +297,7 @@ infoPanel.prototype.readOneFile= async function(aFile){
         }
     })
 }
+
 infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
     var importTwins=[]
     var importRelations=[]
@@ -313,19 +314,65 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
         }
     }
 
-    var twinsImportResult= await this.batchImportTwins(importTwins)
-    twinsImportResult.forEach(data=>{
-        globalCache.storeSingleADTTwin(data)
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+    var oldTwinID2NewID={}
+    importTwins.forEach(oneTwin=>{
+        var oldID= oneTwin["$dtId"]
+        var newID=uuidv4();
+        oldTwinID2NewID[oldID]=newID
+        oneTwin["$dtId"]=newID
     })
-    this.broadcastMessage({ "message": "addNewTwins",twinsInfo:twinsImportResult})
 
-    var relationsImportResult=await this.batchImportRelations(importRelations)
-    globalCache.storeTwinRelationships_append(relationsImportResult)
-    this.broadcastMessage({ "message": "drawAllRelations",info:relationsImportResult})
+    for(var i=importRelations.length-1;i>=0;i--){
+        var oneRel=importRelations[i]
+        if(oldTwinID2NewID[oneRel["$srcId"]]==null || oldTwinID2NewID[oneRel["obj"]["$targetId"]]==null){
+            importRelations.splice(i,1)
+        } else{
+            oneRel["$srcId"]=oldTwinID2NewID[oneRel["$srcId"]]
+            oneRel["obj"]["$targetId"]=oldTwinID2NewID[oneRel["obj"]["$targetId"]]
+            oneRel["$relationshipId"]=uuidv4();
+        }
+    }
 
-    var numOfTwins=twinsImportResult.length
-    var numOfRelations=relationsImportResult.length
-    var str="Add "+numOfTwins+ " node"+((numOfTwins<=1)?"":"s")+", "+numOfRelations+" relationship"+((numOfRelations<=1)?"":"s")
+
+    try{
+        var re = await msalHelper.callAPI("digitaltwin/batchImportTwins", "POST", {"twins":JSON.stringify(importTwins)})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+        return;
+    }
+
+    re.DBTwins=JSON.parse(re.DBTwins)
+    re.ADTTwins=JSON.parse(re.ADTTwins)
+    re.DBTwins.forEach(DBTwin=>{ globalCache.storeSingleDBTwin(DBTwin) })
+    var adtTwins=[]
+    re.ADTTwins.forEach(ADTTwin=>{
+        globalCache.storeSingleADTTwin(ADTTwin)
+        adtTwins.push(ADTTwin)
+    })
+
+    this.broadcastMessage({ "message": "addNewTwins", "twinsInfo": adtTwins })
+
+    //continue to import relations
+    try{
+        var relationsImported = await msalHelper.callAPI("digitaltwin/createRelations", "POST",  {actions:JSON.stringify(importRelations)})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
+    globalCache.storeTwinRelationships_append(relationsImported)
+    this.broadcastMessage({ "message": "drawAllRelations",info:relationsImported})
+
+    var numOfTwins=adtTwins.length
+    var numOfRelations=relationsImported.length
+    var str="Add "+numOfTwins+ " node"+((numOfTwins<=1)?"":"s")+` (from ${importTwins.length})`
+    str+=" and "+numOfRelations+" relationship"+((numOfRelations<=1)?"":"s")+` (from ${importRelations.length})`
     var confirmDialogDiv = new simpleConfirmDialog()
     confirmDialogDiv.show(
         { width: "400px" },
@@ -341,34 +388,7 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
             ]
         }
     )
-}
-
-infoPanel.prototype.batchImportTwins=async function(twins){
-    return new Promise((resolve, reject) => {
-        if(twins.length==0) resolve([])
-        try{
-            $.post("editADT/batchImportTwins",{"twins":JSON.stringify(twins)}, (data)=> {
-                if (data == "") data=[]
-                resolve(data)
-            });
-        }catch(e){
-            reject(e)
-        }
-    })
-}
-
-infoPanel.prototype.batchImportRelations=async function(relations){
-    return new Promise((resolve, reject) => {
-        if(relations.length==0) resolve([])
-        try{
-            $.post("editADT/createRelations",{"actions":JSON.stringify(relations)}, (data)=> {
-                if (data == "") data=[]
-                resolve(data)
-            });
-        }catch(e){
-            reject(e)
-        }
-    })
+    
 }
 
 infoPanel.prototype.refreshInfomation=async function(){

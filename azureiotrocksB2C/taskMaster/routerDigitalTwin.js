@@ -6,7 +6,10 @@ function routerDigitalTwin(){
     this.router = express.Router();
     this.useRoute("fetchUserData")
     this.useRoute("importModels","isPost")
+    
     this.useRoute("upsertDigitalTwin","isPost")
+    this.useRoute("batchImportTwins","isPost")
+
     this.useRoute("listModelsForIDs","isPost")
     this.useRoute("listTwinsForIDs","isPost")
     this.useRoute("changeAttribute","isPost")
@@ -142,6 +145,69 @@ routerDigitalTwin.prototype.changeAttribute =async function(req,res) {
 }
 
 
+routerDigitalTwin.prototype.batchImportTwins =async function(req,res) {
+    //query all twin name in user name space, and check the imported twin names are unique
+    var reqBody={ account:req.authInfo.account}
+    try{
+        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/userData", {json:reqBody,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    var usedTwinName={}
+    body.forEach(oneDoc=>{
+        if(oneDoc["type"]=='DTTwin') usedTwinName[oneDoc['displayName']]=1
+    })
+    
+    var importTwins=JSON.parse(req.body.twins)
+    var duplicateName=[]
+    importTwins.forEach(oneImportTwin=>{
+        var twinName=oneImportTwin["displayName"]
+        if(usedTwinName[twinName]) duplicateName.push(twinName)
+    })
+
+    if(duplicateName.length>0){
+        res.status(400).send("Twin name confliction:"+duplicateName.join(" "))
+        return;
+    }
+
+    var twinIDtoDisplayName={}
+    importTwins.forEach(oneImportTwin=>{
+        twinIDtoDisplayName[oneImportTwin["$dtId"]]=oneImportTwin["displayName"]
+        delete oneImportTwin["displayName"]
+    })
+
+    try{
+        var {body} = await got.post(process.env.digitaltwinoperationAPIURL+"editADT/batchImportTwins", 
+            {json:{"twins":JSON.stringify(importTwins)},responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+
+    var ADTTwins_imported=body
+    var DBTwins_imported=[]
+    var promiseArr=[]
+    ADTTwins_imported.forEach(adtTwin=>{
+        var postLoad={"ADTTwin":adtTwin,"displayName":twinIDtoDisplayName[adtTwin["$dtId"]]}
+        postLoad.account=req.authInfo.account
+        promiseArr.push(got.post(process.env.dboperationAPIURL+"insertData/newTwin",{json:postLoad,responseType: 'json'}))
+    })
+    try{
+        var results=await Promise.allSettled(promiseArr);
+        results.forEach((oneSet,index)=>{
+            if(oneSet.status=="fulfilled") {
+                DBTwins_imported.push(oneSet.value.body) 
+            }
+        })
+    }catch(e){
+        res.status(400).send(e.message);
+        //TODO: roll back ADT twins
+    }
+
+    res.send({"ADTTwins":JSON.stringify(ADTTwins_imported),"DBTwins":JSON.stringify(DBTwins_imported)})
+}
+
 routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
     //check the twin name uniqueness in user name space
     //if successful, generate UUID and create twin in ADT
@@ -157,7 +223,7 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
         var re= await got.post(process.env.dboperationAPIURL+"userAccount/checkTwinName",{json:queryTwinNameUnique});
         //task is successful
         if(re.body!="true") {
-            res.status(400).send({"responseText":"Twin name is not unique!"})
+            res.status(400).send("Twin name is not unique!")
             return;
         }
     }catch(e){
