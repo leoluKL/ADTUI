@@ -224,7 +224,7 @@ topologyDOM.prototype.smartPositionNode = function (mousePosition) {
 
 topologyDOM.prototype.mouseOverFunction= function (e) {
     if(!e.target.data) return
-    if(e.target.isEdge && e.target.isEdge() && e.target.selected()) return; \
+    if(e.target.isEdge && e.target.isEdge() && e.target.selected()) return; 
     //hover make "add bend point" menu difficult to show, so avoid add hover effect to selectd edge
     var info=e.target.data().originalInfo
     if(info==null) return;
