@@ -11,6 +11,7 @@ function routerEditADT(){
     this.useRoute("createRelations","isPost")
     this.useRoute("deleteModel","isPost")
     this.useRoute("deleteRelations","isPost")
+    this.useRoute("deleteTwins","isPost")
 }
 
 routerEditADT.prototype.useRoute=function(routeStr,isPost){
@@ -59,6 +60,57 @@ routerEditADT.prototype.deleteRelations =async function(req,res) {
         res.send(succeedList)
     }catch(e){
         res.status(400).send(e.message);
+    }
+}
+
+routerEditADT.prototype.deleteTwins =async function(req,res) {
+    var twinIDArr=req.body.arr;
+    var promiseArr=[]
+
+    for(var i=0;i<twinIDArr.length;i++){
+        var twinID = twinIDArr[i];
+        promiseArr.push(this.deleteOneTwin(twinID))
+    }
+    try{
+        var results=await Promise.allSettled(promiseArr);
+        var succeedList=[]
+        results.forEach((oneSet,index)=>{
+            if(oneSet.status=="fulfilled") succeedList.push(twinIDArr[index]) 
+        })
+        res.send(succeedList)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+    
+}
+
+routerEditADT.prototype.deleteOneTwin =async function(twinID) {
+    try{
+        var relationships = await adtHelper.ADTClient.listRelationships(twinID)
+        var incomingRelationship=await adtHelper.ADTClient.listIncomingRelationships(twinID)
+
+        var allRelationships={}
+        for await (let page of relationships.byPage({ maxPageSize: 1000 })) { //should be only one page
+            page.value.forEach((oneRel) => {
+                allRelationships[oneRel["$relationshipId"]]={"srcID":oneRel["$sourceId"],"relID":oneRel["$relationshipId"]}
+            })
+        }
+        for await (let page of incomingRelationship.byPage({ maxPageSize: 1000 })) { //should be only one page
+            page.value.forEach((oneRel) => {
+                allRelationships[oneRel["$relationshipId"]]={"srcID":oneRel["$sourceId"],"relID":oneRel["$relationshipId"]}
+            })
+        }
+
+        var promiseArr=[]
+        for(var relID in allRelationships){
+            var oneItem= allRelationships[relID]
+            promiseArr.push(adtHelper.ADTClient.deleteRelationship(oneItem["srcID"],oneItem["relID"]))
+        }
+        await Promise.allSettled(promiseArr);
+        await adtHelper.ADTClient.deleteDigitalTwin(twinID)
+    }catch (e) {
+        console.log(e)
+        throw e;
     }
 }
 
