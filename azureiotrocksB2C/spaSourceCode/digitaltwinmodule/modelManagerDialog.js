@@ -134,7 +134,22 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     actualImportPicBtn.change(async (evt)=>{
         var files = evt.target.files; // FileList object
         var theFile=files[0]
-        var dataUrl= await this.resizeImgFile(theFile,70)
+        
+        if(theFile.type=="image/svg+xml"){
+            var str= await this.readOneFile(theFile)
+            var dataUrl='data:image/svg+xml;utf8,' + encodeURIComponent(str);
+        }else if(theFile.type.match('image.*')){
+            var dataUrl= await this.resizeImgFile(theFile,70)
+        } else {
+            var confirmDialogDiv=new simpleConfirmDialog()
+            confirmDialogDiv.show({ width: "200px" },
+                {
+                    title: "Note"
+                    , content: "Please import image file (png,jpg,svg and so on)"
+                    , buttons: [{colorClass:"w3-gray",text:"Ok","clickFunc":()=>{confirmDialogDiv.close()}}]
+                }
+            )
+        }
         if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
 
         var visualJson=globalCache.visualDefinition["default"]
@@ -240,7 +255,7 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     var rightPart=aTable.find("td:nth-child(2)")
     rightPart.css({"width":"50px","height":"50px","border":"solid 1px lightGray"})
     
-    var avartaImg=$("<img></img>")
+    var avartaImg=$("<img style='height:45px'></img>")
     rightPart.append(avartaImg)
     var visualJson=globalCache.visualDefinition["default"]
     if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)

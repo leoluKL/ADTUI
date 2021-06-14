@@ -26,7 +26,7 @@ modelEditorDialog.prototype.popup = async function() {
 
     importButton.on("click", () => {
         var modelToBeImported = [this.dtdlobj]
-        $.post("editADT/importModels", { "models": modelToBeImported }, (data) => {
+        $.post("editADT/importModels", { "models": JSON.stringify(modelToBeImported) }, (data) => {
             if (data == "") {//successful
                 alert("Model "+ this.dtdlobj["displayName"]+" is created!")
                 this.broadcastMessage({ "message": "ADTModelEdited"})
