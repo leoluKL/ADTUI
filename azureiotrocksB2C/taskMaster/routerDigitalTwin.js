@@ -16,6 +16,7 @@ function routerDigitalTwin(){
     this.useRoute("queryInBound","isPost")
     this.useRoute("deleteModel","isPost")
     this.useRoute("saveVisualDefinition","isPost")
+    this.useRoute("saveLayout","isPost")
 }
 
 routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
@@ -37,6 +38,7 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
 }
 
 routerDigitalTwin.prototype.listModelsForIDs =async function(req,res) {
+    //TODO: add stricter security measure that it only query models belonging to this user
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listModelsForIDs", {json:req.body,responseType: 'json'});
     }catch(e){
@@ -47,6 +49,7 @@ routerDigitalTwin.prototype.listModelsForIDs =async function(req,res) {
 }
 
 routerDigitalTwin.prototype.queryOutBound =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/queryOutBound", {json:req.body,responseType: 'json'});
     }catch(e){
@@ -57,6 +60,7 @@ routerDigitalTwin.prototype.queryOutBound =async function(req,res) {
 }
 
 routerDigitalTwin.prototype.queryInBound =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/queryInBound", {json:req.body,responseType: 'json'});
     }catch(e){
@@ -67,6 +71,7 @@ routerDigitalTwin.prototype.queryInBound =async function(req,res) {
 }
 
 routerDigitalTwin.prototype.createRelations =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"editADT/createRelations", {json:req.body,responseType: 'json'});
     }catch(e){
@@ -77,6 +82,7 @@ routerDigitalTwin.prototype.createRelations =async function(req,res) {
 }
 
 routerDigitalTwin.prototype.getRelationshipsFromTwinIDs =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/getRelationshipsFromTwinIDs", {json:req.body,responseType: 'json'});
     }catch(e){
@@ -89,6 +95,7 @@ routerDigitalTwin.prototype.getRelationshipsFromTwinIDs =async function(req,res)
 
 
 routerDigitalTwin.prototype.listTwinsForIDs =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listTwinsForIDs", {json:req.body,responseType: 'json'});
     }catch(e){
@@ -99,6 +106,7 @@ routerDigitalTwin.prototype.listTwinsForIDs =async function(req,res) {
 }
 
 routerDigitalTwin.prototype.changeAttribute =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
     try{
         var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"editADT/changeAttribute", {json:req.body});
     }catch(e){
@@ -167,6 +175,7 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
 
 
 routerDigitalTwin.prototype.deleteModel =async function(req,res) {
+    //TODO: add stricter security measure that it only operate data belonging to this user
     try{
         await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteModel", {json:req.body});
     }catch(e){
@@ -218,6 +227,20 @@ routerDigitalTwin.prototype.saveVisualDefinition =async function(req,res) {
         res.status(e.response.statusCode).send(e.response.body);
     }
 }
+
+routerDigitalTwin.prototype.saveLayout =async function(req,res) {
+    var reqBody=req.body
+    reqBody.account=req.authInfo.account
+    
+    try{
+        await got.post(process.env.dboperationAPIURL+"insertData/updateTopologySchema", {json:reqBody});
+        res.end()
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+    }
+}
+
+
 
 
 module.exports = new routerDigitalTwin().router
