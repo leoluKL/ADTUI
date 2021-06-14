@@ -4,6 +4,7 @@ const cosmosdbhelper = require('./cosmosdbhelper')
 function routerDeleteData(){
     this.router = express.Router();
     this.useRoute("deleteModel","post")
+    this.useRoute("deleteTopologySchema","post")
 }
 
 routerDeleteData.prototype.useRoute=function(routeStr,isPost){
@@ -24,6 +25,22 @@ routerDeleteData.prototype.deleteModel =async function(req,res) {
         res.status(400).send(e.message)
     }
 }
+
+routerDeleteData.prototype.deleteTopologySchema =async function(req,res) {
+    var accountID=req.body.account
+    var topologyName=req.body.layoutName
+
+    try {
+        await cosmosdbhelper.deleteRecord("appuser",accountID,"TopoSchema."+topologyName)
+        res.end()
+    } catch (e) {
+        console.log(e)
+        res.status(400).send(e.message)
+    }
+}
+
+
+
 
 
 module.exports = new routerDeleteData().router
