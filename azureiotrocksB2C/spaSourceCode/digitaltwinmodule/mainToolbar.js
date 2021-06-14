@@ -2,7 +2,7 @@ const startSelectionDialog = require("./startSelectionDialog")
 const modelManagerDialog = require("./modelManagerDialog")
 const editLayoutDialog= require("./editLayoutDialog")
 const simpleSelectMenu= require("./simpleSelectMenu")
-
+const globalCache = require("./globalCache")
 
 function mainToolbar() {
 }

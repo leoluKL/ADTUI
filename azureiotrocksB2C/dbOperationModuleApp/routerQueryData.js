@@ -16,7 +16,7 @@ routerQueryData.prototype.userData =async function(req,res) {
     var accountID=req.body.account
     var queryStr='SELECT * FROM c where '
     queryStr+=`c.accountID='${accountID}'`
-    queryStr+=` and c.type IN ('DTModel', 'DTTwin','visualSchema')`
+    queryStr+=` and c.type IN ('DTModel', 'DTTwin','visualSchema','Topology')`
     try{
         var queryResult=await cosmosdbhelper.query('appuser',queryStr)
         res.send(queryResult)

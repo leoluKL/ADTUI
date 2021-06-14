@@ -82,14 +82,17 @@ editLayoutDialog.prototype.deleteLayout = function (layoutName) {
         { width: "250px" },
         {
             title: "Confirm"
-            , content: "Please confirm deleting layout \"" + layoutName + "\"?"
+            , content: "Confirm deleting layout \"" + layoutName + "\"?"
             , buttons:[
                 {
                     colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
                         delete globalCache.layoutJSON[layoutName]
                         if (layoutName == globalCache.currentLayoutName) globalCache.currentLayoutName = null
                         this.broadcastMessage({ "message": "layoutsUpdated" })
-                        $.post("layout/saveLayouts", { "adtName": this.getCurADTName(), "layouts": JSON.stringify(globalCache.layoutJSON) })
+                        console.log({ "layoutName": layoutName })
+                        return;
+                        
+                        $.post("layout/saveLayouts", { "layouts": JSON.stringify(globalCache.layoutJSON) })
                         confirmDialogDiv.close();
                         this.refillOptions()
                         this.switchLayoutSelector.triggerOptionIndex(0)

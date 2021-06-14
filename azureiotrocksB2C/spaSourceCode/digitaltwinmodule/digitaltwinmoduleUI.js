@@ -49,7 +49,7 @@ function digitaltwinmoduleUI() {
             startSelectionDialog.popup()
         }
         this.broadcastMessage(this,{ "message": "visualDefinitionRefresh"})
-
+        this.broadcastMessage(this,{ "message": "layoutsUpdated"})
     })
 }
 

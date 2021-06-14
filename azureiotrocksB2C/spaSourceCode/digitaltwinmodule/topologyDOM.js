@@ -589,7 +589,8 @@ topologyDOM.prototype.applyNewLayout = function () {
 
 topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipID
     ,cyedgebendeditingWeights,cyedgebendeditingDistances,cyedgecontroleditingWeights,cyedgecontroleditingDistances) {
-        var theNode=this.core.filter('[id = "'+srcID+'"]');
+        var nodeName=globalCache.twinIDMapToDisplayName[srcID]
+        var theNode=this.core.filter('[id = "'+nodeName+'"]');
         var edges=theNode.connectedEdges().toArray()
         for(var i=0;i<edges.length;i++){
             var anEdge=edges[i]
@@ -612,7 +613,7 @@ topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipI
 
 
 
-topologyDOM.prototype.saveLayout = function (layoutName) {
+topologyDOM.prototype.saveLayout = async function (layoutName) {
     var layoutDict=globalCache.layoutJSON[layoutName]
     if(!layoutDict){
         layoutDict=globalCache.layoutJSON[layoutName]={}
@@ -653,10 +654,13 @@ topologyDOM.prototype.saveLayout = function (layoutName) {
 
     var saveLayoutObj={"layouts":{}}
     saveLayoutObj["layouts"][layoutName]=JSON.stringify(layoutDict)
-    console.log(saveLayoutObj) 
-    return;
-    $.post("layout/saveLayouts",{layoutName:JSON.stringify(layoutDict)})
-    this.broadcastMessage({ "message": "layoutsUpdated"})
+    try{
+        await msalHelper.callAPI("digitaltwin/saveLayout", "POST", saveLayoutObj)
+        this.broadcastMessage({ "message": "layoutsUpdated","layoutName":layoutName})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
 }
 
 topologyDOM.prototype.numberPrecision = function (number) {
