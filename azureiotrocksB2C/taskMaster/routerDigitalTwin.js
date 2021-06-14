@@ -102,8 +102,7 @@ routerDigitalTwin.prototype.deleteTwins =async function(req,res) {
     //store the new twin to cosmos DB
     
     var dbReq=req.body
-    dbReq.account="elephant.lyh@gmail.com"//req.authInfo.account
-    req.body.account="elephant.lyh@gmail.com"
+    dbReq.account=req.authInfo.account
     try{
         var {body}=await got.post(process.env.dboperationAPIURL+"deleteData/deleteTwins",{json:dbReq,responseType: 'json'});
     }catch(e){
