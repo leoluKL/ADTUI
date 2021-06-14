@@ -10,6 +10,7 @@ function routerEditADT(){
     this.useRoute("deleteTwinWithoutConnection","isPost")
     this.useRoute("createRelations","isPost")
     this.useRoute("deleteModel","isPost")
+    this.useRoute("deleteRelations","isPost")
 }
 
 routerEditADT.prototype.useRoute=function(routeStr,isPost){
@@ -40,6 +41,26 @@ routerEditADT.prototype.deleteModel =async function(req,res) {
     }
 }
 
+routerEditADT.prototype.deleteRelations =async function(req,res) {
+    var relations=req.body.relations;
+    var promiseArr=[]
+    relations.forEach(oneAction=>{
+        promiseArr.push(adtHelper.ADTClient.deleteRelationship(oneAction["srcID"],oneAction["relID"]))
+    })
+
+    try{
+        var results=await Promise.allSettled(promiseArr);
+        var succeedList=[]
+        results.forEach((oneSet,index)=>{
+            if(oneSet.status=="fulfilled") {
+                succeedList.push(relations[index]) 
+            }
+        })
+        res.send(succeedList)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+}
 
 
 routerEditADT.prototype.createRelations =async function(req,res) {
