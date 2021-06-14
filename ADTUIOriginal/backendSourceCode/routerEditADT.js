@@ -114,7 +114,6 @@ routerEditADT.prototype.batchImportTwins = async function (adtClient, req, res) 
             succeedList.push(oneSet.value.body) 
         }
     })
-    console.log(results)
     res.send(succeedList)
 }
 
