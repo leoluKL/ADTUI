@@ -459,7 +459,8 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
         var modelgroupSortArr = Object.keys(groupNameList)
         modelgroupSortArr.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()) });
         modelgroupSortArr.forEach(oneGroupName => {
-            this.tree.addGroupNode({ displayName: oneGroupName })
+            var gn=this.tree.addGroupNode({ displayName: oneGroupName })
+            gn.expand()
         })
 
         for (var modelID in modelAnalyzer.DTDLModels) {
