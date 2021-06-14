@@ -148,6 +148,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     actualImportPicBtn.change(async (evt)=>{
         var files = evt.target.files; // FileList object
         var theFile=files[0]
+        console.log()
         var dataUrl= await this.resizeImgFile(theFile,70)
         if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
 

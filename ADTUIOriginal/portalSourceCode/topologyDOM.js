@@ -61,7 +61,9 @@ topologyDOM.prototype.init=function(){
                     'font-size':"12px",
                     'font-family':'Geneva, Arial, Helvetica, sans-serif'
                     //,'background-image': function(ele){ return "images/cat.png"; }
-                    ,'background-fit':'contain' //cover
+                    //,'background-fit':'contain' //cover
+                    ,'background-width':'70%'
+                    ,'background-height':'70%'
                     //'background-color': function( ele ){ return ele.data('bg') }
                 }
             },
