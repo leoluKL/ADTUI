@@ -94,7 +94,8 @@ twinsTree.prototype.rxMessage=function(msgPayload){
 
 twinsTree.prototype.deleteTwins=function(twinIDArr){
     twinIDArr.forEach(twinID=>{
-        this.tree.deleteLeafNode(twinID)
+        var twinDisplayName=globalCache.twinIDMapToDisplayName[twinID]
+        this.tree.deleteLeafNode(twinDisplayName)
     })
 }
 

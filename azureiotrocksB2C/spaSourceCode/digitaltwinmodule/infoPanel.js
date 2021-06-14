@@ -437,14 +437,12 @@ infoPanel.prototype.deleteSelected=async function(){
             , content:dialogStr
             , buttons: [
                 {
-                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
-                        if (twinIDArr.length > 0) this.deleteTwins(twinIDArr)
-                        //if (relationsArr.length > 0) this.deleteRelations(relationsArr)
-                        // shall I delete relations first then delete twins
-
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": async () => {
                         confirmDialogDiv.close()
                         this.DOM.empty()
                         this.drawButtons(null)
+                        if (relationsArr.length > 0) await this.deleteRelations(relationsArr)
+                        if (twinIDArr.length > 0) await this.deleteTwins(twinIDArr)
                     }
                 },
                 {
@@ -460,31 +458,20 @@ infoPanel.prototype.deleteSelected=async function(){
 infoPanel.prototype.deleteTwins=async function(twinIDArr){   
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
-        console.log({arr:smallArr})  //note that i comment out delete relation part
-        return; 
-        var result=await this.deletePartialTwins(smallArr)
-        result.forEach((oneID)=>{
-            delete globalCache.storedTwins[oneID]
-            delete globalCache.storedOutboundRelationships[oneID]
-        });
-
-        this.broadcastMessage({ "message": "twinsDeleted",twinIDArr:result})
+        
+        try{
+            var result = await msalHelper.callAPI("digitaltwin/deleteTwins", "POST", {arr:smallArr})
+            result.forEach((oneID)=>{
+                delete globalCache.storedTwins[oneID]
+                delete globalCache.storedOutboundRelationships[oneID]
+            });
+            this.broadcastMessage({ "message": "twinsDeleted",twinIDArr:result})
+        }catch(e){
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
+        }
     }
 }
-
-infoPanel.prototype.deletePartialTwins= async function(IDArr){
-    return new Promise((resolve, reject) => {
-        try{
-            $.post("editADT/deleteTwins",{arr:IDArr}, function (data) {
-                if(data=="") data=[]
-                resolve(data)
-            });
-        }catch(e){
-            reject(e)
-        }
-    })
-}
-
 
 infoPanel.prototype.deleteRelations=async function(relationsArr){
     var arr=[]

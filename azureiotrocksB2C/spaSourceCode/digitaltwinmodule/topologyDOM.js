@@ -343,7 +343,8 @@ topologyDOM.prototype.deleteRelations=function(relations){
 
 topologyDOM.prototype.deleteTwins=function(twinIDArr){
     twinIDArr.forEach(twinID=>{
-        this.core.$('[id = "'+twinID+'"]').remove()
+        var twinDisplayName=globalCache.twinIDMapToDisplayName[twinID]
+        this.core.$('[id = "'+twinDisplayName+'"]').remove()
     })   
 }
 
