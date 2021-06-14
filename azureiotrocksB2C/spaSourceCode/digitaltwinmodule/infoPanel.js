@@ -55,6 +55,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
         }
     }else if(msgPayload.message=="selectNodes"){
         this.DOM.empty()
+        globalCache.isShowingCreateTwinInterface=false; //allow hovering effect in topology view
         var arr=msgPayload.info;
         
         if(arr==null || arr.length==0){
@@ -113,6 +114,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
         }
     }else if(msgPayload.message=="selectGroupNode"){
         this.DOM.empty()
+        globalCache.isShowingCreateTwinInterface=true; //stop hovering effect in topology view
         var modelID = msgPayload.info["@id"]
         if(!modelAnalyzer.DTDLModels[modelID]) return;
         var twinJson = {

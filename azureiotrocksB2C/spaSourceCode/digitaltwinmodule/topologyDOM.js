@@ -226,6 +226,8 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     if(!e.target.data) return
     if(e.target.isEdge && e.target.isEdge() && e.target.selected()) return; 
     //hover make "add bend point" menu difficult to show, so avoid add hover effect to selectd edge
+    if(globalCache.isShowingCreateTwinInterface) return;  //when user is creating node, do not allow hovering
+
     var info=e.target.data().originalInfo
     if(info==null) return;
     if(this.lastHoverTarget) this.lastHoverTarget.removeClass("hover")
@@ -235,6 +237,7 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
 }
 
 topologyDOM.prototype.mouseOutFunction= function (e) {
+    if(globalCache.isShowingCreateTwinInterface) return;  //when user is creating node, do not allow hovering
     this.selectFunction()
     if(this.lastHoverTarget){
         this.lastHoverTarget.removeClass("hover")
