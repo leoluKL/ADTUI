@@ -65,23 +65,66 @@ routerEditADT.prototype.deleteRelations =async function(req,res) {
 
 routerEditADT.prototype.deleteTwins =async function(req,res) {
     var twinIDArr=req.body.arr;
-    var promiseArr=[]
+    
+    try {
+        //get all the relationships and delete those first
+        var getRelationsPromiseArr = []
+        for (var i = 0; i < twinIDArr.length; i++) {
+            var twinID = twinIDArr[i];
+            getRelationsPromiseArr.push(this.getOneTwinAllRelations(twinID))
+        }
+        var allRelationships = {}
+        var results = await Promise.allSettled(getRelationsPromiseArr);
+        results.forEach((oneSet, index) => {
+            if (oneSet.status == "fulfilled") {
+                oneSet.value.forEach(oneRel => {
+                    allRelationships[oneRel["relID"]] = oneRel
+                })
+            }
+        })
 
-    for(var i=0;i<twinIDArr.length;i++){
-        var twinID = twinIDArr[i];
-        promiseArr.push(this.deleteOneTwin(twinID))
-    }
-    try{
-        var results=await Promise.allSettled(promiseArr);
-        var succeedList=[]
-        results.forEach((oneSet,index)=>{
-            if(oneSet.status=="fulfilled") succeedList.push(twinIDArr[index]) 
+        var deleteRelationsPromiseArr = []
+        for (var relID in allRelationships) {
+            var oneRel = allRelationships[relID]
+            deleteRelationsPromiseArr.push(adtHelper.ADTClient.deleteRelationship(oneRel["srcID"], oneRel["relID"]))
+        }
+        await Promise.allSettled(deleteRelationsPromiseArr);
+
+
+        var promiseArr = []
+        for (var i = 0; i < twinIDArr.length; i++) {
+            var twinID = twinIDArr[i];
+            promiseArr.push(adtHelper.ADTClient.deleteDigitalTwin(twinID))
+        }
+
+        var results = await Promise.allSettled(promiseArr);
+        var succeedList = []
+        results.forEach((oneSet, index) => {
+            if (oneSet.status == "fulfilled") succeedList.push(twinIDArr[index])
         })
         res.send(succeedList)
-    }catch(e){
-        res.status(400).send(e.message);
+    }catch (e) {
+        console.log(e)
+        throw e;
     }
-    
+}
+
+routerEditADT.prototype.getOneTwinAllRelations =async function(twinID) {
+    var relationships = await adtHelper.ADTClient.listRelationships(twinID)
+    var incomingRelationship = await adtHelper.ADTClient.listIncomingRelationships(twinID)
+
+    var allRelationships = []
+    for await (let page of relationships.byPage({ maxPageSize: 1000 })) { //should be only one page
+        page.value.forEach((oneRel) => {
+            allRelationships.push({ "srcID": oneRel["$sourceId"], "relID": oneRel["$relationshipId"] }) 
+        })
+    }
+    for await (let page of incomingRelationship.byPage({ maxPageSize: 1000 })) { //should be only one page
+        page.value.forEach((oneRel) => {
+            allRelationships.push({ "srcID": oneRel["sourceId"], "relID": oneRel["relationshipId"] }) 
+        })
+    }
+    return allRelationships
 }
 
 routerEditADT.prototype.deleteOneTwin =async function(twinID) {
