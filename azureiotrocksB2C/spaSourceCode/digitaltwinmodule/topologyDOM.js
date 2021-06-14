@@ -94,7 +94,9 @@ topologyDOM.prototype.init=function(){
             {selector: 'node.hover',
             style: {
                 'background-blacken':0.5
-            }},{selector: 'edge.hover',
+            }}
+            
+            ,{selector: 'edge.hover',
             style: {
                 'width':5
             }}
@@ -222,6 +224,8 @@ topologyDOM.prototype.smartPositionNode = function (mousePosition) {
 
 topologyDOM.prototype.mouseOverFunction= function (e) {
     if(!e.target.data) return
+    if(e.target.isEdge && e.target.isEdge() && e.target.selected()) return; \
+    //hover make "add bend point" menu difficult to show, so avoid add hover effect to selectd edge
     var info=e.target.data().originalInfo
     if(info==null) return;
     if(this.lastHoverTarget) this.lastHoverTarget.removeClass("hover")
