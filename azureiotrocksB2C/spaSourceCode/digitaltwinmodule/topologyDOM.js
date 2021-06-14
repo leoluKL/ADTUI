@@ -327,7 +327,8 @@ topologyDOM.prototype.deleteRelations=function(relations){
     relations.forEach(oneRelation=>{
         var srcID=oneRelation["srcID"]
         var relationID=oneRelation["relID"]
-        var theNode=this.core.filter('[id = "'+srcID+'"]');
+        var theNodeName=globalCache.twinIDMapToDisplayName[srcID]
+        var theNode=this.core.filter('[id = "'+theNodeName+'"]');
         var edges=theNode.connectedEdges().toArray()
         for(var i=0;i<edges.length;i++){
             var anEdge=edges[i]

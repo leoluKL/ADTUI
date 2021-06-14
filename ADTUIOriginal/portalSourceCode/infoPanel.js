@@ -290,6 +290,20 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
         }
     }
 
+    //for ADT UI standalone tool, translate all twin ID by its displayName
+    var IDtoName={}
+    importTwins.forEach(oneTwin=>{
+        var displayName=oneTwin["displayName"] || oneTwin["$dtId"]
+        IDtoName[oneTwin["$dtId"]]=displayName
+        oneTwin["$dtId"]=displayName
+        delete oneTwin["displayName"]
+    })
+    importRelations.forEach(oneRelation=>{
+        oneRelation["$srcId"]=IDtoName[oneRelation["$srcId"]]
+        oneRelation["obj"]["$targetId"]=IDtoName[oneRelation["obj"]["$targetId"]]
+    })
+
+
     var twinsImportResult= await this.batchImportTwins(importTwins)
     twinsImportResult.forEach(data=>{
         globalCache.storedTwins[data["$dtId"]] = data;

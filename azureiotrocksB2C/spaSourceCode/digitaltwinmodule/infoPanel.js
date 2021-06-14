@@ -458,8 +458,11 @@ infoPanel.prototype.deleteSelected=async function(){
 infoPanel.prototype.deleteTwins=async function(twinIDArr){   
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
-        var result=await this.deletePartialTwins(smallArr)
+        
 
+        console.log({arr:smallArr})
+        return; 
+        var result=await this.deletePartialTwins(smallArr)
         result.forEach((oneID)=>{
             delete globalCache.storedTwins[oneID]
             delete globalCache.storedOutboundRelationships[oneID]
@@ -488,12 +491,14 @@ infoPanel.prototype.deleteRelations=async function(relationsArr){
     relationsArr.forEach(oneRelation=>{
         arr.push({srcID:oneRelation['$sourceId'],relID:oneRelation['$relationshipId']})
     })
-    $.post("editADT/deleteRelations",{"relations":arr},  (data)=> { 
-        if(data=="") data=[];
+    try{
+        var data = await msalHelper.callAPI("digitaltwin/deleteRelations", "POST", {"relations":arr})
         globalCache.storeTwinRelationships_remove(data)
         this.broadcastMessage({ "message": "relationsDeleted","relations":data})
-    });
-    
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
 }
 
 infoPanel.prototype.showOutBound=async function(){

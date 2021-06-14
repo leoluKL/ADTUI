@@ -1,6 +1,7 @@
 const simpleSelectMenu= require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const globalCache=require("./globalCache")
+const msalHelper=require("../msalHelper")
 
 function editLayoutDialog() {
     if(!this.DOM){
@@ -85,17 +86,19 @@ editLayoutDialog.prototype.deleteLayout = function (layoutName) {
             , content: "Confirm deleting layout \"" + layoutName + "\"?"
             , buttons:[
                 {
-                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": async () => {
                         delete globalCache.layoutJSON[layoutName]
                         if (layoutName == globalCache.currentLayoutName) globalCache.currentLayoutName = null
-                        this.broadcastMessage({ "message": "layoutsUpdated" })
-                        console.log({ "layoutName": layoutName })
-                        return;
-                        
-                        $.post("layout/saveLayouts", { "layouts": JSON.stringify(globalCache.layoutJSON) })
-                        confirmDialogDiv.close();
+                        confirmDialogDiv.close()
+                        this.broadcastMessage({ "message": "layoutsUpdated"})
                         this.refillOptions()
                         this.switchLayoutSelector.triggerOptionIndex(0)
+                        try{
+                            await msalHelper.callAPI("digitaltwin/deleteLayout", "POST", { "layoutName": layoutName })
+                        }catch(e){
+                            console.log(e)
+                            if(e.responseText) alert(e.responseText)
+                        }
                     }
                 },
                 {
