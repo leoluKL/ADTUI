@@ -19,6 +19,7 @@ function routerDigitalTwin(){
     this.useRoute("saveLayout","isPost")
     this.useRoute("deleteLayout","isPost")
     this.useRoute("deleteRelations","isPost")
+    this.useRoute("deleteTwins","isPost")
 }
 
 
@@ -95,6 +96,27 @@ routerDigitalTwin.prototype.getRelationshipsFromTwinIDs =async function(req,res)
     res.send(body)
 }
 
+routerDigitalTwin.prototype.deleteTwins =async function(req,res) {
+    //delete the entry from cosmosDB first
+    //then delete them from ADT
+    //store the new twin to cosmos DB
+    
+    var dbReq=req.body
+    dbReq.account="elephant.lyh@gmail.com"//req.authInfo.account
+    req.body.account="elephant.lyh@gmail.com"
+    try{
+        var {body}=await got.post(process.env.dboperationAPIURL+"deleteData/deleteTwins",{json:dbReq,responseType: 'json'});
+    }catch(e){
+        console.log(e)
+    }
+
+    try{
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteTwins", {json:req.body,responseType: 'json'});
+        res.send(body)
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+    }
+}
 
 
 routerDigitalTwin.prototype.listTwinsForIDs =async function(req,res) {

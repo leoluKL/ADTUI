@@ -320,7 +320,7 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
     str+=`. (Raw twin records:${importTwins.length}); Raw relations records:${importRelations.length})`
     var confirmDialogDiv = new simpleConfirmDialog()
     confirmDialogDiv.show(
-        { width: "200px" },
+        { width: "400px" },
         {
             title: "Import Result"
             , content:str

@@ -326,7 +326,7 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
     var str="Add "+numOfTwins+ " node"+((numOfTwins<=1)?"":"s")+", "+numOfRelations+" relationship"+((numOfRelations<=1)?"":"s")
     var confirmDialogDiv = new simpleConfirmDialog()
     confirmDialogDiv.show(
-        { width: "200px" },
+        { width: "400px" },
         {
             title: "Import Result"
             , content:str
@@ -439,7 +439,9 @@ infoPanel.prototype.deleteSelected=async function(){
                 {
                     colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
                         if (twinIDArr.length > 0) this.deleteTwins(twinIDArr)
-                        if (relationsArr.length > 0) this.deleteRelations(relationsArr)
+                        //if (relationsArr.length > 0) this.deleteRelations(relationsArr)
+                        // shall I delete relations first then delete twins
+
                         confirmDialogDiv.close()
                         this.DOM.empty()
                         this.drawButtons(null)
@@ -458,9 +460,7 @@ infoPanel.prototype.deleteSelected=async function(){
 infoPanel.prototype.deleteTwins=async function(twinIDArr){   
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
-        
-
-        console.log({arr:smallArr})
+        console.log({arr:smallArr})  //note that i comment out delete relation part
         return; 
         var result=await this.deletePartialTwins(smallArr)
         result.forEach((oneID)=>{
