@@ -5,6 +5,7 @@ function routerDeleteData(){
     this.router = express.Router();
     this.useRoute("deleteModel","post")
     this.useRoute("deleteTopologySchema","post")
+    this.useRoute("deleteTwins","post")
 }
 
 routerDeleteData.prototype.useRoute=function(routeStr,isPost){
@@ -25,6 +26,30 @@ routerDeleteData.prototype.deleteModel =async function(req,res) {
         res.status(400).send(e.message)
     }
 }
+
+routerDeleteData.prototype.deleteTwins =async function(req,res) {
+    var accountID=req.body.account
+    var twinIDs=req.body.arr
+    var promiseArr=[]
+    twinIDs.forEach(oneTwinID=>{
+        promiseArr.push(cosmosdbhelper.deleteRecord("appuser",accountID,oneTwinID))
+    })
+
+    try{
+        var results=await Promise.allSettled(promiseArr);
+        var succeedList=[]
+        results.forEach((oneSet,index)=>{
+            if(oneSet.status=="fulfilled") {
+                succeedList.push(twinIDs[index]) 
+            }
+        })
+        res.send(succeedList)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+}
+
+
 
 routerDeleteData.prototype.deleteTopologySchema =async function(req,res) {
     var accountID=req.body.account
