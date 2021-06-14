@@ -32,6 +32,8 @@ globalCache.prototype.loadUserData = async function () {
         if(element.type=="visualSchema") {
             //TODO: now there is only one "default" schema to use
             this.visualDefinition[element.name]=element.detail
+        }else if(element.type=="Topology") {
+            this.layoutJSON[element.name]=element.detail
         }else if(element.type=="DTModel") dbmodels.push(element)
         else if(element.type=="DTTwin") dbtwins.push(element)
     });

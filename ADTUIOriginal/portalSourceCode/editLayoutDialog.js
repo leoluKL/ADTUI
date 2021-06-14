@@ -51,7 +51,7 @@ editLayoutDialog.prototype.popup = function () {
 
     var nameInput=$('<input type="text" style="outline:none; width:180px; display:inline;margin-left:2px;margin-right:2px"  placeholder="Fill in a new layout name..."/>').addClass("w3-input w3-border");   
     this.DOM.append(nameInput)
-    var saveAsNewBtn=$('<button class="w3-button w3-green w3-hover-light-green">Save As New</button>')
+    var saveAsNewBtn=$('<button class="w3-button w3-green w3-hover-light-green">Save New Layout</button>')
     this.DOM.append(saveAsNewBtn)
     saveAsNewBtn.on("click",()=>{this.saveIntoLayout(nameInput.val())})
 

@@ -542,7 +542,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="addSelectInbound"){ this.selectInboundNodes()   }
     else if(msgPayload.message=="hideSelectedNodes"){ this.hideSelectedNodes()   }
     else if(msgPayload.message=="COSESelectedNodes"){ this.COSESelectedNodes()   }
-    else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName,msgPayload.adtName)   }
+    else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName)   }
     else if(msgPayload.message=="layoutChange"){ this.applyNewLayout()   }
 }
 
@@ -612,7 +612,7 @@ topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipI
 
 
 
-topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
+topologyDOM.prototype.saveLayout = function (layoutName) {
     var layoutDict=globalCache.layoutJSON[layoutName]
     if(!layoutDict){
         layoutDict=globalCache.layoutJSON[layoutName]={}
@@ -651,7 +651,11 @@ topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
         }
     })
 
-    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(globalCache.layoutJSON)})
+    var saveLayoutObj={"layouts":{}}
+    saveLayoutObj["layouts"][layoutName]=JSON.stringify(layoutDict)
+    console.log(saveLayoutObj) 
+    return;
+    $.post("layout/saveLayouts",{layoutName:JSON.stringify(layoutDict)})
     this.broadcastMessage({ "message": "layoutsUpdated"})
 }
 

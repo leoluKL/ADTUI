@@ -6,6 +6,7 @@ function routerInsertData(){
     this.useRoute("newModels","post")
     this.useRoute("newTwin","post")
     this.useRoute("updateVisualSchema","post")
+    this.useRoute("updateTopologySchema","post")
 }
 
 routerInsertData.prototype.useRoute=function(routeStr,isPost){
@@ -70,6 +71,29 @@ routerInsertData.prototype.updateVisualSchema =async function(req,res) {
         res.status(400).send(e.message)
     }
 }
+
+routerInsertData.prototype.updateTopologySchema =async function(req,res) {
+    var accountID=req.body.account
+    var layouts=req.body.layouts
+
+    try {
+        for(var layoutName in layouts){
+            var content=JSON.parse(layouts[layoutName])
+            var re=await cosmosdbhelper.insertRecord("appuser",{
+                id:"TopoSchema."+layoutName
+                ,"type":"Topology"
+                ,"accountID":accountID
+                ,"name":layoutName
+                ,"detail":content
+            })
+        }
+        res.end()
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+}
+
+
 
 
 
