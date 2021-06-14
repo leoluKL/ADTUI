@@ -7,6 +7,7 @@ function routerEditADT(){
     this.useRoute("deleteModels","isPost")
     this.useRoute("changeAttribute","isPost")
     this.useRoute("upsertDigitalTwin","isPost")
+    this.useRoute("batchImportTwins","isPost")
     this.useRoute("deleteTwinWithoutConnection","isPost")
     this.useRoute("createRelations","isPost")
     this.useRoute("deleteModel","isPost")
@@ -18,6 +19,30 @@ routerEditADT.prototype.useRoute=function(routeStr,isPost){
     this.router[(isPost)?"post":"get"]("/"+routeStr,(req,res)=>{
         this[routeStr](req,res)
     })
+}
+
+routerEditADT.prototype.batchImportTwins =async function(req,res) {
+    var promiseArr=[]
+    var twins=JSON.parse(req.body.twins);
+    var idArr=[]
+    twins.forEach(oneTwin=>{
+        idArr.push(oneTwin['$dtId'])
+        promiseArr.push(adtHelper.ADTClient.upsertDigitalTwin(oneTwin['$dtId'], JSON.stringify(oneTwin)))
+    })
+
+    try{
+        var results=await Promise.allSettled(promiseArr);
+        var succeedList=[]
+        results.forEach((oneSet,index)=>{
+            if(oneSet.status=="fulfilled") {
+                //console.log(JSON.stringify(oneSet,null,2))
+                succeedList.push(oneSet.value.body) 
+            }
+        })
+        res.send(succeedList)
+    }catch(e){
+        res.status(400).send(e.message)
+    }
 }
 
 routerEditADT.prototype.upsertDigitalTwin =async function(req,res) {
