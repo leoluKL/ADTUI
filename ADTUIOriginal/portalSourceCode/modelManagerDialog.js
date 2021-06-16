@@ -170,6 +170,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
         visualJson[modelID].avarta=dataUrl
         this.saveVisualDefinition()
         this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"avarta":dataUrl })
+        this.refreshModelTreeLabel()
         actualImportPicBtn.val("")
     })
 
@@ -179,6 +180,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
         if(this.avartaImg) this.avartaImg.removeAttr('src');
         this.saveVisualDefinition()
         this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"noAvarta":true })
+        this.refreshModelTreeLabel()
     });
 
 
@@ -238,6 +240,11 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     this.fillVisualization(modelID,VisualizationDOM)
 
     this.fillBaseClasses(modelAnalyzer.DTDLModels[modelID].allBaseClasses,baseClassesDOM) 
+}
+
+
+modelManagerDialog.prototype.refreshModelTreeLabel=function(){
+    if(this.tree.selectedNodes.length>0) this.tree.selectedNodes[0].redrawLabel()
 }
 
 modelManagerDialog.prototype.fillBaseClasses=function(baseClasses,parentDom){
@@ -315,6 +322,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         if(!relatinshipName) {
             visualJson[modelID].color=selectColorCode
             this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"color":selectColorCode })
+            this.refreshModelTreeLabel()
         }else{
             if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
             if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
@@ -347,6 +355,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         if(!relatinshipName) {
             visualJson[modelID].shape=selectShape
             this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"shape":selectShape })
+            this.refreshModelTreeLabel()
         }else{
             if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
             if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
@@ -487,6 +496,27 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
             zeroModelItem.css("cursor","default")
         }else{
             this.tree=new simpleTree(this.modelList,{"leafNameProperty":"displayName","noMultipleSelectAllowed":true,"hideEmptyGroup":true})
+
+            this.tree.options.leafNodeIconFunc=(ln)=>{
+                var modelClass=ln.leafInfo["@id"]
+                var colorCode="gray"
+                var shape="ellipse"
+                var avatar=null
+                if(globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][modelClass]){
+                    var visualJson =globalCache.visualDefinition[globalCache.selectedADT][modelClass]
+                    var colorCode= visualJson.color || "gray"
+                    var shape=  visualJson.shape || "ellipse"
+                    var avarta= visualJson.avarta 
+                }
+                var fontsize={"ellipse":"font-size:130%","round-rectangle":"font-size:60%;padding-left:2px","hexagon":"font-size:90%"}[shape]
+                shape={"ellipse":"●","round-rectangle":"▉","hexagon":"⬢"}[shape]
+                
+                var lblHTML="<label style='display:inline;color:"+colorCode+";"+fontsize+";font-weight:normal;vertical-align:middle;border-radius: 2px;'>"+shape+"</label>"
+        
+                if(avarta) lblHTML+="<img src='"+avarta+"' style='height:20px'/>"
+        
+                return $(lblHTML)
+            }
 
             this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
                 var theNode=nodesArr[0]

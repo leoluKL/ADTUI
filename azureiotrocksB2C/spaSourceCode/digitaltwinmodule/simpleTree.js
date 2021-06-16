@@ -339,7 +339,8 @@ simpleTreeLeafNode.prototype.deleteSelf = function () {
 }
 
 simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
-    this.DOM=$('<button class="w3-button w3-white" style="display:block;text-align:left;width:98%">'+this.name+'</button>')
+    this.DOM=$('<button class="w3-button w3-white" style="display:block;text-align:left;width:98%"></button>')
+    this.redrawLabel()
     var clickF=(e)=>{
         this.highlight();
         var clickDetail=e.detail
@@ -354,6 +355,18 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
     this.DOM.on("dblclick",(e)=>{
         this.parentGroupNode.parentTree.dblClickNode(this)
     })
+}
+
+simpleTreeLeafNode.prototype.redrawLabel=function(){
+    this.DOM.empty()
+    if(this.parentGroupNode.parentTree.options.leafNodeIconFunc){
+        var iconLabel=this.parentGroupNode.parentTree.options.leafNodeIconFunc(this)
+        this.DOM.append(iconLabel)
+    }
+
+    var nameDiv=$("<div style='display:inline;padding-right:3px;vertical-align:middle'></div>")
+    nameDiv.text(this.name)
+    this.DOM.append(nameDiv)
 }
 simpleTreeLeafNode.prototype.highlight=function(){
     this.DOM.addClass("w3-orange")
