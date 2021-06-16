@@ -279,11 +279,11 @@ simpleTreeGroupNode.prototype.isOpen=function(){
 
 
 simpleTreeGroupNode.prototype.expand=function(){
-    this.listDOM.addClass("w3-show")
+    if(this.listDOM) this.listDOM.addClass("w3-show")
 }
 
 simpleTreeGroupNode.prototype.shrink=function(){
-    this.listDOM.removeClass("w3-show")
+    if(this.listDOM) this.listDOM.removeClass("w3-show")
 }
 
 simpleTreeGroupNode.prototype.sortNodesByName=function(){
