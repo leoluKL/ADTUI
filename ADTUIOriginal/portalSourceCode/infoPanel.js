@@ -53,9 +53,8 @@ infoPanel.prototype.rxMessage=function(msgPayload){
             this.continerDOM.show()
             this.continerDOM.addClass("w3-animate-right")
         }
-    }else if(msgPayload.message=="selectNodes"){
+    }else if(msgPayload.message=="showInfoSelectedNodes"){
         this.DOM.empty()
-        globalCache.isShowingCreateTwinInterface=false; //allow hovering effect in topology view
         var arr=msgPayload.info;
 
         if(arr==null || arr.length==0){
@@ -95,10 +94,10 @@ infoPanel.prototype.rxMessage=function(msgPayload){
             this.drawButtons("multiple")
             this.drawMultipleObj()
         }
-    }else if(msgPayload.message=="selectGroupNode"){
+    }else if(msgPayload.message=="showInfoGroupNode"){
         this.DOM.empty()
-        globalCache.isShowingCreateTwinInterface=true; //stop hovering effect in topology view
         var modelID = msgPayload.info["@id"]
+        globalCache.showingCreateTwinModelID=modelID
         if(!modelAnalyzer.DTDLModels[modelID]) return;
         var twinJson = {
             "$metadata": {
@@ -398,7 +397,7 @@ infoPanel.prototype.refreshInfomation=async function(){
         })
         
         //redraw infopanel if needed
-        if(this.selectedObjects.length==1) this.rxMessage({ "message": "selectNodes", info: this.selectedObjects })
+        if(this.selectedObjects.length==1) this.rxMessage({ "message": "showInfoSelectedNodes", info: this.selectedObjects })
     });
 }
 

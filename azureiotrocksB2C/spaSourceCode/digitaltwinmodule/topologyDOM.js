@@ -226,19 +226,21 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     if(!e.target.data) return
     if(e.target.isEdge && e.target.isEdge() && e.target.selected()) return; 
     //hover make "add bend point" menu difficult to show, so avoid add hover effect to selectd edge
-    if(globalCache.isShowingCreateTwinInterface) return;  //when user is creating node, do not allow hovering
-
+    
     var info=e.target.data().originalInfo
     if(info==null) return;
     if(this.lastHoverTarget) this.lastHoverTarget.removeClass("hover")
     this.lastHoverTarget=e.target
     e.target.addClass("hover")
-    this.broadcastMessage({ "message": "selectNodes", "info": [info] })
+    this.broadcastMessage({ "message": "showInfoSelectedNodes", "info": [info] })
 }
 
 topologyDOM.prototype.mouseOutFunction= function (e) {
-    if(globalCache.isShowingCreateTwinInterface) return;  //when user is creating node, do not allow hovering
-    this.selectFunction()
+    if(globalCache.showingCreateTwinModelID){
+        this.broadcastMessage({ "message": "showInfoGroupNode", "info": {"@id":globalCache.showingCreateTwinModelID} })
+    }else{
+        this.selectFunction()
+    }
     if(this.lastHoverTarget){
         this.lastHoverTarget.removeClass("hover")
         this.lastHoverTarget=null;
@@ -251,7 +253,8 @@ topologyDOM.prototype.selectFunction = function () {
     if (arr.length == 0) return
     var re = []
     arr.forEach((ele) => { re.push(ele.data().originalInfo) })
-    this.broadcastMessage({ "message": "selectNodes", info: re })
+    globalCache.showingCreateTwinModelID=null; 
+    this.broadcastMessage({ "message": "showInfoSelectedNodes", info: re })
 
     //for debugging purpose
     //arr.forEach((ele)=>{
@@ -512,7 +515,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="addNewTwins") {
         this.drawTwins(msgPayload.twinsInfo,"animation")
     }else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
-    else if(msgPayload.message=="selectNodes"){
+    else if(msgPayload.message=="showInfoSelectedNodes"){ //from selecting twins in the twintree
         this.core.nodes().unselect()
         this.core.edges().unselect()
         var arr=msgPayload.info;

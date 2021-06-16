@@ -32,7 +32,8 @@ function twinsTree(DOM, searchDOM) {
         nodesArr.forEach((item, index) =>{
             infoArr.push(item.leafInfo)
         });
-        this.broadcastMessage({ "message": "selectNodes", info:infoArr, "mouseClickDetail":mouseClickDetail})
+        globalCache.showingCreateTwinModelID=null; 
+        this.broadcastMessage({ "message": "showInfoSelectedNodes", info:infoArr, "mouseClickDetail":mouseClickDetail})
     }
 
     this.tree.callback_afterDblclickNode=(theNode)=>{
@@ -40,7 +41,7 @@ function twinsTree(DOM, searchDOM) {
     }
 
     this.tree.callback_afterSelectGroupNode=(nodeInfo)=>{
-        this.broadcastMessage({"message":"selectGroupNode",info:nodeInfo})
+        this.broadcastMessage({"message":"showInfoGroupNode",info:nodeInfo})
     }
 
     this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("w3-input");
