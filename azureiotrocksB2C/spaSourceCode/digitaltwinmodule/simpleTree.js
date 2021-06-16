@@ -242,6 +242,7 @@ simpleTreeGroupNode.prototype.refreshName=function(){
 }
 simpleTreeGroupNode.prototype.checkOptionHideEmptyGroup=function(){
     if (this.parentTree.options.hideEmptyGroup && this.childLeafNodes.length == 0) {
+        this.shrink()
         this.headerDOM.hide()
         if (this.listDOM) this.listDOM.hide()
     } else {
