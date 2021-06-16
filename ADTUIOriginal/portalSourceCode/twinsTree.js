@@ -18,10 +18,10 @@ function twinsTree(DOM, searchDOM) {
             var shape=  visualJson.shape || "ellipse"
             var avarta= visualJson.avarta 
         }
-        var fontsize={"ellipse":"130%","round-rectangle":"90%","hexagon":"120%"}[shape]
+        var fontsize={"ellipse":"font-size:130%","round-rectangle":"font-size:60%;padding-left:2px","hexagon":"font-size:90%"}[shape]
         shape={"ellipse":"●","round-rectangle":"▉","hexagon":"⬢"}[shape]
         
-        var lblHTML="<label style='display:inline;color:"+colorCode+";font-size:"+fontsize+";font-weight:normal;border-radius: 2px;'>"+shape+"</label>"
+        var lblHTML="<label style='display:inline;color:"+colorCode+";"+fontsize+";font-weight:normal;vertical-align:middle;border-radius: 2px;'>"+shape+"</label>"
 
         if(avarta) lblHTML+="<img src='"+avarta+"' style='height:20px'/>"
 

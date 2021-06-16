@@ -219,15 +219,12 @@ function simpleTreeGroupNode(parentTree,obj){
 
 simpleTreeGroupNode.prototype.refreshName=function(){ //⬢▉⚫
     this.headerDOM.empty()
-    var nameDiv=$("<div style='display:inline;padding-right:3px'></div>")
+    var nameDiv=$("<div style='display:inline;padding-right:3px;vertical-align:middle'></div>")
     nameDiv.text(this.name)
-    var lblColor="gray"
-    if(this.childLeafNodes.length>0) {
-        lblColor="yellowgreen"
-        this.headerDOM.css("font-weight","bold")
-    }else{
-        this.headerDOM.css("font-weight","normal")
-    } 
+    
+    if(this.childLeafNodes.length>0) lblColor="yellowgreen"
+    else var lblColor="gray" 
+    this.headerDOM.css("font-weight","bold")
 
     if(this.parentTree.options.groupNodeIconFunc){
         var iconLabel=this.parentTree.options.groupNodeIconFunc(this)
