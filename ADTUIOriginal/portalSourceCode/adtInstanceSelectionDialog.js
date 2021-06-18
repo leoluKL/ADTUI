@@ -44,7 +44,10 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         
         this.buttonHolder=$("<div style='height:100%'></div>")
         this.contentDOM.children(':first').append(this.buttonHolder)
-        closeButton.on("click",()=>{this.closeDialog()})
+        closeButton.on("click",()=>{
+            if(this.previousSelectedADT==null) this.useFilterToReplace()
+            this.closeDialog()
+        })
     
         var row1=$('<div class="w3-bar" style="padding:2px"></div>')
         this.contentDOM.append(row1)
@@ -141,7 +144,6 @@ adtInstanceSelectionDialog.prototype.setADTInstance=function(selectedADT){
     if (!globalCache.visualDefinition[globalCache.selectedADT])
             globalCache.visualDefinition[globalCache.selectedADT] = {}
     this.listFilters(selectedADT)
-    this.chooseOneFilter("","")
     $.ajaxSetup({
         headers: {
             'adtInstance': globalCache.selectedADT
@@ -243,12 +245,14 @@ adtInstanceSelectionDialog.prototype.listFilters=function(adtInstanceName){
         if(filterName=="ALL") filterList.prepend(oneFilter)
         else filterList.append(oneFilter)
         this.assignEventToOneFilter(oneFilter)
+        if(filterName=="ALL") oneFilter.trigger("click")
         
         oneFilter.on("dblclick",(e)=>{
             if(this.previousSelectedADT == globalCache.selectedADT) this.useFilterToAppend();
             else this.useFilterToReplace();
         })
     }
+
 }
 
 adtInstanceSelectionDialog.prototype.assignEventToOneFilter=function(oneFilter){

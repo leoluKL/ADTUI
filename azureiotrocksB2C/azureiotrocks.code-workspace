@@ -24,7 +24,7 @@
     ],
     "settings": {
       "liveServer.settings.multiRootWorkspaceName": "spaPortal",
-      "workbench.colorTheme": "Noctis Obscuro",
+      "workbench.colorTheme": "Monokai Pro (Filter Machine)",
       "terminal.integrated.rightClickBehavior": "default"
     }
   }
