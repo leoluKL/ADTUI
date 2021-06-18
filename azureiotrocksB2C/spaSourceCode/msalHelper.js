@@ -69,24 +69,22 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
 
 msalHelper.prototype.getToken=async function(b2cScope){
     try{
-        if(this.storedToken!=null){
+        if(this.storedToken==null) this.storedToken={}
+        if(this.storedToken[b2cScope]!=null){
             var currTime=parseInt(new Date().getTime()/1000)
-            if(currTime+60 < this.storedTokenExp) return this.storedToken
+            if(currTime+60 < this.storedToken[b2cScope].expire) return this.storedToken[b2cScope].accessToken
         }
         var tokenRequest={
-            scopes: b2cScope,
+            scopes: [b2cScope],
             forceRefresh: false, // Set this to "true" to skip a cached token and go to the server to get a new token
             account: this.myMSALObj.getAccountByHomeId(this.accountId)
         }
     
         var response = await this.myMSALObj.acquireTokenSilent(tokenRequest)
-        console.log(response.scopes)
         if (!response.accessToken || response.accessToken === "") {
             throw new msal.InteractionRequiredAuthError;
         }
-
-        this.storedToken=response.accessToken
-        this.storedTokenExp=response.idTokenClaims.exp
+        this.storedToken[b2cScope]={"accessToken":response.accessToken,"expire":response.idTokenClaims.exp}
     }catch(error){
         if (error instanceof msal.InteractionRequiredAuthError) {
             // fallback to interaction when silent call fails
