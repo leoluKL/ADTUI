@@ -21,7 +21,10 @@ startSelectionDialog.prototype.popup = async function() {
 
     this.buttonHolder = $("<div style='height:100%'></div>")
     this.contentDOM.children(':first').append(this.buttonHolder)
-    closeButton.on("click", () => { this.closeDialog() })
+    closeButton.on("click", () => {
+        this.useStartSelection("append")
+        this.closeDialog() 
+    })
 
     var replaceButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%; margin-right:8px">Replace All Data</button>')
     var appendButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%">Append Data</button>')

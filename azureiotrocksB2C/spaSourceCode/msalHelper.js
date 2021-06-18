@@ -6,7 +6,8 @@ function msalHelper(){
 
 msalHelper.prototype.signIn=async function(){
     try{
-        var response= await this.myMSALObj.loginPopup({ scopes: globalAppSettings.b2cScopes })
+        var response= await this.myMSALObj.loginPopup({ scopes:[]  }) //globalAppSettings.b2cScopes
+        console.log(response)
         if (response != null){
             this.setAccount(response.account)
             return response.account
@@ -44,7 +45,7 @@ msalHelper.prototype.fetchAccount=function(noAnimation){
 msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
     var headersObj={}
     if(!globalAppSettings.isLocalTest){
-        var token=await this.getToken()
+        var token=await this.getToken(globalAppSettings.b2cScope_taskmaster)
         headersObj["Authorization"]=`Bearer ${token}`
     }
     return new Promise((resolve, reject) => {
@@ -66,19 +67,20 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
     })
 }
 
-msalHelper.prototype.getToken=async function(){
+msalHelper.prototype.getToken=async function(b2cScope){
     try{
         if(this.storedToken!=null){
             var currTime=parseInt(new Date().getTime()/1000)
             if(currTime+60 < this.storedTokenExp) return this.storedToken
         }
         var tokenRequest={
-            scopes: globalAppSettings.b2cScopes,
+            scopes: b2cScope,
             forceRefresh: false, // Set this to "true" to skip a cached token and go to the server to get a new token
             account: this.myMSALObj.getAccountByHomeId(this.accountId)
         }
     
         var response = await this.myMSALObj.acquireTokenSilent(tokenRequest)
+        console.log(response.scopes)
         if (!response.accessToken || response.accessToken === "") {
             throw new msal.InteractionRequiredAuthError;
         }

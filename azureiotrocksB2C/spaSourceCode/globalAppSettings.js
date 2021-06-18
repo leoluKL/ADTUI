@@ -8,7 +8,8 @@ var isLocalTest=(strArr.indexOf("test=1")!=-1)
 
 const globalAppSettings={
     "b2cSignUpSignInName": signupsigninname,
-    "b2cScopes":["https://"+b2cTenantName+".onmicrosoft.com/taskmastermodule/operation"],
+    "b2cScope_taskmaster":["https://"+b2cTenantName+".onmicrosoft.com/taskmastermodule/operation"],
+    "b2cScope_functions":["https://"+b2cTenantName+".onmicrosoft.com/azureiotrocksfunctions/basic"],
     "logoutRedirectUri": url.origin+"/spaindex.html",
     "msalConfig":{
         auth: {

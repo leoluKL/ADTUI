@@ -29,7 +29,7 @@ function digitaltwinmoduleUI() {
     var theAccount=msalHelper.fetchAccount();
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
     //test if the account is really usable
-    msalHelper.getToken().then(res=>{
+    msalHelper.getToken(globalAppSettings.b2cScope_taskmaster).then(res=>{
         //console.log(res)
     }).catch(e=>{
         window.open(globalAppSettings.logoutRedirectUri,"_self")
