@@ -1,6 +1,9 @@
 {
     "folders": [
       {
+        "path": "dataProcessingFunc"
+      },
+      {
         "path": "dbOperationModuleApp"
       },
       {
@@ -25,6 +28,7 @@
     "settings": {
       "liveServer.settings.multiRootWorkspaceName": "spaPortal",
       "workbench.colorTheme": "Monokai Pro (Filter Machine)",
-      "terminal.integrated.rightClickBehavior": "default"
+      "terminal.integrated.rightClickBehavior": "default",
+      "debug.internalConsoleOptions": "neverOpen"
     }
   }

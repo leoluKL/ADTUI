@@ -42,6 +42,30 @@ msalHelper.prototype.fetchAccount=function(noAnimation){
     return foundAccount;
 }
 
+
+msalHelper.prototype.callAzureFunctionsService=async function(APIString,RESTMethod,payload){
+    var headersObj={}
+    var token=await this.getToken(globalAppSettings.b2cScope_functions)
+    headersObj["Authorization"]=`Bearer ${token}`
+    return new Promise((resolve, reject) => {
+        var ajaxContent={
+            type: RESTMethod || 'GET',
+            "headers":headersObj,
+            url: globalAppSettings.functionsAPIURI+APIString,
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            success: function (responseData, textStatus, jqXHR) {
+                resolve(responseData)
+            },
+            error: function (responseData, textStatus, errorThrown) {
+                reject(responseData)
+            }
+        }
+        if(RESTMethod=="POST") ajaxContent.data= JSON.stringify(payload)
+        $.ajax(ajaxContent);
+    })
+}
+
 msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
     var headersObj={}
     if(!globalAppSettings.isLocalTest){
