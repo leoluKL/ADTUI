@@ -19,7 +19,7 @@ cosmosdbhelper.prototype.query = async function (containerID,queryStr) {
     
 }
 
-cosmosdbhelper.prototype.insertRecord=async function (containerID,docObj){
+cosmosdbhelper.prototype.insertRecord=async function (containerID,docObj){ //using upsert so it is both update and create-if-not-exist
     try{
         const { item } = await this.client.database(process.env.cosmosDBName).container(containerID).items.upsert(docObj)
         return item;

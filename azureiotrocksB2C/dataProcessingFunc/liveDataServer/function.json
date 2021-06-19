@@ -1,0 +1,18 @@
+{
+    "disabled": false,
+    "bindings": [
+        {
+            "type": "queueTrigger",
+            "direction": "in",
+            "name": "inputQueueItem",
+            "queueName": "outqueue",
+            "connection": "azureiotrocksfuncstorage_STORAGE"
+        },
+        {
+            "type": "signalR",
+            "name": "signalRMessages",
+            "hubName": "livedata",
+            "direction": "out"
+        }
+    ]
+}

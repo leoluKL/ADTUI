@@ -69,9 +69,15 @@ msalHelper.prototype.callAzureFunctionsService=async function(APIString,RESTMeth
 msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
     var headersObj={}
     if(!globalAppSettings.isLocalTest){
-        var token=await this.getToken(globalAppSettings.b2cScope_taskmaster)
+        try{
+            var token=await this.getToken(globalAppSettings.b2cScope_taskmaster)
+        }catch(e){
+            window.open(globalAppSettings.logoutRedirectUri,"_self")
+        }
+        
         headersObj["Authorization"]=`Bearer ${token}`
     }
+
     return new Promise((resolve, reject) => {
         var ajaxContent={
             type: RESTMethod || 'GET',

@@ -25,9 +25,6 @@ startSelectionDialog.prototype.popup = async function() {
     closeButton.on("click", () => {
         this.useStartSelection("append")
         this.closeDialog() 
-
-        msalHelper.callAzureFunctionsService("negotiate?name=ff","GET").then(re=>{console.log(re)})
-        
     })
 
     var replaceButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%; margin-right:8px">Replace All Data</button>')

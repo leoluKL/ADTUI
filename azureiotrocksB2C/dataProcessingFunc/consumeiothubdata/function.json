@@ -1,19 +1,21 @@
 {
   "bindings": [
     {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
+      "type": "eventHubTrigger",
+      "name": "IoTHubMessages",
       "direction": "in",
-      "name": "req",
-      "methods": [
-        "get",
-        "post"
-      ]
+      "eventHubName": "samples-workitems",
+      "connection": "IoTHubConnectionString",
+      "cardinality": "many",
+      "consumerGroup": "consumedbyfunction"
     },
     {
-      "type": "http",
+      "type": "queue",
       "direction": "out",
-      "name": "res"
+      "name": "outputQueueItem",
+      "queueName": "outqueue",
+      "connection": "azureiotrocksfuncstorage_STORAGE"
     }
-  ]
+  ],
+  "disabled": false
 }
