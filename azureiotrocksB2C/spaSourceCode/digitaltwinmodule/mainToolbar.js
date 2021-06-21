@@ -25,7 +25,8 @@ mainToolbar.prototype.render = function () {
 
     $("#mainToolBar").empty()
     $("#mainToolBar").append(this.switchADTInstanceBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
-        ,this.switchLayoutSelector.DOM,this.editLayoutBtn,this.testSignalRBtn,this.testSendSignalRBtn)
+        ,this.switchLayoutSelector.DOM,this.editLayoutBtn)
+        //,this.testSignalRBtn,this.testSendSignalRBtn
 
     this.switchADTInstanceBtn.on("click",()=>{ startSelectionDialog.popup() })
     this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })

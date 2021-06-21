@@ -7,7 +7,6 @@ function msalHelper(){
 msalHelper.prototype.signIn=async function(){
     try{
         var response= await this.myMSALObj.loginPopup({ scopes:[]  }) //globalAppSettings.b2cScopes
-        console.log(response)
         if (response != null){
             this.setAccount(response.account)
             return response.account
