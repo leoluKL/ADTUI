@@ -58,6 +58,10 @@ mainUI.prototype.showModuleButtons=function(){
     adtUIBtn.on("click",()=>{
         window.open("digitaltwinmodule.html", "_blank");
     })
+
+    deviceManageBtn.on("click",()=>{
+        window.open("devicemanagement.html", "_blank");
+    })
  
     //if this page is open in localhost environment, add three buttons to allow pages opening and using local running api app instead
     // of cloud api app in azure app service. In production environment, these buttons will never show
