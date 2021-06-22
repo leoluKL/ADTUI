@@ -1,10 +1,6 @@
 'use strict';
 
 const modelAnalyzer = require("./modelAnalyzer");
-const formatter = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 3,
-    maximumFractionDigits: 3,
-});
 const simpleSelectMenu = require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const globalCache = require("./globalCache")
@@ -660,7 +656,7 @@ topologyDOM.prototype.numberPrecision = function (number) {
         }
         return number
     }else
-    return parseFloat(formatter.format(number))
+    return parseFloat(number.toFixed(3))
 }
 
 topologyDOM.prototype.COSESelectedNodes = function () {
