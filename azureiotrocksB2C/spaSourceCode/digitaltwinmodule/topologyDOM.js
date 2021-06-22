@@ -748,33 +748,43 @@ topologyDOM.prototype.showConnectionDialog = function (preparationInfo) {
     )
     confirmDialogDiv.dialogDiv.empty()
     preparationInfo.forEach((oneRow,index)=>{
-        var fromNode=oneRow.from
-        var toNode=oneRow.to
-        var connectionTypes=oneRow.connect
-        var label=$('<label style="display:block;margin-bottom:2px"></label>')
-        if(connectionTypes.length==0){
-            label.css("color","red")
-            label.html("No usable connection type from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>")
-        }else if(connectionTypes.length>1){ 
-            label.html("From <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
-            var switchTypeSelector=new simpleSelectMenu(" ")
-            label.prepend(switchTypeSelector.DOM)
-            connectionTypes.forEach(oneType=>{
-                switchTypeSelector.addOption(oneType)
-            })
-            resultActions.push({from:fromNode.data().originalInfo["$dtId"] ,to:toNode.data().originalInfo["$dtId"],connect:connectionTypes[0]})
-            switchTypeSelector.callBack_clickOption=(optionText,optionValue)=>{
-                resultActions[index][2]=optionText
-                switchTypeSelector.changeName(optionText)
-            }
-            switchTypeSelector.triggerOptionIndex(0)
-        }else if(connectionTypes.length==1){
-            resultActions.push({from:fromNode.data().originalInfo["$dtId"] ,to:toNode.data().originalInfo["$dtId"],connect:connectionTypes[0]})
-            label.css("color","green")
-            label.html("Add <b>"+connectionTypes[0]+"</b> connection from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
-        }
-        confirmDialogDiv.dialogDiv.append(label)
+        resultActions.push(this.createOneConnectionAdjustRow(oneRow,confirmDialogDiv))
     })
+}
+
+topologyDOM.prototype.createOneConnectionAdjustRow = function (oneRow,confirmDialogDiv) {
+    var returnObj={}
+    var fromNode=oneRow.from
+    var toNode=oneRow.to
+    var connectionTypes=oneRow.connect
+    var label=$('<label style="display:block;margin-bottom:2px"></label>')
+    if(connectionTypes.length==0){
+        label.css("color","red")
+        label.html("No usable connection type from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>")
+    }else if(connectionTypes.length>1){ 
+        label.html("From <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
+        var switchTypeSelector=new simpleSelectMenu(" ")
+        label.prepend(switchTypeSelector.DOM)
+        connectionTypes.forEach(oneType=>{
+            switchTypeSelector.addOption(oneType)
+        })
+        returnObj["from"]=fromNode.id()
+        returnObj["to"]=toNode.id()
+        returnObj["connect"]=connectionTypes[0]
+        switchTypeSelector.callBack_clickOption=(optionText,optionValue)=>{
+            returnObj["connect"]=optionText
+            switchTypeSelector.changeName(optionText)
+        }
+        switchTypeSelector.triggerOptionIndex(0)
+    }else if(connectionTypes.length==1){
+        returnObj["from"]=fromNode.id()
+        returnObj["to"]=toNode.id()
+        returnObj["connect"]=connectionTypes[0]
+        label.css("color","green")
+        label.html("Add <b>"+connectionTypes[0]+"</b> connection from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
+    }
+    confirmDialogDiv.dialogDiv.append(label)
+    return returnObj;
 }
 
 topologyDOM.prototype.createConnections = async function (resultActions) {

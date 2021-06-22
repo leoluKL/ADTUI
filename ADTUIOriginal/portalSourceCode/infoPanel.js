@@ -300,8 +300,8 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
         delete oneTwin["displayName"]
     })
     importRelations.forEach(oneRelation=>{
-        oneRelation["$srcId"]=IDtoName[oneRelation["$srcId"]]
-        oneRelation["obj"]["$targetId"]=IDtoName[oneRelation["obj"]["$targetId"]]
+        oneRelation["$srcId"]=IDtoName[oneRelation["$srcId"]]||oneRelation["$srcId"]
+        oneRelation["obj"]["$targetId"]=IDtoName[oneRelation["obj"]["$targetId"]]||oneRelation["obj"]["$targetId"]
     })
 
 
