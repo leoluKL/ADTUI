@@ -403,7 +403,7 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
         dtdlObj["schema"]["enumValues"]=[]
         valueArr.forEach(aVal=>{
             dtdlObj["schema"]["enumValues"].push({
-                "name": aVal,
+                "name": aVal.replace(" ",""), //remove all the space in name
                 "enumValue": aVal
               })
         })
