@@ -9,6 +9,7 @@ const msalHelper=require("../msalHelper")
 function topologyDOM(DOM){
     this.DOM=DOM
     this.defaultNodeSize=30
+    this.nodeSizeModelAdjustmentRatio={}
 }
 
 topologyDOM.prototype.init=function(){
@@ -142,6 +143,13 @@ topologyDOM.prototype.init=function(){
             .selector('node')
             .style({ 'font-size': fs, width: dimension, height: dimension })
             .update()
+        for (var modelID in this.nodeSizeModelAdjustmentRatio) {
+            var newDimension = Math.ceil(this.nodeSizeModelAdjustmentRatio[modelID] * dimension)
+            this.core.style()
+                .selector('node[modelID = "' + modelID + '"]')
+                .style({ width: newDimension, height: newDimension })
+                .update()
+        }
         this.core.style()
             .selector('node:selected')
             .style({ 'border-width': Math.ceil(dimension / 15) })
@@ -177,6 +185,7 @@ topologyDOM.prototype.init=function(){
         })
     }
     setOneTimeGrab()
+    this.core.trigger("zoom")
 }
 
 topologyDOM.prototype.smartPositionNode = function (mousePosition) {
@@ -310,6 +319,10 @@ topologyDOM.prototype.updateModelTwinShape=function(modelID,shape){
         .style({'shape': shape})
         .update()   
 }
+topologyDOM.prototype.updateModelTwinDimension=function(modelID,dimensionRatio){
+    this.nodeSizeModelAdjustmentRatio[modelID]=parseFloat(dimensionRatio)
+    this.core.trigger("zoom")
+}
 
 topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){
     this.core.style()
@@ -322,6 +335,20 @@ topologyDOM.prototype.updateRelationshipShape=function(srcModelID,relationshipNa
     this.core.style()
         .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
         .style({'line-style': shape})
+        .update()   
+}
+topologyDOM.prototype.updateRelationshipWidth=function(srcModelID,relationshipName,edgeWidth){
+    this.core.style()
+        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
+        .style({'width':parseFloat(edgeWidth)})
+        .update()   
+    this.core.style()
+        .selector('edge:selected[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
+        .style({'width':parseFloat(edgeWidth)+1,'line-color': 'red'})
+        .update()   
+    this.core.style()
+        .selector('edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
+        .style({'width':parseFloat(edgeWidth)+2})
         .update()   
 }
 
@@ -351,7 +378,7 @@ topologyDOM.prototype.deleteTwins=function(twinIDArr){
 }
 
 topologyDOM.prototype.animateANode=function(twin){
-    var curDimension= this.getNodeSizeInCurrentZoom()
+    var curDimension= twin.width()
     twin.animate({
         style: { 'height': curDimension*2,'width': curDimension*2 },
         duration: 200
@@ -476,14 +503,19 @@ topologyDOM.prototype.applyVisualDefinition=function(){
         if(visualJson[modelID].color) this.updateModelTwinColor(modelID,visualJson[modelID].color)
         if(visualJson[modelID].shape) this.updateModelTwinShape(modelID,visualJson[modelID].shape)
         if(visualJson[modelID].avarta) this.updateModelAvarta(modelID,visualJson[modelID].avarta)
+        if(visualJson[modelID].dimensionRatio) this.updateModelTwinDimension(modelID,visualJson[modelID].dimensionRatio)
         if(visualJson[modelID].rels){
-            for(var relationshipName in visualJson[modelID].rels)
+            for(var relationshipName in visualJson[modelID].rels){
                 if(visualJson[modelID]["rels"][relationshipName].color){
                     this.updateRelationshipColor(modelID,relationshipName,visualJson[modelID]["rels"][relationshipName].color)
                 }
                 if(visualJson[modelID]["rels"][relationshipName].shape){
                     this.updateRelationshipShape(modelID,relationshipName,visualJson[modelID]["rels"][relationshipName].shape)
                 }
+                if(visualJson[modelID]["rels"][relationshipName].edgeWidth){
+                    this.updateRelationshipWidth(modelID,relationshipName,visualJson[modelID]["rels"][relationshipName].edgeWidth)
+                }
+            }
         }
     }
 }
@@ -531,12 +563,14 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         if(msgPayload.srcModelID){
             if(msgPayload.color) this.updateRelationshipColor(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.color)
             else if(msgPayload.shape) this.updateRelationshipShape(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.shape)
+            else if(msgPayload.edgeWidth) this.updateRelationshipWidth(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.edgeWidth)
         } 
         else{
             if(msgPayload.color) this.updateModelTwinColor(msgPayload.modelID,msgPayload.color)
             else if(msgPayload.shape) this.updateModelTwinShape(msgPayload.modelID,msgPayload.shape)
             else if(msgPayload.avarta) this.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
             else if(msgPayload.noAvarta)  this.updateModelAvarta(msgPayload.modelID,null)
+            else if(msgPayload.dimensionRatio)  this.updateModelTwinDimension(msgPayload.modelID,msgPayload.dimensionRatio)
         } 
     }else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
     else if(msgPayload.message=="relationsDeleted") this.deleteRelations(msgPayload.relations)

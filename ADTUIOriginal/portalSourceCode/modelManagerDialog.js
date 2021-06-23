@@ -286,16 +286,20 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 
     var definedColor=null
     var definedShape=null
+    var definedDimensionRatio=null
+    var definedEdgeWidth=null
     var visualJson=globalCache.visualDefinition[globalCache.selectedADT]
     if(relatinshipName==null){
         if(visualJson && visualJson[modelID] && visualJson[modelID].color) definedColor=visualJson[modelID].color
         if(visualJson && visualJson[modelID] && visualJson[modelID].shape) definedShape=visualJson[modelID].shape
+        if(visualJson && visualJson[modelID] && visualJson[modelID].dimensionRatio) definedDimensionRatio=visualJson[modelID].dimensionRatio
     }else{
         if(visualJson && visualJson[modelID]
              && visualJson[modelID]["rels"]
               && visualJson[modelID]["rels"][relatinshipName]){
                   if(visualJson[modelID]["rels"][relatinshipName].color) definedColor=visualJson[modelID]["rels"][relatinshipName].color
                   if(visualJson[modelID]["rels"][relatinshipName].shape) definedShape=visualJson[modelID]["rels"][relatinshipName].shape
+                  if(visualJson[modelID]["rels"][relatinshipName].edgeWidth) definedEdgeWidth=visualJson[modelID]["rels"][relatinshipName].edgeWidth
               }
     }
 
@@ -342,9 +346,8 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         shapeSelector.append($("<option value='solid'>→</option>"))
         shapeSelector.append($("<option value='dotted'>⇢</option>"))
     }
-    if(definedShape!=null) {
-        shapeSelector.val(definedShape)
-    }
+    if(definedShape!=null) shapeSelector.val(definedShape)
+    
     shapeSelector.change((eve)=>{
         var selectShape=eve.target.value
         if (!globalCache.visualDefinition[globalCache.selectedADT])
@@ -363,6 +366,46 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
             this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"shape":selectShape })
         }
         this.saveVisualDefinition()
+    })
+
+
+    var sizeAdjustSelector = $('<select class="w3-border" style="outline:none;width:110px"></select>')
+    if(relatinshipName==null){
+        for(var f=0.2;f<2;f+=0.2){
+            var val=f.toFixed(1)+""
+            sizeAdjustSelector.append($("<option value="+val+">dimension*"+val+"</option>"))
+        }
+        if(definedDimensionRatio!=null) sizeAdjustSelector.val(definedDimensionRatio)
+        else sizeAdjustSelector.val("1.0")
+    }else{
+        for(var f=0.5;f<=4;f+=0.5){
+            var val=f.toFixed(1)+""
+            sizeAdjustSelector.append($("<option value="+val+">width *"+val+"</option>"))
+        }
+        if(definedEdgeWidth!=null) sizeAdjustSelector.val(definedEdgeWidth)
+        else sizeAdjustSelector.val("2.0")
+    }
+    containerDiv.append(sizeAdjustSelector)
+
+    
+    sizeAdjustSelector.change((eve)=>{
+        var chooseVal=eve.target.value
+        if (!globalCache.visualDefinition[globalCache.selectedADT])
+            globalCache.visualDefinition[globalCache.selectedADT] = {}
+        var visualJson = globalCache.visualDefinition[globalCache.selectedADT]
+
+        if(!relatinshipName) {
+            if(!visualJson[modelID]) visualJson[modelID]={}
+            visualJson[modelID].dimensionRatio=chooseVal
+            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"dimensionRatio":chooseVal })
+            this.saveVisualDefinition()
+        }else{
+            if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
+            if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
+            visualJson[modelID]["rels"][relatinshipName].edgeWidth=chooseVal
+            this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"edgeWidth":chooseVal })
+            this.saveVisualDefinition()
+        }
     })
 }
 
