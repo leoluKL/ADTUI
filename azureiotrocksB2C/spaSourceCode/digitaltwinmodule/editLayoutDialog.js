@@ -1,6 +1,6 @@
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
-const globalCache=require("./globalCache")
+const globalCache=require("../sharedSourceFiles/globalCache")
 const msalHelper=require("../msalHelper")
 
 function editLayoutDialog() {

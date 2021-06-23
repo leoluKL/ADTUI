@@ -1,7 +1,7 @@
-const modelAnalyzer = require("./modelAnalyzer");
+const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer");
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
-const globalCache = require("./globalCache")
+const globalCache = require("../sharedSourceFiles/globalCache")
 const msalHelper = require("../msalHelper")
 
 function infoPanel() {

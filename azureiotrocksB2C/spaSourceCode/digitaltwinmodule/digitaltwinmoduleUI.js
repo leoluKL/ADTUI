@@ -2,14 +2,14 @@
 const topologyDOM=require("./topologyDOM.js")
 const twinsTree=require("./twinsTree")
 const startSelectionDialog = require("./startSelectionDialog")
-const modelManagerDialog = require("./modelManagerDialog")
-const modelEditorDialog = require("./modelEditorDialog")
+const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
+const modelEditorDialog = require("../sharedSourceFiles/modelEditorDialog")
 const editLayoutDialog = require("./editLayoutDialog")
 const mainToolbar = require("./mainToolbar")
 const infoPanel= require("./infoPanel");
 const globalAppSettings = require("../globalAppSettings.js");
 const msalHelper=require("../msalHelper")
-const globalCache=require("./globalCache")
+const globalCache=require("../sharedSourceFiles/globalCache")
 
 function digitaltwinmoduleUI() {
     this.initUILayout()

@@ -1,5 +1,5 @@
 const modelAnalyzer=require("./modelAnalyzer")
-const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
+const simpleSelectMenu= require("./simpleSelectMenu")
 const msalHelper=require("../msalHelper")
 const globalCache = require("./globalCache")
 

@@ -1,6 +1,6 @@
 const modelAnalyzer=require("./modelAnalyzer")
-const simpleTree= require("../sharedSourceFiles/simpleTree")
-const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
+const simpleTree= require("./simpleTree")
+const simpleConfirmDialog = require("./simpleConfirmDialog")
 const modelEditorDialog = require("./modelEditorDialog")
 const globalCache = require("./globalCache")
 const msalHelper=require("../msalHelper")
@@ -12,6 +12,7 @@ function modelManagerDialog() {
         $("body").append(this.DOM)
         this.DOM.hide()
     }
+    this.showVisualizationSettings=true;
 }
 
 
@@ -121,55 +122,57 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     this.modelButtonBar.empty()
 
     var delBtn = $('<button style="margin-bottom:2px" class="w3-button w3-light-gray w3-hover-pink w3-border-right">Delete Model</button>')
-    var importPicBtn = $('<button class="w3-button w3-light-gray w3-hover-amber w3-border-right">Upload Avarta</button>')
-    var actualImportPicBtn =$('<input type="file" name="img" style="display:none"></input>')
-    var clearAvartaBtn = $('<button class="w3-button w3-light-gray w3-hover-pink w3-border-right">Clear Avarta</button>')
-    this.modelButtonBar.append(delBtn,importPicBtn,actualImportPicBtn,clearAvartaBtn)
-
-    importPicBtn.on("click", ()=>{
-        actualImportPicBtn.trigger('click');
-    });
-
-    actualImportPicBtn.change(async (evt)=>{
-        var files = evt.target.files; // FileList object
-        var theFile=files[0]
-        
-        if(theFile.type=="image/svg+xml"){
-            var str= await this.readOneFile(theFile)
-            var dataUrl='data:image/svg+xml;utf8,' + encodeURIComponent(str);
-        }else if(theFile.type.match('image.*')){
-            var dataUrl= await this.resizeImgFile(theFile,70)
-        } else {
-            var confirmDialogDiv=new simpleConfirmDialog()
-            confirmDialogDiv.show({ width: "200px" },
-                {
-                    title: "Note"
-                    , content: "Please import image file (png,jpg,svg and so on)"
-                    , buttons: [{colorClass:"w3-gray",text:"Ok","clickFunc":()=>{confirmDialogDiv.close()}}]
-                }
-            )
-        }
-        if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
-
-        var visualJson=globalCache.visualDefinition["default"]
-        if(!visualJson[modelID]) visualJson[modelID]={}
-        visualJson[modelID].avarta=dataUrl
-        this.saveVisualDefinition()
-        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"avarta":dataUrl })
-        this.refreshModelTreeLabel()
-        actualImportPicBtn.val("")
-    })
-
-    clearAvartaBtn.on("click", ()=>{
-        var visualJson=globalCache.visualDefinition["default"]
-        if(visualJson[modelID]) delete visualJson[modelID].avarta 
-        if(this.avartaImg) this.avartaImg.removeAttr('src');
-        this.saveVisualDefinition()
-        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"noAvarta":true })
-        this.refreshModelTreeLabel()
-    });
-
-
+    this.modelButtonBar.append(delBtn)
+    
+    if(this.showVisualizationSettings){
+        var importPicBtn = $('<button class="w3-button w3-light-gray w3-hover-amber w3-border-right">Upload Avarta</button>')
+        var actualImportPicBtn =$('<input type="file" name="img" style="display:none"></input>')
+        var clearAvartaBtn = $('<button class="w3-button w3-light-gray w3-hover-pink w3-border-right">Clear Avarta</button>')
+        this.modelButtonBar.append(importPicBtn,actualImportPicBtn,clearAvartaBtn)
+        importPicBtn.on("click", ()=>{
+            actualImportPicBtn.trigger('click');
+        });
+    
+        actualImportPicBtn.change(async (evt)=>{
+            var files = evt.target.files; // FileList object
+            var theFile=files[0]
+            
+            if(theFile.type=="image/svg+xml"){
+                var str= await this.readOneFile(theFile)
+                var dataUrl='data:image/svg+xml;utf8,' + encodeURIComponent(str);
+            }else if(theFile.type.match('image.*')){
+                var dataUrl= await this.resizeImgFile(theFile,70)
+            } else {
+                var confirmDialogDiv=new simpleConfirmDialog()
+                confirmDialogDiv.show({ width: "200px" },
+                    {
+                        title: "Note"
+                        , content: "Please import image file (png,jpg,svg and so on)"
+                        , buttons: [{colorClass:"w3-gray",text:"Ok","clickFunc":()=>{confirmDialogDiv.close()}}]
+                    }
+                )
+            }
+            if(this.avartaImg) this.avartaImg.attr("src",dataUrl)
+    
+            var visualJson=globalCache.visualDefinition["default"]
+            if(!visualJson[modelID]) visualJson[modelID]={}
+            visualJson[modelID].avarta=dataUrl
+            this.saveVisualDefinition()
+            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"avarta":dataUrl })
+            this.refreshModelTreeLabel()
+            actualImportPicBtn.val("")
+        })
+    
+        clearAvartaBtn.on("click", ()=>{
+            var visualJson=globalCache.visualDefinition["default"]
+            if(visualJson[modelID]) delete visualJson[modelID].avarta 
+            if(this.avartaImg) this.avartaImg.removeAttr('src');
+            this.saveVisualDefinition()
+            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"noAvarta":true })
+            this.refreshModelTreeLabel()
+        });    
+    }
+    
     delBtn.on("click",()=>{
         var confirmDialogDiv = new simpleConfirmDialog()
 
@@ -221,7 +224,8 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
         
     })
     
-    var VisualizationDOM=this.addAPartInRightSpan("Visualization")
+    if(this.showVisualizationSettings) var VisualizationDOM=this.addAPartInRightSpan("Visualization")
+    
     var editablePropertiesDOM=this.addAPartInRightSpan("Editable Properties And Relationships")
     var baseClassesDOM=this.addAPartInRightSpan("Base Classes")
     var originalDefinitionDOM=this.addAPartInRightSpan("Original Definition")
@@ -234,7 +238,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     var validRelationships=modelAnalyzer.DTDLModels[modelID].validRelationships
     this.fillRelationshipInfo(validRelationships,editablePropertiesDOM)
 
-    this.fillVisualization(modelID,VisualizationDOM)
+    if(this.showVisualizationSettings) this.fillVisualization(modelID,VisualizationDOM)
 
     this.fillBaseClasses(modelAnalyzer.DTDLModels[modelID].allBaseClasses,baseClassesDOM) 
 }

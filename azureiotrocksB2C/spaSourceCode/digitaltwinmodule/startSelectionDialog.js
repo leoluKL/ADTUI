@@ -1,7 +1,6 @@
 const globalAppSettings = require("../globalAppSettings")
 const msalHelper=require("../msalHelper")
-const { DBTwinsArr } = require("./globalCache")
-const globalCache=require("./globalCache")
+const globalCache = require("../sharedSourceFiles/globalCache")
 
 function startSelectionDialog() {
     if(!this.DOM){

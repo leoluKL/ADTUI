@@ -1,7 +1,7 @@
 const simpleTree=require("../sharedSourceFiles/simpleTree")
-const modelAnalyzer=require("./modelAnalyzer")
+const modelAnalyzer=require("../sharedSourceFiles/modelAnalyzer")
 const msalHelper = require("../msalHelper")
-const globalCache = require("./globalCache")
+const globalCache = require("../sharedSourceFiles/globalCache")
 
 function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM,{"leafNameProperty":"displayName"})

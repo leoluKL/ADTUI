@@ -1,8 +1,8 @@
 const startSelectionDialog = require("./startSelectionDialog")
-const modelManagerDialog = require("./modelManagerDialog")
+const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
 const editLayoutDialog= require("./editLayoutDialog")
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
-const globalCache = require("./globalCache")
+const globalCache = require("../sharedSourceFiles/globalCache")
 const moduleSwitchDialog=require("../sharedSourceFiles/moduleSwitchDialog")
 
 function mainToolbar() {
