@@ -1,4 +1,4 @@
-const simpleTree=require("./simpleTree")
+const simpleTree=require("../sharedSourceFiles/simpleTree")
 const modelAnalyzer=require("./modelAnalyzer")
 const msalHelper = require("../msalHelper")
 const globalCache = require("./globalCache")

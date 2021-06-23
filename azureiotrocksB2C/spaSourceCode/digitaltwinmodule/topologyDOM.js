@@ -1,8 +1,8 @@
 'use strict';
 
 const modelAnalyzer = require("./modelAnalyzer");
-const simpleSelectMenu = require("./simpleSelectMenu")
-const simpleConfirmDialog = require("./simpleConfirmDialog")
+const simpleSelectMenu = require("../sharedSourceFiles/simpleSelectMenu")
+const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
 const globalCache = require("./globalCache")
 const msalHelper=require("../msalHelper")
 

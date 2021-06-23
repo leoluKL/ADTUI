@@ -1,6 +1,6 @@
 const modelAnalyzer=require("./modelAnalyzer")
-const simpleTree= require("./simpleTree")
-const simpleConfirmDialog = require("./simpleConfirmDialog")
+const simpleTree= require("../sharedSourceFiles/simpleTree")
+const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
 const modelEditorDialog = require("./modelEditorDialog")
 const globalCache = require("./globalCache")
 const msalHelper=require("../msalHelper")

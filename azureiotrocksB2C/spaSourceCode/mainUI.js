@@ -62,6 +62,10 @@ mainUI.prototype.showModuleButtons=function(){
     deviceManageBtn.on("click",()=>{
         window.open("devicemanagement.html", "_blank");
     })
+
+    eventLogBtn.on("click",()=>{
+        window.open("eventlogmodule.html", "_blank");
+    })
  
     //if this page is open in localhost environment, add three buttons to allow pages opening and using local running api app instead
     // of cloud api app in azure app service. In production environment, these buttons will never show

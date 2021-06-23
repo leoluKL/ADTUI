@@ -1,8 +1,9 @@
 const startSelectionDialog = require("./startSelectionDialog")
 const modelManagerDialog = require("./modelManagerDialog")
 const editLayoutDialog= require("./editLayoutDialog")
-const simpleSelectMenu= require("./simpleSelectMenu")
+const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 const globalCache = require("./globalCache")
+const moduleSwitchDialog=require("../sharedSourceFiles/moduleSwitchDialog")
 
 function mainToolbar() {
 }
@@ -24,7 +25,8 @@ mainToolbar.prototype.render = function () {
     this.switchLayoutSelector=new simpleSelectMenu("Layout")
 
     $("#mainToolBar").empty()
-    $("#mainToolBar").append(this.switchADTInstanceBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
+    $("#mainToolBar").append(moduleSwitchDialog.modulesSidebar)
+    $("#mainToolBar").append(moduleSwitchDialog.modulesSwitchButton, this.switchADTInstanceBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
         ,this.switchLayoutSelector.DOM,this.editLayoutBtn)
         //,this.testSignalRBtn,this.testSendSignalRBtn
 
