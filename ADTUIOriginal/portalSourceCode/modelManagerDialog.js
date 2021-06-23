@@ -303,7 +303,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
               }
     }
 
-    var colorSelector=$('<select class="w3-border" style="outline:none"></select>')
+    var colorSelector=$('<select class="w3-border" style="outline:none;width:75px"></select>')
     containerDiv.append(colorSelector)
     var colorArr=["Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
     colorArr.forEach((oneColorCode)=>{
@@ -378,6 +378,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         if(definedDimensionRatio!=null) sizeAdjustSelector.val(definedDimensionRatio)
         else sizeAdjustSelector.val("1.0")
     }else{
+        sizeAdjustSelector.css("width","80px")
         for(var f=0.5;f<=4;f+=0.5){
             var val=f.toFixed(1)+""
             sizeAdjustSelector.append($("<option value="+val+">width *"+val+"</option>"))
