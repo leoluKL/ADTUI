@@ -375,8 +375,17 @@ modelManagerDialog.prototype.fillRelationshipInfo=function(validRelationships,pa
         var keyDiv= $("<label style='display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</label>")
         parentDom.append(keyDiv)
         keyDiv.css("padding-top",".1em")
-        var label=$("<label style='display:inline;background-color:yellowgreen;color:white;font-size:9px;padding:2px'>Relationship type</label>")
+
+        var label=$("<label style='display:inline;background-color:yellowgreen;color:white;font-size:9px;padding:2px'></label>")
+        label.text("Relationship")
         parentDom.append(label)
+        if(validRelationships[ind].target){
+            var label1=$("<label style='display:inline;background-color:yellowgreen;color:white;font-size:9px;padding:2px;margin-left:2px'></label>")
+            label1.text(validRelationships[ind].target)
+            parentDom.append(label1)
+        }
+
+        
         var contentDOM=$("<label></label>")
         contentDOM.css("display","block")
         contentDOM.css("padding-left","1em")
@@ -391,19 +400,30 @@ modelManagerDialog.prototype.fillEditableProperties=function(jsonInfo,parentDom)
         parentDom.append(keyDiv)
         keyDiv.css("padding-top",".1em")
 
-        var contentDOM=$("<label></label>")
         if(Array.isArray(jsonInfo[ind])){
+            var contentDOM=$("<label></label>")
             contentDOM.text("enum")
             contentDOM.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px'})
+            keyDiv.append(contentDOM)
+
+            var valueArr=[]
+            jsonInfo[ind].forEach(ele=>{valueArr.push(ele.enumValue)})
+            var label1=$("<label></label>")
+            label1.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px',"margin-left":"2px"})
+            label1.text(valueArr.join())
+            keyDiv.append(label1)
         }else if(typeof(jsonInfo[ind])==="object") {
+            var contentDOM=$("<label></label>")
             contentDOM.css("display","block")
             contentDOM.css("padding-left","1em")
             this.fillEditableProperties(jsonInfo[ind],contentDOM)
+            keyDiv.append(contentDOM)
         }else {
+            var contentDOM=$("<label></label>")
             contentDOM.text(jsonInfo[ind])
             contentDOM.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px'})
+            keyDiv.append(contentDOM)
         }
-        keyDiv.append(contentDOM)
     }
 }
 
