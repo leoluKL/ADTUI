@@ -233,6 +233,13 @@ simpleTreeGroupNode.prototype.refreshName=function(){
     }
     var numberlabel=$("<label class='"+lblColor+"' style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+this.childLeafNodes.length+"</label>")
     this.headerDOM.append(nameDiv,numberlabel)
+
+
+    if(this.parentTree.options.groupNodeTailButtonFunc){
+        var tailButton=this.parentTree.options.groupNodeTailButtonFunc(this)
+        this.headerDOM.append(tailButton)
+    }
+
     this.checkOptionHideEmptyGroup()
 
 }
@@ -256,7 +263,7 @@ simpleTreeGroupNode.prototype.deleteSelf = function () {
 }
 
 simpleTreeGroupNode.prototype.createDOM=function(){
-    this.headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom"></button>')
+    this.headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom" style="position:relative"></button>')
     this.refreshName()
     this.listDOM=$('<div class="w3-container w3-hide w3-border"></div>')
 

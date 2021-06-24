@@ -27,6 +27,15 @@ function twinsTree(DOM, searchDOM) {
         return $(lblHTML)
     }
 
+    this.tree.options.groupNodeTailButtonFunc = (gn) => {
+        var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="font-size:1.2em;padding:4px 8px;position:absolute;top:3px;right:10px">+</button>')
+        addButton.on("click", (e) => {
+            gn.expand()
+            return false
+        })
+        return addButton;
+    }
+
     this.tree.callback_afterSelectNodes=(nodesArr,mouseClickDetail)=>{
         var infoArr=[]
         nodesArr.forEach((item, index) =>{
