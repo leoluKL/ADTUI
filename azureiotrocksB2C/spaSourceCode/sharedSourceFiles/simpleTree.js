@@ -220,7 +220,7 @@ function simpleTreeGroupNode(parentTree,obj){
 
 simpleTreeGroupNode.prototype.refreshName=function(){
     this.headerDOM.empty()
-    var nameDiv=$("<div style='display:inline;padding-right:3px;vertical-align:middle'></div>")
+    var nameDiv=$("<div style='display:inline;padding-left:5px;padding-right:3px;vertical-align:middle'></div>")
     nameDiv.text(this.name)
     
     if(this.childLeafNodes.length>0) lblColor="w3-lime"
