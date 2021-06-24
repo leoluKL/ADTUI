@@ -80,13 +80,18 @@ topologyDOM.prototype.init=function(){
                 'width': 3,
                 'line-color': 'red',
                 'target-arrow-color': 'red',
-                'source-arrow-color': 'red'
+                'source-arrow-color': 'red',
+                'line-fill':"linear-gradient",
+                'line-gradient-stop-colors':['cyan', 'magenta', 'yellow'],
+                'line-gradient-stop-positions':['0%','70%','100%']
             }},
             {selector: 'node:selected',
             style: {
                 'border-color':"red",
-                'border-width':2,
-                'background-color': 'Gray'
+                'border-width':4,
+                'background-fill':'radial-gradient',
+                'background-gradient-stop-colors':['cyan', 'magenta', 'yellow'],
+                'background-gradient-stop-positions':['0%','50%','60%']
             }},
             {selector: 'node.hover',
             style: {
