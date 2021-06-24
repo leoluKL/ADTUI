@@ -312,10 +312,18 @@ topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode){
 }
 
 topologyDOM.prototype.updateModelTwinShape=function(modelID,shape){
-    this.core.style()
+    if(shape=="hexagon"){
+        this.core.style()
+        .selector('node[modelID = "'+modelID+'"]')
+        .style({'shape': 'polygon','shape-polygon-points':[0,-1,0.866,-0.5,0.866,0.5,0,1,-0.866,0.5,-0.866,-0.5]})
+        .update()   
+    }else{
+        this.core.style()
         .selector('node[modelID = "'+modelID+'"]')
         .style({'shape': shape})
         .update()   
+    }
+    
 }
 topologyDOM.prototype.updateModelTwinDimension=function(modelID,dimensionRatio){
     this.nodeSizeModelAdjustmentRatio[modelID]=parseFloat(dimensionRatio)
@@ -346,7 +354,7 @@ topologyDOM.prototype.updateRelationshipWidth=function(srcModelID,relationshipNa
         .update()   
     this.core.style()
         .selector('edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'width':parseFloat(edgeWidth)+2})
+        .style({'width':parseFloat(edgeWidth)+3})
         .update()   
 }
 
@@ -553,7 +561,8 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         });
     }else if(msgPayload.message=="PanToNode"){
         var nodeInfo= msgPayload.info;
-        var topoNode= this.core.nodes("#"+nodeInfo["$dtId"])
+        var nodeName= globalCache.twinIDMapToDisplayName[nodeInfo["$dtId"]]
+        var topoNode= this.core.nodes("#"+nodeName)
         if(topoNode){
             this.core.center(topoNode)
         }

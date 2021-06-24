@@ -223,16 +223,15 @@ simpleTreeGroupNode.prototype.refreshName=function(){
     var nameDiv=$("<div style='display:inline;padding-right:3px;vertical-align:middle'></div>")
     nameDiv.text(this.name)
     
-    if(this.childLeafNodes.length>0) lblColor="yellowgreen"
-    else var lblColor="gray" 
+    if(this.childLeafNodes.length>0) lblColor="w3-lime"
+    else var lblColor="w3-gray" 
     this.headerDOM.css("font-weight","bold")
 
     if(this.parentTree.options.groupNodeIconFunc){
         var iconLabel=this.parentTree.options.groupNodeIconFunc(this)
         this.headerDOM.append(iconLabel)
     }
-    var numberlabel=$("<label style='display:inline;background-color:"+lblColor
-        +";color:white;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+this.childLeafNodes.length+"</label>")
+    var numberlabel=$("<label class='"+lblColor+"' style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+this.childLeafNodes.length+"</label>")
     this.headerDOM.append(nameDiv,numberlabel)
     this.checkOptionHideEmptyGroup()
 
