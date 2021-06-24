@@ -125,14 +125,13 @@ singleTwinIcon.prototype.redrawIcon=function(){
     var avarta=null
     if(visualJson[modelID].avarta) avarta=visualJson[modelID].avarta
 
-    var imgSrc=this.shapeSvg(shape,fillColor)
+    var imgSrc=encodeURIComponent(this.shapeSvg(shape,fillColor))
 
     this.iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
     if(avarta){
         var avartaimg=$("<img style='position:absolute;left:0px;width:60%;margin:20%' src='"+avarta+"'></img>")
         this.iconDOM.append(avartaimg)
     }
-    this.nameDOM.text()
 }
 
 
