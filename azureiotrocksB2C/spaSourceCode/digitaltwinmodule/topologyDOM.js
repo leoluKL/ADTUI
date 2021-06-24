@@ -88,7 +88,7 @@ topologyDOM.prototype.init=function(){
             {selector: 'node:selected',
             style: {
                 'border-color':"red",
-                'border-width':4,
+                'border-width':2,
                 'background-fill':'radial-gradient',
                 'background-gradient-stop-colors':['cyan', 'magenta', 'yellow'],
                 'background-gradient-stop-positions':['0%','50%','60%']
