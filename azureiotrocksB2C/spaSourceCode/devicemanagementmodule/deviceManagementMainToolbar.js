@@ -11,7 +11,7 @@ deviceManagementMainToolbar.prototype.render = function () {
     $("#MainToolbar").append(moduleSwitchDialog.modulesSidebar)
     $("#MainToolbar").append(moduleSwitchDialog.modulesSwitchButton,this.modelIOBtn)
 
-    modelManagerDialog.showVisualizationSettings=false
+    modelManagerDialog.showRelationVisualizationSettings=false
     this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })
 }
 

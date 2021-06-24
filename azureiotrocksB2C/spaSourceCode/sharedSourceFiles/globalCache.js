@@ -106,6 +106,11 @@ globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
 globalCache.prototype.storeDBModelsArr=function(DBModelsArr){
     this.DBModelsArr.length=0
     this.DBModelsArr=this.DBModelsArr.concat(DBModelsArr)
+    this.DBModelsArr.sort(function (a, b) { 
+        var aName=a.displayName.toLowerCase()
+        var bName=b.displayName.toLowerCase()
+        return aName.localeCompare(bName) 
+    });
 }
 
 

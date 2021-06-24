@@ -259,7 +259,7 @@ simpleTreeGroupNode.prototype.deleteSelf = function () {
 }
 
 simpleTreeGroupNode.prototype.createDOM=function(){
-    this.headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align"></button>')
+    this.headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom"></button>')
     this.refreshName()
     this.listDOM=$('<div class="w3-container w3-hide w3-border"></div>')
 

@@ -19,12 +19,16 @@ function deviceManagementUI() {
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
 
     globalCache.loadUserData().then(re=>{
-        //TODO: if there is no model at all, prompt user to create his first model
+        if(globalCache.DBModelsArr.length==0){
+            //TODO: if there is no model at all, prompt user to create his first model
+        }else{
+            this.twinsList.refill()
+        }
     })
 }
 
 deviceManagementUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar]
+    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,this.twinsList]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){
