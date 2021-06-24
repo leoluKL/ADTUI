@@ -22,13 +22,23 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
 
     if(!twinInfo["id"]){
         //this is for creating new twin
-        var addButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Add New Twin</button>')    
+        var addButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Add New Twin</button>')    
         this.contentDOM.children(':first').append(addButton)
         addButton.on("click", async () => {
           
         })
     }
+    var dialogDOM=$('<div />')
+    this.contentDOM.append(dialogDOM)
+    var IDLableDiv= $("<div class='w3-padding' style='display:inline;padding:.1em .3em .1em .3em; font-weight:bold;color:black'>Twin ID</div>")
+    var IDInput=$('<input type="text" style="margin:8px 0;padding:2px;width:50%;outline:none;display:inline" placeholder="ID"/>').addClass("w3-input w3-border");  
     
+    var modelLableDiv= $("<div class='w3-padding' style='display:inline;padding:.1em .3em .1em .3em; font-weight:bold;color:black'>Model</div>")
+    var modelInput=$('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(twinInfo.modelID);  
+    dialogDOM.append($("<div/>").append(IDLableDiv,IDInput))
+    dialogDOM.append($("<div/>").append(modelLableDiv,modelInput))
+    dialogDOM.append($('<input class="w3-margin w3-check" type="checkbox"><label class="w3-gray" style="padding:2px 8px;font-size:1.2em;border-radius: 3px;"> This is a IoT Device</label>')) 
+
 }
 
 module.exports = new IoTDeviceTwinDialog();

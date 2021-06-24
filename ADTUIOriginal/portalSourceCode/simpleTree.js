@@ -366,7 +366,7 @@ simpleTreeLeafNode.prototype.redrawLabel=function(){
         this.DOM.append(iconLabel)
     }
 
-    var nameDiv=$("<div style='display:inline;padding-right:3px;vertical-align:middle'></div>")
+    var nameDiv=$("<div style='display:inline;padding-left:5px;padding-right:3px;vertical-align:middle'></div>")
     nameDiv.text(this.name)
     this.DOM.append(nameDiv)
 }
