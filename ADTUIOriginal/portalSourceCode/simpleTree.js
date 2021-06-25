@@ -223,7 +223,7 @@ simpleTreeGroupNode.prototype.refreshName=function(){ //⬢▉⚫
     nameDiv.text(this.name)
     
     if(this.childLeafNodes.length>0) lblColor="yellowgreen"
-    else var lblColor="gray" 
+    else var lblColor="darkGray" 
     this.headerDOM.css("font-weight","bold")
 
     if(this.parentTree.options.groupNodeIconFunc){

@@ -9,12 +9,12 @@ function twinsTree(DOM, searchDOM) {
 
     this.tree.options.groupNodeIconFunc=(gn)=>{
         var modelClass=gn.info["@id"]
-        var colorCode="gray"
+        var colorCode="darkGray"
         var shape="ellipse"
         var avarta=null
         if(globalCache.visualDefinition["default"][modelClass]){
             var visualJson =globalCache.visualDefinition["default"][modelClass]
-            var colorCode= visualJson.color || "gray"
+            var colorCode= visualJson.color || "darkGray"
             var shape=  visualJson.shape || "ellipse"
             var avarta= visualJson.avarta 
         }

@@ -305,7 +305,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 
     var colorSelector=$('<select class="w3-border" style="outline:none;width:75px"></select>')
     containerDiv.append(colorSelector)
-    var colorArr=["Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
+    var colorArr=["darkGray","Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
     colorArr.forEach((oneColorCode)=>{
         var anOption=$("<option value='"+oneColorCode+"'>"+oneColorCode+"▧</option>")
         colorSelector.append(anOption)
@@ -563,12 +563,12 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
 
             this.tree.options.leafNodeIconFunc=(ln)=>{
                 var modelClass=ln.leafInfo["@id"]
-                var colorCode="gray"
+                var colorCode="darkGray"
                 var shape="ellipse"
                 var avatar=null
                 if(globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][modelClass]){
                     var visualJson =globalCache.visualDefinition[globalCache.selectedADT][modelClass]
-                    var colorCode= visualJson.color || "gray"
+                    var colorCode= visualJson.color || "darkGray"
                     var shape=  visualJson.shape || "ellipse"
                     var avarta = visualJson.avarta
                 }
