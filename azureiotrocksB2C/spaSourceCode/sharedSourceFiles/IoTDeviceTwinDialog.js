@@ -78,16 +78,17 @@ IoTDeviceTwinDialog.prototype.drawIoTSettings = async function() {
     this.IoTSettingDiv.append(iotTable)
 
     var initialPathArr=[]
-    this.drawEditable(iotTable,this.copyModelEditableProperty,initialPathArr,false)
+    this.drawEditable(iotTable,this.copyModelEditableProperty,initialPathArr,[])
 }
 
-IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathArr,islastRootNode) {
+IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathArr,lastRootNodeRecord) {
     if(jsonInfo==null) return;
     var arr=[]
     for(var ind in jsonInfo) arr.push(ind)
 
     for(var theIndex=0;theIndex<arr.length;theIndex++){
-        if(pathArr.length==0 && theIndex==arr.length-1) islastRootNode=true;
+        if(theIndex==arr.length-1) lastRootNodeRecord[pathArr.length] =true;
+        
         var ind = arr[theIndex]
         var tr=$("<tr/>")
         var leftTD=$("<td/>")
@@ -97,7 +98,7 @@ IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo
         
         
         for(var i=0;i<pathArr.length;i++){
-            if(i==0 && !islastRootNode) rightTD.append(this.treeLineDiv(2))
+            if(!lastRootNodeRecord[i]) rightTD.append(this.treeLineDiv(2))
             else rightTD.append(this.treeLineDiv(4))
         }
 
@@ -118,7 +119,7 @@ IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo
             var label1=$("<label class='w3-dark-gray' style='font-size:9px;padding:2px;margin-left:2px'>"+valueArr.join()+"</label>")
             rightTD.append(label1)
         }else if(typeof(jsonInfo[ind])==="object") {
-            this.drawEditable(parentTable,jsonInfo[ind],newPath,islastRootNode)
+            this.drawEditable(parentTable,jsonInfo[ind],newPath,lastRootNodeRecord)
         }else {
             var typeDOM=$("<label class='w3-dark-gray' style='font-size:9px;padding:2px;margin-left:5px'>"+jsonInfo[ind]+"</label>")
             rightTD.append(typeDOM)

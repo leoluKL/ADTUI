@@ -421,11 +421,11 @@ modelManagerDialog.prototype.fillRelationshipInfo=function(validRelationships,pa
         parentDom.append(keyDiv)
         keyDiv.css("padding-top",".1em")
 
-        var label=$("<label style='display:inline;background-color:yellowgreen;color:white;font-size:9px;padding:2px'></label>")
+        var label=$("<label class='w3-lime' style='display:inline;font-size:9px;padding:2px'></label>")
         label.text("Relationship")
         parentDom.append(label)
         if(validRelationships[ind].target){
-            var label1=$("<label style='display:inline;background-color:yellowgreen;color:white;font-size:9px;padding:2px;margin-left:2px'></label>")
+            var label1=$("<label class='w3-lime' style='display:inline;font-size:9px;padding:2px;margin-left:2px'></label>")
             label1.text(validRelationships[ind].target)
             parentDom.append(label1)
         }
@@ -446,15 +446,15 @@ modelManagerDialog.prototype.fillEditableProperties=function(jsonInfo,parentDom)
         keyDiv.css("padding-top",".1em")
 
         if(Array.isArray(jsonInfo[ind])){
-            var contentDOM=$("<label></label>")
+            var contentDOM=$("<label class='w3-dark-gray' ></label>")
             contentDOM.text("enum")
-            contentDOM.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px'})
+            contentDOM.css({"fontSize":"9px","padding":'2px'})
             keyDiv.append(contentDOM)
 
             var valueArr=[]
             jsonInfo[ind].forEach(ele=>{valueArr.push(ele.enumValue)})
-            var label1=$("<label></label>")
-            label1.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px',"margin-left":"2px"})
+            var label1=$("<label class='w3-dark-gray' ></label>")
+            label1.css({"fontSize":"9px","padding":'2px',"margin-left":"2px"})
             label1.text(valueArr.join())
             keyDiv.append(label1)
         }else if(typeof(jsonInfo[ind])==="object") {
@@ -464,9 +464,9 @@ modelManagerDialog.prototype.fillEditableProperties=function(jsonInfo,parentDom)
             this.fillEditableProperties(jsonInfo[ind],contentDOM)
             keyDiv.append(contentDOM)
         }else {
-            var contentDOM=$("<label></label>")
+            var contentDOM=$("<label class='w3-dark-gray' ></label>")
             contentDOM.text(jsonInfo[ind])
-            contentDOM.css({"background-color":"darkGray","color":"white","fontSize":"9px","padding":'2px'})
+            contentDOM.css({"fontSize":"9px","padding":'2px'})
             keyDiv.append(contentDOM)
         }
     }
