@@ -51,7 +51,6 @@ modelManagerDialog.prototype.popup = async function() {
         actualImportModelsBtn.val("")
     })
     modelEditorBtn.on("click",()=>{
-        this.DOM.hide()
         modelEditorDialog.popup()
     })
 

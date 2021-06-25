@@ -5,7 +5,7 @@ const globalCache = require("./globalCache")
 
 function modelEditorDialog() {
     if(!this.DOM){
-        this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
+        this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:100" class="w3-card-2"></div>')
         $("body").append(this.DOM)
         this.DOM.hide()
     }
@@ -26,7 +26,7 @@ modelEditorDialog.prototype.popup = async function() {
     var importButton =$('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green w3-right" style="height:100%">Import</button>')
     buttonRow.append(importButton)
 
-    importButton.on("click", async () => {F
+    importButton.on("click", async () => {
         var modelToBeImported = [this.dtdlobj]
         try {
             var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) })
