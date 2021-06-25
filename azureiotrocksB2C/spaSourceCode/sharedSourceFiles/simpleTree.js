@@ -227,10 +227,14 @@ simpleTreeGroupNode.prototype.refreshName=function(){
     else var lblColor="w3-gray" 
     this.headerDOM.css("font-weight","bold")
 
+    
     if(this.parentTree.options.groupNodeIconFunc){
         var iconLabel=this.parentTree.options.groupNodeIconFunc(this)
         this.headerDOM.append(iconLabel)
+        var rowHeight=iconLabel.height()
+        nameDiv.css("line-height",rowHeight+"px")
     }
+    
     var numberlabel=$("<label class='"+lblColor+"' style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+this.childLeafNodes.length+"</label>")
     this.headerDOM.append(nameDiv,numberlabel)
 
@@ -365,13 +369,17 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
 
 simpleTreeLeafNode.prototype.redrawLabel=function(){
     this.DOM.empty()
-    if(this.parentGroupNode.parentTree.options.leafNodeIconFunc){
-        var iconLabel=this.parentGroupNode.parentTree.options.leafNodeIconFunc(this)
-        this.DOM.append(iconLabel)
-    }
 
     var nameDiv=$("<div style='display:inline;padding-left:5px;padding-right:3px;vertical-align:middle'></div>")
     nameDiv.text(this.name)
+
+    if(this.parentGroupNode.parentTree.options.leafNodeIconFunc){
+        var iconLabel=this.parentGroupNode.parentTree.options.leafNodeIconFunc(this)
+        this.DOM.append(iconLabel)
+        var rowHeight=iconLabel.height()
+        nameDiv.css("line-height",rowHeight+"px")
+    }
+    
     this.DOM.append(nameDiv)
 }
 simpleTreeLeafNode.prototype.highlight=function(){

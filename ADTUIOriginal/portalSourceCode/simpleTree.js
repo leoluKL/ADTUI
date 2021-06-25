@@ -229,6 +229,8 @@ simpleTreeGroupNode.prototype.refreshName=function(){ //⬢▉⚫
     if(this.parentTree.options.groupNodeIconFunc){
         var iconLabel=this.parentTree.options.groupNodeIconFunc(this)
         this.headerDOM.append(iconLabel)
+        var rowHeight=iconLabel.height()
+        nameDiv.css("line-height",rowHeight+"px")
     }
     
     var numberlabel=$("<label style='display:inline;background-color:"+lblColor
@@ -361,12 +363,13 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
 
 simpleTreeLeafNode.prototype.redrawLabel=function(){
     this.DOM.empty()
+    var nameDiv=$("<div style='display:inline;padding-left:5px;padding-right:3px;vertical-align:middle'></div>")
     if(this.parentGroupNode.parentTree.options.leafNodeIconFunc){
         var iconLabel=this.parentGroupNode.parentTree.options.leafNodeIconFunc(this)
         this.DOM.append(iconLabel)
+        var rowHeight=iconLabel.height()
+        nameDiv.css("line-height",rowHeight+"px")
     }
-
-    var nameDiv=$("<div style='display:inline;padding-left:5px;padding-right:3px;vertical-align:middle'></div>")
     nameDiv.text(this.name)
     this.DOM.append(nameDiv)
 }

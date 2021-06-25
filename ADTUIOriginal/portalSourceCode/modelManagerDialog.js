@@ -567,14 +567,16 @@ modelManagerDialog.prototype.listModels=function(shouldBroadcast){
                 var modelClass=ln.leafInfo["@id"]
                 var colorCode="darkGray"
                 var shape="ellipse"
-                var avatar=null
+                var avarta = null
+                var dimension=20;
                 if(globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][modelClass]){
                     var visualJson =globalCache.visualDefinition[globalCache.selectedADT][modelClass]
                     var colorCode= visualJson.color || "darkGray"
                     var shape=  visualJson.shape || "ellipse"
                     var avarta = visualJson.avarta
+                    if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
                 }
-                var iconDOM = $("<div style='width:25px;height:25px;float:left;position:relative'></div>")
+                var iconDOM = $("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative'></div>")
                 var imgSrc = encodeURIComponent(this.shapeSvg(shape, colorCode))
                 iconDOM.append($("<img src='data:image/svg+xml;utf8," + imgSrc + "'></img>"))
                 if (avarta) {

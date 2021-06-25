@@ -12,14 +12,16 @@ function twinsTree(DOM, searchDOM) {
         var colorCode="darkGray"
         var shape="ellipse"
         var avarta=null
+        var dimension=20;
         if(globalCache.visualDefinition["default"][modelClass]){
             var visualJson =globalCache.visualDefinition["default"][modelClass]
             var colorCode= visualJson.color || "darkGray"
             var shape=  visualJson.shape || "ellipse"
             var avarta= visualJson.avarta 
+            if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
         }
 
-        var iconDOM=$("<div style='width:25px;height:25px;float:left;position:relative'></div>")
+        var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative'></div>")
         var imgSrc=encodeURIComponent(this.shapeSvg(shape,colorCode))
         iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
         if(avarta){
@@ -30,7 +32,7 @@ function twinsTree(DOM, searchDOM) {
     }
 
     this.tree.options.groupNodeTailButtonFunc = (gn) => {
-        var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="font-size:1.2em;padding:4px 8px;position:absolute;top:3px;height:27px; right:10px">+</button>')
+        var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="font-size:1.2em;padding:4px 8px;position:absolute;top:50%;height:27px; right:10px;transform:translateY(-50%)">+</button>')
         addButton.on("click", (e) => {
             gn.expand()
             IoTDeviceTwinDialog.popup({"modelID":gn.info.id})
