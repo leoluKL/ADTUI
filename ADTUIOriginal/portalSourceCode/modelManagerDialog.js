@@ -303,7 +303,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
               }
     }
 
-    var colorSelector=$('<select class="w3-border" style="outline:none;width:75px"></select>')
+    var colorSelector=$('<select class="w3-border" style="outline:none;width:85px"></select>')
     containerDiv.append(colorSelector)
     var colorArr=["darkGray","Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
     colorArr.forEach((oneColorCode)=>{
@@ -314,6 +314,8 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     if(definedColor!=null) {
         colorSelector.val(definedColor)
         colorSelector.css("color",definedColor)
+    }else{
+        colorSelector.css("color","darkGray")
     }
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value

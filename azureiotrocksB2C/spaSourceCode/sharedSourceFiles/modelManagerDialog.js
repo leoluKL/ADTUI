@@ -312,6 +312,8 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     if(definedColor!=null) {
         colorSelector.val(definedColor)
         colorSelector.css("color",definedColor)
+    }else{
+        colorSelector.css("color","darkGray")
     }
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value
