@@ -5,6 +5,8 @@ function simpleTree(DOM,options){
     this.groupNodes=[] //each group header is one node
     this.selectedNodes=[];
     this.options=options || {}
+
+    this.lastClickedNode=null;
 }
 
 simpleTree.prototype.scrollToLeafNode=function(aNode){
@@ -20,6 +22,7 @@ simpleTree.prototype.scrollToLeafNode=function(aNode){
 }
 
 simpleTree.prototype.clearAllLeafNodes=function(){
+    this.lastClickedNode=null
     this.groupNodes.forEach((gNode)=>{
         gNode.listDOM.empty()
         gNode.childLeafNodes.length=0
@@ -99,6 +102,14 @@ simpleTree.prototype.searchText=function(str){
     }    
 }
 
+simpleTree.prototype.getAllLeafNodeArr=function(){
+    var allLeaf=[]
+    this.groupNodes.forEach(gn=>{
+        allLeaf=allLeaf.concat(gn.childLeafNodes)
+    })
+    return allLeaf;
+}
+
 
 simpleTree.prototype.addLeafnodeToGroup=function(groupName,obj,skipRepeat){
     var aGroupNode=this.findGroupNode(groupName)
@@ -107,6 +118,7 @@ simpleTree.prototype.addLeafnodeToGroup=function(groupName,obj,skipRepeat){
 }
 
 simpleTree.prototype.removeAllNodes=function(){
+    this.lastClickedNode=null
     this.groupNodes.length=0;
     this.selectedNodes.length=0;
     this.DOM.empty()
@@ -124,10 +136,12 @@ simpleTree.prototype.findGroupNode=function(groupName){
 }
 
 simpleTree.prototype.delGroupNode=function(gnode){
+    this.lastClickedNode=null
     gnode.deleteSelf()
 }
 
 simpleTree.prototype.deleteLeafNode=function(nodeName){
+    this.lastClickedNode=null
     var findLeafNode=null
     this.groupNodes.forEach((gNode)=>{
         if(findLeafNode!=null) return;
@@ -175,12 +189,15 @@ simpleTree.prototype.selectLeafNode=function(leafNode,mouseClickDetail){
     this.selectLeafNodeArr([leafNode],mouseClickDetail)
 }
 simpleTree.prototype.appendLeafNodeToSelection=function(leafNode){
-    if(this.options.noMultipleSelectAllowed){
-        this.selectLeafNode(leafNode)
-        return;
-    } 
     var newArr=[].concat(this.selectedNodes)
     newArr.push(leafNode)
+    this.selectLeafNodeArr(newArr)
+}
+
+simpleTree.prototype.addNodeArrayToSelection=function(arr){
+    var newArr = this.selectedNodes
+    var filterArr=arr.filter((item) => newArr.indexOf(item) < 0)
+    newArr = newArr.concat(filterArr)
     this.selectLeafNodeArr(newArr)
 }
 
@@ -348,16 +365,51 @@ simpleTreeLeafNode.prototype.deleteSelf = function () {
     gNode.refreshName()
 }
 
+simpleTreeLeafNode.prototype.clickSelf=function(){
+    this.parentGroupNode.parentTree.lastClickedNode=this;
+    this.parentGroupNode.parentTree.selectLeafNode(this)
+}
+
 simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
     this.DOM=$('<button class="w3-button w3-white" style="display:block;text-align:left;width:98%"></button>')
     this.redrawLabel()
+
+
     var clickF=(e)=>{
         this.highlight();
         var clickDetail=e.detail
         if (e.ctrlKey) {
+            if(this.parentGroupNode.parentTree.options.noMultipleSelectAllowed){
+                this.clickSelf()
+                return;
+            }
             this.parentGroupNode.parentTree.appendLeafNodeToSelection(this)
+            this.parentGroupNode.parentTree.lastClickedNode=this;
+        }else if(e.shiftKey){
+            if(this.parentGroupNode.parentTree.options.noMultipleSelectAllowed){
+                this.clickSelf()
+                return;
+            }
+            if(this.parentGroupNode.parentTree.lastClickedNode==null){
+                this.clickSelf()
+            }else{
+                var allLeafNodeArr=this.parentGroupNode.parentTree.getAllLeafNodeArr()
+                var index1 = allLeafNodeArr.indexOf(this.parentGroupNode.parentTree.lastClickedNode)
+                var index2 = allLeafNodeArr.indexOf(this)
+                if(index1==-1 || index2==-1){
+                    this.clickSelf()
+                }else{
+                    //select all leaf between
+                    var lowerI= Math.min(index1,index2)
+                    var higherI= Math.max(index1,index2)
+                    
+                    var middleArr=allLeafNodeArr.slice(lowerI,higherI)                  
+                    middleArr.push(allLeafNodeArr[higherI])
+                    this.parentGroupNode.parentTree.addNodeArrayToSelection(middleArr)
+                }
+            }
         }else{
-            this.parentGroupNode.parentTree.selectLeafNode(this,e.detail)
+            this.clickSelf()
         }
     }
     this.DOM.on("click",(e)=>{clickF(e)})

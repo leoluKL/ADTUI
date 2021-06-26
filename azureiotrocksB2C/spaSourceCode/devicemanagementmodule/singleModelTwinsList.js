@@ -27,7 +27,7 @@ singleModelTwinsList.prototype.createDOM=function(){
     //fill in the twins under this model
     var twins=[]
     globalCache.DBTwinsArr.forEach(aTwin=>{
-        if(aTwin.modelID==this.info.id) twins.push(aTwin)
+        if(aTwin.modelID==this.info["@id"]) twins.push(aTwin)
     })
     twins.sort(function (a, b) { 
         var aName=a.displayName.toLowerCase()
@@ -65,7 +65,11 @@ singleModelTwinsList.prototype.refreshName=function(){
     var addButton= $('<button class="w3-bar-item w3-button w3-red w3-hover-amber w3-right" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
     addButton.on("click",(e)=>{
         this.expand()
-        IoTDeviceTwinDialog.popup({"modelID":this.info.id})
+        IoTDeviceTwinDialog.popup({
+            "$metadata": {
+                "$model": this.info["@id"]
+            }
+        })
         return false
     })
 

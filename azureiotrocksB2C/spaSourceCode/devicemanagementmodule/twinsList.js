@@ -1,5 +1,6 @@
 const msalHelper = require("../msalHelper")
 const globalCache = require("../sharedSourceFiles/globalCache")
+const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer")
 const singleModelTwinsList=require("./singleModelTwinsList")
 
 
@@ -11,9 +12,11 @@ function twinsList(DOM) {
 twinsList.prototype.refill=function(){
     this.DOM.empty()
     for(var ind in this.singleModelTwinsListSet) delete this.singleModelTwinsListSet[ind]
-    globalCache.DBModelsArr.forEach(oneModel=>{
-        this.singleModelTwinsListSet[oneModel.id]=new singleModelTwinsList(oneModel,this,this.DOM)
-    })
+
+    for(var ind in modelAnalyzer.DTDLModels){
+        this.singleModelTwinsListSet[ind]=new singleModelTwinsList(modelAnalyzer.DTDLModels[ind],this,this.DOM)
+    }
+
 }
 
 twinsList.prototype.rxMessage=function(msgPayload){

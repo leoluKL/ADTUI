@@ -6,6 +6,7 @@ const modelEditorDialog = require("../sharedSourceFiles/modelEditorDialog")
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
 const globalCache=require("../sharedSourceFiles/globalCache")
 const twinsList=require("./twinsList")
+const IoTDeviceTwinDialog=require("../sharedSourceFiles/IoTDeviceTwinDialog");
 
 function deviceManagementUI() {
     this.twinsList= new twinsList($("#TwinsList"))
@@ -28,7 +29,7 @@ function deviceManagementUI() {
 }
 
 deviceManagementUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,this.twinsList]
+    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,this.twinsList,IoTDeviceTwinDialog]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

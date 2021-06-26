@@ -35,7 +35,11 @@ function twinsTree(DOM, searchDOM) {
         var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="font-size:1.2em;padding:4px 8px;position:absolute;top:50%;height:27px; right:10px;transform:translateY(-50%)">+</button>')
         addButton.on("click", (e) => {
             gn.expand()
-            IoTDeviceTwinDialog.popup({"modelID":gn.info.id})
+            IoTDeviceTwinDialog.popup({
+                "$metadata": {
+                    "$model": gn.info["@id"]
+                }
+            })
             return false
         })
         return addButton;
@@ -46,16 +50,11 @@ function twinsTree(DOM, searchDOM) {
         nodesArr.forEach((item, index) =>{
             infoArr.push(item.leafInfo)
         });
-        globalCache.showingCreateTwinModelID=null; 
         this.broadcastMessage({ "message": "showInfoSelectedNodes", info:infoArr, "mouseClickDetail":mouseClickDetail})
     }
 
     this.tree.callback_afterDblclickNode=(theNode)=>{
         this.broadcastMessage({ "message": "PanToNode", info:theNode.leafInfo})
-    }
-
-    this.tree.callback_afterSelectGroupNode=(nodeInfo)=>{
-        this.broadcastMessage({"message":"showInfoGroupNode",info:nodeInfo})
     }
 
     this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("w3-input");

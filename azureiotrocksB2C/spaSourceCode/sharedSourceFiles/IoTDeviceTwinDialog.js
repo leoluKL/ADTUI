@@ -1,6 +1,7 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const simpleSelectMenu= require("./simpleSelectMenu")
 const msalHelper=require("../msalHelper")
+const globalCache=require("./globalCache")
 
 function IoTDeviceTwinDialog() {
     if(!this.DOM){
@@ -21,14 +22,21 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     this.contentDOM.children(':first').append(closeButton)
     closeButton.on("click", () => { this.DOM.hide() })
 
-    if(!twinInfo["id"]) var btnText="Add New Twin"//this is for creating new twin
-    else btnText="Confirm" //this is when editing a existed twin
-        
+    if(!twinInfo["$dtId"]){
+        var btnText="Add"//this is for creating new twin
+        var btnText2="Add & Close"
+    } 
+    else{
+        btnText="Save" //this is when editing a existed twin
+        btnText2="Save & Close"
+    } 
+    
     var okButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">'+btnText+'</button>')    
     this.contentDOM.children(':first').append(okButton)
-    okButton.on("click", async () => {
-        
-    })
+    okButton.on("click", async () => {this.addNewTwin()})
+    var okandCloseButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%;margin-left:5px">'+btnText2+'</button>')    
+    this.contentDOM.children(':first').append(okandCloseButton)
+    okandCloseButton.on("click", async () => {this.addNewTwin();this.DOM.hide()})
 
     var firstRow=$('<div class="w3-cell-row" style="padding-bottom:10px"></div>')
     this.contentDOM.append(firstRow)
@@ -43,24 +51,35 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     
     var IDLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Twin ID</div>")
     var IDInput=$('<input type="text" style="margin:8px 0;padding:2px;width:150px;outline:none;display:inline" placeholder="ID"/>').addClass("w3-input w3-border");  
-    
+    var modelID=twinInfo["$metadata"]["$model"]
     var modelLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
-    var modelInput=$('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(twinInfo.modelID);  
+    var modelInput=$('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID);  
     topLeftDom.append($("<div/>").append(IDLableDiv,IDInput))
     topLeftDom.append($("<div/>").append(modelLableDiv,modelInput))
-    
+    IDInput.change((e)=>{
+        this.twinInfo["$dtId"]=$(e.target).val()
+    })
+
 
     
-    var isIoTCheck= $('<input class="w3-margin w3-check" type="checkbox">')
+    var isIoTCheck= $('<input class="w3-margin w3-check" style="width:20px" type="checkbox">')
     var isIoTText = $('<label class="w3-dark-gray" style="padding:2px 8px;font-size:1.2em;border-radius: 3px;"> This is NOT a IoT Device</label>')
     topLeftDom.append(isIoTCheck,isIoTText)
 
 
     var dialogDOM=$('<div />')
     this.contentDOM.append(dialogDOM)
-    var titleTable=$('<table style="width:100%" cellspacing="0px" cellpadding="0px"></table>')
-    titleTable.append($('<tr><td style="font-weight:bold; width:220px">IoT Setting</td><td style="font-weight:bold">Parameter Tree</td></tr>'))
-    titleTable.hide()
+
+    
+    var editableProperties=modelAnalyzer.DTDLModels[modelID].editableProperties
+    if($.isEmptyObject(editableProperties)){
+        var titleTable=$('<div>Warning: There is no propertie in this model to map with a IoT device</div>')
+    }else{
+        var titleTable=$('<table style="width:100%" cellspacing="0px" cellpadding="0px"></table>')
+        titleTable.append($('<tr><td style="font-weight:bold; width:220px">IoT Setting</td><td style="font-weight:bold">Parameter Tree</td></tr>'))
+        titleTable.hide() 
+    }
+
     dialogDOM.append($("<div class='w3-container'/>").append(titleTable))
 
     var IoTSettingDiv=$("<div class='w3-container w3-border' style='width:100%;max-height:300px;overflow:auto'></div>")
@@ -89,8 +108,37 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     })
 }
 
+IoTDeviceTwinDialog.prototype.addNewTwin = async function() {
+    if(!this.twinInfo["$dtId"]||this.twinInfo["$dtId"]==""){
+        alert("Please fill in name for the new digital twin")
+        return;
+    }
+    var modelID=this.twinInfo["$metadata"]["$model"]
+    var componentsNameArr=modelAnalyzer.DTDLModels[modelID].includedComponents
+    componentsNameArr.forEach(oneComponentName=>{ //adt service requesting all component appear by mandatory
+        if(this.twinInfo[oneComponentName]==null)this.twinInfo[oneComponentName]={}
+        this.twinInfo[oneComponentName]["$metadata"]= {}
+    })
+
+    //ask taskmaster to add the twin
+    try{
+        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST",  {"newTwinJson":JSON.stringify(this.twinInfo)})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
+
+    globalCache.storeSingleDBTwin(data.DBTwin)    
+    globalCache.storeSingleADTTwin(data.ADTTwin)
+
+    //it should select the new node in the tree, and move topology view to show the new node (note not blocked by the dialog itself)
+    this.broadcastMessage({ "message": "addNewTwin", twinInfo: data.ADTTwin })
+
+    //clear the input editbox
+}
+
 IoTDeviceTwinDialog.prototype.drawIoTSettings = async function() {
-    var modelID = this.twinInfo.modelID
+    var modelID=this.twinInfo["$metadata"]["$model"]
     var modelDetail= modelAnalyzer.DTDLModels[modelID]
     this.copyModelEditableProperty=JSON.parse(JSON.stringify(modelDetail.editableProperties))
     this.iotSettingsArr=[]
@@ -210,7 +258,6 @@ IoTDeviceTwinDialog.prototype.refreshIoTTelemetrySample = function(){
             if(i==pathArr.length-1) {
                 //["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"]
                 var valueSample
-                console.log(ptype)
                 if(ptype=="enumerator" || ptype=="string") valueSample="stringValue"
                 else if(ptype=="boolean") valueSample = true
                 else if(ptype=="dateTime")  valueSample = new Date().toISOString()

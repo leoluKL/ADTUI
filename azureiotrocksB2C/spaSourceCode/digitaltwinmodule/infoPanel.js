@@ -41,7 +41,6 @@ function infoPanel() {
     });
     this.continerDOM.append(this.DOM)
     $('body').append(this.continerDOM)
-    this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press ctrl key to select multiple in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:5px'>Import twins data by clicking button below</a>")
 
     this.drawButtons(null)
     this.selectedObjects=null;
@@ -111,63 +110,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
             this.drawButtons("multiple")
             this.drawMultipleObj()
         }
-    }else if(msgPayload.message=="showInfoGroupNode"){
-        this.DOM.empty()
-        
-        var modelID = msgPayload.info["@id"]
-        globalCache.showingCreateTwinModelID=modelID
-        if(!modelAnalyzer.DTDLModels[modelID]) return;
-        var twinJson = {
-            "$metadata": {
-                "$model": modelID
-            }
-        }
-        var addBtn =$('<button class="w3-button w3-green w3-hover-light-green w3-margin">Add Twin</button>')
-        this.DOM.append(addBtn)
-
-        addBtn.on("click",(e) => {
-            if(!twinJson["$dtId"]||twinJson["$dtId"]==""){
-                alert("Please fill in name for the new digital twin")
-                return;
-            }
-
-            var componentsNameArr=modelAnalyzer.DTDLModels[modelID].includedComponents
-            componentsNameArr.forEach(oneComponentName=>{ //adt service requesting all component appear by mandatory
-                if(twinJson[oneComponentName]==null)twinJson[oneComponentName]={}
-                twinJson[oneComponentName]["$metadata"]= {}
-            })
-            this.addTwin(twinJson)
-        })
-
-        this.drawStaticInfo(this.DOM,{
-            "Model":modelID
-        })
-
-        addBtn.data("twinJson",twinJson)
-        var copyProperty=JSON.parse(JSON.stringify(modelAnalyzer.DTDLModels[modelID].editableProperties))
-        copyProperty['$dtId']="string"
-        this.drawEditable(this.DOM,copyProperty,twinJson,[],"newTwin")
-        //console.log(modelAnalyzer.DTDLModels[modelID]) 
     }
-}
-
-infoPanel.prototype.addTwin=async function(twinJson){
-    //ask taskmaster to add the twin
-    try{
-        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST",  {"newTwinJson":JSON.stringify(twinJson)})
-    }catch(e){
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-    }
-
-    globalCache.storeSingleDBTwin(data.DBTwin)
-    //successful editing, update the node original info
-    var keyLabel = this.DOM.find('#NEWTWIN_IDLabel')
-    var IDInput = keyLabel.find("input")
-    if (IDInput) IDInput.val("")
-    
-    globalCache.storeSingleADTTwin(data.ADTTwin)
-    this.broadcastMessage({ "message": "addNewTwin", twinInfo: data.ADTTwin })
 }
 
 infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,sourceModel){
@@ -189,6 +132,7 @@ infoPanel.prototype.drawButtons=function(selectType){
             this.exportSelected()
         })    
     }else{
+        this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press ctrl key to select multiple in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:5px'>Import twins data by clicking button below</a>")
         this.DOM.append(impBtn,actualImportTwinsBtn)
     }
     
@@ -632,30 +576,22 @@ infoPanel.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize)
     }
 }
 
-infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,pathArr,isNewTwin){
+infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,pathArr){
     if(jsonInfo==null) return;
     for(var ind in jsonInfo){
         var keyDiv= $("<label style='display:block'><div style='display:inline;padding:.1em .3em .1em .3em; font-weight:bold;color:black'>"+ind+"</div></label>")
-        if(isNewTwin){
-            if(ind=="$dtId") {
-                parent.prepend(keyDiv)
-                keyDiv.attr('id','NEWTWIN_IDLabel');
-            }
-            else parent.append(keyDiv)
-        }else{
-            parent.append(keyDiv)
-        }
+        parent.append(keyDiv)
         
         keyDiv.css("padding-top",".3em") 
 
         var contentDOM=$("<label style='padding-top:.2em'></label>")
         var newPath=pathArr.concat([ind])
         if(Array.isArray(jsonInfo[ind])){
-            this.drawDropdownOption(contentDOM,newPath,jsonInfo[ind],isNewTwin,originElementInfo)
+            this.drawDropdownOption(contentDOM,newPath,jsonInfo[ind],originElementInfo)
         }else if(typeof(jsonInfo[ind])==="object") {
             contentDOM.css("display","block")
             contentDOM.css("padding-left","1em")
-            this.drawEditable(contentDOM,jsonInfo[ind],originElementInfo,newPath,isNewTwin)
+            this.drawEditable(contentDOM,jsonInfo[ind],originElementInfo,newPath)
         }else {
             var aInput=$('<input type="text" style="padding:2px;width:50%;outline:none;display:inline" placeholder="type: '+jsonInfo[ind]+'"/>').addClass("w3-input w3-border");  
             contentDOM.append(aInput)
@@ -664,14 +600,14 @@ infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,path
             aInput.data("path", newPath)
             aInput.data("dataType", jsonInfo[ind])
             aInput.change((e)=>{
-                this.editDTProperty(originElementInfo,$(e.target).data("path"),$(e.target).val(),$(e.target).data("dataType"),isNewTwin)
+                this.editDTProperty(originElementInfo,$(e.target).data("path"),$(e.target).val(),$(e.target).data("dataType"))
             })
         }
         keyDiv.append(contentDOM)
     }
 }
 
-infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,isNewTwin,originElementInfo){
+infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,originElementInfo){
     var aSelectMenu=new simpleSelectMenu("",{buttonCSS:{"padding":"4px 16px"}})
     contentDOM.append(aSelectMenu.DOM)
     aSelectMenu.DOM.data("path", newPath)
@@ -681,7 +617,7 @@ infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,isNe
     })
     aSelectMenu.callBack_clickOption=(optionText,optionValue,realMouseClick)=>{
         aSelectMenu.changeName(optionText)
-        if(realMouseClick) this.editDTProperty(originElementInfo,aSelectMenu.DOM.data("path"),optionValue,"string",isNewTwin)
+        if(realMouseClick) this.editDTProperty(originElementInfo,aSelectMenu.DOM.data("path"),optionValue,"string")
     }
     var val=this.searchValue(originElementInfo,newPath)
     if(val!=null){
@@ -689,14 +625,10 @@ infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,isNe
     }    
 }
 
-infoPanel.prototype.editDTProperty=async function(originElementInfo,path,newVal,dataType,isNewTwin){
+infoPanel.prototype.editDTProperty=async function(originElementInfo,path,newVal,dataType){
     if(["double","boolean","float","integer","long"].includes(dataType)) newVal=Number(newVal)
 
     //{ "op": "add", "path": "/x", "value": 30 }
-    if(isNewTwin){
-        this.updateOriginObjectValue(originElementInfo,path,newVal)
-        return;
-    }
     if(path.length==1){
         var str=""
         path.forEach(segment=>{str+="/"+segment})

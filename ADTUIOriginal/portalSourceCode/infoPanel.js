@@ -40,7 +40,7 @@ function infoPanel() {
     });
     this.continerDOM.append(this.DOM)
     $('body').append(this.continerDOM)
-    this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press ctrl key to select multiple in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:5px'>Import twins data by clicking button below</a>")
+    
 
     this.drawButtons(null)
 
@@ -166,8 +166,9 @@ infoPanel.prototype.drawButtons=function(selectType){
             //and export them
             this.exportSelected()
         })    
-    }else{
-        this.DOM.append(impBtn,actualImportTwinsBtn)
+    } else {
+        this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to select multiple in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press ctrl key to select multiple in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:5px'>Import twins data by clicking button below</a>")
+        this.DOM.append(impBtn, actualImportTwinsBtn)
     }
     
     impBtn.on("click",()=>{actualImportTwinsBtn.trigger('click');})

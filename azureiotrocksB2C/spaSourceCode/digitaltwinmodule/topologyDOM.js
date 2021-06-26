@@ -244,11 +244,7 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
 }
 
 topologyDOM.prototype.mouseOutFunction= function (e) {
-    if(globalCache.showingCreateTwinModelID){
-        this.broadcastMessage({ "message": "showInfoGroupNode", "info": {"@id":globalCache.showingCreateTwinModelID} })
-    }else{
-        this.selectFunction()
-    }
+    this.selectFunction()
     if(this.lastHoverTarget){
         this.lastHoverTarget.removeClass("hover")
         this.lastHoverTarget=null;
@@ -258,10 +254,8 @@ topologyDOM.prototype.mouseOutFunction= function (e) {
 
 topologyDOM.prototype.selectFunction = function () {
     var arr = this.core.$(":selected")
-    if (arr.length == 0) return
     var re = []
     arr.forEach((ele) => { re.push(ele.data().originalInfo) })
-    globalCache.showingCreateTwinModelID=null; 
     this.broadcastMessage({ "message": "showInfoSelectedNodes", info: re })
 
     //for debugging purpose
@@ -551,6 +545,15 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         }
     }else if(msgPayload.message=="addNewTwin") {
         this.drawTwins([msgPayload.twinInfo],"animation")
+        var nodeInfo= msgPayload.twinInfo;
+        var nodeName= globalCache.twinIDMapToDisplayName[nodeInfo["$dtId"]]
+        var topoNode= this.core.nodes("#"+nodeName)
+        if(topoNode){
+            var position=topoNode.renderedPosition()
+            this.core.panBy({x:-position.x+200,y:-position.y+50})
+            topoNode.select()
+            this.selectFunction()
+        }
     }else if(msgPayload.message=="addNewTwins") {
         this.drawTwins(msgPayload.twinsInfo,"animation")
     }else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
