@@ -14,7 +14,7 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     this.twinInfo=twinInfo
     this.DOM.show()
     this.DOM.empty()
-    this.contentDOM = $('<div style="width:505px"></div>')
+    this.contentDOM = $('<div style="width:605px"></div>')
     this.DOM.append(this.contentDOM)
     this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Digital Twin Editor</div></div>'))
     var closeButton = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em;padding-top:4px">×</button>')
@@ -29,20 +29,39 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     okButton.on("click", async () => {
         
     })
+
+    var firstRow=$('<div class="w3-cell-row" style="padding-bottom:10px"></div>')
+    this.contentDOM.append(firstRow)
+    var topLeftDom=$('<div class="w3-container w3-cell" style=""></div>')
+    var topRightDom=$('<div class="w3-container w3-cell" style="width:320px;padding-left:0px;padding-right:0px" />')
+    firstRow.append(topLeftDom,topRightDom)
+
+    this.sampleTelemetryDiv=$('<div class="w3-border" style="margin:5px;height:100px;position:relative;overflow:auto" />')
+    this.sampleTelemetryDiv.append($('<div style="padding:2px;right:0px;position:absolute;font-size:9px" class="w3-dark-gray">Telemetry Format Sample</div>'))
+    topRightDom.append(this.sampleTelemetryDiv)
+    this.sampleTelemetryDiv.hide()
     
-    var dialogDOM=$('<div />')
-    this.contentDOM.append(dialogDOM)
-    var IDLableDiv= $("<div class='w3-padding' style='display:inline;padding:.1em .3em .1em .3em; font-weight:bold;color:black'>Twin ID</div>")
-    var IDInput=$('<input type="text" style="margin:8px 0;padding:2px;width:50%;outline:none;display:inline" placeholder="ID"/>').addClass("w3-input w3-border");  
+    var IDLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Twin ID</div>")
+    var IDInput=$('<input type="text" style="margin:8px 0;padding:2px;width:150px;outline:none;display:inline" placeholder="ID"/>').addClass("w3-input w3-border");  
     
-    var modelLableDiv= $("<div class='w3-padding' style='display:inline;padding:.1em .3em .1em .3em; font-weight:bold;color:black'>Model</div>")
+    var modelLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
     var modelInput=$('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(twinInfo.modelID);  
-    dialogDOM.append($("<div/>").append(IDLableDiv,IDInput))
-    dialogDOM.append($("<div/>").append(modelLableDiv,modelInput))
+    topLeftDom.append($("<div/>").append(IDLableDiv,IDInput))
+    topLeftDom.append($("<div/>").append(modelLableDiv,modelInput))
+    
+
     
     var isIoTCheck= $('<input class="w3-margin w3-check" type="checkbox">')
     var isIoTText = $('<label class="w3-dark-gray" style="padding:2px 8px;font-size:1.2em;border-radius: 3px;"> This is NOT a IoT Device</label>')
-    dialogDOM.append(isIoTCheck,isIoTText)
+    topLeftDom.append(isIoTCheck,isIoTText)
+
+
+    var dialogDOM=$('<div />')
+    this.contentDOM.append(dialogDOM)
+    var titleTable=$('<table style="width:100%" cellspacing="0px" cellpadding="0px"></table>')
+    titleTable.append($('<tr><td style="font-weight:bold; width:220px">IoT Setting</td><td style="font-weight:bold">Parameter Tree</td></tr>'))
+    titleTable.hide()
+    dialogDOM.append($("<div class='w3-container'/>").append(titleTable))
 
     var IoTSettingDiv=$("<div class='w3-container w3-border' style='width:100%;max-height:300px;overflow:auto'></div>")
     this.IoTSettingDiv=IoTSettingDiv
@@ -57,12 +76,15 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
             isIoTText.text("This is a IoT Device")
 
             IoTSettingDiv.css("height","0px")
+            titleTable.show()
             IoTSettingDiv.show()
             IoTSettingDiv.animate({"height":theHeight+10+"px"})
+            this.sampleTelemetryDiv.fadeIn()
         }else {
             isIoTText.removeClass("w3-lime").addClass("w3-dark-gray")
             isIoTText.text("This is NOT a IoT Device")
-            IoTSettingDiv.animate({"height":"0px"},()=>{IoTSettingDiv.css("height","");IoTSettingDiv.hide()})
+            IoTSettingDiv.animate({"height":"0px"},()=>{IoTSettingDiv.css("height","");IoTSettingDiv.hide();titleTable.hide()})
+            this.sampleTelemetryDiv.fadeOut()
         }
     })
 }
@@ -74,11 +96,20 @@ IoTDeviceTwinDialog.prototype.drawIoTSettings = async function() {
     this.iotSettingsArr=[]
     
     var iotTable=$('<table style="width:100%" cellspacing="0px" cellpadding="0px"></table>')
-    iotTable.append($('<tr><td style="font-weight:bold;width:30%">IoT Setting</td><td style="font-weight:bold">Parameter Tree</td></tr>'))
     this.IoTSettingDiv.append(iotTable)
 
     var initialPathArr=[]
+    this.allSelectMenu=[]
     this.drawEditable(iotTable,this.copyModelEditableProperty,initialPathArr,[])
+
+    this.IoTSettingDiv.on("click",()=>{this.shrinkAllSelectMenu()})
+    this.IoTSettingDiv.on("scroll",()=>{this.shrinkAllSelectMenu()})
+}
+
+IoTDeviceTwinDialog.prototype.shrinkAllSelectMenu = async function() {
+    this.allSelectMenu.forEach(selectmenu=>{
+        selectmenu.shrink()
+    })
 }
 
 IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathArr,lastRootNodeRecord) {
@@ -91,7 +122,7 @@ IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo
         
         var ind = arr[theIndex]
         var tr=$("<tr/>")
-        var leftTD=$("<td/>")
+        var leftTD=$("<td style='width:220px'/>")
         var rightTD=$("<td style='height:30px'/>")
         tr.append(leftTD,rightTD)
         parentTable.append(tr)
@@ -105,10 +136,8 @@ IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo
         if(theIndex==arr.length-1) rightTD.append(this.treeLineDiv(3))
         else rightTD.append(this.treeLineDiv(1))
 
-        //var textIndent= pathArr.length*20
-        //rightTD.css({"padding-left":textIndent+"px"})
-
-        rightTD.append($("<div style='display:inline;line-height:28px;margin-left:3px'>"+ind+"</div>"))
+        var pNameDiv=$("<div style='display:inline;line-height:28px;margin-left:3px'>"+ind+"</div>")
+        rightTD.append(pNameDiv)
         var newPath=pathArr.concat([ind])
 
         if(Array.isArray(jsonInfo[ind])){ //it is a enumerator
@@ -118,13 +147,90 @@ IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo
             jsonInfo[ind].forEach(ele=>{valueArr.push(ele.enumValue)})
             var label1=$("<label class='w3-dark-gray' style='font-size:9px;padding:2px;margin-left:2px'>"+valueArr.join()+"</label>")
             rightTD.append(label1)
+            var IoTsettingObj={"type":"","path":newPath,"ptype":"enumerator"}
+            this.iotSettingsArr.push(IoTsettingObj)
+            this.drawIoTSelectDropdown(leftTD,IoTsettingObj,pNameDiv)
         }else if(typeof(jsonInfo[ind])==="object") {
             this.drawEditable(parentTable,jsonInfo[ind],newPath,lastRootNodeRecord)
         }else {
+            var IoTsettingObj={"type":"","path":newPath,"ptype":jsonInfo[ind]}
+            this.iotSettingsArr.push(IoTsettingObj)
+            this.drawIoTSelectDropdown(leftTD,IoTsettingObj,pNameDiv)
             var typeDOM=$("<label class='w3-dark-gray' style='font-size:9px;padding:2px;margin-left:5px'>"+jsonInfo[ind]+"</label>")
             rightTD.append(typeDOM)
         } 
     }
+}
+
+IoTDeviceTwinDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,pNameDiv){
+    var aSelectMenu = new simpleSelectMenu(""
+        , {
+            "isClickable": true, "withBorder": true
+            , buttonCSS: { "padding": "4px 16px", width: "210px" }
+            ,"optionListMarginTop":80,"optionListMarginLeft":210
+            ,"adjustPositionAnchor":this.DOM.offset()
+        }
+    )
+    aSelectMenu.callBack_beforeClickExpand=()=>{
+        this.shrinkAllSelectMenu()
+    }
+    this.allSelectMenu.push(aSelectMenu)
+    td.append(aSelectMenu.rowDOM)
+    aSelectMenu.addOption("NOT IoT Device parameter","NONE")
+    aSelectMenu.addOption("IoT Device Telemetry","telemetry","w3-lime")
+    aSelectMenu.addOption("IoT Device Desired Property","desired","w3-amber")
+    aSelectMenu.addOption("IoT Device Report Property","report","w3-blue")
+
+    aSelectMenu.callBack_clickOption=(optionText,optionValue,realMouseClick,colorClass)=>{
+        IoTsettingObj["type"]=optionValue
+        aSelectMenu.changeName(optionText)
+        if(colorClass){
+            aSelectMenu.button.attr('class', 'w3-button w3-border '+colorClass);
+            pNameDiv.attr('class', colorClass);
+        } else{
+            aSelectMenu.button.attr('class', 'w3-button w3-border')   
+            pNameDiv.attr('class', '');
+        }
+        if(realMouseClick) this.refreshIoTTelemetrySample()
+    }
+    aSelectMenu.triggerOptionIndex(0)
+}
+
+IoTDeviceTwinDialog.prototype.refreshIoTTelemetrySample = function(){
+    var sampleObj={}
+    
+    this.iotSettingsArr.forEach(onep=>{
+        if(onep.type!="telemetry") return;
+        var pathArr=onep.path
+        var ptype=onep.ptype
+        
+        var theRoot=sampleObj
+        for(var i=0;i<pathArr.length;i++){
+            var str=pathArr[i]
+            if(i==pathArr.length-1) {
+                //["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"]
+                var valueSample
+                console.log(ptype)
+                if(ptype=="enumerator" || ptype=="string") valueSample="stringValue"
+                else if(ptype=="boolean") valueSample = true
+                else if(ptype=="dateTime")  valueSample = new Date().toISOString()
+                else if(ptype=="date")  valueSample = (new Date().toISOString()).split("T")[0]
+                else if(ptype=="double" || ptype=="float")  valueSample =1.1
+                else if(ptype=="duration") valueSample="PT16H30M"
+                else if(ptype=="integer" || ptype=="long") valueSample=1
+                else if(ptype=="time") valueSample ="T"+((new Date().toISOString()).split("T")[1])
+                else valueSample="Unknown"
+                theRoot[str]=valueSample
+            }else{
+                if(!theRoot[str])theRoot[str]={}
+                theRoot=theRoot[str]
+            }
+        }
+    })
+
+    var label=this.sampleTelemetryDiv.find(':first-child');
+    var script= $('<pre style="color:gray;margin:0px">'+JSON.stringify(sampleObj,null,2)+'</pre>')
+    this.sampleTelemetryDiv.empty().append(label,script)
 }
 
 IoTDeviceTwinDialog.prototype.treeLineDiv = function(typeNumber) {

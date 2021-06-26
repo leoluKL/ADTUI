@@ -9,6 +9,12 @@ function simpleSelectMenu(buttonName,options){
             this.adjustDropDownPosition()
         })
     }
+
+
+    //it seems that the select menu only can show outside of a parent scrollable dom when it is inside a w3-bar item... not very sure about why 
+    var rowDOM=$('<div class="w3-bar"></div>')
+    this.rowDOM=rowDOM
+    this.rowDOM.append(this.DOM)
     
     this.button=$('<button class="w3-button" style="outline: none;"><a>'+buttonName+'</a><a style="font-weight:bold;padding-left:2px"></a><i class="fa fa-caret-down" style="padding-left:3px"></i></button>')
     if(options.withBorder) this.button.addClass("w3-border")
@@ -28,11 +34,17 @@ function simpleSelectMenu(buttonName,options){
 
     if(options.isClickable){
         this.button.on("click",(e)=>{
+            this.callBack_beforeClickExpand()
             this.adjustDropDownPosition()
             if(this.optionContentDOM.hasClass("w3-show"))  this.optionContentDOM.removeClass("w3-show")
             else this.optionContentDOM.addClass("w3-show")
+            return false;
         })    
     }
+}
+
+simpleSelectMenu.prototype.shrink=function(){
+    if(this.optionContentDOM.hasClass("w3-show"))  this.optionContentDOM.removeClass("w3-show")
 }
 
 simpleSelectMenu.prototype.adjustDropDownPosition=function(){
@@ -59,10 +71,12 @@ simpleSelectMenu.prototype.addOptionArr=function(arr){
     });
 }
 
-simpleSelectMenu.prototype.addOption=function(optionText,optionValue){
+simpleSelectMenu.prototype.addOption=function(optionText,optionValue,colorClass){
     var optionItem=$('<a href="#" class="w3-bar-item w3-button">'+optionText+'</a>')
+    if(colorClass) optionItem.addClass(colorClass)
     this.optionContentDOM.append(optionItem)
     optionItem.data("optionValue",optionValue||optionText)
+    optionItem.data("optionColorClass",colorClass)
     optionItem.on('click',(e)=>{
         this.curSelectVal=optionItem.data("optionValue")
         if(this.isClickable){
@@ -75,7 +89,8 @@ simpleSelectMenu.prototype.addOption=function(optionText,optionValue){
                 this.DOM.removeClass('w3-dropdown-click')
             }, 100);
         }
-        this.callBack_clickOption(optionText,optionItem.data("optionValue"),"realMouseClick")
+        this.callBack_clickOption(optionText,optionItem.data("optionValue"),"realMouseClick",colorClass)
+        return false
     })
 }
 
@@ -92,8 +107,9 @@ simpleSelectMenu.prototype.triggerOptionIndex=function(optionIndex){
         return;
     }
     this.curSelectVal=theOption.data("optionValue")
-    this.callBack_clickOption(theOption.text(),theOption.data("optionValue"))
+    this.callBack_clickOption(theOption.text(),theOption.data("optionValue"),null,theOption.data("optionColorClass"))
 }
+
 simpleSelectMenu.prototype.triggerOptionValue=function(optionValue){
     var re=this.findOption(optionValue)
     if(re==null){
@@ -112,7 +128,10 @@ simpleSelectMenu.prototype.clearOptions=function(optionText,optionValue){
 }
 
 simpleSelectMenu.prototype.callBack_clickOption=function(optiontext,optionValue,realMouseClick){
-
 }
+
+simpleSelectMenu.prototype.callBack_beforeClickExpand=function(optiontext,optionValue,realMouseClick){
+}
+
 
 module.exports = simpleSelectMenu;
