@@ -118,16 +118,16 @@ singleTwinIcon.prototype.redrawIcon=function(){
 
     var visualJson=globalCache.visualDefinition["default"]
     var fillColor="darkGray"
-    if(visualJson[modelID].color) fillColor=visualJson[modelID].color
+    if(visualJson[modelID] && visualJson[modelID].color) fillColor=visualJson[modelID].color
     var dimension=30;
-    if(visualJson[modelID].dimensionRatio){
+    if(visualJson[modelID] && visualJson[modelID].dimensionRatio){
         dimension*=parseFloat(visualJson[modelID].dimensionRatio)
         this.iconDOM.css({"width":dimension+"px","height":dimension+"px"})
     } 
     var shape="ellipse"
-    if(visualJson[modelID].shape) shape=visualJson[modelID].shape
+    if(visualJson[modelID] && visualJson[modelID].shape) shape=visualJson[modelID].shape
     var avarta=null
-    if(visualJson[modelID].avarta) avarta=visualJson[modelID].avarta
+    if(visualJson[modelID] && visualJson[modelID].avarta) avarta=visualJson[modelID].avarta
 
     var imgSrc=encodeURIComponent(this.shapeSvg(shape,fillColor))
 

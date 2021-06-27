@@ -357,9 +357,9 @@ simpleTreeLeafNode.prototype.deleteSelf = function () {
     gNode.refreshName()
 }
 
-simpleTreeLeafNode.prototype.clickSelf=function(){
+simpleTreeLeafNode.prototype.clickSelf=function(mouseClickDetail){
     this.parentGroupNode.parentTree.lastClickedNode=this;
-    this.parentGroupNode.parentTree.selectLeafNode(this)
+    this.parentGroupNode.parentTree.selectLeafNode(this,mouseClickDetail)
 }
 
 
@@ -400,7 +400,7 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
                 }
             }
         }else{
-            this.clickSelf()
+            this.clickSelf(clickDetail)
         }
     }
     this.DOM.on("click",(e)=>{clickF(e)})

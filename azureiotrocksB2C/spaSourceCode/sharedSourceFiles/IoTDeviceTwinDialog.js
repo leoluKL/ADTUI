@@ -11,8 +11,10 @@ function IoTDeviceTwinDialog() {
     }
 }
 
-IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
+IoTDeviceTwinDialog.prototype.popup = async function(twinInfo,iotDeviceInfo) {
+    this.originalTwinInfo=JSON.parse(JSON.stringify(twinInfo))
     this.twinInfo=twinInfo
+    this.iotDeviceInfo=iotDeviceInfo
     this.DOM.show()
     this.DOM.empty()
     this.contentDOM = $('<div style="width:605px"></div>')
@@ -25,18 +27,24 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     if(!twinInfo["$dtId"]){
         var btnText="Add"//this is for creating new twin
         var btnText2="Add & Close"
+        this.isCreatingTwin=true
+        var okButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">'+btnText+'</button>')    
+        this.contentDOM.children(':first').append(okButton)
+        okButton.on("click", async () => {this.addNewTwin()})    
     } 
     else{
-        btnText="Save" //this is when editing a existed twin
-        btnText2="Save & Close"
+        btnText2="Save" //this is when editing a existed twin
     } 
     
-    var okButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">'+btnText+'</button>')    
-    this.contentDOM.children(':first').append(okButton)
-    okButton.on("click", async () => {this.addNewTwin()})
-    var okandCloseButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%;margin-left:5px">'+btnText2+'</button>')    
-    this.contentDOM.children(':first').append(okandCloseButton)
-    okandCloseButton.on("click", async () => {this.addNewTwin();this.DOM.hide()})
+    var secondButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%;margin-left:5px">'+btnText2+'</button>')    
+    this.contentDOM.children(':first').append(secondButton)
+
+    if(!twinInfo["$dtId"]){
+        secondButton.on("click", async () => {this.addNewTwin("CloseDialog")})
+    }else{
+        secondButton.on("click", async () => {this.saveTwin()})
+    }
+    
 
     var firstRow=$('<div class="w3-cell-row" style="padding-bottom:10px"></div>')
     this.contentDOM.append(firstRow)
@@ -50,7 +58,8 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     this.sampleTelemetryDiv.hide()
     
     var IDLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Twin ID</div>")
-    var IDInput=$('<input type="text" style="margin:8px 0;padding:2px;width:150px;outline:none;display:inline" placeholder="ID"/>').addClass("w3-input w3-border");  
+    var IDInput=$('<input type="text" style="margin:8px 0;padding:2px;width:150px;outline:none;display:inline" placeholder="ID"/>').addClass("w3-input w3-border");
+    this.IDInput=IDInput 
     var modelID=twinInfo["$metadata"]["$model"]
     var modelLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
     var modelInput=$('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID);  
@@ -60,10 +69,9 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
         this.twinInfo["$dtId"]=$(e.target).val()
     })
 
-
-    
     var isIoTCheck= $('<input class="w3-margin w3-check" style="width:20px" type="checkbox">')
     var isIoTText = $('<label class="w3-dark-gray" style="padding:2px 8px;font-size:1.2em;border-radius: 3px;"> This is NOT a IoT Device</label>')
+    this.isIoTCheck=isIoTCheck
     topLeftDom.append(isIoTCheck,isIoTText)
 
 
@@ -88,27 +96,52 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo) {
     dialogDOM.append(IoTSettingDiv)
     this.drawIoTSettings()
 
-    isIoTCheck.on("change",()=>{
+    isIoTCheck.on("change",(e)=>{
         if(isIoTCheck.prop('checked')) {
             var theHeight= IoTSettingDiv.height()
             isIoTText.removeClass("w3-dark-gray").addClass("w3-lime")
             isIoTText.text("This is a IoT Device")
 
-            IoTSettingDiv.css("height","0px")
-            titleTable.show()
-            IoTSettingDiv.show()
-            IoTSettingDiv.animate({"height":theHeight+10+"px"})
-            this.sampleTelemetryDiv.fadeIn()
+            if(!this.iotDeviceInfo) this.iotDeviceInfo={}
+            if(e.isTrigger){ // it is from programmaticaltrigger
+                IoTSettingDiv.css("height",theHeight+10+"px")
+                titleTable.show()
+                IoTSettingDiv.show()    
+                this.sampleTelemetryDiv.show()
+            }else{
+                IoTSettingDiv.css("height","0px")
+                titleTable.show()
+                IoTSettingDiv.show()
+                IoTSettingDiv.animate({"height":theHeight+10+"px"})
+                this.sampleTelemetryDiv.fadeIn()
+            }
         }else {
+            this.iotDeviceInfo=null;
             isIoTText.removeClass("w3-lime").addClass("w3-dark-gray")
             isIoTText.text("This is NOT a IoT Device")
-            IoTSettingDiv.animate({"height":"0px"},()=>{IoTSettingDiv.css("height","");IoTSettingDiv.hide();titleTable.hide()})
-            this.sampleTelemetryDiv.fadeOut()
+            if(e.isTrigger){ // it is from programmaticaltrigger
+                IoTSettingDiv.css("height","");
+                IoTSettingDiv.hide();
+                titleTable.hide()
+                this.sampleTelemetryDiv.hide()    
+            }else{
+                IoTSettingDiv.animate({"height":"0px"},()=>{IoTSettingDiv.css("height","");IoTSettingDiv.hide();titleTable.hide()})
+                this.sampleTelemetryDiv.fadeOut()    
+            }
         }
     })
+
+    if(this.iotDeviceInfo){
+        isIoTCheck.prop( "checked", true );
+        isIoTCheck.trigger("change")    
+    }
 }
 
-IoTDeviceTwinDialog.prototype.addNewTwin = async function() {
+IoTDeviceTwinDialog.prototype.saveTwin= async function(){
+    //TODO: save the twin change
+}
+
+IoTDeviceTwinDialog.prototype.addNewTwin = async function(closeDialog) {
     if(!this.twinInfo["$dtId"]||this.twinInfo["$dtId"]==""){
         alert("Please fill in name for the new digital twin")
         return;
@@ -134,7 +167,13 @@ IoTDeviceTwinDialog.prototype.addNewTwin = async function() {
     //it should select the new node in the tree, and move topology view to show the new node (note not blocked by the dialog itself)
     this.broadcastMessage({ "message": "addNewTwin", twinInfo: data.ADTTwin })
 
-    //clear the input editbox
+    if(closeDialog)this.DOM.hide()
+    else{
+        //clear the input editbox
+        if(this.iotDeviceInfo) this.popup(this.originalTwinInfo,{})
+        else this.popup(this.originalTwinInfo)
+    }
+    
 }
 
 IoTDeviceTwinDialog.prototype.drawIoTSettings = async function() {
