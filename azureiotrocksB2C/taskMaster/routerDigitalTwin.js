@@ -211,10 +211,12 @@ routerDigitalTwin.prototype.batchImportTwins =async function(req,res) {
 routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
     //check the twin name uniqueness in user name space
     //if successful, generate UUID and create twin in ADT
-    //if successful, then store the twin to cosmosDB as well
+    //if successful, provision the device in iot hub
+    //successful or fail, store the twin to cosmosDB as well
     //if not successful, then roll back by deleting the twin from ADT
     var twinInfo=JSON.parse(req.body.newTwinJson);
     var originTwinID=twinInfo['$dtId']
+    
     var queryTwinNameUnique={}
     queryTwinNameUnique.account=req.authInfo.account
     queryTwinNameUnique.checkName=originTwinID
@@ -242,11 +244,40 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
         return;
     }
 
+    //provision the iot device in iot hub
+    var haveIoTDetail=false
+    if(req.body.isIoTDevice){
+        var tags={
+            "app":"azureiotrocks",
+            "twinName":originTwinID,
+            "owner":req.authInfo.account
+        }
+        var desiredInDeviceTwin= req.body.desiredInDeviceTwin
+        try{
+            var provisionDevicePayload={"deviceID":twinUUID,"tags":tags,"desiredProperties":desiredInDeviceTwin}
+            await got.post(process.env.iothuboperationAPIURL+"controlPlane/provisionDevice", {json:provisionDevicePayload,responseType: 'json'});
+            haveIoTDetail=true;
+        }catch(e){
+            console.error("IoT device provisioning fails: "+ twinUUID)
+        }
+    }
+
+
     var newTwinInADT=createTwinRe.body
 
     //store the new twin to cosmos DB
-    var postLoad={"ADTTwin":newTwinInADT,"displayName":originTwinID}
-    postLoad.account=req.authInfo.account
+    var postLoad={
+        "ADTTwin":newTwinInADT
+        ,"displayName":originTwinID
+        ,"account":req.authInfo.account
+    }
+
+    if(haveIoTDetail){
+        postLoad["IoTDeviceID"]=twinUUID
+        if(req.body.desiredProperties) postLoad["desiredProperties"]=req.body.desiredProperties
+        if(req.body.reportProperties) postLoad["reportProperties"]=req.body.reportProperties
+        if(req.body.telemetryProperties) postLoad["telemetryProperties"]=req.body.telemetryProperties
+    }
 
     try{
         var DBTwin=await got.post(process.env.dboperationAPIURL+"insertData/newTwin",{json:postLoad,responseType: 'json'});
@@ -258,6 +289,7 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         //roll back ADT operation by deleting the twin
+        //TODO: roll back the added iot hub device registry
         console.error("roll back twin creation for "+originTwinID)
         await got.post(process.env.digitaltwinoperationAPIURL+"editADT/deleteTwinWithoutConnection", {json:{"twinID":twinUUID}});
     }    

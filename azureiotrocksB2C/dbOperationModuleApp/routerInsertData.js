@@ -48,7 +48,19 @@ routerInsertData.prototype.newTwin =async function(req,res) {
             , creationTS: new Date().getTime(), id: ADTTwin["$dtId"]
             ,"modelID":ADTTwin['$metadata']['$model']
         }
-        var re = await cosmosdbhelper.insertRecord("appuser", aDocument)
+        if(req.body.IoTDeviceID){
+            aDocument.IoTDeviceID=req.body.IoTDeviceID
+            var aDocument2={
+                "id":ADTTwin["$dtId"],
+                "type":"Formula",
+                "telemetryProperties":req.body.telemetryProperties,
+                "reportProperties":req.body.reportProperties,
+                "desiredProperties":req.body.desiredProperties,
+            }
+            await cosmosdbhelper.insertRecord("twincalculation", aDocument2)
+        }
+        await cosmosdbhelper.insertRecord("appuser", aDocument)
+
         res.send(aDocument)
     } catch (e) {
         res.status(400).send(e.message)

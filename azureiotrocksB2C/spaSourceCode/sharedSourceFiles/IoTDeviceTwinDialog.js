@@ -156,7 +156,28 @@ IoTDeviceTwinDialog.prototype.addNewTwin = async function(closeDialog) {
     //ask taskmaster to add the twin
     try{
         var postBody= {"newTwinJson":JSON.stringify(this.twinInfo)}
-        if(this.iotDeviceInfo) postBody.iotDeviceInfo= JSON.stringify(this.iotDeviceInfo)
+
+        //var desiredProperties= req.body.desiredProperties
+        //reportProperties
+        //telemetry mapping
+        if(this.iotDeviceInfo){
+            postBody.isIoTDevice=true;
+            postBody.telemetryProperties=[]
+            postBody.desiredProperties=[]
+            postBody.desiredInDeviceTwin={}
+            postBody.reportProperties=[]
+            this.iotSettingsArr.forEach(ele=>{
+                if(ele.type=="telemetry") postBody.telemetryProperties.push(ele)
+                else if(ele.type=="desired"){
+                    postBody.desiredProperties.push(ele)
+                    var propertyName=ele.path[ele.path.length-1]
+                    var propertySampleV= this.propertyTypeSampleValue(ele.ptype)
+                    postBody.desiredInDeviceTwin[propertyName]=propertySampleV
+                }else if(ele.type=="report") postBody.reportPrperties.push(ele)
+            })
+        }
+        console.log(postBody)
+        return;
         var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST", postBody )
     }catch(e){
         console.log(e)
@@ -285,6 +306,25 @@ IoTDeviceTwinDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,pN
     aSelectMenu.triggerOptionIndex(0)
 }
 
+IoTDeviceTwinDialog.prototype.propertyTypeSampleValue = function(ptype){
+    //["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"]
+    var mapping={
+        "enumerator":"stringValue"
+        ,"string":"stringValue"
+        ,"boolean":true
+        ,"dateTime":new Date().toISOString()
+        ,"date": (new Date().toISOString()).split("T")[0]
+        ,"double":0.1
+        ,"float":0.1
+        ,"duration":"PT16H30M"
+        ,"integer":0
+        ,"long":0
+        ,"time": "T"+((new Date().toISOString()).split("T")[1])
+    }
+    if(mapping[ptype]!=null) return mapping[ptype]
+    else return "unknown"
+}
+
 IoTDeviceTwinDialog.prototype.refreshIoTTelemetrySample = function(){
     var sampleObj={}
     
@@ -297,17 +337,7 @@ IoTDeviceTwinDialog.prototype.refreshIoTTelemetrySample = function(){
         for(var i=0;i<pathArr.length;i++){
             var str=pathArr[i]
             if(i==pathArr.length-1) {
-                //["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"]
-                var valueSample
-                if(ptype=="enumerator" || ptype=="string") valueSample="stringValue"
-                else if(ptype=="boolean") valueSample = true
-                else if(ptype=="dateTime")  valueSample = new Date().toISOString()
-                else if(ptype=="date")  valueSample = (new Date().toISOString()).split("T")[0]
-                else if(ptype=="double" || ptype=="float")  valueSample =1.1
-                else if(ptype=="duration") valueSample="PT16H30M"
-                else if(ptype=="integer" || ptype=="long") valueSample=1
-                else if(ptype=="time") valueSample ="T"+((new Date().toISOString()).split("T")[1])
-                else valueSample="Unknown"
+                var valueSample=this.propertyTypeSampleValue(ptype)
                 theRoot[str]=valueSample
             }else{
                 if(!theRoot[str])theRoot[str]={}
