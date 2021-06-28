@@ -34,10 +34,12 @@ function simpleSelectMenu(buttonName,options){
 
     if(options.isClickable){
         this.button.on("click",(e)=>{
-            this.callBack_beforeClickExpand()
             this.adjustDropDownPosition()
             if(this.optionContentDOM.hasClass("w3-show"))  this.optionContentDOM.removeClass("w3-show")
-            else this.optionContentDOM.addClass("w3-show")
+            else{
+                this.callBack_beforeClickExpand()
+                this.optionContentDOM.addClass("w3-show")
+            } 
             return false;
         })    
     }

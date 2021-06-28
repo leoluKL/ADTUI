@@ -155,7 +155,9 @@ IoTDeviceTwinDialog.prototype.addNewTwin = async function(closeDialog) {
 
     //ask taskmaster to add the twin
     try{
-        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST",  {"newTwinJson":JSON.stringify(this.twinInfo)})
+        var postBody= {"newTwinJson":JSON.stringify(this.twinInfo)}
+        if(this.iotDeviceInfo) postBody.iotDeviceInfo= JSON.stringify(this.iotDeviceInfo)
+        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST", postBody )
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)
