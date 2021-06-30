@@ -10,7 +10,7 @@ const infoPanel= require("./infoPanel");
 const globalAppSettings = require("../globalAppSettings.js");
 const msalHelper=require("../msalHelper")
 const globalCache=require("../sharedSourceFiles/globalCache")
-const IoTDeviceTwinDialog=require("../sharedSourceFiles/IoTDeviceTwinDialog");
+const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 
 function digitaltwinmoduleUI() {
     this.initUILayout()
@@ -49,7 +49,7 @@ function digitaltwinmoduleUI() {
 
 digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
     var componentsArr=[this.twinsTree,startSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
-         mainToolbar,this.topologyInstance,infoPanel,IoTDeviceTwinDialog]
+         mainToolbar,this.topologyInstance,infoPanel,newTwinDialog]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

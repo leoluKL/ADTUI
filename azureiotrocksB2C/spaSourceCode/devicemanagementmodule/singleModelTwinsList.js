@@ -1,5 +1,5 @@
 const globalCache = require("../sharedSourceFiles/globalCache");
-const IoTDeviceTwinDialog=require("../sharedSourceFiles/IoTDeviceTwinDialog");
+const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 
 function singleModelTwinsList(singleDBModel,parentTwinsList) {
     this.parentTwinsList=parentTwinsList
@@ -65,7 +65,7 @@ singleModelTwinsList.prototype.refreshName=function(){
     var addButton= $('<button class="w3-bar-item w3-button w3-red w3-hover-amber w3-right" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
     addButton.on("click",(e)=>{
         this.expand()
-        IoTDeviceTwinDialog.popup({
+        newTwinDialog.popup({
             "$metadata": {
                 "$model": this.info["@id"]
             }

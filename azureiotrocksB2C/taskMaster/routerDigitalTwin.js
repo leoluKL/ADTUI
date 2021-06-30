@@ -244,8 +244,7 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
         return;
     }
 
-    //provision the iot device in iot hub
-    var haveIoTDetail=false
+    /*TODO: provision iot hub device if the model is an IoT device model
     if(req.body.isIoTDevice){
         var tags={
             "app":"azureiotrocks",
@@ -262,7 +261,7 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
             console.error("IoT device provisioning fails: "+ twinUUID)
         }
     }
-
+    */
 
     var newTwinInADT=createTwinRe.body
 
@@ -273,12 +272,14 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
         ,"account":req.authInfo.account
     }
 
+    /*
     if(haveIoTDetail){
         postLoad["IoTDeviceID"]=twinUUID
         if(req.body.desiredProperties) postLoad["desiredProperties"]=req.body.desiredProperties
         if(req.body.reportProperties) postLoad["reportProperties"]=req.body.reportProperties
         if(req.body.telemetryProperties) postLoad["telemetryProperties"]=req.body.telemetryProperties
     }
+    */
 
     try{
         var DBTwin=await got.post(process.env.dboperationAPIURL+"insertData/newTwin",{json:postLoad,responseType: 'json'});

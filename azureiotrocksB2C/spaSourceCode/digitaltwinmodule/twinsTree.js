@@ -2,7 +2,7 @@ const simpleTree=require("../sharedSourceFiles/simpleTree")
 const modelAnalyzer=require("../sharedSourceFiles/modelAnalyzer")
 const msalHelper = require("../msalHelper")
 const globalCache = require("../sharedSourceFiles/globalCache")
-const IoTDeviceTwinDialog=require("../sharedSourceFiles/IoTDeviceTwinDialog");
+const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 
 function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM,{"leafNameProperty":"displayName"})
@@ -35,7 +35,7 @@ function twinsTree(DOM, searchDOM) {
         var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="font-size:1.2em;padding:4px 8px;position:absolute;top:50%;height:27px; right:10px;transform:translateY(-50%)">+</button>')
         addButton.on("click", (e) => {
             gn.expand()
-            IoTDeviceTwinDialog.popup({
+            newTwinDialog.popup({
                 "$metadata": {
                     "$model": gn.info["@id"]
                 }
