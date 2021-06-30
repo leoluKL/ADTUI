@@ -250,7 +250,8 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
         var tags={
             "app":"azureiotrocks",
             "twinName":originTwinID,
-            "owner":req.authInfo.account
+            "owner":req.authInfo.account,
+            "modelID":twinInfo["$metadata"]["$model"]
         }
         var desiredInDeviceTwin= req.body.desiredInDeviceTwin
         try{

@@ -8,6 +8,10 @@ module.exports = async function (context, IoTHubMessages) {
         if (context.bindingData.systemPropertiesArray) {
             devID = context.bindingData.systemPropertiesArray[0]["iothub-connection-device-id"]
         }
+
+        //[{"deviceOwner":"leolu@microsoft.com"}]
+        context.log(JSON.stringify(context.bindingData.propertiesArray)) //the information enrichment set in iot hub to add into the messages
+        
         context.log("message received from: "+devID)
         context.log(str)
         outQueueArr.push(message)

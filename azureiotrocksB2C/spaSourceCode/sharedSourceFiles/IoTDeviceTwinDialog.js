@@ -173,11 +173,9 @@ IoTDeviceTwinDialog.prototype.addNewTwin = async function(closeDialog) {
                     var propertyName=ele.path[ele.path.length-1]
                     var propertySampleV= this.propertyTypeSampleValue(ele.ptype)
                     postBody.desiredInDeviceTwin[propertyName]=propertySampleV
-                }else if(ele.type=="report") postBody.reportPrperties.push(ele)
+                }else if(ele.type=="report") postBody.reportProperties.push(ele)
             })
         }
-        console.log(postBody)
-        return;
         var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST", postBody )
     }catch(e){
         console.log(e)
