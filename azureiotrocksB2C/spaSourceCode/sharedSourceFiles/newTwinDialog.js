@@ -164,8 +164,8 @@ newTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathA
 
 newTwinDialog.prototype.drawDropDownBox=function(rightTD,newPath,valueArr){
     var aSelectMenu = new simpleSelectMenu(""
-        , {
-            buttonCSS: { "padding": "4px 16px", width: "100px" }
+        , { width: "200" 
+            ,buttonCSS: { "padding": "4px 16px"}
             , "optionListMarginTop": 25//,"optionListMarginLeft":210
             , "adjustPositionAnchor": this.DOM.offset()
         })

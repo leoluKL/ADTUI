@@ -12,7 +12,8 @@ function simpleSelectMenu(buttonName,options){
 
 
     //it seems that the select menu only can show outside of a parent scrollable dom when it is inside a w3-bar item... not very sure about why 
-    var rowDOM=$('<div class="w3-bar" style="display:inline-block;width:100px;margin-left:5px"></div>')
+    var rowDOM=$('<div class="w3-bar" style="display:inline-block;margin-left:5px"></div>')
+    rowDOM.css("width",(options.width||100)+"px")
     this.rowDOM=rowDOM
     this.rowDOM.append(this.DOM)
     

@@ -544,6 +544,8 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
             if(globalCache.currentLayoutName==null)  this.noPosition_cose()
         }
     }else if(msgPayload.message=="addNewTwin") {
+        this.core.nodes().unselect()
+        this.core.edges().unselect()
         this.drawTwins([msgPayload.twinInfo],"animation")
         var nodeInfo= msgPayload.twinInfo;
         var nodeName= globalCache.twinIDMapToDisplayName[nodeInfo["$dtId"]]
