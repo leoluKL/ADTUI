@@ -37,7 +37,7 @@ routerInsertData.prototype.newModels =async function(req,res) {
     }
 }
 
-routerInsertData.prototype.updateModels =async function(req,res) {
+routerInsertData.prototype.updateModel =async function(req,res) {
     var accountID=req.body.account
     var modelID=req.body.modelID
     var updateInfo=JSON.parse(req.body.updateInfo)
