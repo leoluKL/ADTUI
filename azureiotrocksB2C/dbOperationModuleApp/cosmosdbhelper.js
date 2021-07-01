@@ -16,8 +16,19 @@ cosmosdbhelper.prototype.query = async function (containerID,queryStr) {
     }catch(e){
         throw e;
     }
-    
 }
+
+cosmosdbhelper.prototype.getDocByID = async function (containerID,patitionKey,patitionKeyValue,itemID) {
+    var queryStr='SELECT * FROM c where '
+    queryStr+=`c.id='${itemID}' and c.${patitionKey}='${patitionKeyValue}'`
+    try{
+        var re=await this.query(containerID,queryStr)
+        return re;
+    }catch(e){
+        throw e;
+    }
+}
+
 
 cosmosdbhelper.prototype.insertRecord=async function (containerID,docObj){ //using upsert so it is both update and create-if-not-exist
     try{

@@ -3,7 +3,7 @@ const simpleSelectMenu= require("./simpleSelectMenu")
 const msalHelper=require("../msalHelper")
 const globalCache=require("./globalCache")
 
-function IoTDeviceTwinDialog() {
+function modelIoTSettingDialog() {
     if(!this.DOM){
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
         $("body").append(this.DOM)
@@ -11,40 +11,19 @@ function IoTDeviceTwinDialog() {
     }
 }
 
-IoTDeviceTwinDialog.prototype.popup = async function(twinInfo,iotDeviceInfo) {
-    this.originalTwinInfo=JSON.parse(JSON.stringify(twinInfo))
-    this.twinInfo=twinInfo
-    this.iotDeviceInfo=iotDeviceInfo
+modelIoTSettingDialog.prototype.popup = async function(modelID) {
     this.DOM.show()
     this.DOM.empty()
-    this.contentDOM = $('<div style="width:605px"></div>')
+    this.contentDOM = $('<div style="width:620px"></div>')
     this.DOM.append(this.contentDOM)
-    this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Digital Twin Editor</div></div>'))
+    this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">IoT Settings</div></div>'))
     var closeButton = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em;padding-top:4px">×</button>')
     this.contentDOM.children(':first').append(closeButton)
     closeButton.on("click", () => { this.DOM.hide() })
 
-    if(!twinInfo["$dtId"]){
-        var btnText="Add"//this is for creating new twin
-        var btnText2="Add & Close"
-        this.isCreatingTwin=true
-        var okButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">'+btnText+'</button>')    
-        this.contentDOM.children(':first').append(okButton)
-        okButton.on("click", async () => {this.addNewTwin()})    
-    } 
-    else{
-        btnText2="Save" //this is when editing a existed twin
-    } 
-    
-    var secondButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%;margin-left:5px">'+btnText2+'</button>')    
-    this.contentDOM.children(':first').append(secondButton)
-
-    if(!twinInfo["$dtId"]){
-        secondButton.on("click", async () => {this.addNewTwin("CloseDialog")})
-    }else{
-        secondButton.on("click", async () => {this.saveTwin()})
-    }
-    
+    var okButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Accept</button>')
+    this.contentDOM.children(':first').append(okButton)
+    okButton.on("click", async () => { this.commitChange() })
 
     var firstRow=$('<div class="w3-cell-row" style="padding-bottom:10px"></div>')
     this.contentDOM.append(firstRow)
@@ -57,29 +36,39 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo,iotDeviceInfo) {
     topRightDom.append(this.sampleTelemetryDiv)
     this.sampleTelemetryDiv.hide()
     
-    var IDLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Twin ID</div>")
-    var IDInput=$('<input type="text" style="margin:8px 0;padding:2px;width:150px;outline:none;display:inline" placeholder="ID"/>').addClass("w3-input w3-border");
-    this.IDInput=IDInput 
-    var modelID=twinInfo["$metadata"]["$model"]
-    var modelLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
-    var modelInput=$('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID);  
-    topLeftDom.append($("<div/>").append(IDLableDiv,IDInput))
-    topLeftDom.append($("<div/>").append(modelLableDiv,modelInput))
-    IDInput.change((e)=>{
-        this.twinInfo["$dtId"]=$(e.target).val()
-    })
+    var modelInfo=modelAnalyzer.DTDLModels[modelID]
+    this.modelID=modelID
+    var DBModelInfo=null
+    for(var i=0;i<globalCache.DBModelsArr.length;i++){
+        var ele = globalCache.DBModelsArr[i]
+        if(ele.id==modelID){
+            DBModelInfo = globalCache.DBModelsArr[i]
+            break
+        }
+    }
+    if(DBModelInfo && DBModelInfo.isIoTDeviceModel){
+        this.iotInfo={}
+    }else{
+        this.iotInfo=null
+    }
 
-    var isIoTCheck= $('<input class="w3-margin w3-check" style="width:20px" type="checkbox">')
-    var isIoTText = $('<label class="w3-dark-gray" style="padding:2px 8px;font-size:1.2em;border-radius: 3px;"> This is NOT a IoT Device</label>')
-    this.isIoTCheck=isIoTCheck
-    topLeftDom.append(isIoTCheck,isIoTText)
+    topLeftDom.append($("<div style='padding-top:10px'/>").append(
+        $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
+        , $('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID)))
+    topLeftDom.append($("<div class='w3-padding-16'/>").append(
+        $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Name</div>")
+        , $('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelInfo["displayName"])))
+
+    var isIoTCheck = $('<input class="w3-check" style="width:20px;margin-left:16px;margin-right:10px" type="checkbox">')
+    var isIoTText = $('<label class="w3-dark-gray" style="padding:2px 8px;font-size:1.2em;border-radius: 3px;"> This is NOT a IoT Model</label>')
+    this.isIoTCheck = isIoTCheck
+    topLeftDom.append(isIoTCheck, isIoTText)
 
 
-    var dialogDOM=$('<div />')
+    var dialogDOM = $('<div />')
     this.contentDOM.append(dialogDOM)
 
-    
-    var editableProperties=modelAnalyzer.DTDLModels[modelID].editableProperties
+    var editableProperties=modelInfo.editableProperties
     if($.isEmptyObject(editableProperties)){
         var titleTable=$('<div>Warning: There is no propertie in this model to map with a IoT device</div>')
     }else{
@@ -94,15 +83,16 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo,iotDeviceInfo) {
     this.IoTSettingDiv=IoTSettingDiv
     IoTSettingDiv.hide()
     dialogDOM.append(IoTSettingDiv)
+    this.iotSettingsArr=[]
     this.drawIoTSettings()
 
     isIoTCheck.on("change",(e)=>{
         if(isIoTCheck.prop('checked')) {
             var theHeight= IoTSettingDiv.height()
             isIoTText.removeClass("w3-dark-gray").addClass("w3-lime")
-            isIoTText.text("This is a IoT Device")
+            isIoTText.text("This is a IoT Model")
 
-            if(!this.iotDeviceInfo) this.iotDeviceInfo={}
+            if(!this.iotInfo) this.iotInfo={}
             if(e.isTrigger){ // it is from programmaticaltrigger
                 IoTSettingDiv.css("height",theHeight+10+"px")
                 titleTable.show()
@@ -116,9 +106,9 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo,iotDeviceInfo) {
                 this.sampleTelemetryDiv.fadeIn()
             }
         }else {
-            this.iotDeviceInfo=null;
+            this.iotInfo=null;
             isIoTText.removeClass("w3-lime").addClass("w3-dark-gray")
-            isIoTText.text("This is NOT a IoT Device")
+            isIoTText.text("This is NOT a IoT Model")
             if(e.isTrigger){ // it is from programmaticaltrigger
                 IoTSettingDiv.css("height","");
                 IoTSettingDiv.hide();
@@ -131,37 +121,22 @@ IoTDeviceTwinDialog.prototype.popup = async function(twinInfo,iotDeviceInfo) {
         }
     })
 
-    if(this.iotDeviceInfo){
+    if(this.iotInfo){
         isIoTCheck.prop( "checked", true );
         isIoTCheck.trigger("change")    
     }
+
+    
 }
 
-IoTDeviceTwinDialog.prototype.saveTwin= async function(){
-    //TODO: save the twin change
-}
-
-IoTDeviceTwinDialog.prototype.addNewTwin = async function(closeDialog) {
-    if(!this.twinInfo["$dtId"]||this.twinInfo["$dtId"]==""){
-        alert("Please fill in name for the new digital twin")
-        return;
-    }
-    var modelID=this.twinInfo["$metadata"]["$model"]
-    var componentsNameArr=modelAnalyzer.DTDLModels[modelID].includedComponents
-    componentsNameArr.forEach(oneComponentName=>{ //adt service requesting all component appear by mandatory
-        if(this.twinInfo[oneComponentName]==null)this.twinInfo[oneComponentName]={}
-        this.twinInfo[oneComponentName]["$metadata"]= {}
-    })
-
-    //ask taskmaster to add the twin
+modelIoTSettingDialog.prototype.commitChange = async function() {
+    //ask taskmaster to update model 
+    //in case of iot setting enabled, provision all twins to iot hub
+    //otherwise, deprovision all twins
+    var postBody= {"modelID":this.modelID}
     try{
-        var postBody= {"newTwinJson":JSON.stringify(this.twinInfo)}
-
-        //var desiredProperties= req.body.desiredProperties
-        //reportProperties
-        //telemetry mapping
-        if(this.iotDeviceInfo){
-            postBody.isIoTDevice=true;
+        if(this.iotInfo){
+            postBody.isIoTDeviceModel=true
             postBody.telemetryProperties=[]
             postBody.desiredProperties=[]
             postBody.desiredInDeviceTwin={}
@@ -175,52 +150,43 @@ IoTDeviceTwinDialog.prototype.addNewTwin = async function(closeDialog) {
                     postBody.desiredInDeviceTwin[propertyName]=propertySampleV
                 }else if(ele.type=="report") postBody.reportProperties.push(ele)
             })
+            //TODO:....
+        }else{
+            postBody.isIoTDeviceModel=false
+            //TODO:....
         }
-        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST", postBody )
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)
     }
 
-    globalCache.storeSingleDBTwin(data.DBTwin)    
-    globalCache.storeSingleADTTwin(data.ADTTwin)
-
-    //it should select the new node in the tree, and move topology view to show the new node (note not blocked by the dialog itself)
-    this.broadcastMessage({ "message": "addNewTwin", twinInfo: data.ADTTwin })
-
-    if(closeDialog)this.DOM.hide()
-    else{
-        //clear the input editbox
-        if(this.iotDeviceInfo) this.popup(this.originalTwinInfo,{})
-        else this.popup(this.originalTwinInfo)
-    }
+    //TODO: change global cached dbmodel and dbtwins...
     
+    this.DOM.hide()
 }
 
-IoTDeviceTwinDialog.prototype.drawIoTSettings = async function() {
-    var modelID=this.twinInfo["$metadata"]["$model"]
-    var modelDetail= modelAnalyzer.DTDLModels[modelID]
-    this.copyModelEditableProperty=JSON.parse(JSON.stringify(modelDetail.editableProperties))
-    this.iotSettingsArr=[]
-    
+modelIoTSettingDialog.prototype.drawIoTSettings = async function() {
+    var modelDetail= modelAnalyzer.DTDLModels[this.modelID]
+    var copyModelEditableProperty=JSON.parse(JSON.stringify(modelDetail.editableProperties))
     var iotTable=$('<table style="width:100%" cellspacing="0px" cellpadding="0px"></table>')
     this.IoTSettingDiv.append(iotTable)
 
     var initialPathArr=[]
     this.allSelectMenu=[]
-    this.drawEditable(iotTable,this.copyModelEditableProperty,initialPathArr,[])
+    var lastRootNodeRecord=[]
+    this.drawEditable(iotTable,copyModelEditableProperty,initialPathArr,lastRootNodeRecord)
 
     this.IoTSettingDiv.on("click",()=>{this.shrinkAllSelectMenu()})
     this.IoTSettingDiv.on("scroll",()=>{this.shrinkAllSelectMenu()})
 }
 
-IoTDeviceTwinDialog.prototype.shrinkAllSelectMenu = async function() {
+modelIoTSettingDialog.prototype.shrinkAllSelectMenu = async function() {
     this.allSelectMenu.forEach(selectmenu=>{
         selectmenu.shrink()
     })
 }
 
-IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathArr,lastRootNodeRecord) {
+modelIoTSettingDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathArr,lastRootNodeRecord) {
     if(jsonInfo==null) return;
     var arr=[]
     for(var ind in jsonInfo) arr.push(ind)
@@ -270,12 +236,12 @@ IoTDeviceTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo
     }
 }
 
-IoTDeviceTwinDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,pNameDiv){
+modelIoTSettingDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,pNameDiv){
     var aSelectMenu = new simpleSelectMenu(""
         , {
-            "isClickable": true, "withBorder": true
-            , buttonCSS: { "padding": "4px 16px", width: "210px" }
-            ,"optionListMarginTop":80,"optionListMarginLeft":210
+            width: "210px","isClickable": true, "withBorder": true
+            , buttonCSS: { "padding": "4px 16px" }
+            ,"optionListMarginTop":0,"optionListMarginLeft":210
             ,"adjustPositionAnchor":this.DOM.offset()
         }
     )
@@ -304,7 +270,9 @@ IoTDeviceTwinDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,pN
     aSelectMenu.triggerOptionIndex(0)
 }
 
-IoTDeviceTwinDialog.prototype.propertyTypeSampleValue = function(ptype){
+
+
+modelIoTSettingDialog.prototype.propertyTypeSampleValue = function(ptype){
     //["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"]
     var mapping={
         "enumerator":"stringValue"
@@ -323,7 +291,7 @@ IoTDeviceTwinDialog.prototype.propertyTypeSampleValue = function(ptype){
     else return "unknown"
 }
 
-IoTDeviceTwinDialog.prototype.refreshIoTTelemetrySample = function(){
+modelIoTSettingDialog.prototype.refreshIoTTelemetrySample = function(){
     var sampleObj={}
     
     this.iotSettingsArr.forEach(onep=>{
@@ -349,7 +317,7 @@ IoTDeviceTwinDialog.prototype.refreshIoTTelemetrySample = function(){
     this.sampleTelemetryDiv.empty().append(label,script)
 }
 
-IoTDeviceTwinDialog.prototype.treeLineDiv = function(typeNumber) {
+modelIoTSettingDialog.prototype.treeLineDiv = function(typeNumber) {
     var reDiv=$('<div style="margin-left:10px;width:15px;height: 100%;float: left"></div>')
     if(typeNumber==1){
         reDiv.append($('<div class="w3-border-bottom w3-border-left" style="width:100%;height:50%;"></div><div class="w3-border-left" style="width:100%;height:50%;"></div>'))
@@ -363,4 +331,4 @@ IoTDeviceTwinDialog.prototype.treeLineDiv = function(typeNumber) {
     return reDiv
 }
 
-module.exports = new IoTDeviceTwinDialog();
+module.exports = new modelIoTSettingDialog();

@@ -37,6 +37,26 @@ routerInsertData.prototype.newModels =async function(req,res) {
     }
 }
 
+routerInsertData.prototype.updateModels =async function(req,res) {
+    var accountID=req.body.account
+    var modelID=req.body.modelID
+    var updateInfo=JSON.parse(req.body.updateInfo)
+
+    try {
+        var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",accountID,modelID)
+        if(originalDocument.length==0) res.status(400).send("model "+modelID+" is not found!")
+        var newModelDocument = originalDocument[0]
+        for(var ind in updateInfo){
+            newModelDocument[ind]=updateInfo[ind]
+        }
+        await cosmosdbhelper.insertRecord("appuser", newModelDocument)
+        res.end()
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+}
+
+
 routerInsertData.prototype.newTwin =async function(req,res) {
     var accountID=req.body.account
     var ADTTwin=req.body.ADTTwin

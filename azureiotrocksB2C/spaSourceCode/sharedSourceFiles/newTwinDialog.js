@@ -23,7 +23,6 @@ newTwinDialog.prototype.popup = async function(twinInfo) {
     this.contentDOM.children(':first').append(closeButton)
     closeButton.on("click", () => { this.DOM.hide() })
 
-    this.isCreatingTwin = true
     var addButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Add</button>')
     this.contentDOM.children(':first').append(addButton)
     addButton.on("click", async () => { this.addNewTwin() })
@@ -106,19 +105,10 @@ newTwinDialog.prototype.drawModelSettings = async function() {
     this.settingsDiv.append(settingsTable)
 
     var initialPathArr=[]
-    this.allSelectMenu=[]
     var lastRootNodeRecord=[]
     this.drawEditable(settingsTable,copyModelEditableProperty,initialPathArr,lastRootNodeRecord)
-
-    this.settingsDiv.on("click",()=>{this.shrinkAllSelectMenu()})
-    this.settingsDiv.on("scroll",()=>{this.shrinkAllSelectMenu()})
 }
 
-newTwinDialog.prototype.shrinkAllSelectMenu = async function() {
-    this.allSelectMenu.forEach(selectmenu=>{
-        selectmenu.shrink()
-    })
-}
 
 newTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathArr,lastRootNodeRecord) {
     if(jsonInfo==null) return;

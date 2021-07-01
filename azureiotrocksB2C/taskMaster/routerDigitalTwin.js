@@ -8,6 +8,8 @@ function routerDigitalTwin(){
     this.useRoute("importModels","isPost")
     
     this.useRoute("upsertDigitalTwin","isPost")
+    this.useRoute("changeModelIoTSettings","isPost")
+
     this.useRoute("batchImportTwins","isPost")
 
     this.useRoute("listModelsForIDs","isPost")
@@ -208,11 +210,22 @@ routerDigitalTwin.prototype.batchImportTwins =async function(req,res) {
     res.send({"ADTTwins":JSON.stringify(ADTTwins_imported),"DBTwins":JSON.stringify(DBTwins_imported)})
 }
 
+
+routerDigitalTwin.prototype.changeModelIoTSettings = async function(req,res){
+    var postLoad={}
+    if(haveIoTDetail){
+        postLoad["IoTDeviceID"]=twinUUID
+        if(req.body.desiredProperties) postLoad["desiredProperties"]=req.body.desiredProperties
+        if(req.body.reportProperties) postLoad["reportProperties"]=req.body.reportProperties
+        if(req.body.telemetryProperties) postLoad["telemetryProperties"]=req.body.telemetryProperties
+    }
+
+}
+
 routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
     //check the twin name uniqueness in user name space
     //if successful, generate UUID and create twin in ADT
-    //if successful, provision the device in iot hub
-    //successful or fail, store the twin to cosmosDB as well
+    //if successful, store the twin to cosmosDB as well
     //if not successful, then roll back by deleting the twin from ADT
     var twinInfo=JSON.parse(req.body.newTwinJson);
     var originTwinID=twinInfo['$dtId']
@@ -271,15 +284,6 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
         ,"displayName":originTwinID
         ,"account":req.authInfo.account
     }
-
-    /*
-    if(haveIoTDetail){
-        postLoad["IoTDeviceID"]=twinUUID
-        if(req.body.desiredProperties) postLoad["desiredProperties"]=req.body.desiredProperties
-        if(req.body.reportProperties) postLoad["reportProperties"]=req.body.reportProperties
-        if(req.body.telemetryProperties) postLoad["telemetryProperties"]=req.body.telemetryProperties
-    }
-    */
 
     try{
         var DBTwin=await got.post(process.env.dboperationAPIURL+"insertData/newTwin",{json:postLoad,responseType: 'json'});
