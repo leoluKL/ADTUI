@@ -212,14 +212,16 @@ routerDigitalTwin.prototype.batchImportTwins =async function(req,res) {
 
 
 routerDigitalTwin.prototype.changeModelIoTSettings = async function(req,res){
-    var postLoad={}
-    if(haveIoTDetail){
-        postLoad["IoTDeviceID"]=twinUUID
-        if(req.body.desiredProperties) postLoad["desiredProperties"]=req.body.desiredProperties
-        if(req.body.reportProperties) postLoad["reportProperties"]=req.body.reportProperties
-        if(req.body.telemetryProperties) postLoad["telemetryProperties"]=req.body.telemetryProperties
+    var postLoad=req.body;
+    postLoad.account=req.authInfo.account
+    
+    try{
+        var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateModel", {json:postLoad,responseType: 'json'});
+        res.end();
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
     }
-
 }
 
 routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {

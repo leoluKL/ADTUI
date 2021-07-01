@@ -136,20 +136,24 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
     var postBody= {"modelID":this.modelID}
     try{
         if(this.iotInfo){
-            postBody.isIoTDeviceModel=true
-            postBody.telemetryProperties=[]
-            postBody.desiredProperties=[]
+            postBody.updateInfo={}
+            postBody.updateInfo.isIoTDeviceModel=true
+            postBody.updateInfo.telemetryProperties=[]
+            postBody.updateInfo.desiredProperties=[]
             postBody.desiredInDeviceTwin={}
-            postBody.reportProperties=[]
+            postBody.updateInfo.reportProperties=[]
             this.iotSettingsArr.forEach(ele=>{
-                if(ele.type=="telemetry") postBody.telemetryProperties.push(ele)
+                if(ele.type=="telemetry") postBody.updateInfo.telemetryProperties.push(ele)
                 else if(ele.type=="desired"){
-                    postBody.desiredProperties.push(ele)
+                    postBody.updateInfo.desiredProperties.push(ele)
                     var propertyName=ele.path[ele.path.length-1]
                     var propertySampleV= this.propertyTypeSampleValue(ele.ptype)
                     postBody.desiredInDeviceTwin[propertyName]=propertySampleV
-                }else if(ele.type=="report") postBody.reportProperties.push(ele)
+                }else if(ele.type=="report") postBody.updateInfo.reportProperties.push(ele)
             })
+            postBody.updateInfo=JSON.stringify(postBody.updateInfo)
+
+            console.log(postBody)
             //TODO:....
         }else{
             postBody.isIoTDeviceModel=false
