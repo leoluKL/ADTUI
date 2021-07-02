@@ -2,11 +2,11 @@ const globalCache = require("../sharedSourceFiles/globalCache");
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 const modelIoTSettingDialog = require("../sharedSourceFiles/modelIoTSettingDialog")
 
-function singleModelTwinsList(singleDBModel,parentTwinsList) {
+function singleModelTwinsList(singleADTModel,parentTwinsList) {
     this.parentTwinsList=parentTwinsList
-    this.info=singleDBModel
+    this.info=singleADTModel
     this.childTwins={}
-    this.name=singleDBModel.displayName;
+    this.name=singleADTModel.displayName;
     this.createDOM()
 }
 
@@ -54,6 +54,9 @@ singleModelTwinsList.prototype.refreshName=function(){
     var nameDiv=$("<div class='w3-text-dark-gray' style='display:inline;padding-right:3px;vertical-align:middle;font-weight:bold;color:darkgray'></div>")
     nameDiv.text(this.name)
 
+    var modelID=this.info["@id"]
+    var singleDBModel= globalCache.getSingleDBModelByID(modelID)
+
     var countTwins=0
     var countIoTDevices=0
     for(var ind in this.childTwins) {
@@ -82,7 +85,9 @@ singleModelTwinsList.prototype.refreshName=function(){
     })
 
 
-    this.headerDOM.append(nameDiv,numberlabel,numberlabel2,iotSetButton,addButton)
+    this.headerDOM.append(nameDiv,numberlabel)
+    if(singleDBModel && singleDBModel.isIoTDeviceModel) this.headerDOM.append(numberlabel2)
+    this.headerDOM.append(iotSetButton,addButton)
 }
 
 singleModelTwinsList.prototype.refreshTwinsIcon=function(){

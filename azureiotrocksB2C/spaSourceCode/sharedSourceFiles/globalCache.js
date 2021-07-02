@@ -103,9 +103,37 @@ globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
     })
 }
 
+globalCache.prototype.getSingleDBModelByID=function(modelID){
+    for(var i=0;i<this.DBModelsArr.length;i++){
+        var ele = this.DBModelsArr[i]
+        if(ele.id==modelID){
+            return ele
+        }
+    }
+    return null;
+}
+
+globalCache.prototype.storeSingleDBModel=function(singleDBModelInfo){
+    var modelID = singleDBModelInfo.id
+    for(var i=0;i<this.DBModelsArr.length;i++){
+        var ele = this.DBModelsArr[i]
+        if(ele.id==modelID){
+            this.DBModelsArr[i]=singleDBModelInfo
+            return;
+        }
+    }
+    //it is a new single model if code reaches here
+    this.DBModelsArr.push(singleDBModelInfo)
+    this.sortDBModelsArr()
+}
+
 globalCache.prototype.storeDBModelsArr=function(DBModelsArr){
     this.DBModelsArr.length=0
     this.DBModelsArr=this.DBModelsArr.concat(DBModelsArr)
+    this.sortDBModelsArr()
+    
+}
+globalCache.prototype.sortDBModelsArr=function(){
     this.DBModelsArr.sort(function (a, b) { 
         var aName=a.displayName.toLowerCase()
         var bName=b.displayName.toLowerCase()

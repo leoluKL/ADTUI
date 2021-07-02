@@ -38,14 +38,7 @@ modelIoTSettingDialog.prototype.popup = async function(modelID) {
     
     var modelInfo=modelAnalyzer.DTDLModels[modelID]
     this.modelID=modelID
-    var DBModelInfo=null
-    for(var i=0;i<globalCache.DBModelsArr.length;i++){
-        var ele = globalCache.DBModelsArr[i]
-        if(ele.id==modelID){
-            DBModelInfo = globalCache.DBModelsArr[i]
-            break
-        }
-    }
+    var DBModelInfo=globalCache.getSingleDBModelByID(modelID)
     if(DBModelInfo && DBModelInfo.isIoTDeviceModel){
         this.iotInfo={}
     }else{
@@ -134,44 +127,36 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
     //in case of iot setting enabled, provision all twins to iot hub
     //otherwise, deprovision all twins
     var postBody= {"modelID":this.modelID}
-    try{
-        if(this.iotInfo){
-            postBody.updateInfo={}
-            postBody.updateInfo.isIoTDeviceModel=true
-            postBody.updateInfo.telemetryProperties=[]
-            postBody.updateInfo.desiredProperties=[]
-            postBody.desiredInDeviceTwin={}
-            postBody.updateInfo.reportProperties=[]
-            this.iotSettingsArr.forEach(ele=>{
-                if(ele.type=="telemetry") postBody.updateInfo.telemetryProperties.push(ele)
-                else if(ele.type=="desired"){
-                    postBody.updateInfo.desiredProperties.push(ele)
-                    var propertyName=ele.path[ele.path.length-1]
-                    var propertySampleV= this.propertyTypeSampleValue(ele.ptype)
-                    postBody.desiredInDeviceTwin[propertyName]=propertySampleV
-                }else if(ele.type=="report") postBody.updateInfo.reportProperties.push(ele)
-            })
-            postBody.updateInfo=JSON.stringify(postBody.updateInfo)
+    if(this.iotInfo){
+        postBody.updateInfo={}
+        postBody.updateInfo.isIoTDeviceModel=true
+        postBody.updateInfo.telemetryProperties=[]
+        postBody.updateInfo.desiredProperties=[]
+        postBody.desiredInDeviceTwin={}
+        postBody.updateInfo.reportProperties=[]
+        this.iotSettingsArr.forEach(ele=>{
+            if(ele.type=="telemetry") postBody.updateInfo.telemetryProperties.push(ele)
+            else if(ele.type=="desired"){
+                postBody.updateInfo.desiredProperties.push(ele)
+                var propertyName=ele.path[ele.path.length-1]
+                var propertySampleV= this.propertyTypeSampleValue(ele.ptype)
+                postBody.desiredInDeviceTwin[propertyName]=propertySampleV
+            }else if(ele.type=="report") postBody.updateInfo.reportProperties.push(ele)
+        })
+        postBody.updateInfo=JSON.stringify(postBody.updateInfo)
 
-            //console.log(postBody)
-            try {
-                var response = await msalHelper.callAPI("devicemanagement/changeModelIoTSettings", "POST", postBody)
-    
-                alert("Model \"" + this.dtdlobj["displayName"] + "\" is created!")
-                this.broadcastMessage({ "message": "ADTModelEdited" })
-                modelAnalyzer.addModels(modelToBeImported) //add so immediatley the list can show the new models
-                this.popup() //refresh content
-            }catch(e){
-                console.log(e)
-                if(e.responseText) alert(e.responseText)
-            } 
-        }else{
-            postBody.isIoTDeviceModel=false
-            //TODO:....
-        }
-    }catch(e){
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
+        //console.log(postBody)
+        try {
+            var response = await msalHelper.callAPI("devicemanagement/changeModelIoTSettings", "POST", postBody)
+            globalCache.storeSingleDBModel(response)
+            //TODO: broadcast
+        }catch(e){
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
+        } 
+    }else{
+        postBody.isIoTDeviceModel=false
+        //TODO:....
     }
 
     //TODO: change global cached dbmodel and dbtwins...
