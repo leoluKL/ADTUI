@@ -18,6 +18,18 @@ routerDeviceManagement.prototype.provisionIoTDeviceTwin = async function(req,res
     
 }
 
+routerDeviceManagement.prototype.deprovisionIoTDeviceTwin = async function(req,res){
+    
+}
+
+routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinID){
+    
+}
+
+routerDeviceManagement.prototype._deprovisionIoTDeviceTwin = async function(twinID){
+    
+}
+
 
 routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res){
     var postLoad=req.body;
@@ -32,14 +44,34 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
     }
 
     var updatedModelDoc=body.updatedModelDoc;
-    var twinsID= body.twinsID //[{id:..}...]
+    var twins= body.twins //[{id:..,IoTDeviceID:...}...]
+    var returnDBTwins=[]
     
+    if(updatedModelDoc.isIoTDeviceModel){
+        //provision each device to iot hub
+        twins.forEach(aTwin => {
+            var iotTwinID= aTwin.IoTDeviceID
+            if(iotTwinID!=null && iotTwinID!="") {
+                return; //the twin has been provisioned to iot hub
+            }
+            var twinID= aTwin.id;
+            var provisionedTwinDoc = this._provisionIoTDeviceTwin(twinID,)
+            returnDBTwins.push(provisionedTwinDoc)
+        });
+    }else{
+        //deprovision each device off iot hub
+        twins.forEach(aTwin => {
+            var iotTwinID= aTwin.IoTDeviceID
+            if(iotTwinID==null || iotTwinID=="") {
+                return; //the twin has been deprovisioned off iot hub
+            }
+            var twinID= aTwin.id;
+            var deprovisionedTwinDoc = this._deprovisionIoTDeviceTwin(twinID)
+            returnDBTwins.push(deprovisionedTwinDoc)
+        });
+    }
 
-    //provision each device to iot hub
-    twinsID.forEach(aTwin => {
-        var twinID= aTwin.id;
-        
-    });
+    res.send({"updatedModelDoc":updatedModelDoc,"DBTwins":returnDBTwins})
     
     /*TODO: provision iot hub device if the model is an IoT device model
     if(req.body.isIoTDevice){

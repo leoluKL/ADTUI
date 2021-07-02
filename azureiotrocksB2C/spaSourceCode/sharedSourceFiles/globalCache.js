@@ -103,6 +103,19 @@ globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
     })
 }
 
+globalCache.prototype.mergeDBTwinsArr=function(DBTwinsArr){
+    var idList={}
+    DBTwinsArr.forEach(aDBTwin=>{
+        idList[aDBTwin.id]=1
+    })
+    this.DBTwinsArr.forEach(aDBTwin=>{
+        if(idList[aDBTwin.id]) return;
+        DBTwinsArr.push(aDBTwin)
+    })
+
+    this.storeDBTwinsArr(DBTwinsArr)
+}
+
 globalCache.prototype.getSingleDBModelByID=function(modelID){
     for(var i=0;i<this.DBModelsArr.length;i++){
         var ele = this.DBModelsArr[i]

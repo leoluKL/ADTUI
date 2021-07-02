@@ -57,7 +57,7 @@ routerInsertData.prototype.updateModel =async function(req,res) {
     }
 
     //query out all the twins of this model and send back the twins ID
-    var queryStr='SELECT c.id,c.IoTDeviceID FROM c where '
+    var queryStr='SELECT c.id,c.IoTDeviceID,c.displayName FROM c where '
     queryStr+=`c.accountID='${accountID}'`
     queryStr+=` and c.modelID = '${modelID}'`
     queryStr+=` and c.type = 'DTTwin'`
