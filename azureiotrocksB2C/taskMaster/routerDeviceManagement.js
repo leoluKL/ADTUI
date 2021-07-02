@@ -4,6 +4,8 @@ const got = require('got');
 function routerDeviceManagement(){
     this.router = express.Router();
     this.useRoute("changeModelIoTSettings","isPost")
+    this.useRoute("provisionIoTDeviceTwin","isPost")
+    this.useRoute("deprovisionIoTDeviceTwin","isPost")
 }
 
 routerDeviceManagement.prototype.useRoute=function(routeStr,isPost){
@@ -11,6 +13,11 @@ routerDeviceManagement.prototype.useRoute=function(routeStr,isPost){
         this[routeStr](req,res)
     })
 }
+
+routerDeviceManagement.prototype.provisionIoTDeviceTwin = async function(req,res){
+    
+}
+
 
 routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res){
     var postLoad=req.body;
@@ -27,6 +34,12 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
     var updatedModelDoc=body.updatedModelDoc;
     var twinsID= body.twinsID //[{id:..}...]
     
+
+    //provision each device to iot hub
+    twinsID.forEach(aTwin => {
+        var twinID= aTwin.id;
+        
+    });
     
     /*TODO: provision iot hub device if the model is an IoT device model
     if(req.body.isIoTDevice){
