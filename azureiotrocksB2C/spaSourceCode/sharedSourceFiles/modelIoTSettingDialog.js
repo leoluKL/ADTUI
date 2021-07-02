@@ -153,8 +153,18 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
             })
             postBody.updateInfo=JSON.stringify(postBody.updateInfo)
 
-            console.log(postBody)
-            //TODO:....
+            //console.log(postBody)
+            try {
+                var response = await msalHelper.callAPI("devicemanagement/changeModelIoTSettings", "POST", { "models": JSON.stringify(modelToBeImported) })
+    
+                alert("Model \"" + this.dtdlobj["displayName"] + "\" is created!")
+                this.broadcastMessage({ "message": "ADTModelEdited" })
+                modelAnalyzer.addModels(modelToBeImported) //add so immediatley the list can show the new models
+                this.popup() //refresh content
+            }catch(e){
+                console.log(e)
+                if(e.responseText) alert(e.responseText)
+            } 
         }else{
             postBody.isIoTDeviceModel=false
             //TODO:....

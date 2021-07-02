@@ -55,6 +55,7 @@ if(!localTestFlag){
 //define sub routers for http requests
 app.use("/accountManagement", require("./routerAccountManagement"))
 app.use("/digitaltwin", require("./routerDigitalTwin"))
+app.use("/devicemanagement", require("./routerDeviceManagement"))
 
 const port = process.env.PORT || 5002;
 
