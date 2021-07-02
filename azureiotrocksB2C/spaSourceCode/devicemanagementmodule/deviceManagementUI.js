@@ -3,6 +3,7 @@ const globalAppSettings = require("../globalAppSettings.js");
 const msalHelper=require("../msalHelper")
 const deviceManagementMainToolbar = require("./deviceManagementMainToolbar")
 const modelEditorDialog = require("../sharedSourceFiles/modelEditorDialog")
+const modelIoTSettingDialog= require("../sharedSourceFiles/modelIoTSettingDialog")
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
 const globalCache=require("../sharedSourceFiles/globalCache")
 const twinsList=require("./twinsList")
@@ -29,7 +30,7 @@ function deviceManagementUI() {
 }
 
 deviceManagementUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,this.twinsList,newTwinDialog]
+    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,this.twinsList,newTwinDialog,modelIoTSettingDialog]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

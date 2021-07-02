@@ -39,8 +39,9 @@ modelIoTSettingDialog.prototype.popup = async function(modelID) {
     var modelInfo=modelAnalyzer.DTDLModels[modelID]
     this.modelID=modelID
     var DBModelInfo=globalCache.getSingleDBModelByID(modelID)
+    this.DBModelInfo=DBModelInfo
     if(DBModelInfo && DBModelInfo.isIoTDeviceModel){
-        this.iotInfo={}
+        this.iotInfo=this.DBModelInfo
     }else{
         this.iotInfo=null
     }
@@ -85,7 +86,7 @@ modelIoTSettingDialog.prototype.popup = async function(modelID) {
             isIoTText.removeClass("w3-dark-gray").addClass("w3-lime")
             isIoTText.text("This is a IoT Model")
 
-            if(!this.iotInfo) this.iotInfo={}
+            if(!this.iotInfo) this.iotInfo=this.DBModelInfo
             if(e.isTrigger){ // it is from programmaticaltrigger
                 IoTSettingDiv.css("height",theHeight+10+"px")
                 titleTable.show()
@@ -127,8 +128,8 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
     //in case of iot setting enabled, provision all twins to iot hub
     //otherwise, deprovision all twins
     var postBody= {"modelID":this.modelID}
+    postBody.updateInfo={}
     if(this.iotInfo){
-        postBody.updateInfo={}
         postBody.updateInfo.isIoTDeviceModel=true
         postBody.updateInfo.telemetryProperties=[]
         postBody.updateInfo.desiredProperties=[]
@@ -143,22 +144,21 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
                 postBody.desiredInDeviceTwin[propertyName]=propertySampleV
             }else if(ele.type=="report") postBody.updateInfo.reportProperties.push(ele)
         })
-        postBody.updateInfo=JSON.stringify(postBody.updateInfo)
-
-        //console.log(postBody)
-        try {
-            var response = await msalHelper.callAPI("devicemanagement/changeModelIoTSettings", "POST", postBody)
-            globalCache.storeSingleDBModel(response)
-            //TODO: broadcast
-        }catch(e){
-            console.log(e)
-            if(e.responseText) alert(e.responseText)
-        } 
     }else{
-        postBody.isIoTDeviceModel=false
-        //TODO:....
+        postBody.updateInfo.isIoTDeviceModel=false
     }
 
+    postBody.updateInfo = JSON.stringify(postBody.updateInfo)
+    try {
+        var response = await msalHelper.callAPI("devicemanagement/changeModelIoTSettings", "POST", postBody)
+        globalCache.storeSingleDBModel(response)
+        //TODO: broadcast
+    } catch (e) {
+        console.log(e)
+        if (e.responseText) alert(e.responseText)
+    }
+
+    this.broadcastMessage({ "message": "ModelIoTSettingEdited","modelID":response.id })
     //TODO: change global cached dbmodel and dbtwins...
     
     this.DOM.hide()
@@ -220,19 +220,41 @@ modelIoTSettingDialog.prototype.drawEditable = async function(parentTable,jsonIn
             jsonInfo[ind].forEach(ele=>{valueArr.push(ele.enumValue)})
             var label1=$("<label class='w3-dark-gray' style='font-size:9px;padding:2px;margin-left:2px'>"+valueArr.join()+"</label>")
             rightTD.append(label1)
+
             var IoTsettingObj={"type":"","path":newPath,"ptype":"enumerator"}
             this.iotSettingsArr.push(IoTsettingObj)
+            IoTsettingObj.type=this.checkPropertyPathIoTType(newPath)
             this.drawIoTSelectDropdown(leftTD,IoTsettingObj,pNameDiv)
         }else if(typeof(jsonInfo[ind])==="object") {
             this.drawEditable(parentTable,jsonInfo[ind],newPath,lastRootNodeRecord)
         }else {
             var IoTsettingObj={"type":"","path":newPath,"ptype":jsonInfo[ind]}
             this.iotSettingsArr.push(IoTsettingObj)
+            IoTsettingObj.type=this.checkPropertyPathIoTType(newPath)
             this.drawIoTSelectDropdown(leftTD,IoTsettingObj,pNameDiv)
             var typeDOM=$("<label class='w3-dark-gray' style='font-size:9px;padding:2px;margin-left:5px'>"+jsonInfo[ind]+"</label>")
             rightTD.append(typeDOM)
         } 
     }
+}
+
+modelIoTSettingDialog.prototype.checkPropertyPathIoTType=function(pathArr){
+    if(!this.iotInfo) return ""
+    var desiredProperties=this.iotInfo["desiredProperties"]
+    var reportProperties=this.iotInfo["reportProperties"]
+    var telemetryProperties=this.iotInfo["telemetryProperties"]
+    var checkPathStr=JSON.stringify(pathArr)
+    var tmpFunc=(arr,reStr)=>{
+        for(var i=0;i<arr.length;i++){
+            var elePath=JSON.stringify(arr[i].path)
+            if(elePath==checkPathStr) return reStr
+        }
+        return ""
+    }
+    var re=tmpFunc(desiredProperties,"desired")
+    if(re=="") re=tmpFunc(reportProperties,"report")
+    if(re=="") re=tmpFunc(telemetryProperties,"telemetry")
+    return re;
 }
 
 modelIoTSettingDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,pNameDiv){
@@ -255,7 +277,6 @@ modelIoTSettingDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,
     aSelectMenu.addOption("IoT Device Report Property","report","w3-blue")
 
     aSelectMenu.callBack_clickOption=(optionText,optionValue,realMouseClick,colorClass)=>{
-        IoTsettingObj["type"]=optionValue
         aSelectMenu.changeName(optionText)
         if(colorClass){
             aSelectMenu.button.attr('class', 'w3-button w3-border '+colorClass);
@@ -264,9 +285,13 @@ modelIoTSettingDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,
             aSelectMenu.button.attr('class', 'w3-button w3-border')   
             pNameDiv.attr('class', '');
         }
-        if(realMouseClick) this.refreshIoTTelemetrySample()
+        this.refreshIoTTelemetrySample()
+        if(realMouseClick) {
+            IoTsettingObj["type"]=optionValue
+        }
     }
-    aSelectMenu.triggerOptionIndex(0)
+    if(IoTsettingObj.type!="") aSelectMenu.triggerOptionValue(IoTsettingObj.type)
+    else aSelectMenu.triggerOptionIndex(0)
 }
 
 

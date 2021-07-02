@@ -63,7 +63,10 @@ singleModelTwinsList.prototype.refreshName=function(){
         countTwins++
         if(this.childTwins[ind].twinInfo["IoTDeviceID"]!=null) countIoTDevices++
     }
-    var numberlabel=$("<label class='w3-orange' style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+countTwins+" twins</label>")
+    var numberlabel=$("<label style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+countTwins+" twins</label>")
+    if(countTwins==0) numberlabel.addClass("w3-gray")
+    else numberlabel.addClass("w3-orange")
+
     var numberlabel2=$("<label class='w3-lime' style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+countIoTDevices+" IoT Devices</label>")
     
     var addButton= $('<button class="w3-bar-item w3-button w3-red w3-hover-amber w3-right" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')

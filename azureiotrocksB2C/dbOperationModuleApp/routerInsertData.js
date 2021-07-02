@@ -50,11 +50,23 @@ routerInsertData.prototype.updateModel =async function(req,res) {
         for(var ind in updateInfo){
             newModelDocument[ind]=updateInfo[ind]
         }
-        var re=await cosmosdbhelper.insertRecord("appuser", newModelDocument)
-        res.send(re)
+        var updatedModelDoc=await cosmosdbhelper.insertRecord("appuser", newModelDocument)
     } catch (e) {
         res.status(400).send(e.message)
     }
+
+    //query out all the twins of this model and send back the twins ID
+    var queryStr='SELECT c.id FROM c where '
+    queryStr+=`c.accountID='${accountID}'`
+    queryStr+=` and c.modelID = '${modelID}'`
+    queryStr+=` and c.type = 'DTTwin'`
+    try{
+        var queryResult=await cosmosdbhelper.query('appuser',queryStr)
+    }catch(e){
+        res.status(400).send(e.message)
+    }
+
+    re.send({"updatedModelDoc":updatedModelDoc,"twinsID":queryResult})
 }
 
 

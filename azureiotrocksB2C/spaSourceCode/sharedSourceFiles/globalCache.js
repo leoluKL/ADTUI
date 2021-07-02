@@ -118,7 +118,8 @@ globalCache.prototype.storeSingleDBModel=function(singleDBModelInfo){
     for(var i=0;i<this.DBModelsArr.length;i++){
         var ele = this.DBModelsArr[i]
         if(ele.id==modelID){
-            this.DBModelsArr[i]=singleDBModelInfo
+            for(var ind in ele) delete ele[ind]
+            for(var ind in singleDBModelInfo) ele[ind]=singleDBModelInfo[ind]
             return;
         }
     }

@@ -24,6 +24,7 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
         return;
     }
 
+    
     /*TODO: provision iot hub device if the model is an IoT device model
     if(req.body.isIoTDevice){
         var tags={

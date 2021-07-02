@@ -22,6 +22,8 @@ twinsList.prototype.refill=function(){
 twinsList.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="visualDefinitionChange"){
         if(msgPayload.modelID) this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsIcon()
+    }else if(msgPayload.message=="ModelIoTSettingEdited"){
+        this.singleModelTwinsListSet[msgPayload.modelID].refreshName()
     }
 }
 

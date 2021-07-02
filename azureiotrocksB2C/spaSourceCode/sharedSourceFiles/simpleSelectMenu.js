@@ -63,7 +63,7 @@ simpleSelectMenu.prototype.findOption=function(optionValue){
     for(var i=0;i<options.length;i++){
         var anOption=$(options[i])
         if(optionValue==anOption.data("optionValue")){
-            return {"text":anOption.text(),"value":anOption.data("optionValue")}
+            return {"text":anOption.text(),"value":anOption.data("optionValue"),"colorClass":anOption.data("optionColorClass")}
         }
     }
 }
@@ -92,7 +92,7 @@ simpleSelectMenu.prototype.addOption=function(optionText,optionValue,colorClass)
                 this.DOM.removeClass('w3-dropdown-click')
             }, 100);
         }
-        this.callBack_clickOption(optionText,optionItem.data("optionValue"),"realMouseClick",colorClass)
+        this.callBack_clickOption(optionText,optionItem.data("optionValue"),"realMouseClick",optionItem.data("optionColorClass"))
         return false
     })
 }
@@ -120,7 +120,7 @@ simpleSelectMenu.prototype.triggerOptionValue=function(optionValue){
         this.callBack_clickOption(null,null)
     }else{
         this.curSelectVal=re.value
-        this.callBack_clickOption(re.text,re.value)
+        this.callBack_clickOption(re.text,re.value,null,re.colorClass)
     }
 }
 
