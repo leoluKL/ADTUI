@@ -50,8 +50,8 @@ routerInsertData.prototype.updateModel =async function(req,res) {
         for(var ind in updateInfo){
             newModelDocument[ind]=updateInfo[ind]
         }
-        await cosmosdbhelper.insertRecord("appuser", newModelDocument)
-        res.end()
+        var re=await cosmosdbhelper.insertRecord("appuser", newModelDocument)
+        res.send(re)
     } catch (e) {
         res.status(400).send(e.message)
     }
