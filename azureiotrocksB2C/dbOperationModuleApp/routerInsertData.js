@@ -69,6 +69,25 @@ routerInsertData.prototype.updateModel =async function(req,res) {
     res.send({"updatedModelDoc":updatedModelDoc,"twinsID":queryResult})
 }
 
+routerInsertData.prototype.updateTwin =async function(req,res) {
+    var accountID=req.body.account
+    var twinID=req.body.twinID
+    var updateInfo=JSON.parse(req.body.updateInfo)
+
+    try {
+        var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",accountID,twinID)
+        if(originalDocument.length==0) res.status(400).send("twin "+twinID+" is not found!")
+        var newTwinDocument = originalDocument[0]
+        for(var ind in updateInfo){
+            newTwinDocument[ind]=updateInfo[ind]
+        }
+        var updatedTwinDoc=await cosmosdbhelper.insertRecord("appuser", newTwinDocument)
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+    res.send(updatedTwinDoc)
+}
+
 
 routerInsertData.prototype.newTwin =async function(req,res) {
     var accountID=req.body.account
