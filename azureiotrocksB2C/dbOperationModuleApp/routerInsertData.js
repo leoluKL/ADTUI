@@ -66,7 +66,7 @@ routerInsertData.prototype.updateModel =async function(req,res) {
         res.status(400).send(e.message)
     }
 
-    re.send({"updatedModelDoc":updatedModelDoc,"twinsID":queryResult})
+    res.send({"updatedModelDoc":updatedModelDoc,"twinsID":queryResult})
 }
 
 
