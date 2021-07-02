@@ -5,6 +5,7 @@ function routerInsertData(){
     this.router = express.Router();
     this.useRoute("newModels","post")
     this.useRoute("updateModel","post")
+    this.useRoute("updateTwin","post")
     this.useRoute("newTwin","post")
     this.useRoute("updateVisualSchema","post")
     this.useRoute("updateTopologySchema","post")
