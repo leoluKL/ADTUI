@@ -1,5 +1,3 @@
-const globalAppSettings = require("../globalAppSettings")
-const msalHelper=require("../msalHelper")
 const globalCache = require("../sharedSourceFiles/globalCache")
 
 function startSelectionDialog() {

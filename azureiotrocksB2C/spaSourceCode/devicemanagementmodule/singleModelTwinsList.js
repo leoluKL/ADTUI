@@ -1,11 +1,11 @@
 const globalCache = require("../sharedSourceFiles/globalCache");
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
-const modelIoTSettingDialog = require("../sharedSourceFiles/modelIoTSettingDialog")
+const modelIoTSettingDialog = require("./modelIoTSettingDialog")
 
 function singleModelTwinsList(singleADTModel,parentTwinsList) {
     this.parentTwinsList=parentTwinsList
     this.info=singleADTModel
-    this.childTwins={}
+    this.childTwins={} 
     this.name=singleADTModel.displayName;
     this.createDOM()
 }
