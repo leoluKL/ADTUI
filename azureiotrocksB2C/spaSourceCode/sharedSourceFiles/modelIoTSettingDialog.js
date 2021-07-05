@@ -159,7 +159,7 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
         if (e.responseText) alert(e.responseText)
     }
 
-    this.broadcastMessage({ "message": "ModelIoTSettingEdited","modelID":response.id })
+    this.broadcastMessage({ "message": "ModelIoTSettingEdited","modelID":response.updatedModelDoc.id })
     this.DOM.hide()
 }
 
@@ -284,10 +284,10 @@ modelIoTSettingDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,
             aSelectMenu.button.attr('class', 'w3-button w3-border')   
             pNameDiv.attr('class', '');
         }
-        this.refreshIoTTelemetrySample()
         if(realMouseClick) {
             IoTsettingObj["type"]=optionValue
         }
+        this.refreshIoTTelemetrySample()
     }
     if(IoTsettingObj.type!="") aSelectMenu.triggerOptionValue(IoTsettingObj.type)
     else aSelectMenu.triggerOptionIndex(0)
@@ -316,7 +316,6 @@ modelIoTSettingDialog.prototype.propertyTypeSampleValue = function(ptype){
 
 modelIoTSettingDialog.prototype.refreshIoTTelemetrySample = function(){
     var sampleObj={}
-    
     this.iotSettingsArr.forEach(onep=>{
         if(onep.type!="telemetry") return;
         var pathArr=onep.path

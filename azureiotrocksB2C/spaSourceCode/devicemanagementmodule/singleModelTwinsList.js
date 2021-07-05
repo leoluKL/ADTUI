@@ -97,6 +97,12 @@ singleModelTwinsList.prototype.refreshTwinsIcon=function(){
     for(var twinID in this.childTwins) this.childTwins[twinID].redrawIcon()
 }
 
+singleModelTwinsList.prototype.refreshTwinsIoTStatus=function(){
+    for(var twinID in this.childTwins) this.childTwins[twinID].redrawIoTState()
+}
+
+
+
 
 //--------------------------------------------------------------------------------------
 
@@ -121,7 +127,7 @@ singleTwinIcon.prototype.redrawIoTState=function(){
     this.IoTLable.css("opacity",0)
 
     if(this.twinInfo.IoTDeviceID!=null) {
-        this.IoTLable.css("opacity",100) //use opacity to control so it holds its place even when it is no visible
+        this.IoTLable.css("opacity",100) //use opacity to control so it holds its visual space even when it is no visible
         if(this.twinInfo.connectState) {
             this.IoTLable.removeClass("w3-gray")
             this.IoTLable.addClass("w3-lime")

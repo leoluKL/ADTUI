@@ -15,11 +15,11 @@ routerDeviceManagement.prototype.useRoute=function(routeStr,isPost){
 }
 
 routerDeviceManagement.prototype.provisionIoTDeviceTwin = async function(req,res){
-    
+    //TODO:
 }
 
 routerDeviceManagement.prototype.deprovisionIoTDeviceTwin = async function(req,res){
-    
+    //TODO:
 }
 
 routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinUUID,tags,desiredInDeviceTwin,accountID){
@@ -40,7 +40,7 @@ routerDeviceManagement.prototype._deprovisionIoTDeviceTwin = async function(twin
         var deprovisionDevicePayload={"deviceID":twinUUID}
         await got.post(process.env.iothuboperationAPIURL+"controlPlane/deprovisionDevice", {json:provisionDevicePayload,responseType: 'json'});
 
-        var postLoad={account:accountID,twinID:twinUUID,updateInfo:JSON.stringify({"IoTDeviceID":twinUUID})}
+        var postLoad={account:accountID,twinID:twinUUID,updateInfo:JSON.stringify({"IoTDeviceID":null})}
         var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateTwin", {json:postLoad,responseType: 'json'});
         return body
     }catch(e){

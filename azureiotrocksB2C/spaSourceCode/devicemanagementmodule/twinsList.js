@@ -24,6 +24,7 @@ twinsList.prototype.rxMessage=function(msgPayload){
         if(msgPayload.modelID) this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsIcon()
     }else if(msgPayload.message=="ModelIoTSettingEdited"){
         this.singleModelTwinsListSet[msgPayload.modelID].refreshName()
+        this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsIoTStatus()
     }
 }
 
