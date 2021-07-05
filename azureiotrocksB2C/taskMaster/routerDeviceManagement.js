@@ -55,7 +55,6 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
     
     try{
         var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateModel", {json:postLoad,responseType: 'json'});
-        res.send(body);
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         return;
