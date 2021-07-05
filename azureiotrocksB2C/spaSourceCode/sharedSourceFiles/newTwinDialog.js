@@ -56,6 +56,12 @@ newTwinDialog.prototype.popup = async function(twinInfo) {
 }
 
 newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
+    var modelID=this.twinInfo["$metadata"]["$model"]
+    var DBModelInfo=globalCache.getSingleDBModelByID(modelID)
+    console.log(DBModelInfo)
+
+    return;
+
     if(!this.twinInfo["$dtId"]||this.twinInfo["$dtId"]==""){
         alert("Please fill in name for the new digital twin")
         return;
@@ -80,7 +86,7 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
     globalCache.storeSingleADTTwin(data.ADTTwin)
 
     //it should select the new node in the tree, and move topology view to show the new node (note not blocked by the dialog itself)
-    this.broadcastMessage({ "message": "addNewTwin", twinInfo: data.ADTTwin })
+    this.broadcastMessage({ "message": "addNewTwin", "twinInfo": data.ADTTwin, "DBTwinInfo":data.DBTwin})
 
     if(closeDialog)this.DOM.hide()
     else{

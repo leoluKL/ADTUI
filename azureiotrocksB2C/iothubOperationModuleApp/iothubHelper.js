@@ -1,3 +1,4 @@
+//https://docs.microsoft.com/en-us/javascript/api/azure-iothub/registry?view=azure-node-latest
 const iothub = require('azure-iothub');
 const { DefaultAzureCredential} = require("@azure/identity");
 

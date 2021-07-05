@@ -31,7 +31,7 @@ routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinUU
         var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateTwin", {json:postLoad,responseType: 'json'});
         return body
     }catch(e){
-        console.error("IoT device provisioning fails: "+ twinUUID)
+        throw e;
     }
 }
 
@@ -47,7 +47,7 @@ routerDeviceManagement.prototype._deprovisionIoTDeviceTwin = async function(twin
         var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateTwin", {json:postLoad,responseType: 'json'});
         return body
     }catch(e){
-        console.error("IoT device deprovisioning fails: "+ twinUUID)
+        throw e;
     }
 }
 
@@ -57,7 +57,6 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
     var accountID=req.authInfo.account
     postLoad.account=accountID
     
-
 
     try{
         var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateModel", {json:postLoad,responseType: 'json'});
@@ -76,7 +75,15 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
             var aTwin=twins[i]
             var iotTwinID= aTwin.IoTDeviceID
             if(iotTwinID!=null && iotTwinID!="") {
-                return; //the twin has been provisioned to iot hub
+                if(req.body.forceRefreshDeviceDesired){
+                    var refreshDesiredPayload={"deviceID":iotTwinID,"desiredProperties":req.body.desiredInDeviceTwin}
+                    try{
+                        await got.post(process.env.iothuboperationAPIURL+"controlPlane/updateDeviceDesiredProperties", {json:refreshDesiredPayload,responseType: 'json'});
+                    }catch(e){
+                        console.error(e.response.body)
+                    }
+                }
+                continue;
             }
             var twinDisplayName=aTwin.displayName
             var twinID= aTwin.id;
@@ -99,7 +106,7 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
             var aTwin=twins[i]
             var iotTwinID= aTwin.IoTDeviceID
             if(iotTwinID==null || iotTwinID=="") {
-                return; //the twin has been deprovisioned off iot hub
+                continue; //the twin has been deprovisioned off iot hub
             }
             try{
                 var deprovisionedTwinDoc = await this._deprovisionIoTDeviceTwin(aTwin.id,accountID)

@@ -5,6 +5,7 @@ function routerControlPlane(){
     this.router = express.Router();
     this.useRoute("provisionDevice","post")
     this.useRoute("deprovisionDevice","post")
+    this.useRoute("updateDeviceDesiredProperties","post")
 
     this.useRoute("test")
 }
@@ -44,7 +45,33 @@ routerControlPlane.prototype.provisionDevice =async function(req,res) {
     }catch(e){
         res.status(400).send(e.message)
     }
-    
+}
+
+routerControlPlane.prototype.updateDeviceDesiredProperties=async function(req,res){
+    var deviceID=req.body.deviceID
+    var desiredProperties= req.body.desiredProperties
+
+    try{
+        var oldDeviceTwin=await iothubHelper.iothubRegistry.getTwin(deviceID)
+        var oldDesired=oldDeviceTwin.responseBody.properties.desired
+
+        for(var ind in oldDesired){
+            if(ind[0] == "$") continue; //$metadata and $version, system created key
+            if(desiredProperties[ind]) desiredProperties[ind] = oldDesired[ind]  //inherit the old desired value
+            else desiredProperties[ind]=null //remove unused desired properties
+        }
+
+        await iothubHelper.iothubRegistry.updateTwin(deviceID
+        ,{
+            "properties":{
+                "desired":desiredProperties
+            }
+        }
+        ,"*")
+        res.end()
+    }catch(e){
+        res.status(400).send(e.message)
+    }
 }
 
 routerControlPlane.prototype.test=async function(req,res){

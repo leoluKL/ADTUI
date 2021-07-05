@@ -42,6 +42,11 @@ singleModelTwinsList.prototype.createDOM=function(){
     this.refreshName()
 }
 
+singleModelTwinsList.prototype.addTwin=function(DBTwinInfo){
+    this.childTwins[DBTwinInfo.id]=new singleTwinIcon(DBTwinInfo,this)
+    this.refreshName()
+}
+
 singleModelTwinsList.prototype.expand=function(){
     this.listDOM.addClass("w3-show")
 }

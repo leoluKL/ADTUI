@@ -26,6 +26,9 @@ twinsList.prototype.rxMessage=function(msgPayload){
         this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsInfo()
         this.singleModelTwinsListSet[msgPayload.modelID].refreshName()
         this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsIoTStatus()
+    }else if(msgPayload.message=="addNewTwin"){
+        var modelID= msgPayload.DBTwinInfo.modelID
+        this.singleModelTwinsListSet[modelID].addTwin(msgPayload.DBTwinInfo) 
     }
 }
 
