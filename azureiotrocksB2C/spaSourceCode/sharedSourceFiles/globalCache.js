@@ -105,15 +105,16 @@ globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
 
 globalCache.prototype.mergeDBTwinsArr=function(DBTwinsArr){
     var idList={}
-    DBTwinsArr.forEach(aDBTwin=>{
+    var arr=[].concat(DBTwinsArr)
+    arr.forEach(aDBTwin=>{
         idList[aDBTwin.id]=1
     })
     this.DBTwinsArr.forEach(aDBTwin=>{
         if(idList[aDBTwin.id]) return;
-        DBTwinsArr.push(aDBTwin)
+        arr.push(aDBTwin)
     })
 
-    this.storeDBTwinsArr(DBTwinsArr)
+    this.storeDBTwinsArr(arr)
 }
 
 globalCache.prototype.getSingleDBModelByID=function(modelID){

@@ -47,7 +47,7 @@ if(!localTestFlag){
     });
 }else{
     app.use((req, res, next) => {
-        req.authInfo={emails:["test@gmail.com"],account:"test@gmail.com", name: "testaccount", country: "Singapore", idp: "google.com"}
+        req.authInfo={emails:["elephant.lyh@gmail.com"],account:"elephant.lyh@gmail.com", name: "testing", country: "Singapore", idp: "google.com"}
         next();
     });
 }
