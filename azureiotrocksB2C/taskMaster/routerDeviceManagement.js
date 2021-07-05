@@ -22,12 +22,32 @@ routerDeviceManagement.prototype.deprovisionIoTDeviceTwin = async function(req,r
     
 }
 
-routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinID){
-    
+routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinUUID,tags,desiredInDeviceTwin,accountID){
+    try{
+        var provisionDevicePayload={"deviceID":twinUUID,"tags":tags,"desiredProperties":desiredInDeviceTwin}
+        await got.post(process.env.iothuboperationAPIURL+"controlPlane/provisionDevice", {json:provisionDevicePayload,responseType: 'json'});
+        haveIoTDetail=true;
+
+        var postLoad={account:accountID,twinID:twinUUID,updateInfo:JSON.stringify({"IoTDeviceID":twinUUID})}
+        var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateTwin", {json:postLoad,responseType: 'json'});
+        return body
+    }catch(e){
+        console.error("IoT device provisioning fails: "+ twinUUID)
+    }
 }
 
-routerDeviceManagement.prototype._deprovisionIoTDeviceTwin = async function(twinID){
-    
+routerDeviceManagement.prototype._deprovisionIoTDeviceTwin = async function(twinUUID){
+    try{
+        var deprovisionDevicePayload={"deviceID":twinUUID}
+        await got.post(process.env.iothuboperationAPIURL+"controlPlane/deprovisionDevice", {json:provisionDevicePayload,responseType: 'json'});
+        haveIoTDetail=true;
+
+        var postLoad={account:accountID,twinID:twinUUID,updateInfo:JSON.stringify({"IoTDeviceID":twinUUID})}
+        var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateTwin", {json:postLoad,responseType: 'json'});
+        return body
+    }catch(e){
+        console.error("IoT device provisioning fails: "+ twinUUID)
+    }
 }
 
 
@@ -44,7 +64,7 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
     }
 
     var updatedModelDoc=body.updatedModelDoc;
-    var twins= body.twins //[{id:..,IoTDeviceID:...}...]
+    var twins= body.twins //[{id:..,IoTDeviceID:...,displayName:...}...]
     var returnDBTwins=[]
     
     if(updatedModelDoc.isIoTDeviceModel){
@@ -54,8 +74,15 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
             if(iotTwinID!=null && iotTwinID!="") {
                 return; //the twin has been provisioned to iot hub
             }
+            var twinDisplayName=aTwin.displayName
             var twinID= aTwin.id;
-            var provisionedTwinDoc = this._provisionIoTDeviceTwin(twinID,)
+            var iotDeviceTags={
+                "app":"azureiotrocks",
+                "twinName":twinDisplayName,
+                "owner":req.authInfo.account,
+                "modelID":updatedModelDoc.id
+            }
+            var provisionedTwinDoc = this._provisionIoTDeviceTwin(twinID,iotDeviceTags,req.body.desiredInDeviceTwin,req.authInfo.account)
             returnDBTwins.push(provisionedTwinDoc)
         });
     }else{
@@ -72,25 +99,6 @@ routerDeviceManagement.prototype.changeModelIoTSettings = async function(req,res
     }
 
     res.send({"updatedModelDoc":updatedModelDoc,"DBTwins":returnDBTwins})
-    
-    /*TODO: provision iot hub device if the model is an IoT device model
-    if(req.body.isIoTDevice){
-        var tags={
-            "app":"azureiotrocks",
-            "twinName":originTwinID,
-            "owner":req.authInfo.account,
-            "modelID":twinInfo["$metadata"]["$model"]
-        }
-        var desiredInDeviceTwin= req.body.desiredInDeviceTwin
-        try{
-            var provisionDevicePayload={"deviceID":twinUUID,"tags":tags,"desiredProperties":desiredInDeviceTwin}
-            await got.post(process.env.iothuboperationAPIURL+"controlPlane/provisionDevice", {json:provisionDevicePayload,responseType: 'json'});
-            haveIoTDetail=true;
-        }catch(e){
-            console.error("IoT device provisioning fails: "+ twinUUID)
-        }
-    }
-    */
 }
 
 

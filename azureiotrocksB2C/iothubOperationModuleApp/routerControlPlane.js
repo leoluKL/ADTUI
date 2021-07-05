@@ -4,6 +4,7 @@ const iothubHelper=require("./iothubHelper")
 function routerControlPlane(){
     this.router = express.Router();
     this.useRoute("provisionDevice","post")
+    this.useRoute("deprovisionDevice","post")
 
     this.useRoute("test")
 }
@@ -12,6 +13,16 @@ routerControlPlane.prototype.useRoute=function(routeStr,isPost){
     this.router[(isPost)?"post":"get"]("/"+routeStr,(req,res)=>{
         this[routeStr](req,res)
     })
+}
+
+routerControlPlane.prototype.deprovisionDevice =async function(req,res) {
+    var deviceID=req.body.deviceID
+    try{
+        await iothubHelper.iothubRegistry.delete(deviceID)
+        res.end()
+    }catch(e){
+        res.status(400).send(e.message)
+    }
 }
 
 routerControlPlane.prototype.provisionDevice =async function(req,res) {
