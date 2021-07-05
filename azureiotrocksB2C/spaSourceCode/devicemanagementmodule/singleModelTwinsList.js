@@ -101,14 +101,18 @@ singleModelTwinsList.prototype.refreshTwinsIoTStatus=function(){
     for(var twinID in this.childTwins) this.childTwins[twinID].redrawIoTState()
 }
 
+singleModelTwinsList.prototype.refreshTwinsInfo=function(){
+    for(var twinID in this.childTwins) this.childTwins[twinID].refreshTwinInfo()
+}
+
 
 
 
 //--------------------------------------------------------------------------------------
 
-function singleTwinIcon(singleDBTwin,parentModelTwins) {
+function singleTwinIcon(singleDBTwin,parentModelTwinsList) {
     this.twinInfo=singleDBTwin
-    this.parentModelTwins=parentModelTwins
+    this.parentModelTwinsList=parentModelTwinsList
     this.DOM=$("<div class='w3-hover-amber'  style='width:80px;float:left;height:100px;margin:8px;cursor:default'/>")
 
     this.IoTLable=$("<div style='width:30%;text-align:center;border-radius: 3px;margin:5px 35%;height:15px;font-weight:bold;font-size:80%'>IoT</div>")
@@ -117,8 +121,13 @@ function singleTwinIcon(singleDBTwin,parentModelTwins) {
     this.nameDOM=$("<div style='word-break: break-word;width:100%;text-align:center;margin-top:5px'>"+this.twinInfo.displayName+"</div>")
     this.redrawIcon()
     this.redrawIoTState()
-    parentModelTwins.listDOM.append(this.DOM)
+    parentModelTwinsList.listDOM.append(this.DOM)
     this.DOM.append(this.IoTLable, this.iconDOM,this.nameDOM)
+}
+
+singleTwinIcon.prototype.refreshTwinInfo=function(){
+    var twinID=this.twinInfo.id
+    this.twinInfo=globalCache.getSingleDBTwinByID(twinID)
 }
 
 singleTwinIcon.prototype.redrawIoTState=function(){

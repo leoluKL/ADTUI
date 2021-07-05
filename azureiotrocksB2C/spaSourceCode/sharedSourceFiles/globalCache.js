@@ -117,6 +117,16 @@ globalCache.prototype.mergeDBTwinsArr=function(DBTwinsArr){
     this.storeDBTwinsArr(arr)
 }
 
+globalCache.prototype.getSingleDBTwinByID=function(twinID){
+    for(var i=0;i<this.DBTwinsArr.length;i++){
+        var ele = this.DBTwinsArr[i]
+        if(ele.id==twinID){
+            return ele
+        }
+    }
+    return null;
+}
+
 globalCache.prototype.getSingleDBModelByID=function(modelID){
     for(var i=0;i<this.DBModelsArr.length;i++){
         var ele = this.DBModelsArr[i]
