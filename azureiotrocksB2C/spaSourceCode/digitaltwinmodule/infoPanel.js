@@ -422,7 +422,19 @@ infoPanel.prototype.deleteSelected=async function(){
     )
 }
 
-infoPanel.prototype.deleteTwins=async function(twinIDArr){   
+infoPanel.prototype.deleteTwins=async function(twinIDArr){
+    var ioTDevices=[]
+    twinIDArr.forEach(oneTwinID=>{
+        var dbTwinInfo=globalCache.getSingleDBTwinByID(oneTwinID)
+        if(dbTwinInfo.IoTDeviceID!=null && dbTwinInfo.IoTDeviceID!=""){
+            ioTDevices.push(dbTwinInfo.IoTDeviceID)
+        }
+    })
+    if(ioTDevices.length>0){
+        msalHelper.callAPI("devicemanagement/unregisterIoTDevices", "POST", {arr:ioTDevices})
+    }
+    
+
     while(twinIDArr.length>0){
         var smallArr= twinIDArr.splice(0, 100);
         

@@ -538,6 +538,8 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
 
         this.tree.options.leafNodeIconFunc = (ln) => {
             var modelClass = ln.leafInfo["@id"]
+            var dbModelInfo=globalCache.getSingleDBModelByID(modelClass)
+            
             var colorCode = "darkGray"
             var shape = "ellipse"
             var avarta = null
@@ -551,6 +553,12 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
             }
 
             var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative'></div>")
+            if(dbModelInfo.isIoTDeviceModel){
+                var iotDiv=$("<div class='w3-border' style='position:absolute;right:-5px;padding:0px 2px;top:-9px;border-radius: 3px;font-size:7px'>IoT</div>")
+                iconDOM.append(iotDiv)
+            }
+
+
             var imgSrc=encodeURIComponent(this.shapeSvg(shape,colorCode))
             iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
             if(avarta){

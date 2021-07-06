@@ -9,6 +9,7 @@ function twinsTree(DOM, searchDOM) {
 
     this.tree.options.groupNodeIconFunc=(gn)=>{
         var modelClass=gn.info["@id"]
+        var dbModelInfo=globalCache.getSingleDBModelByID(modelClass)
         var colorCode="darkGray"
         var shape="ellipse"
         var avarta=null
@@ -21,7 +22,12 @@ function twinsTree(DOM, searchDOM) {
             if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
         }
 
-        var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative'></div>")
+        var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative;padding-top:2px'></div>")
+        if(dbModelInfo.isIoTDeviceModel){
+            var iotDiv=$("<div class='w3-border' style='position:absolute;right:-5px;padding:0px 2px;top:-7px;border-radius: 3px;font-size:7px'>IoT</div>")
+            iconDOM.append(iotDiv)
+        }
+
         var imgSrc=encodeURIComponent(this.shapeSvg(shape,colorCode))
         iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
         if(avarta){

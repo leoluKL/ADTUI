@@ -45,6 +45,7 @@ modelIoTSettingDialog.prototype.popup = async function(modelID) {
     }else{
         this.iotInfo=null
     }
+    this.originalDesiredPropertiesStr=JSON.stringify(DBModelInfo.desiredProperties)
 
     topLeftDom.append($("<div style='padding-top:10px'/>").append(
         $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
@@ -146,6 +147,12 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
     }else{
         postBody.updateInfo.isIoTDeviceModel=false
     }
+
+    var curDesiredPropertyStr=JSON.stringify(postBody.updateInfo.desiredProperties)
+    if(curDesiredPropertyStr!=this.originalDesiredPropertiesStr) {
+        postBody.forceRefreshDeviceDesired=true
+    }
+
 
     postBody.updateInfo = JSON.stringify(postBody.updateInfo)
     try {
