@@ -1,35 +1,83 @@
-const msalHelper = require("../msalHelper")
-const globalCache = require("../sharedSourceFiles/globalCache")
 const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer")
 const singleModelTwinsList=require("./singleModelTwinsList")
 
 
 function twinsList(DOM) {
     this.DOM=DOM
-    this.singleModelTwinsListSet={}
+    this.singleModelTwinsListArr=[]
+    this.selectedTwinIcons=[];
+}
+
+twinsList.prototype.findSingleModelTwinsListByModelID=function(modelID){
+    for(var i=0;i<this.singleModelTwinsListArr.length;i++){
+        var aModelTwinsList=this.singleModelTwinsListArr[i]
+        if(aModelTwinsList.info["@id"]==modelID) return aModelTwinsList
+    }
+    return null;
 }
 
 twinsList.prototype.refill=function(){
     this.DOM.empty()
-    for(var ind in this.singleModelTwinsListSet) delete this.singleModelTwinsListSet[ind]
+    this.singleModelTwinsListArr.length=0
 
     for(var ind in modelAnalyzer.DTDLModels){
-        this.singleModelTwinsListSet[ind]=new singleModelTwinsList(modelAnalyzer.DTDLModels[ind],this,this.DOM)
+        this.singleModelTwinsListArr.push(new singleModelTwinsList(modelAnalyzer.DTDLModels[ind],this,this.DOM))
     }
 
 }
 
 twinsList.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="visualDefinitionChange"){
-        if(msgPayload.modelID) this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsIcon()
+        if(msgPayload.modelID)  var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(msgPayload.modelID)
+        theSingleModelTwinsList.refreshTwinsIcon()
     }else if(msgPayload.message=="ModelIoTSettingEdited"){
-        this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsInfo()
-        this.singleModelTwinsListSet[msgPayload.modelID].refreshName()
-        this.singleModelTwinsListSet[msgPayload.modelID].refreshTwinsIoTStatus()
+        if(msgPayload.modelID)  var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(msgPayload.modelID)
+        theSingleModelTwinsList.refreshTwinsInfo()
+        theSingleModelTwinsList.refreshName()
+        theSingleModelTwinsList.refreshTwinsIoTStatus()
     }else if(msgPayload.message=="addNewTwin"){
-        var modelID= msgPayload.DBTwinInfo.modelID
-        this.singleModelTwinsListSet[modelID].addTwin(msgPayload.DBTwinInfo) 
+        var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(msgPayload.DBTwinInfo.modelID)
+        theSingleModelTwinsList.addTwin(msgPayload.DBTwinInfo) 
     }
 }
+
+twinsList.prototype.appendTwinIconToSelection=function(aTwinIcon){
+    var newArr=[].concat(this.selectedTwinIcons)
+    newArr.push(aTwinIcon)
+    this.selectTwinIconArr(newArr)
+}
+
+twinsList.prototype.addTwinIconArrayToSelection=function(arr){
+    var newArr = this.selectedTwinIcons
+    var filterArr=arr.filter((item) => newArr.indexOf(item) < 0)
+    newArr = newArr.concat(filterArr)
+    this.selectTwinIconArr(newArr)
+}
+
+twinsList.prototype.selectTwinIcon=function(aTwinIcon,mouseClickDetail){
+    this.selectTwinIconArr([aTwinIcon],mouseClickDetail)
+}
+
+twinsList.prototype.selectTwinIconArr=function(twiniconArr,mouseClickDetail){
+    for(var i=0;i<this.selectedTwinIcons.length;i++){
+        this.selectedTwinIcons[i].dim()
+    }
+    this.selectedTwinIcons.length=0;
+    this.selectedTwinIcons=this.selectedTwinIcons.concat(twiniconArr)
+    for(var i=0;i<this.selectedTwinIcons.length;i++){
+        this.selectedTwinIcons[i].highlight()
+    }
+
+    if(this.callback_afterSelectTwinIcons) this.callback_afterSelectTwinIcons(this.selectedTwinIcons,mouseClickDetail)
+}
+
+twinsList.prototype.getAllTwinIconArr=function(){
+    var allTwinIcons=[]
+    this.singleModelTwinsListArr.forEach(aModelTwinsList=>{
+        allTwinIcons=allTwinIcons.concat(aModelTwinsList.childTwins)
+    })
+    return allTwinIcons;
+}
+
 
 module.exports = twinsList;

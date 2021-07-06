@@ -5,7 +5,7 @@ const modelIoTSettingDialog = require("./modelIoTSettingDialog")
 function singleModelTwinsList(singleADTModel,parentTwinsList) {
     this.parentTwinsList=parentTwinsList
     this.info=singleADTModel
-    this.childTwins={} 
+    this.childTwins=[]
     this.name=singleADTModel.displayName;
     this.createDOM()
 }
@@ -36,14 +36,14 @@ singleModelTwinsList.prototype.createDOM=function(){
         return aName.localeCompare(bName) 
     });
     twins.forEach(aTwin=>{
-        this.childTwins[aTwin.id]=new singleTwinIcon(aTwin,this)
+        this.childTwins.push(new singleTwinIcon(aTwin,this))
     })
 
     this.refreshName()
 }
 
 singleModelTwinsList.prototype.addTwin=function(DBTwinInfo){
-    this.childTwins[DBTwinInfo.id]=new singleTwinIcon(DBTwinInfo,this)
+    this.childTwins.push(new singleTwinIcon(DBTwinInfo,this))
     this.refreshName()
 }
 
@@ -64,10 +64,10 @@ singleModelTwinsList.prototype.refreshName=function(){
 
     var countTwins=0
     var countIoTDevices=0
-    for(var ind in this.childTwins) {
+    this.childTwins.forEach(aTwin=>{
         countTwins++
-        if(this.childTwins[ind].twinInfo["IoTDeviceID"]!=null) countIoTDevices++
-    }
+        if(aTwin.twinInfo["IoTDeviceID"]!=null) countIoTDevices++
+    })
     var numberlabel=$("<label style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+countTwins+" twins</label>")
     if(countTwins==0) numberlabel.addClass("w3-gray")
     else numberlabel.addClass("w3-orange")
@@ -99,15 +99,15 @@ singleModelTwinsList.prototype.refreshName=function(){
 }
 
 singleModelTwinsList.prototype.refreshTwinsIcon=function(){
-    for(var twinID in this.childTwins) this.childTwins[twinID].redrawIcon()
+    this.childTwins.forEach(aTwin=>{aTwin.redrawIcon()})
 }
 
 singleModelTwinsList.prototype.refreshTwinsIoTStatus=function(){
-    for(var twinID in this.childTwins) this.childTwins[twinID].redrawIoTState()
+    this.childTwins.forEach(aTwin=>{aTwin.redrawIoTState()})
 }
 
 singleModelTwinsList.prototype.refreshTwinsInfo=function(){
-    for(var twinID in this.childTwins) this.childTwins[twinID].refreshTwinInfo()
+    this.childTwins.forEach(aTwin=>{aTwin.refreshTwinInfo()})
 }
 
 
@@ -118,7 +118,7 @@ singleModelTwinsList.prototype.refreshTwinsInfo=function(){
 function singleTwinIcon(singleDBTwin,parentModelTwinsList) {
     this.twinInfo=singleDBTwin
     this.parentModelTwinsList=parentModelTwinsList
-    this.DOM=$("<div class='w3-hover-amber'  style='width:80px;float:left;height:100px;margin:8px;cursor:default'/>")
+    this.DOM=$("<div class='w3-hover-gray'  style='width:80px;float:left;height:100px;margin:8px;cursor:default'/>")
 
     this.IoTLable=$("<div style='width:30%;text-align:center;border-radius: 3px;margin:5px 35%;height:15px;font-weight:bold;font-size:80%'>IoT</div>")
 
@@ -128,6 +128,43 @@ function singleTwinIcon(singleDBTwin,parentModelTwinsList) {
     this.redrawIoTState()
     parentModelTwinsList.listDOM.append(this.DOM)
     this.DOM.append(this.IoTLable, this.iconDOM,this.nameDOM)
+
+
+    var clickF=(e)=>{
+        this.highlight();
+        var clickDetail=e.detail
+        if (e.ctrlKey) {
+            this.parentModelTwinsList.parentTwinsList.appendTwinIconToSelection(this)
+            this.parentModelTwinsList.parentTwinsList.lastClickedTwinIcon=this;
+        }else if(e.shiftKey){
+            if(this.parentModelTwinsList.parentTwinsList.lastClickedTwinIcon==null){
+                this.clickSelf()
+            }else{
+                var allTwinIconArr=this.parentModelTwinsList.parentTwinsList.getAllTwinIconArr()
+                var index1 = allTwinIconArr.indexOf(this.parentModelTwinsList.parentTwinsList.lastClickedTwinIcon)
+                var index2 = allTwinIconArr.indexOf(this)
+                if(index1==-1 || index2==-1){
+                    this.clickSelf()
+                }else{
+                    //select all twinicons between
+                    var lowerI= Math.min(index1,index2)
+                    var higherI= Math.max(index1,index2)
+                    
+                    var middleArr=allTwinIconArr.slice(lowerI,higherI)                  
+                    middleArr.push(allTwinIconArr[higherI])
+                    this.parentModelTwinsList.parentTwinsList.addTwinIconArrayToSelection(middleArr)
+                }
+            }
+        }else{
+            this.clickSelf(clickDetail)
+        }
+    }
+    this.DOM.on("click",(e)=>{clickF(e)})
+}
+
+singleTwinIcon.prototype.clickSelf=function(mouseClickDetail){
+    this.parentModelTwinsList.parentTwinsList.lastClickedTwinIcon=this;
+    this.parentModelTwinsList.parentTwinsList.selectTwinIcon(this,mouseClickDetail)
 }
 
 singleTwinIcon.prototype.refreshTwinInfo=function(){
@@ -185,5 +222,17 @@ singleTwinIcon.prototype.shapeSvg=function(shape,color){//round-rectangle":"▉"
         return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><rect x="10" y="10" rx="10" ry="10" width="80" height="80" fill="'+color+'" /></svg>'
     }
 }
+
+singleTwinIcon.prototype.highlight=function(){
+    this.DOM.addClass("w3-hover-orange")
+    this.DOM.addClass("w3-amber")
+    this.DOM.removeClass("w3-hover-gray")
+}
+singleTwinIcon.prototype.dim=function(){
+    this.DOM.removeClass("w3-hover-orange")
+    this.DOM.removeClass("w3-amber")
+    this.DOM.addClass("w3-hover-gray")
+}
+
 
 module.exports = singleModelTwinsList;
