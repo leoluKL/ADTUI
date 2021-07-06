@@ -155,6 +155,8 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
 
 
     postBody.updateInfo = JSON.stringify(postBody.updateInfo)
+    console.log(postBody)
+    return
     try {
         var response = await msalHelper.callAPI("devicemanagement/changeModelIoTSettings", "POST", postBody)
         globalCache.storeSingleDBModel(response.updatedModelDoc)

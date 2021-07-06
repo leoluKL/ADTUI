@@ -57,7 +57,7 @@ routerControlPlane.prototype.updateDeviceDesiredProperties=async function(req,re
 
         for(var ind in oldDesired){
             if(ind[0] == "$") continue; //$metadata and $version, system created key
-            if(desiredProperties[ind]) desiredProperties[ind] = oldDesired[ind]  //inherit the old desired value
+            if(desiredProperties[ind]!=null) desiredProperties[ind] = oldDesired[ind]  //inherit the old desired value
             else desiredProperties[ind]=null //remove unused desired properties
         }
 
