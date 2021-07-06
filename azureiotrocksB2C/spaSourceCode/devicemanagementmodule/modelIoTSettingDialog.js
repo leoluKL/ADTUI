@@ -140,8 +140,7 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
             else if(ele.type=="desired"){
                 postBody.updateInfo.desiredProperties.push(ele)
                 var propertyName=ele.path[ele.path.length-1]
-                var propertySampleV= this.propertyTypeSampleValue(ele.ptype)
-                postBody.desiredInDeviceTwin[propertyName]=propertySampleV
+                postBody.desiredInDeviceTwin[propertyName]=""
             }else if(ele.type=="report") postBody.updateInfo.reportProperties.push(ele)
         })
     }else{

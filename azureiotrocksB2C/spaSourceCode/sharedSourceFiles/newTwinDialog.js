@@ -84,10 +84,23 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
 
     //ask taskmaster to provision the twin to iot hub if the model is a iot device model
     if(DBModelInfo.isIoTDeviceModel){
-        
+        try{
+            var postBody= {"DBTwin":data.DBTwin,"desiredInDeviceTwin":{}}
+            DBModelInfo.desiredProperties.forEach(ele=>{
+                var propertyName=ele.path[ele.path.length-1]
+                var propertySampleV= ""
+                postBody.desiredInDeviceTwin[propertyName]=propertySampleV
+            })
+            var provisionedDocument = await msalHelper.callAPI("devicemanagement/provisionIoTDeviceTwin", "POST", postBody )
+        }catch(e){
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
+        }
+        data.DBTwin=provisionedDocument
+        globalCache.storeSingleDBTwin(provisionedDocument)   
     }
 
-    //it should select the new node in the tree, and move topology view to show the new node (note not blocked by the dialog itself)
+    //it should select the new node in the tree, and move topology view to show the new node (note pan to a place that is not blocked by the dialog itself)
     this.broadcastMessage({ "message": "addNewTwin", "twinInfo": data.ADTTwin, "DBTwinInfo":data.DBTwin})
 
     if(closeDialog)this.DOM.hide()
@@ -95,7 +108,6 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
         //clear the input editbox
         this.popup(this.originalTwinInfo)
     }
-    
 }
 
 newTwinDialog.prototype.drawModelSettings = async function() {

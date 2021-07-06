@@ -6,6 +6,7 @@ function routerDeviceManagement(){
     this.useRoute("changeModelIoTSettings","isPost")
     this.useRoute("provisionIoTDeviceTwin","isPost")
     this.useRoute("deprovisionIoTDeviceTwin","isPost")
+    this.useRoute("unregisterIoTDevices","isPost")
 }
 
 routerDeviceManagement.prototype.useRoute=function(routeStr,isPost){
@@ -41,6 +42,23 @@ routerDeviceManagement.prototype.deprovisionIoTDeviceTwin = async function(req,r
         res.status(400).send(e.response.body);
     }
 }
+
+routerDeviceManagement.prototype.unregisterIoTDevices = async function(req,res){
+    var promiseArr=[]
+    var twinIDs=req.body.arr
+    twinIDs.forEach(aID=>{
+        var deprovisionDevicePayload={"deviceID":aID}
+        promiseArr.push(got.post(process.env.iothuboperationAPIURL+"controlPlane/deprovisionDevice", {json:deprovisionDevicePayload,responseType: 'json'}))
+    })
+
+    try{
+        await Promise.allSettled(promiseArr);
+        res.end()
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+}
+
 
 routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinUUID,tags,desiredInDeviceTwin,accountID){
     try{
