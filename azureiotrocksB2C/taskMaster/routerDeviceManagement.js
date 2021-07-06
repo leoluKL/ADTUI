@@ -15,11 +15,31 @@ routerDeviceManagement.prototype.useRoute=function(routeStr,isPost){
 }
 
 routerDeviceManagement.prototype.provisionIoTDeviceTwin = async function(req,res){
-    //TODO:
+    var accountID=req.authInfo.account
+    var twinID=req.body.DBTwin.id
+    var tags={
+        "app":"azureiotrocks",
+        "twinName":req.body.DBTwin.displayName,
+        "owner":accountID,
+        "modelID":req.body.DBTwin.modelID
+    }
+    try{
+        var provisionedTwinDoc = await this._provisionIoTDeviceTwin(twinID,tags,req.body.desiredInDeviceTwin,accountID)
+        res.send(provisionedTwinDoc)
+    }catch(e){
+        res.status(400).send(e.response.body);
+    }
 }
 
 routerDeviceManagement.prototype.deprovisionIoTDeviceTwin = async function(req,res){
-    //TODO:
+    var accountID=req.authInfo.account
+    var twinID=req.body.twinID
+    try{
+        var deprovisionedTwinDoc = await this._deprovisionIoTDeviceTwin(twinID,accountID)
+        res.send(deprovisionedTwinDoc)
+    }catch(e){
+        res.status(400).send(e.response.body);
+    }
 }
 
 routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinUUID,tags,desiredInDeviceTwin,accountID){

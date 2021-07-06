@@ -58,15 +58,11 @@ newTwinDialog.prototype.popup = async function(twinInfo) {
 newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
     var modelID=this.twinInfo["$metadata"]["$model"]
     var DBModelInfo=globalCache.getSingleDBModelByID(modelID)
-    console.log(DBModelInfo)
-
-    return;
 
     if(!this.twinInfo["$dtId"]||this.twinInfo["$dtId"]==""){
         alert("Please fill in name for the new digital twin")
         return;
     }
-    var modelID=this.twinInfo["$metadata"]["$model"]
     var componentsNameArr=modelAnalyzer.DTDLModels[modelID].includedComponents
     componentsNameArr.forEach(oneComponentName=>{ //adt service requesting all component appear by mandatory
         if(this.twinInfo[oneComponentName]==null)this.twinInfo[oneComponentName]={}
@@ -84,6 +80,12 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
 
     globalCache.storeSingleDBTwin(data.DBTwin)    
     globalCache.storeSingleADTTwin(data.ADTTwin)
+
+
+    //ask taskmaster to provision the twin to iot hub if the model is a iot device model
+    if(DBModelInfo.isIoTDeviceModel){
+        
+    }
 
     //it should select the new node in the tree, and move topology view to show the new node (note not blocked by the dialog itself)
     this.broadcastMessage({ "message": "addNewTwin", "twinInfo": data.ADTTwin, "DBTwinInfo":data.DBTwin})
