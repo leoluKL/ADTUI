@@ -4,13 +4,13 @@ const msalHelper=require("../msalHelper")
 const deviceManagementMainToolbar = require("./deviceManagementMainToolbar")
 const modelEditorDialog = require("../sharedSourceFiles/modelEditorDialog")
 const modelIoTSettingDialog= require("./modelIoTSettingDialog")
+const twinInfoPanel= require("./twinInfoPanel");
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
 const globalCache=require("../sharedSourceFiles/globalCache")
 const twinsList=require("./twinsList")
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 
 function deviceManagementUI() {
-    this.twinsList= new twinsList($("#TwinsList"))
     deviceManagementMainToolbar.render()
 
     this.myMSALObj = new msal.PublicClientApplication(globalAppSettings.msalConfig);
@@ -24,13 +24,13 @@ function deviceManagementUI() {
         if(globalCache.DBModelsArr.length==0){
             //TODO: if there is no model at all, prompt user to create his first model
         }else{
-            this.twinsList.refill()
+            twinsList.refill()
         }
     })
 }
 
 deviceManagementUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,this.twinsList,newTwinDialog,modelIoTSettingDialog]
+    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,twinsList,newTwinDialog,modelIoTSettingDialog,twinInfoPanel]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

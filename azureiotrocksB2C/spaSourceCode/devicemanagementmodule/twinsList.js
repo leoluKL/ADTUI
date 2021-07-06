@@ -2,8 +2,8 @@ const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer")
 const singleModelTwinsList=require("./singleModelTwinsList")
 
 
-function twinsList(DOM) {
-    this.DOM=DOM
+function twinsList() {
+    this.DOM=$("#TwinsList")
     this.singleModelTwinsListArr=[]
     this.selectedTwinIcons=[];
 }
@@ -80,4 +80,4 @@ twinsList.prototype.getAllTwinIconArr=function(){
 }
 
 
-module.exports = twinsList;
+module.exports = new twinsList();
