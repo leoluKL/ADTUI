@@ -2,6 +2,7 @@ const modelAnalyzer=require("../sharedSourceFiles/modelAnalyzer")
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 const msalHelper=require("../msalHelper")
 const globalCache=require("../sharedSourceFiles/globalCache")
+const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
 
 function modelIoTSettingDialog() {
     if(!this.DOM){
@@ -23,7 +24,9 @@ modelIoTSettingDialog.prototype.popup = async function(modelID) {
 
     var okButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Accept</button>')
     this.contentDOM.children(':first').append(okButton)
-    okButton.on("click", async () => { this.commitChange() })
+    okButton.on("click", async () => { 
+        this.checkModelIoTSettingChange()    
+    })
 
     var firstRow=$('<div class="w3-cell-row" style="padding-bottom:10px"></div>')
     this.contentDOM.append(firstRow)
@@ -122,6 +125,58 @@ modelIoTSettingDialog.prototype.popup = async function(modelID) {
     }
 
     
+}
+
+modelIoTSettingDialog.prototype.checkModelIoTSettingChange= function(){
+    //if it is to remove the iot setting and there are twins under this model that have been provisioned
+    //give a warning dialog to confirm the change
+    if(this.iotInfo) {
+        this.commitChange()
+        return;
+    }
+
+    var affectTwins= globalCache.getDBTwinsByModelID(this.modelID)
+
+    var provisionedTwins=[]
+    for(var i=0;i<affectTwins.length;i++){
+        var oneTwin=affectTwins[i]
+        if(oneTwin.IoTDeviceID!=null && oneTwin.IoTDeviceID!=""){
+            provisionedTwins.push(globalCache.twinIDMapToDisplayName[oneTwin.id])
+        }
+    }
+
+    if(provisionedTwins.length==0){
+        this.commitChange()
+        return;
+    }
+
+    var dialogStr="Turning off model IoT setting will deactive "
+    if(provisionedTwins.length>10) dialogStr+= provisionedTwins.length +" IoT devices of this model type"
+    else dialogStr+="IoT devices: "+provisionedTwins.join()
+    dialogStr+=". Are you sure?"
+
+    var confirmDialogDiv=new simpleConfirmDialog()
+
+    confirmDialogDiv.show(
+        { width: "250px" },
+        {
+            title: "Warning"
+            , content: dialogStr
+            , buttons:[
+                {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                        this.commitChange()
+                    }
+                },
+                {
+                    colorClass: "w3-gray",text: "Cancel", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                }}
+            ]
+        }
+    )
+
 }
 
 modelIoTSettingDialog.prototype.commitChange = async function() {

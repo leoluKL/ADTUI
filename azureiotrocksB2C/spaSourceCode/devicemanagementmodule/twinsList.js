@@ -6,6 +6,14 @@ function twinsList() {
     this.DOM=$("#TwinsList")
     this.singleModelTwinsListArr=[]
     this.selectedTwinIcons=[];
+
+    this.callback_afterSelectTwinIcons=(twinIcons,mouseClickDetail)=>{
+        var infoArr=[]
+        twinIcons.forEach((item, index) =>{
+            infoArr.push(item.twinInfo)
+        });
+        this.broadcastMessage({ "message": "showInfoSelectedDevices", info:infoArr, "mouseClickDetail":mouseClickDetail})
+    }
 }
 
 twinsList.prototype.findSingleModelTwinsListByModelID=function(modelID){

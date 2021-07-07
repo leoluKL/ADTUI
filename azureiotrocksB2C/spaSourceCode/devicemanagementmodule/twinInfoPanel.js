@@ -10,6 +10,72 @@ function twinInfoPanel() {
     this.selectedObjects=null;
 }
 
+
+twinInfoPanel.prototype.rxMessage=function(msgPayload){
+    if(msgPayload.message=="showInfoSelectedDevices"){
+        this.DOM.empty()
+        var arr=msgPayload.info;
+        console.log(arr)
+        return;
+        
+        if(arr==null || arr.length==0){
+            this.drawButtons(null)
+            this.selectedObjects=[];
+            return;
+        }
+        this.selectedObjects=arr;
+        if(arr.length==1){
+            var singleElementInfo=arr[0];
+            
+            if(singleElementInfo["$dtId"]){// select a node
+                this.drawButtons("singleNode")
+                
+                //instead of draw the $dtId, draw display name instead
+                //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
+                this.drawStaticInfo(this.DOM,{"name":singleElementInfo["displayName"]},"1em","13px")
+
+
+                var modelName=singleElementInfo['$metadata']['$model']
+                
+                if(modelAnalyzer.DTDLModels[modelName]){
+                    this.drawEditable(this.DOM,modelAnalyzer.DTDLModels[modelName].editableProperties,singleElementInfo,[])
+                }
+                //instead of drawing the original infomration, draw more meaningful one
+                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
+                this.drawStaticInfo(this.DOM,{"Model":singleElementInfo["$metadata"]["$model"]},"1em","10px")
+                for(var ind in singleElementInfo["$metadata"]){
+                    if(ind == "$model") continue;
+                    var tmpObj={}
+                    tmpObj[ind]=singleElementInfo["$metadata"][ind]
+                    this.drawStaticInfo(this.DOM,tmpObj,"1em","10px")
+                }
+            }else if(singleElementInfo["$sourceId"]){
+                this.drawButtons("singleRelationship")
+                this.drawStaticInfo(this.DOM,{
+                    "From":globalCache.twinIDMapToDisplayName[singleElementInfo["$sourceId"]],
+                    "To":globalCache.twinIDMapToDisplayName[singleElementInfo["$targetId"]],
+                    "Relationship Type":singleElementInfo["$relationshipName"]
+                    //,"$relationshipId":singleElementInfo["$relationshipId"]
+                },"1em","13px")
+                var relationshipName=singleElementInfo["$relationshipName"]
+                var sourceModel=singleElementInfo["sourceModel"]
+                
+                this.drawEditable(this.DOM,this.getRelationShipEditableProperties(relationshipName,sourceModel),singleElementInfo,[])
+                for(var ind in singleElementInfo["$metadata"]){
+                    var tmpObj={}
+                    tmpObj[ind]=singleElementInfo["$metadata"][ind]
+                    this.drawStaticInfo(this.DOM,tmpObj,"1em","10px")
+                }
+                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
+            }
+        }else if(arr.length>1){
+            this.drawButtons("multiple")
+            this.drawMultipleObj()
+        }
+    }
+}
+
+
 twinInfoPanel.prototype.drawButtons=function(selectType){
     if(selectType!=null){
     }else{

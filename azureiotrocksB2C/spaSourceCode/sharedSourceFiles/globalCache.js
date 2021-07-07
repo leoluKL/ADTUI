@@ -117,6 +117,19 @@ globalCache.prototype.mergeDBTwinsArr=function(DBTwinsArr){
     this.storeDBTwinsArr(arr)
 }
 
+
+
+globalCache.prototype.getDBTwinsByModelID=function(modelID){
+    var resultArr=[]
+    for(var i=0;i<this.DBTwinsArr.length;i++){
+        var ele = this.DBTwinsArr[i]
+        if(ele.modelID==modelID){
+            resultArr.push(ele)
+        }
+    }
+    return resultArr;
+}
+
 globalCache.prototype.getSingleDBTwinByID=function(twinID){
     for(var i=0;i<this.DBTwinsArr.length;i++){
         var ele = this.DBTwinsArr[i]
