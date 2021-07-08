@@ -30,18 +30,7 @@ app.use(express.urlencoded({extended: true}));
 //create the secret for creating JWT that will include information of projects each login user can access
 global.jwtSecret= uuidv4()
 
-/*
-jwt.verify(testJWT+"e", jwtSecret, (err, verifiedJwt) => {
-    if(err){
-      console.log(err.message)
-    }else{
-      console.log(verifiedJwt.body.availableProjects)
-    }
-})
-*/
-
-
-var parseAuthTokenFromAzureAD =(token) =>{
+var parseJWT =(token) =>{
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     base64= Buffer.from(base64, 'base64').toString();
@@ -57,8 +46,34 @@ if(!localTestFlag){
         var bearerToken = req.header("Authorization")
         if(bearerToken!=null){
             bearerToken= bearerToken.substring("Bearer ".length);
-            req.authInfo=parseAuthTokenFromAzureAD(bearerToken)
+            req.authInfo=parseJWT(bearerToken)  //this is the token from azure AD
             req.authInfo.account=req.authInfo.emails[0]
+        }
+        next();
+    });
+    //verify if the project jwt token is valid and the request project is accessible to this user account
+    app.use((req, res, next) => {
+        if(req.body.projectID!=null){
+            var passProjectVerification=false
+            var joinedProjectsToken = req.header("projects")
+            if(joinedProjectsToken!=null){
+                var availableProjects=parseJWT(joinedProjectsToken).availableProjects  //this is the token contain all usable projects for this user
+                if(availableProjects[req.body.projectID]!=null) passProjectVerification=true
+            }
+            if(passProjectVerification){ //also check if the jwt is legal
+                try {
+                    var parsedJwt = jwt.verify(joinedProjectsToken,global.jwtSecret);
+                  } catch(e) {
+                    res.status(400).send("InvalidProjectToken")
+                    return; //stop this http request as it asking to access nonauthorized project
+                  }
+            }
+            
+            if(!passProjectVerification){
+                //reject the request
+                res.status(400).send("ProjectNotAuthorized")
+                return; //stop this http request as it asking to access nonauthorized project
+            }
         }
         next();
     });
@@ -68,6 +83,7 @@ if(!localTestFlag){
         next();
     });
 }
+
 
 //define sub routers for http requests
 app.use("/accountManagement", require("./routerAccountManagement"))
