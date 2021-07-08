@@ -1,6 +1,6 @@
 const express = require("express");
 const got = require('got');
-const { v4:uuidv4 } = require('uuid');
+const jwt = require('njwt')
 
 function routerDigitalTwin(){
     this.router = express.Router();
@@ -43,7 +43,25 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
         return;
     }
 
-    //get the joinedProject
+    //get the joinedProject JWT and send it back to frontend
+    var userDetail=null
+    for(var i=0;i<body.length;i++){
+        if(body[i].type=="user") {
+            userDetail=body[i]
+            break;
+        }
+    }
+    if(userDetail && userDetail.joinedProjects){
+        var projects=userDetail.joinedProjects
+        var projectClaim={"availableProjects":{}}
+        projects.forEach(oneProject=>{
+            projectClaim.availableProjects[oneProject.id]=oneProject
+        })
+        const token = jwt.create(projectClaim, global.jwtSecret)
+        token.setExpiration(new Date().getTime() + 60*1000)
+        body.push({type:"joinedProjectsToken","jwt":token.compact()})
+    }
+
     res.send(body)
 }
 

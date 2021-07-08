@@ -2,9 +2,9 @@ const express = require('express');
 
 const app = express();
 const got = require('got');
-
 const { v4:uuidv4 } = require('uuid');
 const jwt = require('njwt')
+
 
 var myArgs = process.argv.slice(2);
 var localTestFlag = false;
@@ -28,13 +28,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 //create the secret for creating JWT that will include information of projects each login user can access
-var jwtSecret= uuidv4()
-var testClaim={"availableProjects":{"abc":1,"def":1}}
-const token = jwt.create(testClaim, jwtSecret)
-token.setExpiration(new Date().getTime() + 60*1000)
-var testJWT=token.compact()
-console.log(testJWT)
+global.jwtSecret= uuidv4()
 
+/*
 jwt.verify(testJWT+"e", jwtSecret, (err, verifiedJwt) => {
     if(err){
       console.log(err.message)
@@ -42,7 +38,7 @@ jwt.verify(testJWT+"e", jwtSecret, (err, verifiedJwt) => {
       console.log(verifiedJwt.body.availableProjects)
     }
 })
-
+*/
 
 
 var parseAuthTokenFromAzureAD =(token) =>{
