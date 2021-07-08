@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const got = require('got');
 
+const { v4:uuidv4 } = require('uuid');
+const jwt = require('njwt')
+
 var myArgs = process.argv.slice(2);
 var localTestFlag = false;
 if (myArgs[0] == "--local") localTestFlag = true;
@@ -24,8 +27,25 @@ if(localTestFlag){
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
+//create the secret for creating JWT that will include information of projects each login user can access
+var jwtSecret= uuidv4()
+var testClaim={"availableProjects":{"abc":1,"def":1}}
+const token = jwt.create(testClaim, jwtSecret)
+token.setExpiration(new Date().getTime() + 60*1000)
+var testJWT=token.compact()
+console.log(testJWT)
 
-var parseJwt =(token) =>{
+jwt.verify(testJWT+"e", jwtSecret, (err, verifiedJwt) => {
+    if(err){
+      console.log(err.message)
+    }else{
+      console.log(verifiedJwt.body.availableProjects)
+    }
+})
+
+
+
+var parseAuthTokenFromAzureAD =(token) =>{
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     base64= Buffer.from(base64, 'base64').toString();
@@ -35,12 +55,13 @@ var parseJwt =(token) =>{
 
     return JSON.parse(jsonPayload);
 };
+
 if(!localTestFlag){
     app.use((req, res, next) => {
         var bearerToken = req.header("Authorization")
         if(bearerToken!=null){
             bearerToken= bearerToken.substring("Bearer ".length);
-            req.authInfo=parseJwt(bearerToken)
+            req.authInfo=parseAuthTokenFromAzureAD(bearerToken)
             req.authInfo.account=req.authInfo.emails[0]
         }
         next();
