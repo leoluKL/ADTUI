@@ -42,6 +42,8 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
         res.status(e.response.statusCode).send(e.response.body);
         return;
     }
+
+    //get the joinedProject
     res.send(body)
 }
 
