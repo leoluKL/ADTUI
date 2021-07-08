@@ -108,21 +108,17 @@ globalCache.prototype.storeProjectModelsData=function(DBModels,adtModels){
     modelAnalyzer.analyze();
 }
 
-/*
-var dbtwins=[]
-    var dbmodels=[]
-    DBModels.forEach(element => {
+globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
+    var dbtwins=[]
+    resArr.forEach(element => {
         if(element.type=="visualSchema") {
             //TODO: now there is only one "default" schema to use
-            globalCache.visualDefinition[element.name]=element.detail
-        }else if(element.type=="Topology") {
-            globalCache.layoutJSON[element.name]=element.detail
-        }else if(element.type=="DTModel") dbmodels.push(element)
+            this.visualDefinition[element.name]=element.detail
+        }else if(element.type=="Topology") this.layoutJSON[element.name]=element.detail
         else if(element.type=="DTTwin") dbtwins.push(element)
     });
-    globalCache.storeDBTwinsArr(dbtwins)
-    globalCache.storeDBModelsArr(dbmodels)
-*/
+    this.storeDBTwinsArr(dbtwins)
+}
 
 globalCache.prototype.getDBTwinsByModelID=function(modelID){
     var resultArr=[]

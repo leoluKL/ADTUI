@@ -24,20 +24,29 @@ function deviceManagementUI() {
 }
 
 deviceManagementUI.prototype.initData=async function(){
-    msalHelper.reloadUserAccountData()
-
-    //TODO: prompt user to choose project to start, tempororily direct load the project data
     try{
-        var res=await msalHelper.callAPI("digitaltwin/fetchProjectModelsData","POST",{"projectID":globalCache.currentProjectID})
+        await msalHelper.reloadUserAccountData()
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)
         return
     }
-    globalCache.storeProjectModelsData(res.DBModels,res.adtModels)
+    
 
-    console.log(res)
-    return;
+    //TODO: prompt user to choose project to start, tempororily direct load the project data
+    try{
+        var res=await msalHelper.callAPI("digitaltwin/fetchProjectModelsData","POST",null,"withProjectID")
+        globalCache.storeProjectModelsData(res.DBModels,res.adtModels)
+
+        var res=await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData","POST",null,"withProjectID")
+        globalCache.storeProjectTwinsAndVisualData(res)
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+        return
+    }
+    
+    
     if(globalCache.DBModelsArr.length==0){
         //TODO: if there is no model at all, prompt user to create his first model
     }else{

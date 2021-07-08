@@ -524,7 +524,14 @@ modelManagerDialog.prototype.readOneFile= async function(aFile){
 
 modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
     this.modelList.empty()
-    await globalCache.loadUserData()
+    try{
+        var res=await msalHelper.callAPI("digitaltwin/fetchProjectModelsData","POST",null,"withProjectID")
+        globalCache.storeProjectModelsData(res.DBModels,res.adtModels)
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+        return
+    }
 
     if(jQuery.isEmptyObject(modelAnalyzer.DTDLModels)){
         var zeroModelItem=$('<li style="font-size:0.9em">zero model record. Please import...</li>')

@@ -90,8 +90,12 @@ msalHelper.prototype.reloadUserAccountData=async function(){
     globalCache.storeUserData(res)
 }
 
-msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
+msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload,withProjectID){
     var headersObj={}
+    if(withProjectID){
+        payload=payload||{}
+        payload["projectID"]=globalCache.currentProjectID
+    } 
     if(!globalAppSettings.isLocalTest){
         try{
             var token=await this.getToken(globalAppSettings.b2cScope_taskmaster)
@@ -105,8 +109,7 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
         if(globalCache.joinedProjectsToken) {
             var expTS=this.parseJWT(globalCache.joinedProjectsToken).exp
             var currTime=parseInt(new Date().getTime()/1000)
-            if(expTS-currTime<30){ //fetch a new projects JWT token 
-                console.log("reload user account data")
+            if(expTS-currTime<60){ //fetch a new projects JWT token 
                 await this.reloadUserAccountData()
             }
         }
