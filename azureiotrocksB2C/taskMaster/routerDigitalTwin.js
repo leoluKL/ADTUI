@@ -5,7 +5,8 @@ const jwt = require('njwt')
 function routerDigitalTwin(){
     this.router = express.Router();
     this.useRoute("fetchUserData")
-    this.useRoute("fetchProjectData","isPost")
+    this.useRoute("fetchProjectModelsData","isPost")
+    this.useRoute("fetchProjectTwinsAndVisualData","isPost")
     
     this.useRoute("importModels","isPost")
     
@@ -13,7 +14,6 @@ function routerDigitalTwin(){
     
     this.useRoute("batchImportTwins","isPost")
 
-    this.useRoute("listModelsForIDs","isPost")
     this.useRoute("listTwinsForIDs","isPost")
     this.useRoute("changeAttribute","isPost")
     this.useRoute("getRelationshipsFromTwinIDs","isPost")
@@ -35,16 +35,39 @@ routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
     })
 }
 
-
-routerDigitalTwin.prototype.fetchProjectData =async function(req,res) {
-    var reqBody={ projectID:req.body.projectID}
+routerDigitalTwin.prototype.fetchProjectTwinsAndVisualData =async function(req,res) {
+    var reqBody={ projectID:req.body.projectID, account:req.authInfo.account}
     try{
-        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/projectData", {json:reqBody,responseType: 'json'});
+        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/projectTwinsAndVisual", {json:reqBody,responseType: 'json'});
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         return;
     }
     res.send(body)
+}
+
+routerDigitalTwin.prototype.fetchProjectModelsData =async function(req,res) {
+    var reqBody={ projectID:req.body.projectID}
+    try{
+        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/projectModels", {json:reqBody,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+
+    var DBModels=body;
+    var modelIDs=[]
+    DBModels.forEach(oneModel=>{modelIDs.push(oneModel["id"])})
+
+    try{
+        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listModelsForIDs", {json:modelIDs,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    var adtModels=body;
+
+    res.send({"DBModels":DBModels,"adtModels":adtModels})
 }
 
 routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
@@ -79,16 +102,6 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
     res.send(body)
 }
 
-routerDigitalTwin.prototype.listModelsForIDs =async function(req,res) {
-    //TODO: add stricter security measure that it only query models belonging to this user
-    try{
-        var {body}= await got.post(process.env.digitaltwinoperationAPIURL+"queryADT/listModelsForIDs", {json:req.body,responseType: 'json'});
-    }catch(e){
-        res.status(e.response.statusCode).send(e.response.body);
-        return;
-    }
-    res.send(body)
-}
 
 routerDigitalTwin.prototype.queryOutBound =async function(req,res) {
     //TODO: add stricter security measure that it only operate data belonging to this user

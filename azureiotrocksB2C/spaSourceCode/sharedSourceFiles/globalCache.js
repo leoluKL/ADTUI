@@ -1,7 +1,15 @@
-const msalHelper=require("../msalHelper")
 const modelAnalyzer=require("./modelAnalyzer")
 
 function globalCache(){
+    this.accountInfo=null;
+    this.joinedProjectsToken=null;
+    //TODO: going to be changable
+    this.changeCurrentProject("1faede18-c6a0-484b-843a-7105b168568f")
+}
+
+
+globalCache.prototype.changeCurrentProject = function (newProjectID) {
+    if(newProjectID==this.currentProjectID) return;
     this.storedOutboundRelationships = {}
     this.storedTwins = {}
     //stored data, seperately from ADT service and from cosmosDB service
@@ -16,60 +24,9 @@ function globalCache(){
     this.layoutJSON={}
 
     this.visualDefinition={"default":{}}
+    this.currentProjectID=newProjectID
 }
 
-globalCache.prototype.loadUserData = async function () {
-    try{
-        var res=await msalHelper.callAPI("digitaltwin/fetchUserData")
-    }catch(e){
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-        return;
-    }
-    var dbtwins=[]
-    var dbmodels=[]
-    res.forEach(element => {
-        if(element.type=="visualSchema") {
-            //TODO: now there is only one "default" schema to use
-            this.visualDefinition[element.name]=element.detail
-        }else if(element.type=="Topology") {
-            this.layoutJSON[element.name]=element.detail
-        }else if(element.type=="DTModel") dbmodels.push(element)
-        else if(element.type=="DTTwin") dbtwins.push(element)
-    });
-    this.storeDBTwinsArr(dbtwins)
-    this.storeDBModelsArr(dbmodels)
-    //query detail of all models
-    for(var ind in this.modelIDMapToName) delete this.modelIDMapToName[ind]
-    for(var ind in this.modelNameMapToID) delete this.modelNameMapToID[ind]
-    var modelIDs=[]
-    this.DBModelsArr.forEach(oneModel=>{modelIDs.push(oneModel["id"])})
-    try {
-        var data = await msalHelper.callAPI("digitaltwin/listModelsForIDs", "POST", modelIDs)
-        var tmpNameToObj = {}
-        for (var i = 0; i < data.length; i++) {
-            if (data[i]["displayName"] == null) data[i]["displayName"] = data[i]["@id"]
-            if ($.isPlainObject(data[i]["displayName"])) {
-                if (data[i]["displayName"]["en"]) data[i]["displayName"] = data[i]["displayName"]["en"]
-                else data[i]["displayName"] = JSON.stringify(data[i]["displayName"])
-            }
-            if (tmpNameToObj[data[i]["displayName"]] != null) {
-                //repeated model display name
-                data[i]["displayName"] = data[i]["@id"]
-            }
-            tmpNameToObj[data[i]["displayName"]] = data[i]
-
-            this.modelIDMapToName[data[i]["@id"]]=data[i]["displayName"]
-            this.modelNameMapToID[data[i]["displayName"]]=data[i]["@id"]
-        }
-        modelAnalyzer.clearAllModels();
-        modelAnalyzer.addModels(data)
-        modelAnalyzer.analyze();
-    } catch (e) {
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-    }
-}
 
 globalCache.prototype.storeADTTwins=function(twinsData){
     twinsData.forEach((oneNode)=>{this.storeSingleADTTwin(oneNode)});
@@ -117,6 +74,28 @@ globalCache.prototype.mergeDBTwinsArr=function(DBTwinsArr){
     this.storeDBTwinsArr(arr)
 }
 
+globalCache.prototype.storeUserData=function(res){
+    res.forEach(oneResponse=>{
+        if(oneResponse.type=="joinedProjectsToken") this.joinedProjectsToken=oneResponse.jwt;
+        else if(oneResponse.type=="user") this.accountInfo=oneResponse
+    })
+}
+
+globalCache.prototype.storeProjectData=function(res){
+    var dbtwins=[]
+    var dbmodels=[]
+    res.forEach(element => {
+        if(element.type=="visualSchema") {
+            //TODO: now there is only one "default" schema to use
+            globalCache.visualDefinition[element.name]=element.detail
+        }else if(element.type=="Topology") {
+            globalCache.layoutJSON[element.name]=element.detail
+        }else if(element.type=="DTModel") dbmodels.push(element)
+        else if(element.type=="DTTwin") dbtwins.push(element)
+    });
+    globalCache.storeDBTwinsArr(dbtwins)
+    globalCache.storeDBModelsArr(dbmodels)
+}
 
 
 globalCache.prototype.getDBTwinsByModelID=function(modelID){

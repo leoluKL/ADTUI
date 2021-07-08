@@ -1,4 +1,6 @@
 const globalAppSettings=require("./globalAppSettings")
+const globalCache=require("./sharedSourceFiles/globalCache")
+
 
 function msalHelper(){
     this.myMSALObj = new msal.PublicClientApplication(globalAppSettings.msalConfig);
@@ -124,6 +126,41 @@ msalHelper.prototype.getToken=async function(b2cScope){
     }
 
     return response.accessToken;
+}
+
+msalHelper.prototype.loadUserData = async function () {
+    
+    
+    //query detail of all models
+    for(var ind in globalCache.modelIDMapToName) delete globalCache.modelIDMapToName[ind]
+    for(var ind in globalCache.modelNameMapToID) delete globalCache.modelNameMapToID[ind]
+    var modelIDs=[]
+    globalCache.DBModelsArr.forEach(oneModel=>{modelIDs.push(oneModel["id"])})
+    try {
+        var data = await this.callAPI("digitaltwin/listModelsForIDs", "POST", modelIDs)
+        var tmpNameToObj = {}
+        for (var i = 0; i < data.length; i++) {
+            if (data[i]["displayName"] == null) data[i]["displayName"] = data[i]["@id"]
+            if ($.isPlainObject(data[i]["displayName"])) {
+                if (data[i]["displayName"]["en"]) data[i]["displayName"] = data[i]["displayName"]["en"]
+                else data[i]["displayName"] = JSON.stringify(data[i]["displayName"])
+            }
+            if (tmpNameToObj[data[i]["displayName"]] != null) {
+                //repeated model display name
+                data[i]["displayName"] = data[i]["@id"]
+            }
+            tmpNameToObj[data[i]["displayName"]] = data[i]
+
+            globalCache.modelIDMapToName[data[i]["@id"]]=data[i]["displayName"]
+            globalCache.modelNameMapToID[data[i]["displayName"]]=data[i]["@id"]
+        }
+        modelAnalyzer.clearAllModels();
+        modelAnalyzer.addModels(data)
+        modelAnalyzer.analyze();
+    } catch (e) {
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
 }
 
 module.exports = new msalHelper();

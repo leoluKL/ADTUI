@@ -20,6 +20,25 @@ function deviceManagementUI() {
     var theAccount=msalHelper.fetchAccount();
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
 
+
+    try{
+        var res=await msalHelper.callAPI("digitaltwin/fetchUserData")
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+        return
+    }
+    globalCache.storeUserData(res)
+
+    //TODO: prompt user to choose project to start, tempororily direct load the project data
+    try{
+        var res=await msalHelper.callAPI("digitaltwin/fetchProjectData","POST",{"projectID":globalCache.currentProjectID})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+        return
+    }
+
     globalCache.loadUserData().then(re=>{
         if(globalCache.DBModelsArr.length==0){
             //TODO: if there is no model at all, prompt user to create his first model
@@ -27,6 +46,9 @@ function deviceManagementUI() {
             twinsList.refill()
         }
     })
+
+
+
 }
 
 deviceManagementUI.prototype.broadcastMessage=function(source,msgPayload){
