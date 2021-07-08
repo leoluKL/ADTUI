@@ -81,10 +81,37 @@ globalCache.prototype.storeUserData=function(res){
     })
 }
 
-globalCache.prototype.storeProjectData=function(res){
-    var dbtwins=[]
+globalCache.prototype.storeProjectModelsData=function(DBModels,adtModels){
+    this.storeDBModelsArr(DBModels)
+
+    for(var ind in this.modelIDMapToName) delete this.modelIDMapToName[ind]
+    for(var ind in this.modelNameMapToID) delete this.modelNameMapToID[ind]
+
+    var tmpNameToObj = {}
+    for (var i = 0; i < adtModels.length; i++) {
+        if (adtModels[i]["displayName"] == null) adtModels[i]["displayName"] = adtModels[i]["@id"]
+        if ($.isPlainObject(adtModels[i]["displayName"])) {
+            if (adtModels[i]["displayName"]["en"]) adtModels[i]["displayName"] = adtModels[i]["displayName"]["en"]
+            else adtModels[i]["displayName"] = JSON.stringify(adtModels[i]["displayName"])
+        }
+        if (tmpNameToObj[adtModels[i]["displayName"]] != null) {
+            //repeated model display name
+            adtModels[i]["displayName"] = adtModels[i]["@id"]
+        }
+        tmpNameToObj[adtModels[i]["displayName"]] = 1
+
+        this.modelIDMapToName[adtModels[i]["@id"]] = adtModels[i]["displayName"]
+        this.modelNameMapToID[adtModels[i]["displayName"]] = adtModels[i]["@id"]
+    }
+    modelAnalyzer.clearAllModels();
+    modelAnalyzer.addModels(adtModels)
+    modelAnalyzer.analyze();
+}
+
+/*
+var dbtwins=[]
     var dbmodels=[]
-    res.forEach(element => {
+    DBModels.forEach(element => {
         if(element.type=="visualSchema") {
             //TODO: now there is only one "default" schema to use
             globalCache.visualDefinition[element.name]=element.detail
@@ -95,8 +122,7 @@ globalCache.prototype.storeProjectData=function(res){
     });
     globalCache.storeDBTwinsArr(dbtwins)
     globalCache.storeDBModelsArr(dbmodels)
-}
-
+*/
 
 globalCache.prototype.getDBTwinsByModelID=function(modelID){
     var resultArr=[]

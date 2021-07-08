@@ -67,6 +67,29 @@ msalHelper.prototype.callAzureFunctionsService=async function(APIString,RESTMeth
     })
 }
 
+msalHelper.prototype.parseJWT=function(token){
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    base64= Buffer.from(base64, 'base64').toString();
+    var jsonPayload = decodeURIComponent(base64.split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
+
+msalHelper.prototype.reloadUserAccountData=async function(){
+    try{
+        var res=await this.callAPI("digitaltwin/fetchUserData")
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+        return
+
+    }
+    globalCache.storeUserData(res)
+}
+
 msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
     var headersObj={}
     if(!globalAppSettings.isLocalTest){
@@ -77,6 +100,22 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload){
         }
         
         headersObj["Authorization"]=`Bearer ${token}`
+
+        //in case joined projects JWT is going to expire, renew another one
+        if(globalCache.joinedProjectsToken) {
+            var expTS=this.parseJWT(globalCache.joinedProjectsToken).exp
+            var currTime=parseInt(new Date().getTime()/1000)
+            if(expTS-currTime<30){ //fetch a new projects JWT token 
+                console.log("reload user account data")
+                await this.reloadUserAccountData()
+            }
+        }
+
+        //if the API need to use project ID, must add a header "projects" jwt token so server side will verify
+        if(payload && payload.projectID && globalCache.joinedProjectsToken){
+            headersObj["projects"]=globalCache.joinedProjectsToken
+        }
+
     }
 
     return new Promise((resolve, reject) => {
@@ -126,41 +165,6 @@ msalHelper.prototype.getToken=async function(b2cScope){
     }
 
     return response.accessToken;
-}
-
-msalHelper.prototype.loadUserData = async function () {
-    
-    
-    //query detail of all models
-    for(var ind in globalCache.modelIDMapToName) delete globalCache.modelIDMapToName[ind]
-    for(var ind in globalCache.modelNameMapToID) delete globalCache.modelNameMapToID[ind]
-    var modelIDs=[]
-    globalCache.DBModelsArr.forEach(oneModel=>{modelIDs.push(oneModel["id"])})
-    try {
-        var data = await this.callAPI("digitaltwin/listModelsForIDs", "POST", modelIDs)
-        var tmpNameToObj = {}
-        for (var i = 0; i < data.length; i++) {
-            if (data[i]["displayName"] == null) data[i]["displayName"] = data[i]["@id"]
-            if ($.isPlainObject(data[i]["displayName"])) {
-                if (data[i]["displayName"]["en"]) data[i]["displayName"] = data[i]["displayName"]["en"]
-                else data[i]["displayName"] = JSON.stringify(data[i]["displayName"])
-            }
-            if (tmpNameToObj[data[i]["displayName"]] != null) {
-                //repeated model display name
-                data[i]["displayName"] = data[i]["@id"]
-            }
-            tmpNameToObj[data[i]["displayName"]] = data[i]
-
-            globalCache.modelIDMapToName[data[i]["@id"]]=data[i]["displayName"]
-            globalCache.modelNameMapToID[data[i]["displayName"]]=data[i]["@id"]
-        }
-        modelAnalyzer.clearAllModels();
-        modelAnalyzer.addModels(data)
-        modelAnalyzer.analyze();
-    } catch (e) {
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-    }
 }
 
 module.exports = new msalHelper();
