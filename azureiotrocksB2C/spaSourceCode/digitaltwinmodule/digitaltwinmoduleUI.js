@@ -42,33 +42,8 @@ digitaltwinmoduleUI.prototype.initData=async function(){
         if(e.responseText) alert(e.responseText)
         return
     }
-    
-    //TODO: prompt user to choose project to start, tempororily direct load the project data
-    try{
-        var res=await msalHelper.callAPI("digitaltwin/fetchProjectModelsData","POST",null,"withProjectID")
-        globalCache.storeProjectModelsData(res.DBModels,res.adtModels)
 
-        var res=await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData","POST",null,"withProjectID")
-        globalCache.storeProjectTwinsAndVisualData(res)
-    }catch(e){
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-        return
-    }
-
-    if(globalCache.DBModelsArr.length==0){
-        //directly popup to model management dialog allow user import or create model
-        modelManagerDialog.popup()
-        //pop up welcome screen
-        var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
-        popWin.html(`Welcome, ${msalHelper.userName}! Firstly, you may consider importing a few twin model files or creating twin models from scratch. <br/><br/>Click to continue...`)
-        $("body").append(popWin)
-        popWin.on("click",()=>{popWin.remove()})
-    }else{
-        startSelectionDialog.popup()
-    }
-    this.broadcastMessage(this,{ "message": "visualDefinitionRefresh"})
-    this.broadcastMessage(this,{ "message": "layoutsUpdated"})
+    startSelectionDialog.popup()
 }
 
 digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){

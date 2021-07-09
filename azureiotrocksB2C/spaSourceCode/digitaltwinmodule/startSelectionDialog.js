@@ -1,4 +1,5 @@
 const globalCache = require("../sharedSourceFiles/globalCache")
+const simpleSelectMenu=require("../sharedSourceFiles/simpleSelectMenu")
 
 function startSelectionDialog() {
     if(!this.DOM){
@@ -31,6 +32,23 @@ startSelectionDialog.prototype.popup = async function() {
     appendButton.on("click", () => { this.useStartSelection("append") })
     this.buttonHolder.append(replaceButton, appendButton)
 
+
+    var row1=$('<div class="w3-bar" style="padding:2px"></div>')
+    this.contentDOM.append(row1)
+    var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;font-size:1.2em;">Project </div>')
+    row1.append(lable)
+    var switchProjectSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1.2em",colorClass:"w3-light-gray",buttonCSS:{"padding":"5px 10px"}})
+    row1.append(switchProjectSelector.DOM)
+    var joinedProjects=globalCache.accountInfo.joinedProjects
+    joinedProjects.forEach(aProject=>{
+        var str = aProject.name+" (from "+aProject.owner+")"
+        switchProjectSelector.addOption(str,aProject.id)
+    })
+    switchProjectSelector.callBack_clickOption=(optionText,optionValue)=>{
+        switchProjectSelector.changeName(optionText)
+        this.chooseProject(optionValue)
+    }
+
     var panelHeight=450
     var row2=$('<div class="w3-cell-row"></div>')
     this.contentDOM.append(row2)
@@ -46,13 +64,52 @@ startSelectionDialog.prototype.popup = async function() {
     rightSpan.children(':first').append(selectedTwinsDOM)
     this.selectedTwinsDOM=selectedTwinsDOM 
 
-    this.leftSpan.append($('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Select Twins from<p style="position:absolute;text-align:left;font-weight:normal;top:-10px;width:200px" class="w3-text w3-tag w3-tiny">choose one or more models</p></div></div>'))
+    this.leftSpan.append($('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Start from models...<p style="position:absolute;text-align:left;font-weight:normal;top:-10px;width:100px" class="w3-text w3-tag w3-tiny">choose one or more models</p></div></div>'))
 
     this.modelsCheckBoxes=$('<form class="w3-container w3-border" style="height:'+(panelHeight-40)+'px;overflow:auto"></form>')
     leftSpan.append(this.modelsCheckBoxes)
-    this.fillAvailableModels()
+    
+    if(this.previousSelectedProject!=null){
+        switchProjectSelector.triggerOptionValue(this.previousSelectedProject)
+    }else{
+        switchProjectSelector.triggerOptionIndex(0)
+    }
+}
 
-    this.listTwins()
+
+startSelectionDialog.prototype.chooseProject = function () {
+    /*
+    try {
+        var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
+        globalCache.storeProjectModelsData(res.DBModels, res.adtModels)
+
+        var res = await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData", "POST", null, "withProjectID")
+        globalCache.storeProjectTwinsAndVisualData(res)
+    } catch (e) {
+        console.log(e)
+        if (e.responseText) alert(e.responseText)
+        return
+    }
+    this.broadcastMessage(this,{ "message": "visualDefinitionRefresh"})
+    this.broadcastMessage(this,{ "message": "layoutsUpdated"})
+    */
+    //this.fillAvailableModels()
+
+    //this.listTwins()
+
+    /*
+    if(globalCache.DBModelsArr.length==0){
+        //directly popup to model management dialog allow user import or create model
+        modelManagerDialog.popup()
+        //pop up welcome screen
+        var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
+        popWin.html(`Welcome, ${msalHelper.userName}! Firstly, you may consider importing a few twin model files or creating twin models from scratch. <br/><br/>Click to continue...`)
+        $("body").append(popWin)
+        popWin.on("click",()=>{popWin.remove()})
+    }else{
+        
+    }
+    */
 }
 
 startSelectionDialog.prototype.closeDialog=function(){
@@ -95,7 +152,7 @@ startSelectionDialog.prototype.getSelectedTwins=function(){
 
 startSelectionDialog.prototype.listTwins=function(){
     this.selectedTwinsDOM.empty()
-    var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey;font-weight:bold">ID</td><td style="border-bottom:solid 1px lightgrey;font-weight:bold">MODEL</td></tr>')
+    var tr=$('<tr><td style="border-right:solid 1px lightgrey;border-bottom:solid 1px lightgrey;font-weight:bold">TWIN ID</td><td style="border-bottom:solid 1px lightgrey;font-weight:bold">MODEL ID</td></tr>')
     this.selectedTwinsDOM.append(tr)
 
     var selectedTwins=this.getSelectedTwins()

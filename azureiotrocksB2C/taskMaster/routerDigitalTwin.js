@@ -94,7 +94,7 @@ routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
         projects.forEach(oneProject=>{
             projectClaim.availableProjects[oneProject.id]=oneProject
         })
-        const token = jwt.create(projectClaim, global.jwtSecret)
+        const token = jwt.create(projectClaim, process.env.joinedProjectsJWTCreateSecret)
         token.setExpiration(new Date().getTime() + 3600*1000)
         body.push({type:"joinedProjectsToken","jwt":token.compact()})
     }

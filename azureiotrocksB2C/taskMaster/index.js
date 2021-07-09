@@ -2,7 +2,6 @@ const express = require('express');
 
 const app = express();
 const got = require('got');
-const { v4:uuidv4 } = require('uuid');
 const jwt = require('njwt')
 
 
@@ -27,8 +26,6 @@ if(localTestFlag){
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-//create the secret for creating JWT that will include information of projects each login user can access
-global.jwtSecret= uuidv4()
 
 var parseJWT =(token) =>{
     var base64Url = token.split('.')[1];
@@ -62,7 +59,7 @@ if(!localTestFlag){
             }
             if(passProjectVerification){ //also check if the jwt is legal
                 try {
-                    var parsedJwt = jwt.verify(joinedProjectsToken,global.jwtSecret);
+                    var parsedJwt = jwt.verify(joinedProjectsToken,process.env.joinedProjectsJWTCreateSecret);
                   } catch(e) {
                     res.status(400).send("InvalidProjectToken")
                     return; //stop this http request as it asking to access nonauthorized project
