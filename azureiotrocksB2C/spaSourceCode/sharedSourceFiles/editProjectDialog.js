@@ -35,10 +35,11 @@ editProjectDialog.prototype.popup = function (projectInfo) {
             alert("Name can not be empty!")
             return;
         }
-        var requestBody={"projectID":selectedProjectID,"accounts":[],"newProjectName":nameStr}
+        var requestBody={"projectID":projectInfo.id,"accounts":[],"newProjectName":nameStr}
         requestBody.accounts=requestBody.accounts.concat(projectInfo.shareWith)
         try {
-            await msalHelper.callAPI("accountManagement/changeOwnProjectName", "POST", {"projectID":selectedProjectID})
+            await msalHelper.callAPI("accountManagement/changeOwnProjectName", "POST", requestBody)
+            nameInput.blur()
         } catch (e) {
             console.log(e)
             if (e.responseText) alert(e.responseText)
@@ -62,11 +63,38 @@ editProjectDialog.prototype.popup = function (projectInfo) {
     this.shareAccountsList=shareAccountsList;
     this.drawSharedAccounts()
 
+    shareAccountInput.on("keydown",(event) =>{
+        if (event.keyCode == 13) this.shareWithAccount(shareAccountInput)
+    });
+    inviteBtn.on("click",()=>{ this.shareWithAccount(shareAccountInput)})
+}
+
+editProjectDialog.prototype.shareWithAccount=async function(accountInput){
+    var shareToAccount=accountInput.val()
+    if(shareToAccount=="") return;
+    var theIndex= this.projectInfo.shareWith.indexOf(shareToAccount)
+    if(theIndex!=-1) return;
+    var requestBody={"projectID":this.projectInfo.id,"shareToAccount":shareToAccount}
+    try {
+        await msalHelper.callAPI("accountManagement/shareProjectTo", "POST", requestBody)
+        this.addAccountToShareWith(shareToAccount)
+        this.drawSharedAccounts()
+        accountInput.val("")
+    } catch (e) {
+        console.log(e)
+        if (e.responseText) alert(e.responseText)
+        return
+    }
+}
+
+editProjectDialog.prototype.addAccountToShareWith=function(shareToAccountID){
+    var theIndex= this.projectInfo.shareWith.indexOf(shareToAccountID)
+    if(theIndex==-1) this.projectInfo.shareWith.push(shareToAccountID)
 }
 
 editProjectDialog.prototype.drawSharedAccounts=function(){
     this.shareAccountsList.empty()
-    var sharedAccount=["leolu@microsoft.com","leoxiaolu@gmail.com"]
+    var sharedAccount=this.projectInfo.shareWith
     sharedAccount.forEach(oneEmail => {
         var arow = $('<div class="w3-bar" style="padding:2px"></div>')
         this.shareAccountsList.append(arow)
@@ -74,6 +102,19 @@ editProjectDialog.prototype.drawSharedAccounts=function(){
         arow.append(lable)
         var removeBtn=$('<a class="w3-button w3-border w3-red w3-hover-amber" style="margin-left:10pxyy" href="#">Remove</a>')
         arow.append(removeBtn)
+        removeBtn.on("click",async ()=>{
+            var requestBody={"projectID":this.projectInfo.id,"notShareToAccount":oneEmail}
+            try {
+                await msalHelper.callAPI("accountManagement/notShareProjectTo", "POST", requestBody)
+                var theIndex = this.projectInfo.shareWith.indexOf(oneEmail)
+                if (theIndex != -1) this.projectInfo.shareWith.splice(theIndex, 1)
+                this.drawSharedAccounts()
+            } catch (e) {
+                console.log(e)
+                if (e.responseText) alert(e.responseText)
+                return
+            }
+        })
     })
 }
 

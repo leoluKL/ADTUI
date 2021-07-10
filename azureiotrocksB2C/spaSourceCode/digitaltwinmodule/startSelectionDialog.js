@@ -14,7 +14,7 @@ function startSelectionDialog() {
 startSelectionDialog.prototype.popup = async function() {
     this.DOM.show()
     this.DOM.empty()
-    this.contentDOM = $('<div style="width:665px"></div>')
+    this.contentDOM = $('<div style="width:680px"></div>')
     this.DOM.append(this.contentDOM)
     this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Select Twins</div></div>'))
     var closeButton = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em;padding-top:4px">×</button>')
@@ -29,13 +29,15 @@ startSelectionDialog.prototype.popup = async function() {
 
     var row1=$('<div class="w3-bar" style="padding:2px"></div>')
     this.contentDOM.append(row1)
-    var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;font-size:1.2em;">Project </div>')
+    var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;">Project </div>')
     row1.append(lable)
-    var switchProjectSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1.2em",colorClass:"w3-light-gray",buttonCSS:{"padding":"5px 10px"}})
+    var switchProjectSelector=new simpleSelectMenu(" ",{withBorder:1,colorClass:"w3-light-gray",buttonCSS:{"padding":"5px 10px"}})
+    this.switchProjectSelector=switchProjectSelector
     row1.append(switchProjectSelector.DOM)
     var joinedProjects=globalCache.accountInfo.joinedProjects
     joinedProjects.forEach(aProject=>{
-        var str = aProject.name+" (from "+aProject.owner+")"
+        var str = aProject.name
+        if(aProject.owner!=globalCache.accountInfo.accountID) str+=" (from "+aProject.owner+")"
         switchProjectSelector.addOption(str,aProject.id)
     })
     switchProjectSelector.callBack_clickOption=(optionText,optionValue)=>{
@@ -45,9 +47,10 @@ startSelectionDialog.prototype.popup = async function() {
 
     this.editProjectBtn=$('<a class="w3-bar-item w3-button" href="#"><i class="fa fa-share-alt fa-lg"></i></a>')
     this.deleteProjectBtn=$('<a class="w3-button" href="#"><i class="fa fa-trash fa-lg"></i></a>')
-    row1.append(this.editProjectBtn,this.deleteProjectBtn)
+    this.newProjectBtn=$('<a class="w3-button" href="#"><i class="fa fa-plus fa-lg"></i></a>')
+    row1.append(this.editProjectBtn,this.deleteProjectBtn,this.newProjectBtn)
 
-    var panelHeight=450
+    var panelHeight=400
     var row2=$('<div class="w3-cell-row"></div>')
     this.contentDOM.append(row2)
     var leftSpan=$('<div style="padding:5px;width:230px;padding-right:5px;overflow:hidden"></div>')
@@ -62,7 +65,7 @@ startSelectionDialog.prototype.popup = async function() {
     rightSpan.children(':first').append(selectedTwinsDOM)
     this.selectedTwinsDOM=selectedTwinsDOM 
 
-    this.leftSpan.append($('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Start from models...<p style="position:absolute;text-align:left;font-weight:normal;top:-10px;width:100px" class="w3-text w3-tag w3-tiny">choose one or more models</p></div></div>'))
+    this.leftSpan.append($('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="padding-left:2px;font-weight:bold;color:gray">Choose twins...<p style="position:absolute;text-align:left;font-weight:normal;top:-10px;width:140px" class="w3-text w3-tag w3-tiny">choose twins of one or more models</p></div></div>'))
 
     this.modelsCheckBoxes=$('<form class="w3-container w3-border" style="height:'+(panelHeight-40)+'px;overflow:auto"></form>')
     leftSpan.append(this.modelsCheckBoxes)
@@ -103,6 +106,27 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
         this.editProjectBtn.hide()
         this.deleteProjectBtn.hide()
     }
+    this.newProjectBtn.on("click",async ()=>{
+        var tsStr=(new Date().toLocaleString()) 
+        try {
+            var newProjectInfo = await msalHelper.callAPI("accountManagement/newProjectTo", "POST", { "projectName": "New Project " + tsStr })
+            globalCache.accountInfo.joinedProjects.unshift(newProjectInfo)
+            this.switchProjectSelector.clearOptions()
+            var joinedProjects = globalCache.accountInfo.joinedProjects
+            joinedProjects.forEach(aProject => {
+                var str = aProject.name
+                if(aProject.owner!=globalCache.accountInfo.accountID) str+=" (from "+aProject.owner+")"
+                this.switchProjectSelector.addOption(str, aProject.id)
+            })
+            //NOTE: must query the new joined projects JWT token again
+            await msalHelper.reloadUserAccountData()
+            this.switchProjectSelector.triggerOptionIndex(0)
+        } catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+            return
+        }
+    })
     
 
     if(this.previousSelectedProject==null){
