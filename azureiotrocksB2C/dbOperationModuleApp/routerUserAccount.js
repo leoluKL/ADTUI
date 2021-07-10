@@ -83,7 +83,7 @@ routerUserAccount.prototype.newProjectTo =async function(req,res) {
     var projectName=req.body.projectName
     try{
         var accountDocument=await this.getUserAccountDocument(ownerAccount)
-        accountDocument.joinedProjects.push( {"id":projectID, "name": projectName, "owner": ownerAccount })
+        accountDocument.joinedProjects.push( {"id":projectID, "name": projectName, "owner": ownerAccount,"shareWith":[] })
         await cosmosdbhelper.insertRecord("appuser",accountDocument)
         res.end()
     }catch(e){
@@ -99,18 +99,32 @@ routerUserAccount.prototype.deleteProjectTo =async function(req,res) {
 routerUserAccount.prototype.notShareProjectTo = async function (req, res) {
     var requestFromAccount = req.body.requestFromAccount
     var notshareToAccount = req.body.notShareToAccount
+    var projectID = req.body.projectID
     if(requestFromAccount==this.notShareProjectTo){
         res.status(400).send("Can not remove accessing to own project")
         return;
     }
-    var projectID = req.body.projectID
-    try {
-        var projectName = await this.getProjectNameIfAccountOwnProject(requestFromAccount, projectID)
-        if (projectName == null) {
-            res.status(400).send(requestFromAccount + " is not authorized to change this project")
-            return;
+    
+    var ownerProjectInfo=null
+    try{
+        var ownerAccountDocument=await this.getUserAccountDocument(requestFromAccount)
+        var joinedProjects=ownerAccountDocument.joinedProjects
+        for(var i=0;i<joinedProjects.length;i++){
+            var oneProject=joinedProjects[i]
+            if(oneProject.id==projectID){
+                if(oneProject.owner==requestFromAccount) ownerProjectInfo=oneProject
+                break
+            }
         }
-
+        if(ownerProjectInfo==null) throw new Error(requestFromAccount+" is not authorized to change this project"); 
+    }catch(e){
+        res.status(400).send(e.message);
+        return;
+    }
+    
+    
+    
+    try {
         try{
             var accountDocument = await this.getUserAccountDocument(notshareToAccount)
         }catch(e){ //in case the target account does not exist
@@ -126,6 +140,13 @@ routerUserAccount.prototype.notShareProjectTo = async function (req, res) {
                 break
             }
         }
+
+        var theIndex=ownerProjectInfo.shareWith.indexOf(notshareToAccount) 
+        if(theIndex!=-1){
+            ownerProjectInfo.shareWith.splice(theIndex,1)
+            await cosmosdbhelper.insertRecord("appuser",ownerAccountDocument)
+        }
+
         await cosmosdbhelper.insertRecord("appuser", accountDocument)
         res.end()
     } catch (e) {
@@ -138,14 +159,29 @@ routerUserAccount.prototype.shareProjectTo =async function(req,res) {
     var requestFromAccount=req.body.requestFromAccount
     var shareToAccount=req.body.shareToAccount
     var projectID= req.body.projectID
-    try{
-        var projectName=await this.getProjectNameIfAccountOwnProject(requestFromAccount,projectID)
-        if(projectName==null){
-            res.status(400).send(requestFromAccount+" is not authorized to change this project")
-            return;
-        }
 
+    var ownerProjectInfo=null
+    try{
+        var ownerAccountDocument=await this.getUserAccountDocument(requestFromAccount)
+        var joinedProjects=ownerAccountDocument.joinedProjects
+        for(var i=0;i<joinedProjects.length;i++){
+            var oneProject=joinedProjects[i]
+            if(oneProject.id==projectID){
+                if(oneProject.owner==requestFromAccount) ownerProjectInfo=oneProject
+                break
+            }
+        }
+        if(ownerProjectInfo==null) throw new Error(requestFromAccount+" is not authorized to change this project"); 
+    }catch(e){
+        res.status(400).send(e.message);
+        return;
+    }
+
+    try{
+        var projectName=ownerProjectInfo.name
+        console.log(shareToAccount)
         var accountDocument=await this.getUserAccountDocument(shareToAccount)
+        
         var joinedProjects=accountDocument.joinedProjects
         for(var i=0;i<joinedProjects.length;i++){
             var oneProject=joinedProjects[i]
@@ -154,8 +190,10 @@ routerUserAccount.prototype.shareProjectTo =async function(req,res) {
                 return;
             }
         }
+        ownerProjectInfo.shareWith.push(shareToAccount)
         accountDocument.joinedProjects.push( {"id":projectID, "name": projectName, "owner": requestFromAccount })
         await cosmosdbhelper.insertRecord("appuser",accountDocument)
+        await cosmosdbhelper.insertRecord("appuser",ownerAccountDocument)
         res.end()
     }catch(e){
         res.status(400).send(e.message);
@@ -199,6 +237,7 @@ routerUserAccount.prototype.changeOwnProjectName =async function(req,res) {
     var requestFromAccount=req.body.requestFromAccount
     var projectID= req.body.projectID
     var accountIDs=req.body.accounts
+    accountIDs.push(requestFromAccount)
     var newName=req.body.newProjectName
     try{
         var projectName=await this.getProjectNameIfAccountOwnProject(requestFromAccount,projectID)

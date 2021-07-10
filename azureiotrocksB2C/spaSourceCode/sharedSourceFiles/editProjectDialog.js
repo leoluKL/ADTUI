@@ -29,6 +29,24 @@ editProjectDialog.prototype.popup = function (projectInfo) {
     var nameInput=$('<input type="text" style="outline:none; width:70%; display:inline;margin-left:2px;margin-right:2px"  placeholder="Project Name..."/>').addClass("w3-input w3-border");   
     row1.append(nameInput)
     nameInput.val(projectInfo.name)
+    nameInput.on("change",async ()=>{
+        var nameStr=nameInput.val()
+        if(nameStr=="") {
+            alert("Name can not be empty!")
+            return;
+        }
+        var requestBody={"projectID":selectedProjectID,"accounts":[],"newProjectName":nameStr}
+        requestBody.accounts=requestBody.accounts.concat(projectInfo.shareWith)
+        try {
+            await msalHelper.callAPI("accountManagement/changeOwnProjectName", "POST", {"projectID":selectedProjectID})
+        } catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+            return
+        }
+    })
+
+
 
     var row2=$('<div class="w3-bar" style="padding:2px"></div>')
     this.DOM.append(row2)
@@ -36,8 +54,8 @@ editProjectDialog.prototype.popup = function (projectInfo) {
     row2.append(lable)
     var shareAccountInput=$('<input type="text" style="outline:none; width:60%; display:inline;margin-left:2px;margin-right:2px"  placeholder="Invitee Email..."/>').addClass("w3-input w3-border");   
     row2.append(shareAccountInput)
-    var inviteBtn=$('<a class="w3-button w3-border w3-red w3-hover-amber" href="#">Invite</a>')
-    row2.append(inviteBtn)
+    var inviteBtn=$('<a class="w3-button w3-border w3-red w3-hover-amber" href="#">Invite</a>') 
+    row2.append(inviteBtn) 
 
     var shareAccountsList=$("<div class='w3-border w3-padding' style='margin:1px 1px; height:200px;overflow-x:hidden;overflow-y:auto'><div>")
     this.DOM.append(shareAccountsList)
@@ -54,7 +72,7 @@ editProjectDialog.prototype.drawSharedAccounts=function(){
         this.shareAccountsList.append(arow)
         var lable = $('<div class="w3-bar-item w3-opacity" style="padding-right:5px;">'+oneEmail+' </div>')
         arow.append(lable)
-        var removeBtn=$('<a class="w3-button w3-border w3-red w3-hover-amber" style="margin-left:10px" href="#">Remove</a>')
+        var removeBtn=$('<a class="w3-button w3-border w3-red w3-hover-amber" style="margin-left:10pxyy" href="#">Remove</a>')
         arow.append(removeBtn)
     })
 }

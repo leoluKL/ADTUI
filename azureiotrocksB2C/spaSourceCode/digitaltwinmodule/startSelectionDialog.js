@@ -44,7 +44,8 @@ startSelectionDialog.prototype.popup = async function() {
     }
 
     this.editProjectBtn=$('<a class="w3-bar-item w3-button" href="#"><i class="fa fa-share-alt fa-lg"></i></a>')
-    row1.append(this.editProjectBtn)
+    this.deleteProjectBtn=$('<a class="w3-button" href="#"><i class="fa fa-trash fa-lg"></i></a>')
+    row1.append(this.editProjectBtn,this.deleteProjectBtn)
 
     var panelHeight=450
     var row2=$('<div class="w3-cell-row"></div>')
@@ -87,9 +88,20 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
     var projectInfo=this.getProjectInfo(selectedProjectID)
     if(projectInfo.owner==globalCache.accountInfo.accountID){
         this.editProjectBtn.show()
+        this.deleteProjectBtn.show()
         this.editProjectBtn.on("click", () => { editProjectDialog.popup(projectInfo) })
+        this.deleteProjectBtn.on("click",async ()=>{
+            try {
+                await msalHelper.callAPI("accountManagement/deleteProjectTo", "POST", {"projectID":selectedProjectID})
+            } catch (e) {
+                console.log(e)
+                if (e.responseText) alert(e.responseText)
+                return
+            }
+        })
     }else{
         this.editProjectBtn.hide()
+        this.deleteProjectBtn.hide()
     }
     
 
