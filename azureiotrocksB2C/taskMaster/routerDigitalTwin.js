@@ -150,12 +150,9 @@ routerDigitalTwin.prototype.getRelationshipsFromTwinIDs =async function(req,res)
 routerDigitalTwin.prototype.deleteTwins =async function(req,res) {
     //delete the entry from cosmosDB first
     //then delete them from ADT
-    //store the new twin to cosmos DB
     
-    var dbReq=req.body
-    dbReq.account=req.authInfo.account
     try{
-        var {body}=await got.post(process.env.dboperationAPIURL+"deleteData/deleteTwins",{json:dbReq,responseType: 'json'});
+        var {body}=await got.post(process.env.dboperationAPIURL+"deleteData/deleteTwins",{json:req.body,responseType: 'json'});
     }catch(e){
         console.log(e)
     }
@@ -195,7 +192,7 @@ routerDigitalTwin.prototype.changeAttribute =async function(req,res) {
 
 routerDigitalTwin.prototype.batchImportTwins =async function(req,res) {
     //query all twin name in user name space, and check the imported twin names are unique
-    var reqBody={ account:req.authInfo.account}
+    var reqBody={ projectID:req.body.projectID, account:req.authInfo.account}
     try{
         var {body} = await got.post(process.env.dboperationAPIURL+"queryData/projectTwinsAndVisual", {json:reqBody,responseType: 'json'});
     }catch(e){
@@ -238,7 +235,7 @@ routerDigitalTwin.prototype.batchImportTwins =async function(req,res) {
     var promiseArr=[]
     ADTTwins_imported.forEach(adtTwin=>{
         var postLoad={"ADTTwin":adtTwin,"displayName":twinIDtoDisplayName[adtTwin["$dtId"]]}
-        postLoad.account=req.authInfo.account
+        postLoad.projectID=req.body.projectID
         promiseArr.push(got.post(process.env.dboperationAPIURL+"insertData/newTwin",{json:postLoad,responseType: 'json'}))
     })
     try{
@@ -266,7 +263,7 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
     var originTwinID=twinInfo['$dtId']
     
     var queryTwinNameUnique={}
-    queryTwinNameUnique.account=req.authInfo.account
+    queryTwinNameUnique.projectID=req.body.projectID
     queryTwinNameUnique.checkName=originTwinID
 
     try{
@@ -297,7 +294,7 @@ routerDigitalTwin.prototype.upsertDigitalTwin =async function(req,res) {
     var postLoad={
         "ADTTwin":newTwinInADT
         ,"displayName":originTwinID
-        ,"account":req.authInfo.account
+        ,"projectID":req.body.projectID
     }
 
     try{
@@ -330,7 +327,8 @@ routerDigitalTwin.prototype.deleteRelations =async function(req,res) {
 
 
 routerDigitalTwin.prototype.deleteLayout =async function(req,res) {
-    var dbReq={"layoutName":req.body.layoutName, "account":req.authInfo.account}
+    var dbReq=req.body
+    dbReq.account=req.authInfo.account
     try{
         await got.post(process.env.dboperationAPIURL+"deleteData/deleteTopologySchema",{json:dbReq});
         //task is successful
@@ -351,7 +349,7 @@ routerDigitalTwin.prototype.deleteModel =async function(req,res) {
         console.log(e.response.body);
     }
 
-    var dbReq={"model":req.body.model, "account":req.authInfo.account}
+    var dbReq={"model":req.body.model, "projectID":req.body.projectID}
     try{
         await got.post(process.env.dboperationAPIURL+"deleteData/deleteModel",{json:dbReq});
         //task is successful
@@ -372,7 +370,7 @@ routerDigitalTwin.prototype.importModels =async function(req,res) {
     
     //store the model to cosmos DB
     var postLoad=req.body
-    postLoad.account=req.authInfo.account
+    postLoad.projectID=req.body.projectID
     try{
         await got.post(process.env.dboperationAPIURL+"insertData/newModels",{json:postLoad,responseType: 'json'});
         //task is successful

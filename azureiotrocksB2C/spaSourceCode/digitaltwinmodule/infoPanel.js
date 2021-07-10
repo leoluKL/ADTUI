@@ -285,7 +285,7 @@ infoPanel.prototype.readTwinsFilesContentAndImport=async function(files){
 
 
     try{
-        var re = await msalHelper.callAPI("digitaltwin/batchImportTwins", "POST", {"twins":JSON.stringify(importTwins)})
+        var re = await msalHelper.callAPI("digitaltwin/batchImportTwins", "POST", {"twins":JSON.stringify(importTwins)},"withProjectID")
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)
@@ -439,7 +439,7 @@ infoPanel.prototype.deleteTwins=async function(twinIDArr){
         var smallArr= twinIDArr.splice(0, 100);
         
         try{
-            var result = await msalHelper.callAPI("digitaltwin/deleteTwins", "POST", {arr:smallArr})
+            var result = await msalHelper.callAPI("digitaltwin/deleteTwins", "POST", {arr:smallArr},"withProjectID")
             result.forEach((oneID)=>{
                 delete globalCache.storedTwins[oneID]
                 delete globalCache.storedOutboundRelationships[oneID]

@@ -195,7 +195,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
                         colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": async () => {
                             confirmDialogDiv.close();
                             try{
-                                await msalHelper.callAPI("digitaltwin/deleteModel", "POST", { "model": modelID })
+                                await msalHelper.callAPI("digitaltwin/deleteModel", "POST", { "model": modelID },"withProjectID")
                                 delete modelAnalyzer.DTDLModels[modelID]
                                 this.tree.deleteLeafNode(globalCache.modelIDMapToName[modelID])
                                 this.broadcastMessage({ "message": "ADTModelsChange"})
@@ -404,7 +404,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 
 modelManagerDialog.prototype.saveVisualDefinition=async function(){
     try{
-        await msalHelper.callAPI("digitaltwin/saveVisualDefinition", "POST", {"visualDefinitionJson":JSON.stringify(globalCache.visualDefinition["default"])})
+        await msalHelper.callAPI("digitaltwin/saveVisualDefinition", "POST", {"visualDefinitionJson":JSON.stringify(globalCache.visualDefinition["default"])},"withProjectID")
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)
@@ -499,7 +499,7 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
     }
     if(fileContentArr.length==0) return;
     try {
-        var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", {"models":JSON.stringify(fileContentArr)})
+        var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", {"models":JSON.stringify(fileContentArr)},"withProjectID")
         this.listModels("shouldBroadCast")
     }catch(e){
         console.log(e)

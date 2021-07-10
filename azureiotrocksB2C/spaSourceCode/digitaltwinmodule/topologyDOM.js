@@ -710,7 +710,7 @@ topologyDOM.prototype.saveLayout = async function (layoutName) {
     var saveLayoutObj={"layouts":{}}
     saveLayoutObj["layouts"][layoutName]=JSON.stringify(layoutDict)
     try{
-        await msalHelper.callAPI("digitaltwin/saveLayout", "POST", saveLayoutObj)
+        await msalHelper.callAPI("digitaltwin/saveLayout", "POST", saveLayoutObj,"withProjectID")
         this.broadcastMessage({ "message": "layoutsUpdated","layoutName":layoutName})
     }catch(e){
         console.log(e)

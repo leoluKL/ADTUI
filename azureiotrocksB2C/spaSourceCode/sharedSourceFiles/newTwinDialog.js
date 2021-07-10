@@ -72,7 +72,7 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
     //ask taskmaster to add the twin
     try{
         var postBody= {"newTwinJson":JSON.stringify(this.twinInfo)}
-        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST", postBody )
+        var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST", postBody,"withProjectID" )
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)
@@ -91,7 +91,7 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
                 var propertySampleV= ""
                 postBody.desiredInDeviceTwin[propertyName]=propertySampleV
             })
-            var provisionedDocument = await msalHelper.callAPI("devicemanagement/provisionIoTDeviceTwin", "POST", postBody )
+            var provisionedDocument = await msalHelper.callAPI("devicemanagement/provisionIoTDeviceTwin", "POST", postBody,"withProjectID" )
         }catch(e){
             console.log(e)
             if(e.responseText) alert(e.responseText)

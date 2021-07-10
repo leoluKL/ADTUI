@@ -29,7 +29,7 @@ modelEditorDialog.prototype.popup = async function() {
     importButton.on("click", async () => {
         var modelToBeImported = [this.dtdlobj]
         try {
-            var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) })
+            var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) },"withProjectID")
 
             alert("Model \"" + this.dtdlobj["displayName"] + "\" is created!")
             this.broadcastMessage({ "message": "ADTModelEdited" })
