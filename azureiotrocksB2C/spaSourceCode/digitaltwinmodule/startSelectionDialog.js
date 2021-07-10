@@ -45,7 +45,7 @@ startSelectionDialog.prototype.popup = async function() {
         this.chooseProject(optionValue)
     }
 
-    this.editProjectBtn=$('<a class="w3-bar-item w3-button" href="#"><i class="fa fa-share-alt fa-lg"></i></a>')
+    this.editProjectBtn=$('<a class="w3-bar-item w3-button" href="#"><i class="fa fa-edit fa-lg"></i></a>')
     this.deleteProjectBtn=$('<a class="w3-button" href="#"><i class="fa fa-trash fa-lg"></i></a>')
     this.newProjectBtn=$('<a class="w3-button" href="#"><i class="fa fa-plus fa-lg"></i></a>')
     row1.append(this.editProjectBtn,this.deleteProjectBtn,this.newProjectBtn)

@@ -69,7 +69,7 @@ routerUserAccount.prototype.basic =async function(req,res) {
                 "idp": idp
             },
             "joinedProjects":[
-                {"id":firstProjectID,"name":"Project 1","owner":accountID}
+                {"id":firstProjectID,"name":"Project 1","owner":accountID,"shareWith":[]}
             ]
         })
         cosmosdbhelper.insertRecord('appuser',queryResult[0])
