@@ -83,9 +83,10 @@ routerUserAccount.prototype.newProjectTo =async function(req,res) {
     var projectName=req.body.projectName
     try{
         var accountDocument=await this.getUserAccountDocument(ownerAccount)
-        accountDocument.joinedProjects.push( {"id":projectID, "name": projectName, "owner": ownerAccount,"shareWith":[] })
+        var newProjectInfo={"id":projectID, "name": projectName, "owner": ownerAccount,"shareWith":[] }
+        accountDocument.joinedProjects.push(newProjectInfo)
         await cosmosdbhelper.insertRecord("appuser",accountDocument)
-        res.end()
+        res.send(newProjectInfo)
     }catch(e){
         res.status(400).send(e.message);
         return;
