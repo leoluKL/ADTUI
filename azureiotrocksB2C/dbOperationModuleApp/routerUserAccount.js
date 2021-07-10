@@ -179,7 +179,6 @@ routerUserAccount.prototype.shareProjectTo =async function(req,res) {
 
     try{
         var projectName=ownerProjectInfo.name
-        console.log(shareToAccount)
         var accountDocument=await this.getUserAccountDocument(shareToAccount)
         
         var joinedProjects=accountDocument.joinedProjects
