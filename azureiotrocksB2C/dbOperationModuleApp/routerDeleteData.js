@@ -15,11 +15,11 @@ routerDeleteData.prototype.useRoute=function(routeStr,isPost){
 }
 
 routerDeleteData.prototype.deleteModel =async function(req,res) {
-    var accountID=req.body.account
+    var projectID=req.body.projectID
     var modelID=req.body.model
 
     try {
-        await cosmosdbhelper.deleteRecord("appuser",accountID,modelID)
+        await cosmosdbhelper.deleteRecord("dtproject",projectID,modelID)
         res.end()
     } catch (e) {
         console.log(e)
@@ -28,11 +28,11 @@ routerDeleteData.prototype.deleteModel =async function(req,res) {
 }
 
 routerDeleteData.prototype.deleteTwins =async function(req,res) {
-    var accountID=req.body.account
+    var projectID=req.body.projectID
     var twinIDs=req.body.arr
     var promiseArr=[]
     twinIDs.forEach(oneTwinID=>{
-        promiseArr.push(cosmosdbhelper.deleteRecord("appuser",accountID,oneTwinID))
+        promiseArr.push(cosmosdbhelper.deleteRecord("dtproject",projectID,oneTwinID))
     })
 
     try{
@@ -53,10 +53,11 @@ routerDeleteData.prototype.deleteTwins =async function(req,res) {
 
 routerDeleteData.prototype.deleteTopologySchema =async function(req,res) {
     var accountID=req.body.account
+    var projectID=req.body.projectID
     var topologyName=req.body.layoutName
 
     try {
-        await cosmosdbhelper.deleteRecord("appuser",accountID,"TopoSchema."+topologyName)
+        await cosmosdbhelper.deleteRecord("appuser",accountID,"TopoSchema."+projectID+"."+topologyName)
         res.end()
     } catch (e) {
         console.log(e)

@@ -19,14 +19,14 @@ routerUserAccount.prototype.useRoute=function(routeStr,isPost){
 }
 
 routerUserAccount.prototype.checkTwinName =async function(req,res) {
-    var accountID=req.body.account
+    var projectID=req.body.projectID
     var checkName= req.body.checkName
     var queryStr='SELECT * FROM c where '
-    queryStr+=`c.accountID='${accountID}'`
+    queryStr+=`c.projectID='${projectID}'`
     queryStr+=` and c.type='DTTwin'`
     queryStr+=` and c.displayName='${checkName}'`
     try{
-        var queryResult=await cosmosdbhelper.query('appuser',queryStr)
+        var queryResult=await cosmosdbhelper.query('dtproject',queryStr)
         if(queryResult.length==0) res.send(true)
         else res.send(false)
     }catch(e){

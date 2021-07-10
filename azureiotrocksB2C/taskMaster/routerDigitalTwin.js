@@ -71,7 +71,7 @@ routerDigitalTwin.prototype.fetchProjectModelsData =async function(req,res) {
 }
 
 routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
-    //fetch digital twins, dtdl models and the visualization data (from both cosmosdb and ADT )
+    //fetch user account infomation and generate JWT of the joined projects
     var reqBody={ account:req.authInfo.account}
     try{
         var {body} = await got.post(process.env.dboperationAPIURL+"queryData/userData", {json:reqBody,responseType: 'json'});
@@ -197,7 +197,7 @@ routerDigitalTwin.prototype.batchImportTwins =async function(req,res) {
     //query all twin name in user name space, and check the imported twin names are unique
     var reqBody={ account:req.authInfo.account}
     try{
-        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/userData", {json:reqBody,responseType: 'json'});
+        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/projectTwinsAndVisual", {json:reqBody,responseType: 'json'});
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         return;
