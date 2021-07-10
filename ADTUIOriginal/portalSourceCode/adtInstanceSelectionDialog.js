@@ -113,8 +113,6 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         panelCard.append(testResultSpan)
         testResultSpan.append(testResultTable)
 
-        this.bottomBar=$('<div class="w3-bar"></div>')
-        this.contentDOM.append(this.bottomBar)
 
         if(this.previousSelectedADT!=null){
             switchADTSelector.triggerOptionValue(this.previousSelectedADT)
@@ -126,7 +124,6 @@ adtInstanceSelectionDialog.prototype.popup = function () {
 }
 
 adtInstanceSelectionDialog.prototype.setADTInstance=function(selectedADT){
-    this.bottomBar.empty()
     this.buttonHolder.empty()
     if(this.previousSelectedADT==null || this.previousSelectedADT == selectedADT){
         var replaceButton=$('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%; margin-right:8px">Replace All Data</button>')

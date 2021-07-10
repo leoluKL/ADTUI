@@ -5,6 +5,7 @@ function routerUserAccount(){
     this.router = express.Router();
     this.useRoute("basic","post")
     this.useRoute("checkTwinName","post")
+    this.useRoute("changeOwnProjectName","post")
 }
 
 routerUserAccount.prototype.useRoute=function(routeStr,isPost){
@@ -70,6 +71,43 @@ routerUserAccount.prototype.basic =async function(req,res) {
     res.send(queryResult[0])
 }
 
+routerUserAccount.prototype.changeOwnProjectName =async function(req,res) {
+    var accountIDs=req.body.accounts
+    var projectID= req.body.projectID
+    var newName=req.body.newProjectName
+
+    var promiseArr=[]
+    accountIDs.forEach(oneAccount=>{
+        promiseArr.push(this.changeProjectNameInOneAccount(oneAccount,projectID,newName))
+    })
+    try{
+        var results=await Promise.allSettled(promiseArr);
+        res.end()
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+}
+
+routerUserAccount.prototype.changeProjectNameInOneAccount =async function(accountID,projectID,newName) {
+    var queryStr='SELECT * FROM c where '
+    queryStr+=`c.accountID='${accountID}'`
+    try{
+        var queryResult=await cosmosdbhelper.query('appuser',queryStr)
+        var wholeDocument=queryResult[0]
+        var joinedProjects=wholeDocument.joinedProjects
+        for(var i=0;i<joinedProjects.length;i++){
+            var oneProject=joinedProjects[i]
+            if(oneProject.id==projectID){
+                oneProject.name=newName
+                break
+            }
+        }
+
+        await cosmosdbhelper.insertRecord("appuser",wholeDocument)
+    }catch(e){
+        throw e
+    }
+}
 
 
 module.exports = new routerUserAccount().router

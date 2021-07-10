@@ -1,5 +1,7 @@
 const globalCache = require("../sharedSourceFiles/globalCache")
 const simpleSelectMenu=require("../sharedSourceFiles/simpleSelectMenu")
+const msalHelper=require("../msalHelper")
+const editProjectDialog=require("../sharedSourceFiles/editProjectDialog")
 
 function startSelectionDialog() {
     if(!this.DOM){
@@ -25,14 +27,6 @@ startSelectionDialog.prototype.popup = async function() {
         this.closeDialog() 
     })
 
-    var replaceButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%; margin-right:8px">Replace All Data</button>')
-    var appendButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%">Append Data</button>')
-
-    replaceButton.on("click", () => { this.useStartSelection("replace") })
-    appendButton.on("click", () => { this.useStartSelection("append") })
-    this.buttonHolder.append(replaceButton, appendButton)
-
-
     var row1=$('<div class="w3-bar" style="padding:2px"></div>')
     this.contentDOM.append(row1)
     var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;font-size:1.2em;">Project </div>')
@@ -48,6 +42,9 @@ startSelectionDialog.prototype.popup = async function() {
         switchProjectSelector.changeName(optionText)
         this.chooseProject(optionValue)
     }
+
+    this.editProjectBtn=$('<a class="w3-bar-item w3-button" href="#"><i class="fa fa-share-alt fa-lg"></i></a>')
+    row1.append(this.editProjectBtn)
 
     var panelHeight=450
     var row2=$('<div class="w3-cell-row"></div>')
@@ -76,9 +73,44 @@ startSelectionDialog.prototype.popup = async function() {
     }
 }
 
+startSelectionDialog.prototype.getProjectInfo = function (projectID) {
+    var joinedProjects=globalCache.accountInfo.joinedProjects
+    for(var i=0;i<joinedProjects.length;i++){
+        var aProject=joinedProjects[i]
+        if(aProject.id==projectID) return aProject
+    }
+}
 
-startSelectionDialog.prototype.chooseProject = function () {
-    /*
+startSelectionDialog.prototype.chooseProject = async function (selectedProjectID) {
+    this.buttonHolder.empty()
+
+    var projectInfo=this.getProjectInfo(selectedProjectID)
+    if(projectInfo.owner==globalCache.accountInfo.accountID){
+        this.editProjectBtn.show()
+        this.editProjectBtn.on("click", () => { editProjectDialog.popup(projectInfo) })
+    }else{
+        this.editProjectBtn.hide()
+    }
+    
+
+    if(this.previousSelectedProject==null){
+        var replaceButton = $('<button class="w3-button w3-card w3-hover-deep-orange w3-green" style="height:100%; margin-right:8px">Start</button>')
+        replaceButton.on("click", () => { this.useStartSelection("replace") })
+        this.buttonHolder.append(replaceButton)
+    }else if(this.previousSelectedProject == selectedProjectID){
+        var replaceButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%; margin-right:8px">Replace All Data</button>')
+        var appendButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%">Append Data</button>')
+    
+        replaceButton.on("click", () => { this.useStartSelection("replace") })
+        appendButton.on("click", () => { this.useStartSelection("append") })
+        this.buttonHolder.append(replaceButton, appendButton)
+    }else{
+        var replaceButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%; margin-right:8px">Replace All Data</button>')
+        replaceButton.on("click", () => { this.useStartSelection("replace") })
+        this.buttonHolder.append(replaceButton)
+    }
+    globalCache.currentProjectID = selectedProjectID
+    
     try {
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
         globalCache.storeProjectModelsData(res.DBModels, res.adtModels)
@@ -90,13 +122,10 @@ startSelectionDialog.prototype.chooseProject = function () {
         if (e.responseText) alert(e.responseText)
         return
     }
-    this.broadcastMessage(this,{ "message": "visualDefinitionRefresh"})
-    this.broadcastMessage(this,{ "message": "layoutsUpdated"})
-    */
-    //this.fillAvailableModels()
+    this.fillAvailableModels()
+    this.listTwins()
 
-    //this.listTwins()
-
+    //TODO: when there is no twin at all, prompt user to start creating model first...
     /*
     if(globalCache.DBModelsArr.length==0){
         //directly popup to model management dialog allow user import or create model
@@ -112,12 +141,15 @@ startSelectionDialog.prototype.chooseProject = function () {
     */
 }
 
+
+
 startSelectionDialog.prototype.closeDialog=function(){
     this.DOM.hide()
     this.broadcastMessage({ "message": "startSelectionDialog_closed"})
 }
 
 startSelectionDialog.prototype.fillAvailableModels = function() {
+    this.modelsCheckBoxes.empty()
     this.modelsCheckBoxes.append('<input class="w3-check" type="checkbox" id="ALL"><label style="padding-left:5px"><b>ALL</b></label><p/>')
     globalCache.DBModelsArr.forEach(oneModel=>{
         var modelName=oneModel["displayName"]
@@ -168,6 +200,7 @@ startSelectionDialog.prototype.listTwins=function(){
 
 
 startSelectionDialog.prototype.useStartSelection=function(action){
+    this.previousSelectedProject=globalCache.currentProjectID
     var selectedTwins=this.getSelectedTwins()
     var twinIDs=[]
     selectedTwins.forEach(aTwin=>{twinIDs.push(aTwin["id"])})
@@ -176,6 +209,8 @@ startSelectionDialog.prototype.useStartSelection=function(action){
     globalCache.DBModelsArr.forEach(oneModel=>{modelIDs.push(oneModel["id"])})
 
     this.broadcastMessage({ "message": "startSelection_"+action, "twinIDs": twinIDs,"modelIDs":modelIDs })
+    this.broadcastMessage({ "message": "visualDefinitionRefresh"})
+    this.broadcastMessage({ "message": "layoutsUpdated"})
     this.closeDialog()
 }
 

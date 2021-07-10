@@ -9,7 +9,6 @@ const mainToolbar = require("./mainToolbar")
 const infoPanel= require("./infoPanel");
 const globalAppSettings = require("../globalAppSettings.js");
 const msalHelper=require("../msalHelper")
-const globalCache=require("../sharedSourceFiles/globalCache")
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 
 function digitaltwinmoduleUI() {
