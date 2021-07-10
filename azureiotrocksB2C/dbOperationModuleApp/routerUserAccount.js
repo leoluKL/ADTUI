@@ -78,6 +78,7 @@ routerUserAccount.prototype.changeOwnProjectName =async function(req,res) {
 
     var promiseArr=[]
     accountIDs.forEach(oneAccount=>{
+        oneAccount=oneAccount.toLowerCase();
         promiseArr.push(this.changeProjectNameInOneAccount(oneAccount,projectID,newName))
     })
     try{

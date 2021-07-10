@@ -44,7 +44,7 @@ if(!localTestFlag){
         if(bearerToken!=null){
             bearerToken= bearerToken.substring("Bearer ".length);
             req.authInfo=parseJWT(bearerToken)  //this is the token from azure AD
-            req.authInfo.account=req.authInfo.emails[0]
+            req.authInfo.account=req.authInfo.emails[0].toLowerCase();
         }
         next();
     });
