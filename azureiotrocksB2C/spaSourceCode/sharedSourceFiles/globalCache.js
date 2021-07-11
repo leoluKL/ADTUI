@@ -1,5 +1,3 @@
-const modelAnalyzer=require("./modelAnalyzer")
-
 function globalCache(){
     this.accountInfo=null;
     this.joinedProjectsToken=null;
@@ -103,9 +101,6 @@ globalCache.prototype.storeProjectModelsData=function(DBModels,adtModels){
         this.modelIDMapToName[adtModels[i]["@id"]] = adtModels[i]["displayName"]
         this.modelNameMapToID[adtModels[i]["displayName"]] = adtModels[i]["@id"]
     }
-    modelAnalyzer.clearAllModels();
-    modelAnalyzer.addModels(adtModels)
-    modelAnalyzer.analyze();
 }
 
 globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){

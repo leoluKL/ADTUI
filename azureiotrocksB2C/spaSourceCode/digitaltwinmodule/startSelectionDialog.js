@@ -3,6 +3,7 @@ const simpleSelectMenu=require("../sharedSourceFiles/simpleSelectMenu")
 const msalHelper=require("../msalHelper")
 const editProjectDialog=require("../sharedSourceFiles/editProjectDialog")
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
+const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer")
 
 function startSelectionDialog() {
     if(!this.DOM){
@@ -54,13 +55,13 @@ startSelectionDialog.prototype.popup = async function() {
     var panelHeight=400
     var row2=$('<div class="w3-cell-row"></div>')
     this.contentDOM.append(row2)
-    var leftSpan=$('<div style="padding:5px;width:230px;padding-right:5px;overflow:hidden"></div>')
+    var leftSpan=$('<div style="padding:5px;width:260px;padding-right:5px;overflow:hidden"></div>')
     row2.append(leftSpan)
     this.leftSpan=leftSpan
 
     var rightSpan=$('<div class="w3-container w3-cell" style="padding-top:10px;"></div>')
     row2.append(rightSpan) 
-    rightSpan.append($('<div class="w3-container w3-card" style="color:gray;height:'+(panelHeight-10)+'px;overflow:auto;width:410px;"></div>'))
+    rightSpan.append($('<div class="w3-container w3-card" style="color:gray;height:'+(panelHeight-10)+'px;overflow:auto;width:390px;"></div>'))
     var selectedTwinsDOM=$("<table style='width:100%'></table>")
     selectedTwinsDOM.css({"border-collapse":"collapse"})
     rightSpan.children(':first').append(selectedTwinsDOM)
@@ -151,7 +152,9 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
     try {
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
         globalCache.storeProjectModelsData(res.DBModels, res.adtModels)
-
+        modelAnalyzer.clearAllModels();
+        modelAnalyzer.addModels(res.adtModels)
+        modelAnalyzer.analyze();
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData", "POST", null, "withProjectID")
         globalCache.storeProjectTwinsAndVisualData(res)
     } catch (e) {

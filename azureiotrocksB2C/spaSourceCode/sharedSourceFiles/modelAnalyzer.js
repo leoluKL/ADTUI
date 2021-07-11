@@ -1,3 +1,4 @@
+const msalHelper=require("../msalHelper")
 //This is a singleton class
 
 function modelAnalyzer(){
@@ -180,5 +181,44 @@ modelAnalyzer.prototype.analyze=function(){
     //console.log(this.relationshipTypes)
 }
 
+modelAnalyzer.prototype.listModelsForDeleteModel=function(modelID){
+    var childModelIDs=[]
+    for(var aID in this.DTDLModels){
+        var aModel=this.DTDLModels[aID]
+        if(aModel.allBaseClasses && aModel.allBaseClasses[modelID]) childModelIDs.push(aModel["@id"])
+    }
+    return childModelIDs
+}
+
+modelAnalyzer.prototype.deleteModel=async function(modelID,funcAfterEachSuccessDelete,funcAfterFail,completeFunc){
+    var relatedModelIDs=this.listModelsForDeleteModel(modelID)
+    var modelLevel=[]
+    relatedModelIDs.forEach(oneID=>{
+        var checkModel=this.DTDLModels[oneID]
+        modelLevel.push({"modelID":oneID,"level":Object.keys(checkModel.allBaseClasses).length})
+    })
+    modelLevel.push({"modelID":modelID,"level":0})
+    modelLevel.sort(function (a, b) {return b["level"]-a["level"] });
+    
+    for(var i=0;i<modelLevel.length;i++){
+        var aModelID=modelLevel[i].modelID
+        try{
+            await msalHelper.callAPI("digitaltwin/deleteModel", "POST", { "model": aModelID },"withProjectID")
+            delete this.DTDLModels[aModelID]
+            if(funcAfterEachSuccessDelete) funcAfterEachSuccessDelete(aModelID)
+        }catch(e){
+            var deletedModels=[]
+            var alertStr="Delete model is incomplete. Deleted Model:"
+            for(var j=0;j<i;j++){
+                alertStr+= modelLevel[j].modelID+" "
+                deletedModels.push(modelLevel[j].modelID)
+            } 
+            alertStr+=". Fail to delete "+aModelID+". Error is "+e
+            if(funcAfterFail) funcAfterFail(deletedModels)
+            alert(e)
+        }
+    }
+    if(completeFunc) completeFunc()
+}
 
 module.exports = new modelAnalyzer();

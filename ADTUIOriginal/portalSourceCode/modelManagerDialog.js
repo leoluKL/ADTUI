@@ -39,7 +39,7 @@ modelManagerDialog.prototype.popup = async function() {
 
     var importModelsBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Import</button>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
-    var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create Model</button>')
+    var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create/Modify Model</button>')
     var exportModelBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Export All Models</button>')
     this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn, modelEditorBtn,exportModelBtn)
     importModelsBtn.on("click", ()=>{
@@ -56,7 +56,7 @@ modelManagerDialog.prototype.popup = async function() {
 
     exportModelBtn.on("click", () => {
         var modelArr=[]
-        for(var modelName in this.models) modelArr.push(this.models[modelName])
+        for(var modelID in modelAnalyzer.DTDLModels) modelArr.push(JSON.parse(modelAnalyzer.DTDLModels[modelID]["original"]))
         var pom = $("<a></a>")
         pom.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(modelArr)));
         pom.attr('download', "exportModels.json");
@@ -184,32 +184,20 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
 
 
     delBtn.on("click",()=>{
+        var relatedModelIDs =modelAnalyzer.listModelsForDeleteModel(modelID)
+        var dialogStr=(relatedModelIDs.length==0)? ("This will DELETE model \"" + modelID + "\""): 
+            (modelID + " is base model of "+relatedModelIDs.join(", ")+". Delete all of them?")
         var confirmDialogDiv = new simpleConfirmDialog()
-
         confirmDialogDiv.show(
-            { width: "250px" },
+            { width: "350px" },
             {
                 title: "Warning"
-                , content: "This will DELETE model \"" + modelID + "\""
+                , content: dialogStr
                 , buttons: [
                     {
                         colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
                             confirmDialogDiv.close();
-                            $.post("editADT/deleteModel",{"model":modelID}, (data)=> {
-                                if(data==""){//successful
-                                    delete modelAnalyzer.DTDLModels[modelID]
-                                    delete this.models[modelName]
-                                    this.tree.deleteLeafNode(modelName)
-                                    this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models})
-                                    this.panelCard.empty()
-                                    if(globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][modelID] ){
-                                        delete globalCache.visualDefinition[globalCache.selectedADT][modelID]
-                                        this.saveVisualDefinition()
-                                    }
-                                }else{ //error happens
-                                    alert(data)
-                                }
-                            });
+                            this.confirmDeleteModel(modelID)
                         }
                     },
                     {
@@ -241,6 +229,23 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelName){
     this.fillBaseClasses(modelAnalyzer.DTDLModels[modelID].allBaseClasses,baseClassesDOM) 
 }
 
+modelManagerDialog.prototype.confirmDeleteModel=function(modelID){
+    var funcAfterEachSuccessDelete = (eachDeletedModelID,eachModelName) => {
+        delete this.models[eachModelName]
+        this.tree.deleteLeafNode(eachModelName)
+        if (globalCache.visualDefinition[globalCache.selectedADT] && globalCache.visualDefinition[globalCache.selectedADT][eachDeletedModelID]) {
+            delete globalCache.visualDefinition[globalCache.selectedADT][eachDeletedModelID]
+        }
+    }
+    var completeFunc=()=>{ 
+        this.broadcastMessage({ "message": "ADTModelsChange", "models":this.models})
+        this.panelCard.empty()
+        this.saveVisualDefinition()
+    }
+
+    //even not completely successful deleting, it will still invoke completeFunc
+    modelAnalyzer.deleteModel(modelID,funcAfterEachSuccessDelete,completeFunc,completeFunc)
+}
 
 modelManagerDialog.prototype.refreshModelTreeLabel=function(){
     if(this.tree.selectedNodes.length>0) this.tree.selectedNodes[0].redrawLabel()
@@ -533,6 +538,7 @@ modelManagerDialog.prototype.readOneFile= async function(aFile){
 
 modelManagerDialog.prototype.listModels=function(shouldBroadcast){
     this.modelList.empty()
+    this.panelCard.empty()
     for(var ind in this.models) delete this.models[ind]
 
     $.get("queryADT/listModels", (data, status) => {

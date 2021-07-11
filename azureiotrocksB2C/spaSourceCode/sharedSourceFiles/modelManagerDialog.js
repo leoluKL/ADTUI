@@ -28,7 +28,7 @@ modelManagerDialog.prototype.popup = async function() {
 
     var importModelsBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Import</button>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
-    var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create Model</button>')
+    var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create/Modify Model</button>')
     var exportModelBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Export All Models</button>')
     this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn, modelEditorBtn,exportModelBtn)
     importModelsBtn.on("click", ()=>{
@@ -173,43 +173,30 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
 
     
     delBtn.on("click",()=>{
+        var relatedModelIDs =modelAnalyzer.listModelsForDeleteModel(modelID)
+        var dialogStr=(relatedModelIDs.length==0)? ("This will DELETE model \"" + modelID + "\"."): 
+            (modelID + " is base model of "+relatedModelIDs.join(", ")+".")
         var confirmDialogDiv = new simpleConfirmDialog()
 
         //check how many twins are under this model ID
         var numberOfTwins=0
+        var checkTwinsModelArr=[modelID].concat(relatedModelIDs)
         globalCache.DBTwinsArr.forEach(oneDBTwin=>{
-            if(oneDBTwin["modelID"]==modelID) numberOfTwins++
+            var theIndex=checkTwinsModelArr.indexOf(oneDBTwin["modelID"])
+            if(theIndex!=-1) numberOfTwins++
         })
 
-        var contentStr="This will DELETE model \"" + modelID + "\". "
-        contentStr+="(There "+((numberOfTwins>1)?("are "+numberOfTwins+" twins"):("is "+numberOfTwins+" twin") ) + " of this model."
-        if(numberOfTwins>0) contentStr+=" You may still delete the model, but please import a model with this modelID to ensure normal operation)"
-        else contentStr+=")"
+        dialogStr+=" (There will be "+((numberOfTwins>1)?(numberOfTwins+" twins"):(numberOfTwins+" twin") ) + " being impacted)"
         confirmDialogDiv.show(
             { width: "350px" },
             {
                 title: "Warning"
-                , content: contentStr
+                , content: dialogStr
                 , buttons: [
                     {
                         colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": async () => {
                             confirmDialogDiv.close();
-                            try{
-                                await msalHelper.callAPI("digitaltwin/deleteModel", "POST", { "model": modelID },"withProjectID")
-                                delete modelAnalyzer.DTDLModels[modelID]
-                                this.tree.deleteLeafNode(globalCache.modelIDMapToName[modelID])
-                                this.broadcastMessage({ "message": "ADTModelsChange"})
-                                this.panelCard.empty()
-                                //TODO: clear the visualization setting of this deleted model
-                                /*
-                                if (globalCache.visualDefinition["default"][modelID]) {
-                                    delete globalCache.visualDefinition["default"][modelID]
-                                    this.saveVisualDefinition()
-                                }*/
-                            }catch(e){
-                                console.log(e)
-                                if(e.responseText) alert(e.responseText)
-                            }   
+                            this.confirmDeleteModel(modelID) 
                         }
                     },
                     {
@@ -239,6 +226,25 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     this.fillVisualization(modelID,VisualizationDOM)
 
     this.fillBaseClasses(modelAnalyzer.DTDLModels[modelID].allBaseClasses,baseClassesDOM) 
+}
+
+modelManagerDialog.prototype.confirmDeleteModel=function(modelID){
+    var funcAfterEachSuccessDelete = (eachDeletedModelID) => {
+        this.tree.deleteLeafNode(globalCache.modelIDMapToName[eachDeletedModelID])
+        //TODO: clear the visualization setting of this deleted model
+        /*
+        if (globalCache.visualDefinition["default"][modelID]) {
+            delete globalCache.visualDefinition["default"][modelID]
+            this.saveVisualDefinition()
+        }*/
+    }
+    var completeFunc=()=>{ 
+        this.broadcastMessage({ "message": "ADTModelsChange"})
+        this.panelCard.empty()
+    }
+
+    //even not completely successful deleting, it will still invoke completeFunc
+    modelAnalyzer.deleteModel(modelID,funcAfterEachSuccessDelete,completeFunc,completeFunc)
 }
 
 modelManagerDialog.prototype.refreshModelTreeLabel=function(){
@@ -524,9 +530,13 @@ modelManagerDialog.prototype.readOneFile= async function(aFile){
 
 modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
     this.modelList.empty()
+    this.panelCard.empty()
     try{
         var res=await msalHelper.callAPI("digitaltwin/fetchProjectModelsData","POST",null,"withProjectID")
         globalCache.storeProjectModelsData(res.DBModels,res.adtModels)
+        modelAnalyzer.clearAllModels();
+        modelAnalyzer.addModels(res.adtModels)
+        modelAnalyzer.analyze();
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)

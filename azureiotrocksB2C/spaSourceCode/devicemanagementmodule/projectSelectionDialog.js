@@ -3,6 +3,7 @@ const simpleSelectMenu=require("../sharedSourceFiles/simpleSelectMenu")
 const msalHelper=require("../msalHelper")
 const editProjectDialog=require("../sharedSourceFiles/editProjectDialog")
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
+const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer")
 
 function projectSelectionDialog() {
     if(!this.DOM){
@@ -128,6 +129,9 @@ projectSelectionDialog.prototype.useProject=async function(){
     try {
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
         globalCache.storeProjectModelsData(res.DBModels, res.adtModels)
+        modelAnalyzer.clearAllModels();
+        modelAnalyzer.addModels(res.adtModels)
+        modelAnalyzer.analyze();
 
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData", "POST", null, "withProjectID")
         globalCache.storeProjectTwinsAndVisualData(res)

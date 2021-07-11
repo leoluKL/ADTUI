@@ -1,7 +1,7 @@
 const modelAnalyzer=require("./modelAnalyzer")
 const simpleSelectMenu= require("./simpleSelectMenu")
 const msalHelper=require("../msalHelper")
-const globalCache = require("./globalCache")
+const simpleConfirmDialog=require("./simpleConfirmDialog")
 
 function modelEditorDialog() {
     if(!this.DOM){
@@ -24,21 +24,13 @@ modelEditorDialog.prototype.popup = async function() {
     var buttonRow=$('<div  style="height:40px" class="w3-bar"></div>')
     this.contentDOM.append(buttonRow)
     var importButton =$('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green w3-right" style="height:100%">Import</button>')
+    this.importButton=importButton
     buttonRow.append(importButton)
 
     importButton.on("click", async () => {
-        var modelToBeImported = [this.dtdlobj]
-        try {
-            var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) },"withProjectID")
-
-            alert("Model \"" + this.dtdlobj["displayName"] + "\" is created!")
-            this.broadcastMessage({ "message": "ADTModelEdited" })
-            modelAnalyzer.addModels(modelToBeImported) //add so immediatley the list can show the new models
-            this.popup() //refresh content
-        }catch(e){
-            console.log(e)
-            if(e.responseText) alert(e.responseText)
-        }        
+        var currentModelID=this.dtdlobj["@id"]
+        if(modelAnalyzer.DTDLModels[currentModelID]==null) this.importModelArr([this.dtdlobj])
+        else this.replaceModel()       
     })
 
     var lable=$('<div class="w3-bar-item w3-opacity" style="padding-right:5px;font-size:1.2em;">Model Template</div>')
@@ -69,6 +61,79 @@ modelEditorDialog.prototype.popup = async function() {
 
     modelTemplateSelector.triggerOptionIndex(0)
 }
+
+modelEditorDialog.prototype.replaceModel=function(){
+    //delete the old same name model, then create it again
+    var currentModelID=this.dtdlobj["@id"]
+
+    var relatedModelIDs=modelAnalyzer.listModelsForDeleteModel(currentModelID)
+
+    var dialogStr = (relatedModelIDs.length == 0) ? ("Twins will be impact under model \"" + currentModelID + "\"") :
+        (currentModelID + " is base model of " + relatedModelIDs.join(", ") + ". Twins under these models will be impact.")
+    var confirmDialogDiv = new simpleConfirmDialog()
+    confirmDialogDiv.show(
+        { width: "350px" },
+        {
+            title: "Warning"
+            , content: dialogStr
+            , buttons: [
+                {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": () => {
+                        confirmDialogDiv.close();
+                        this.confirmReplaceModel(currentModelID)
+                    }
+                },
+                {
+                    colorClass: "w3-gray", text: "Cancel", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                    }
+                }
+            ]
+        }
+    )    
+}
+
+modelEditorDialog.prototype.importModelArr=async function(modelToBeImported,forReplacing,afterFailure){
+    try {
+        var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) },"withProjectID")
+        if(forReplacing) alert("Model " + this.dtdlobj["displayName"] + " is modified successfully!")
+        else alert("Model " + this.dtdlobj["displayName"] + " is created!")
+
+        this.broadcastMessage({ "message": "ADTModelEdited" })
+        modelAnalyzer.addModels(modelToBeImported) //add so immediatley the list can show the new models
+        this.popup() //refresh content
+    }catch(e){
+        if(afterFailure) afterFailure()
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    } 
+}
+
+modelEditorDialog.prototype.confirmReplaceModel=function(modelID){
+    var relatedModelIDs=modelAnalyzer.listModelsForDeleteModel(modelID)
+    var backupModels=[]
+    relatedModelIDs.forEach(oneID=>{
+        backupModels.push(JSON.parse(modelAnalyzer.DTDLModels[oneID]["original"]))
+    })
+    backupModels.push(this.dtdlobj)
+    var backupModelsStr=encodeURIComponent(JSON.stringify(backupModels))
+
+    var funcAfterFail=(deletedModelIDs)=>{
+        var pom = $("<a></a>")
+        pom.attr('href', 'data:text/plain;charset=utf-8,' + backupModelsStr);
+        pom.attr('download', "exportModelsAfterFailedOperation.json");
+        pom[0].click()
+    }
+    var funcAfterEachSuccessDelete = (eachDeletedModelID,eachModelName) => {}
+    
+    var completeFunc=()=>{ 
+        //import all the models again
+        this.importModelArr(backupModels,"forReplacing",funcAfterFail)
+    }
+    modelAnalyzer.deleteModel(modelID,funcAfterEachSuccessDelete,funcAfterFail,completeFunc)
+}
+
+
 
 modelEditorDialog.prototype.chooseTemplate=function(tempalteName){
     if(tempalteName!="New"){
@@ -108,6 +173,11 @@ modelEditorDialog.prototype.chooseTemplate=function(tempalteName){
 }
 
 modelEditorDialog.prototype.refreshDTDL=function(){
+    //it will refresh the generated DTDL sample, it will also change the import button to show "Create" or "Modify"
+    var currentModelID=this.dtdlobj["@id"]
+    if(modelAnalyzer.DTDLModels[currentModelID]==null) this.importButton.text("Create")
+    else this.importButton.text("Modify")
+
     this.dtdlScriptPanel.empty()
     this.dtdlScriptPanel.append($('<div style="height:20px;width:100px" class="w3-bar w3-gray">Generated DTDL</div>'))
     this.dtdlScriptPanel.append($('<pre style="color:gray">'+JSON.stringify(this.dtdlobj,null,2)+'</pre>'))
@@ -340,7 +410,7 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
     var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
     var ptypeSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1em",colorClass:"w3-light-gray w3-bar-item",buttonCSS:{"padding":"4px 5px"},"optionListHeight":300,"isClickable":1,"optionListMarginTop":-150,"optionListMarginLeft":60,
     "adjustPositionAnchor":dialogOffset})
-    ptypeSelector.addOptionArr(["Enum","Object","boolean","date","dateTime","double","duration","float","integer","long","string","time"])
+    ptypeSelector.addOptionArr(["string","float","integer","Enum","Object","double","boolean","date","dateTime","duration","long","time"])
     DOM.append(parameterNameInput,ptypeSelector.DOM,enumValueInput,addButton,removeButton)
 
     removeButton.on("click",()=>{
