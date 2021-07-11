@@ -23,7 +23,7 @@ function twinsTree(DOM, searchDOM) {
         }
 
         var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative;padding-top:2px'></div>")
-        if(dbModelInfo.isIoTDeviceModel){
+        if(dbModelInfo && dbModelInfo.isIoTDeviceModel){
             var iotDiv=$("<div class='w3-border' style='position:absolute;right:-5px;padding:0px 2px;top:-7px;border-radius: 3px;font-size:7px'>IoT</div>")
             iconDOM.append(iotDiv)
         }
@@ -137,7 +137,8 @@ twinsTree.prototype.refreshModels=function(){
         modelsData[oneModel["displayName"]] = oneModel
     }
     //delete all group nodes of deleted models
-    this.tree.groupNodes.forEach((gnode)=>{
+    var arr=[].concat(this.tree.groupNodes)
+    arr.forEach((gnode)=>{
         if(modelsData[gnode.name]==null){
             //delete this group node
             gnode.deleteSelf()

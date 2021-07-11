@@ -247,9 +247,11 @@ simpleTreeGroupNode.prototype.refreshName=function(){
     
     if(this.parentTree.options.groupNodeIconFunc){
         var iconLabel=this.parentTree.options.groupNodeIconFunc(this)
-        this.headerDOM.append(iconLabel)
-        var rowHeight=iconLabel.height()
-        nameDiv.css("line-height",rowHeight+"px")
+        if(iconLabel){
+            this.headerDOM.append(iconLabel)
+            var rowHeight=iconLabel.height()
+            nameDiv.css("line-height",rowHeight+"px")    
+        }
     }
     
     var numberlabel=$("<label class='"+lblColor+"' style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+this.childLeafNodes.length+"</label>")
@@ -286,7 +288,7 @@ simpleTreeGroupNode.prototype.deleteSelf = function () {
 simpleTreeGroupNode.prototype.createDOM=function(){
     this.headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom" style="position:relative"></button>')
     this.refreshName()
-    this.listDOM=$('<div class="w3-container w3-hide w3-border w3-padding-16"></div>')
+    this.listDOM=$('<div class="w3-container w3-hide w3-border" style="padding:8px"></div>')
 
     this.headerDOM.on("click",(evt)=> {
         if(this.listDOM.hasClass("w3-show")) this.listDOM.removeClass("w3-show")

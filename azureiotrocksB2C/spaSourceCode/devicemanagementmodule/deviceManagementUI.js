@@ -9,6 +9,7 @@ const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
 const globalCache=require("../sharedSourceFiles/globalCache")
 const twinsList=require("./twinsList")
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
+const projectSelectionDialog=require("./projectSelectionDialog")
 
 function deviceManagementUI() {
     deviceManagementMainToolbar.render()
@@ -31,31 +32,11 @@ deviceManagementUI.prototype.initData=async function(){
         if(e.responseText) alert(e.responseText)
         return
     }
-    
-
-    //TODO: prompt user to choose project to start, tempororily direct load the project data
-    try{
-        var res=await msalHelper.callAPI("digitaltwin/fetchProjectModelsData","POST",null,"withProjectID")
-        globalCache.storeProjectModelsData(res.DBModels,res.adtModels)
-
-        var res=await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData","POST",null,"withProjectID")
-        globalCache.storeProjectTwinsAndVisualData(res)
-    }catch(e){
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-        return
-    }
-    
-    
-    if(globalCache.DBModelsArr.length==0){
-        //TODO: if there is no model at all, prompt user to create his first model
-    }else{
-        twinsList.refill()
-    }
+    projectSelectionDialog.popup()
 }
 
 deviceManagementUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,twinsList,newTwinDialog,modelIoTSettingDialog,twinInfoPanel]
+    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,twinsList,newTwinDialog,modelIoTSettingDialog,twinInfoPanel,projectSelectionDialog]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

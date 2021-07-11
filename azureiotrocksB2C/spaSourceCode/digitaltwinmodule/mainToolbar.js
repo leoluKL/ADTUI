@@ -12,7 +12,7 @@ mainToolbar.prototype.render = function () {
     $("#mainToolBar").addClass("w3-bar w3-red")
     $("#mainToolBar").css({"z-index":100,"overflow":"visible"})
 
-    this.switchADTInstanceBtn=$('<a class="w3-bar-item w3-button" href="#">Source</a>')
+    this.switchProjectBtn=$('<a class="w3-bar-item w3-button" href="#">Project</a>')
     this.modelIOBtn=$('<a class="w3-bar-item w3-button" href="#">Models</a>')
     this.showForgeViewBtn=$('<a class="w3-bar-item w3-button w3-hover-none w3-text-light-grey w3-hover-text-light-grey" style="opacity:.35" href="#">ForgeView</a>')
     this.showGISViewBtn=$('<a class="w3-bar-item w3-button w3-hover-none w3-text-light-grey w3-hover-text-light-grey" style="opacity:.35" href="#">GISView</a>')
@@ -26,11 +26,11 @@ mainToolbar.prototype.render = function () {
 
     $("#mainToolBar").empty()
     $("#mainToolBar").append(moduleSwitchDialog.modulesSidebar)
-    $("#mainToolBar").append(moduleSwitchDialog.modulesSwitchButton, this.switchADTInstanceBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
+    $("#mainToolBar").append(moduleSwitchDialog.modulesSwitchButton, this.switchProjectBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
         ,this.switchLayoutSelector.DOM,this.editLayoutBtn)
         //,this.testSignalRBtn,this.testSendSignalRBtn
 
-    this.switchADTInstanceBtn.on("click",()=>{ startSelectionDialog.popup() })
+    this.switchProjectBtn.on("click",()=>{ startSelectionDialog.popup() })
     this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })
     this.editLayoutBtn.on("click",()=>{ editLayoutDialog.popup() })
 

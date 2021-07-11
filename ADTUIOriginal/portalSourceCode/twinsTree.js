@@ -118,7 +118,8 @@ twinsTree.prototype.deleteTwins=function(twinIDArr){
 
 twinsTree.prototype.refreshModels=function(modelsData){
     //delete all group nodes of deleted models
-    this.tree.groupNodes.forEach((gnode)=>{
+    var arr=[].concat(this.tree.groupNodes)
+    arr.groupNodes.forEach((gnode)=>{
         if(modelsData[gnode.name]==null){
             //delete this group node
             gnode.deleteSelf()

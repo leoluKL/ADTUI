@@ -321,7 +321,7 @@ modelIoTSettingDialog.prototype.drawIoTSelectDropdown=function(td,IoTsettingObj,
         , {
             width: "210px","isClickable": true, "withBorder": true
             , buttonCSS: { "padding": "4px 16px" }
-            ,"optionListMarginTop":0,"optionListMarginLeft":210
+            ,"optionListMarginTop":50,"optionListMarginLeft":210
             ,"adjustPositionAnchor":this.DOM.offset()
         }
     )

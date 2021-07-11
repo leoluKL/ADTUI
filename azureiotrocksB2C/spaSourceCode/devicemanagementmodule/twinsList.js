@@ -35,7 +35,9 @@ twinsList.prototype.refill=function(){
 }
 
 twinsList.prototype.rxMessage=function(msgPayload){
-    if(msgPayload.message=="visualDefinitionChange"){
+    if(msgPayload.message=="startProject"){
+        this.refill()
+    }else if(msgPayload.message=="visualDefinitionChange"){
         if(msgPayload.modelID)  var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(msgPayload.modelID)
         theSingleModelTwinsList.refreshTwinsIcon()
     }else if(msgPayload.message=="ModelIoTSettingEdited"){

@@ -2,6 +2,7 @@ const globalCache = require("../sharedSourceFiles/globalCache")
 const simpleSelectMenu=require("../sharedSourceFiles/simpleSelectMenu")
 const msalHelper=require("../msalHelper")
 const editProjectDialog=require("../sharedSourceFiles/editProjectDialog")
+const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
 
 function startSelectionDialog() {
     if(!this.DOM){
@@ -160,21 +161,6 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
     }
     this.fillAvailableModels()
     this.listTwins()
-
-    //TODO: when there is no twin at all, prompt user to start creating model first...
-    /*
-    if(globalCache.DBModelsArr.length==0){
-        //directly popup to model management dialog allow user import or create model
-        modelManagerDialog.popup()
-        //pop up welcome screen
-        var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
-        popWin.html(`Welcome, ${msalHelper.userName}! Firstly, you may consider importing a few twin model files or creating twin models from scratch. <br/><br/>Click to continue...`)
-        $("body").append(popWin)
-        popWin.on("click",()=>{popWin.remove()})
-    }else{
-        
-    }
-    */
 }
 
 
@@ -248,6 +234,17 @@ startSelectionDialog.prototype.useStartSelection=function(action){
     this.broadcastMessage({ "message": "visualDefinitionRefresh"})
     this.broadcastMessage({ "message": "layoutsUpdated"})
     this.closeDialog()
+
+    if(globalCache.DBModelsArr.length==0){
+        //directly popup to model management dialog allow user import or create model
+        modelManagerDialog.popup()
+        //pop up welcome screen
+        var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
+        popWin.html(`Welcome, ${msalHelper.userName}! Firstly, let's import or create a few twin models to start. <br/><br/>Click to continue...`)
+        $("body").append(popWin)
+        popWin.on("click",()=>{popWin.remove()})
+        setTimeout(()=>{popWin.remove()},2000)
+    }
 }
 
 module.exports = new startSelectionDialog();
