@@ -238,12 +238,16 @@ startSelectionDialog.prototype.useStartSelection=function(action){
     if(globalCache.DBModelsArr.length==0){
         //directly popup to model management dialog allow user import or create model
         modelManagerDialog.popup()
+        modelManagerDialog.DOM.hide()
+        modelManagerDialog.DOM.fadeIn()
         //pop up welcome screen
         var popWin=$('<div class="w3-blue w3-card-4 w3-padding-large" style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:105;width:400px;cursor:default"></div>')
         popWin.html(`Welcome, ${msalHelper.userName}! Firstly, let's import or create a few twin models to start. <br/><br/>Click to continue...`)
         $("body").append(popWin)
         popWin.on("click",()=>{popWin.remove()})
-        setTimeout(()=>{popWin.remove()},2000)
+        setTimeout(()=>{
+            popWin.fadeOut("slow",()=>{popWin.remove()});
+        },3000)
     }
 }
 
