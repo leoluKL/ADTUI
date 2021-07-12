@@ -100,6 +100,7 @@ modelEditorDialog.prototype.importModelArr=function(modelToBeImported,forReplaci
                 alert("Model " + this.dtdlobj["displayName"] + " is created!")
             }
             this.broadcastMessage({ "message": "ADTModelEdited" })
+            modelAnalyzer.addModels(modelToBeImported)//add so immediatley the list can show the new models
             this.popup() //refresh content
         } else { //error happens
             if(afterFailure) afterFailure()
