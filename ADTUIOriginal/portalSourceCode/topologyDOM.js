@@ -537,7 +537,18 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
             if(globalCache.currentLayoutName==null)  this.noPosition_cose()
         }
     }else if(msgPayload.message=="addNewTwin") {
+        this.core.nodes().unselect()
+        this.core.edges().unselect()
         this.drawTwins([msgPayload.twinInfo],"animation")
+        var nodeInfo= msgPayload.twinInfo;
+        var nodeName= nodeInfo["$dtId"]
+        var topoNode= this.core.nodes("#"+nodeName)
+        if(topoNode){
+            var position=topoNode.renderedPosition()
+            this.core.panBy({x:-position.x+200,y:-position.y+200})
+            topoNode.select()
+            this.selectFunction()
+        }
     }else if(msgPayload.message=="addNewTwins") {
         this.drawTwins(msgPayload.twinsInfo,"animation")
     }else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
