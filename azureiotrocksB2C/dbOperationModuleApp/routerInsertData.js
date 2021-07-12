@@ -115,7 +115,7 @@ routerInsertData.prototype.updateVisualSchema =async function(req,res) {
     var visualDefinitionJson = JSON.parse(req.body.visualDefinitionJson)
     try {
         var re=await cosmosdbhelper.insertRecord("appuser",{
-            id:"VisualSchema.default"
+            id:"VisualSchema."+projectID+".default"
             ,"type":"visualSchema"
             ,"accountID":accountID
             ,"projectID":projectID

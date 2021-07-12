@@ -819,8 +819,8 @@ topologyDOM.prototype.createOneConnectionAdjustRow = function (oneRow,confirmDia
         connectionTypes.forEach(oneType=>{
             switchTypeSelector.addOption(oneType)
         })
-        returnObj["from"]=fromNode.id()
-        returnObj["to"]=toNode.id()
+        returnObj["from"]=fromNodefromNode.data().originalInfo["$dtId"]
+        returnObj["to"]=toNodefromNode.data().originalInfo["$dtId"]
         returnObj["connect"]=connectionTypes[0]
         switchTypeSelector.callBack_clickOption=(optionText,optionValue)=>{
             returnObj["connect"]=optionText
@@ -828,8 +828,8 @@ topologyDOM.prototype.createOneConnectionAdjustRow = function (oneRow,confirmDia
         }
         switchTypeSelector.triggerOptionIndex(0)
     }else if(connectionTypes.length==1){
-        returnObj["from"]=fromNode.id()
-        returnObj["to"]=toNode.id()
+        returnObj["from"]=fromNode.data().originalInfo["$dtId"]
+        returnObj["to"]=toNode.data().originalInfo["$dtId"]
         returnObj["connect"]=connectionTypes[0]
         label.css("color","green")
         label.html("Add <b>"+connectionTypes[0]+"</b> connection from <b>"+fromNode.id()+"</b> to <b>"+toNode.id()+"</b>") 
