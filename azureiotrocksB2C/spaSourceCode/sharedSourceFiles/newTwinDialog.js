@@ -72,10 +72,7 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
     //ask taskmaster to add the twin
     try{
         var postBody= {"newTwinJson":JSON.stringify(this.twinInfo)}
-        console.log(postBody)
         var data = await msalHelper.callAPI("digitaltwin/upsertDigitalTwin", "POST", postBody,"withProjectID" )
-        
-        console.log(data)
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)

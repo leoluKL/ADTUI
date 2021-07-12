@@ -813,32 +813,24 @@ topologyDOM.prototype.createOneConnectionAdjustRow = function (oneRow,confirmDia
 
 
 topologyDOM.prototype.createConnections = function (resultActions) {
-    // for each resultActions, calculate the appendix index, to avoid same ID is used for existed connections
-    resultActions.forEach(oneAction=>{
-        var maxExistedConnectionNumber=0
-        var existedRelations=globalCache.storedOutboundRelationships[oneAction.from]
-        if(existedRelations==null) existedRelations=[]
-        existedRelations.forEach(oneRelation=>{
-            var oneRelationID=oneRelation['$relationshipId']
-            if(oneRelation["$targetId"]!=oneAction.to) return
-            var lastIndex= oneRelationID.split(";").pop()
-            lastIndex=parseInt(lastIndex)
-            if(maxExistedConnectionNumber<=lastIndex) maxExistedConnectionNumber=lastIndex+1
-        })
-        oneAction.IDindex=maxExistedConnectionNumber
-    })
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+    
     var finalActions=[]
     resultActions.forEach(oneAction=>{
         var oneFinalAction={}
         oneFinalAction["$srcId"]=oneAction["from"]
-        oneFinalAction["$relationshipId"]=oneAction["from"]+";"+oneAction["to"]+";"+oneAction["connect"]+";"+oneAction["IDindex"]
+        oneFinalAction["$relationshipId"]=uuidv4();
         oneFinalAction["obj"]={
             "$targetId": oneAction["to"],
             "$relationshipName": oneAction["connect"]
         }
         finalActions.push(oneFinalAction)
     })
-
     $.post("editADT/createRelations",{actions:JSON.stringify(finalActions)}, (data, status) => {
         if(data=="") return;
         globalCache.storeTwinRelationships_append(data)
