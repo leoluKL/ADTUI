@@ -216,21 +216,99 @@ infoPanel.prototype.drawButtons=function(selectType){
         selectOutBoundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
         coseLayoutBtn.on("click",()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
         hideBtn.on("click",()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
+    }
+    if (numOfNode > 1) {
+        //some additional buttons when select multiple items
         this.drawAdvanceAlignmentButtons()
     }
 }
 
 infoPanel.prototype.drawAdvanceAlignmentButtons=async function(){
-    var alignButtonsTable=$("<table><tr><td></td><td></td><td></td></tr><tr><td></td><td style='text-align:center'>ALIGN</td><td></td></tr><tr><td></td><td></td><td></td></tr></table>")
+    var label=$("<label class='w3-gray' style='display:block;margin-top:5px;width:20%;text-align:center;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>Arrange</label>") 
+    this.DOM.append(label) 
+    var alignButtonsTable=$("<table style='margin:0 auto'><tr><td></td><td></td><td></td></tr><tr><td></td><td style='text-align:center;font-weight:bold;color:darkGray'>ALIGN</td><td></td></tr><tr><td></td><td></td><td></td></tr></table>")
     this.DOM.append(alignButtonsTable)
-    var alignTopButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-up"></i></button>')
-    var alignLeftButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-left"></i></button>')
-    var alignRightButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-right"></i></button>')
-    var alignBottomButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-down"></i></button>')
+    var alignTopButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-up"></i></button>')
+    var alignLeftButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-left"></i></button>')
+    var alignRightButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-right"></i></button>')
+    var alignBottomButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-down"></i></button>')
     alignButtonsTable.find("td").eq(1).append(alignTopButton)
     alignButtonsTable.find("td").eq(3).append(alignLeftButton)
     alignButtonsTable.find("td").eq(5).append(alignRightButton)
     alignButtonsTable.find("td").eq(7).append(alignBottomButton)
+
+
+    var arrangeTable=$("<table style='margin:0 auto'><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>")
+    this.DOM.append(arrangeTable)
+
+    var distributeHButton = $('<button class="w3-button w3-border"><i class="fas fa-ellipsis-h fa-lg"></i></button>') 
+    var distributeVButton = $('<button class="w3-button w3-border"><i class="fas fa-ellipsis-v fa-lg"></i></button>') 
+    var leftRotateButton = $('<button class="w3-button w3-border"><i class="fas fa-undo-alt fa-lg"></i></button>') 
+    var rightRotateButton = $('<button class="w3-button w3-border"><i class="fas fa-redo-alt fa-lg"></i></button>') 
+    var mirrorHButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-arrows-alt-h"></i></button>') 
+    var mirrorVButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-arrows-alt-v"></i></button>')
+    var expandButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-expand-arrows-alt"></i></button>') 
+    var compressButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-compress-arrows-alt"></i></button>')
+    
+    arrangeTable.find("td").eq(0).append(distributeHButton)
+    arrangeTable.find("td").eq(1).append(distributeVButton)
+    arrangeTable.find("td").eq(2).append(leftRotateButton)
+    arrangeTable.find("td").eq(3).append(rightRotateButton)
+    arrangeTable.find("td").eq(4).append(mirrorHButton)
+    arrangeTable.find("td").eq(5).append(mirrorVButton)
+    arrangeTable.find("td").eq(6).append(expandButton)
+    arrangeTable.find("td").eq(7).append(compressButton)
+
+
+    alignTopButton.on("click", (e) => {
+        this.broadcastMessage({ "message": "alignSelectedNode", direction: "top" })
+        $(document.activeElement).blur()
+    })
+    alignLeftButton.on("click", () => {
+        this.broadcastMessage({ "message": "alignSelectedNode", direction: "left" })
+        $(document.activeElement).blur()
+    })
+    alignRightButton.on("click", () => {
+        this.broadcastMessage({ "message": "alignSelectedNode", direction: "right" })
+        $(document.activeElement).blur()
+    })
+    alignBottomButton.on("click", () => {
+        this.broadcastMessage({ "message": "alignSelectedNode", direction: "bottom" })
+        $(document.activeElement).blur()
+    })
+
+    distributeHButton.on("click", () => {
+        this.broadcastMessage({ "message": "distributeSelectedNode", direction: "horizontal" })
+        $(document.activeElement).blur()
+    })
+    distributeVButton.on("click", () => {
+        this.broadcastMessage({ "message": "distributeSelectedNode", direction: "vertical" })
+        $(document.activeElement).blur()
+    })
+    leftRotateButton.on("click", () => {
+        this.broadcastMessage({ "message": "rotateSelectedNode", direction: "left" })
+        $(document.activeElement).blur()
+    })
+    rightRotateButton.on("click", () => {
+        this.broadcastMessage({ "message": "rotateSelectedNode", direction: "right" })
+        $(document.activeElement).blur()
+    })
+    mirrorHButton.on("click", () => {
+        this.broadcastMessage({ "message": "mirrorSelectedNode", direction: "horizontal" })
+        $(document.activeElement).blur()
+    })
+    mirrorVButton.on("click", () => {
+        this.broadcastMessage({ "message": "mirrorSelectedNode", direction: "vertical" })
+        $(document.activeElement).blur()
+    })
+    expandButton.on("click", () => {
+        this.broadcastMessage({ "message": "dimensionSelectedNode", direction: "expand" })
+        $(document.activeElement).blur()
+    })
+    compressButton.on("click", () => {
+        this.broadcastMessage({ "message": "dimensionSelectedNode", direction: "compress" })
+        $(document.activeElement).blur()
+    })
 }
 
 infoPanel.prototype.exportSelected=async function(){

@@ -46,6 +46,7 @@ For developer's usage, there are additional npm run options (inside folder ./ADT
 
 ![Main UI](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/screenshot1.jpg)
 ![Choose datasets](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/screenshot2.jpg)
+![CAD](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/CAD.png)
 
 ## How To Use Tips
 1. Start with a set of twins data
@@ -81,6 +82,7 @@ A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-pla
 - Rehaul UI to be align with the coming cloud host platform version
 - Ehance editing functionality so you can easily creat right angle edge segments (like 90 degree) and align nodes in horizontal or vertial level
 - Support edge shape editing (segment lines or bezier curve), thanks to Cytoscape edge editing plugin
+- CAD enhancement
 
 ## Purpose
 - A convinient application to use together with ADT cloud service

@@ -193,18 +193,9 @@ topologyDOM.prototype.init=function(){
     setOneTimeGrab()
 
     var ur = this.core.undoRedo({isDebug: false});
-    this.ur=ur
-    $(document).on("keydown",  (e)=>{
-        if (e.ctrlKey && e.target.nodeName === 'BODY')
-            if (e.which === 90)   ur.undo();
-            else if (e.which === 89)    ur.redo();
-            else if(e.which===83){
-                this.broadcastMessage({"message":"popupLayoutEditing"})
-                return false
-            }
-    });
-
+    this.ur=ur    
     this.core.trigger("zoom")
+    this.setKeyDownFunc()
 }
 
 topologyDOM.prototype.smartPositionNode = function (mousePosition) {
@@ -428,7 +419,11 @@ topologyDOM.prototype.drawTwins=function(twinsData,animation){
     }
 
     //if there is currently a layout there, apply it
-    this.applyNewLayout()
+    var layoutName=globalCache.currentLayoutName
+    if(layoutName!=null){
+        var layoutDetail= globalCache.layoutJSON[layoutName]
+        if(layoutDetail) this.applyNewLayoutWithUndo(layoutDetail,this.getCurrentLayoutDetail())
+    }
 
     return eles
 }
@@ -602,19 +597,163 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="hideSelectedNodes"){ this.hideSelectedNodes()   }
     else if(msgPayload.message=="COSESelectedNodes"){ this.COSESelectedNodes()   }
     else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName,msgPayload.adtName)   }
-    else if(msgPayload.message=="layoutChange"){ this.applyNewLayout()   }
+    else if (msgPayload.message == "layoutChange") {
+        var layoutName = globalCache.currentLayoutName
+        if (layoutName != null) {
+            var layoutDetail = globalCache.layoutJSON[layoutName]
+            if (layoutDetail) this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail())
+        }
+    }else if(msgPayload.message=="alignSelectedNode") this.alignSelectedNodes(msgPayload.direction)
+    else if(msgPayload.message=="distributeSelectedNode") this.distributeSelectedNode(msgPayload.direction)
+    else if(msgPayload.message=="rotateSelectedNode") this.rotateSelectedNode(msgPayload.direction)
+    else if(msgPayload.message=="mirrorSelectedNode") this.mirrorSelectedNode(msgPayload.direction)
+    else if(msgPayload.message=="dimensionSelectedNode") this.dimensionSelectedNode(msgPayload.direction)
 }
 
-topologyDOM.prototype.redrawBasedOnLayoutDetail = function (layoutDetail) {
-    //remove all bending edge 
-    this.core.edges().forEach(oneEdge=>{
-        oneEdge.removeClass('edgebendediting-hasbendpoints')
-        oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
-        oneEdge.data("cyedgebendeditingWeights",[])
-        oneEdge.data("cyedgebendeditingDistances",[])
-        oneEdge.data("cyedgecontroleditingWeights",[])
-        oneEdge.data("cyedgecontroleditingDistances",[])
+topologyDOM.prototype.dimensionSelectedNode = function (direction) {
+    var ratio=1.2
+    var selectedNodes=this.core.nodes(':selected')
+    if(selectedNodes.size()<2) return;
+    var boundary= selectedNodes.boundingBox({includeLabels :false,includeOverlays :false })
+    var centerX=boundary["x1"]+boundary["w"]/2
+    var centerY=boundary["y1"]+boundary["h"]/2
+    
+    var oldLayout={}
+    var newLayout={}
+    selectedNodes.forEach(oneNode=>{
+        var curPos=oneNode.position()
+        var nodeID=oneNode.id()
+        oldLayout[nodeID]=[curPos['x'],curPos['y']]
+        var xoffcenter=curPos["x"]-centerX
+        var yoffcenter=curPos["y"]-centerY
+        if(direction=="expand") newLayout[nodeID]=[centerX+xoffcenter*ratio,centerY+yoffcenter*ratio]
+        else if(direction=="compress") newLayout[nodeID]=[centerX+xoffcenter/ratio,centerY+yoffcenter/ratio]
     })
+    this.applyNewLayoutWithUndo(newLayout,oldLayout,"onlyAdjustNodePosition")
+}
+
+topologyDOM.prototype.mirrorSelectedNode = function (direction) {
+    var selectedNodes=this.core.nodes(':selected')
+    if(selectedNodes.size()<2) return;
+    var boundary= selectedNodes.boundingBox({includeLabels :false,includeOverlays :false })
+    var centerX=boundary["x1"]+boundary["w"]/2
+    var centerY=boundary["y1"]+boundary["h"]/2
+    
+    var oldLayout={}
+    var newLayout={}
+    selectedNodes.forEach(oneNode=>{
+        var curPos=oneNode.position()
+        var nodeID=oneNode.id()
+        oldLayout[nodeID]=[curPos['x'],curPos['y']]
+        var xoffcenter=curPos["x"]-centerX
+        var yoffcenter=curPos["y"]-centerY
+        if(direction=="horizontal") newLayout[nodeID]=[centerX-xoffcenter,curPos['y']]
+        else if(direction=="vertical") newLayout[nodeID]=[curPos['x'],centerY-yoffcenter]
+    })
+    this.applyNewLayoutWithUndo(newLayout,oldLayout,"onlyAdjustNodePosition")
+}
+
+topologyDOM.prototype.rotateSelectedNode = function (direction) {
+    var selectedNodes=this.core.nodes(':selected')
+    if(selectedNodes.size()<2) return;
+    var boundary= selectedNodes.boundingBox({includeLabels :false,includeOverlays :false })
+    var centerX=boundary["x1"]+boundary["w"]/2
+    var centerY=boundary["y1"]+boundary["h"]/2
+    
+    var oldLayout={}
+    var newLayout={}
+    selectedNodes.forEach(oneNode=>{
+        var curPos=oneNode.position()
+        var nodeID=oneNode.id()
+        oldLayout[nodeID]=[curPos['x'],curPos['y']]
+        var xoffcenter=curPos["x"]-centerX
+        var yoffcenter=curPos["y"]-centerY
+        if(direction=="left") newLayout[nodeID]=[centerX+yoffcenter,centerY-xoffcenter]
+        else if(direction=="right") newLayout[nodeID]=[centerX-yoffcenter,centerY+xoffcenter]
+    })
+    this.applyNewLayoutWithUndo(newLayout,oldLayout,"onlyAdjustNodePosition")
+}
+
+topologyDOM.prototype.distributeSelectedNode = function (direction) {
+    var selectedNodes=this.core.nodes(':selected')
+    if(selectedNodes.size()<3) return;
+    var numArr=[]
+    var oldLayout={}
+    var layoutForSort=[]
+    selectedNodes.forEach(oneNode=>{
+        var position=oneNode.position()
+        if(direction=="vertical") numArr.push(position['y'])
+        else if(direction=="horizontal") numArr.push(position['x'])
+        var curPos=oneNode.position()
+        var nodeID=oneNode.id()
+        oldLayout[nodeID]=[curPos['x'],curPos['y']]
+        layoutForSort.push({id:nodeID,x:curPos['x'],y:curPos['y']})
+    })
+
+    if(direction=="vertical") layoutForSort.sort(function (a, b) {return a["y"]-b["y"] })
+    else if(direction=="horizontal") layoutForSort.sort(function (a, b) {return a["x"]-b["x"] })
+    
+    var minV=Math.min(...numArr)
+    var maxV=Math.max(...numArr)
+    if(minV==maxV) return;
+    var gap=(maxV-minV)/(selectedNodes.size()-1)
+    var newLayout={}
+    if(direction=="vertical") var curV=layoutForSort[0]["y"]
+    else if(direction=="horizontal") curV=layoutForSort[0]["x"]
+    for(var i=0;i<layoutForSort.length;i++){
+        var oneNodeInfo=layoutForSort[i]
+        if(i==0|| i==layoutForSort.length-1){
+            newLayout[oneNodeInfo.id]=[oneNodeInfo['x'],oneNodeInfo['y']]
+            continue
+        }
+        curV+=gap;
+        if(direction=="vertical") newLayout[oneNodeInfo.id]=[oneNodeInfo['x'],curV]
+        else if(direction=="horizontal") newLayout[oneNodeInfo.id]=[curV,oneNodeInfo['y']]
+    }
+    this.applyNewLayoutWithUndo(newLayout,oldLayout,"onlyAdjustNodePosition")
+}
+
+topologyDOM.prototype.alignSelectedNodes = function (direction) {
+    var selectedNodes=this.core.nodes(':selected')
+    if(selectedNodes.size()<2) return;
+    var numArr=[]
+    selectedNodes.forEach(oneNode=>{
+        var position=oneNode.position()
+        if(direction=="top"|| direction=="bottom") numArr.push(position['y'])
+        else if(direction=="left"|| direction=="right") numArr.push(position['x'])
+    })
+    var targetX=targetY=null
+    if(direction=="top") var targetY= Math.min(...numArr)
+    else if(direction=="bottom") var targetY= Math.max(...numArr)
+    if(direction=="left") var targetX= Math.min(...numArr)
+    else if(direction=="right") var targetX= Math.max(...numArr)
+    
+    var oldLayout={}
+    var newLayout={}
+    selectedNodes.forEach(oneNode=>{
+        var curPos=oneNode.position()
+        var nodeID=oneNode.id()
+        oldLayout[nodeID]=[curPos['x'],curPos['y']]
+        newLayout[nodeID]=[curPos['x'],curPos['y']]
+        if(targetX!=null) newLayout[nodeID][0]=targetX
+        if(targetY!=null) newLayout[nodeID][1]=targetY
+    })
+    this.applyNewLayoutWithUndo(newLayout,oldLayout,"onlyAdjustNodePosition")
+}
+
+topologyDOM.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,onlyAdjustNodePosition) {
+    //remove all bending edge 
+    if(!onlyAdjustNodePosition){
+        this.core.edges().forEach(oneEdge=>{
+            oneEdge.removeClass('edgebendediting-hasbendpoints')
+            oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
+            oneEdge.data("cyedgebendeditingWeights",[])
+            oneEdge.data("cyedgebendeditingDistances",[])
+            oneEdge.data("cyedgecontroleditingWeights",[])
+            oneEdge.data("cyedgecontroleditingDistances",[])
+        })
+    }
+    
     
     if(layoutDetail==null) return;
     
@@ -647,29 +786,27 @@ topologyDOM.prototype.redrawBasedOnLayoutDetail = function (layoutDetail) {
     }
 }
 
-topologyDOM.prototype.applyNewLayout = function () {
-    var layoutName=globalCache.currentLayoutName
-    if(layoutName==null) return;
-
+topologyDOM.prototype.applyNewLayoutWithUndo = function (newLayoutDetail,oldLayoutDetail,onlyAdjustNodePosition) {
     //store current layout for undo operation
-
     this.ur.action( "changeLayout"
         , (arg)=>{
-            var layoutDetail= globalCache.layoutJSON[arg.layout]
-            this.redrawBasedOnLayoutDetail(layoutDetail)        
+            this.redrawBasedOnLayoutDetail(arg.newLayoutDetail,arg.onlyAdjustNodePosition)        
             return arg
         }
         , (arg)=>{
-            this.redrawBasedOnLayoutDetail(arg.currentLayoutDetail)
+            this.redrawBasedOnLayoutDetail(arg.oldLayoutDetail,arg.onlyAdjustNodePosition)
             return arg
         }
     )
-    this.ur.do("changeLayout",{firstTime:true,"layout":layoutName,"currentLayoutDetail":this.getCurrentLayoutDetail()})
+    this.ur.do("changeLayout"
+        , { firstTime: true, "newLayoutDetail": newLayoutDetail, "oldLayoutDetail": oldLayoutDetail,"onlyAdjustNodePosition":onlyAdjustNodePosition}
+    )
 }
 
 topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipID
     ,cyedgebendeditingWeights,cyedgebendeditingDistances,cyedgecontroleditingWeights,cyedgecontroleditingDistances) {
         var theNode=this.core.filter('[id = "'+srcID+'"]');
+        if(theNode.length==0) return;
         var edges=theNode.connectedEdges().toArray()
         for(var i=0;i<edges.length;i++){
             var anEdge=edges[i]
@@ -913,14 +1050,26 @@ topologyDOM.prototype.checkAvailableConnectionType = function (fromNodeModel,toN
     return re
 }
 
+topologyDOM.prototype.setKeyDownFunc=function(includeCancelConnectOperation){
+    $(document).on("keydown",  (e)=>{
+        if (e.ctrlKey && e.target.nodeName === 'BODY'){
+            if (e.which === 90)   this.ur.undo();
+            else if (e.which === 89)    this.ur.redo();
+            else if(e.which===83){
+                this.broadcastMessage({"message":"popupLayoutEditing"})
+                return false
+            }
+        }
+        if (e.keyCode == 27) this.cancelTargetNodeMode()    
+    });
+}
+
 
 topologyDOM.prototype.startTargetNodeMode = function (mode) {
     this.core.autounselectify( true );
     this.core.container().style.cursor = 'crosshair';
     this.targetNodeMode=mode;
-    $(document).keydown((event) => {
-        if (event.keyCode == 27) this.cancelTargetNodeMode()
-    });
+    this.setKeyDownFunc("includeCancelConnectOperation")
 
     this.core.nodes().on('click', (e)=>{
         var clickedNode = e.target;
@@ -935,6 +1084,7 @@ topologyDOM.prototype.cancelTargetNodeMode=function(){
     this.targetNodeMode=null;
     this.core.container().style.cursor = 'default';
     $(document).off('keydown');
+    this.setKeyDownFunc()
     this.core.nodes().off("click")
     this.core.autounselectify( false );
 }
