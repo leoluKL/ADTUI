@@ -86,6 +86,8 @@ mainToolbar.prototype.updateLayoutSelector = function () {
 mainToolbar.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="layoutsUpdated") {
         this.updateLayoutSelector()
+    }else if(msgPayload.message=="popupLayoutEditing"){
+        editLayoutDialog.popup()
     }
 }
 

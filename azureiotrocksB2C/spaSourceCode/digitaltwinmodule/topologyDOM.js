@@ -192,13 +192,14 @@ topologyDOM.prototype.init=function(){
     setOneTimeGrab()
 
     var ur = this.core.undoRedo({isDebug: false});
-    $(document).on("keydown", function (e) {
+    $(document).on("keydown",  (e)=>{
         if (e.ctrlKey && e.target.nodeName === 'BODY')
-            if (e.which === 90)
-                ur.undo();
-            else if (e.which === 89)
-                ur.redo();
-
+            if (e.which === 90)   ur.undo();
+            else if (e.which === 89)    ur.redo();
+            else if(e.which===83){
+                this.broadcastMessage({"message":"popupLayoutEditing"})
+                return false
+            }
     });
 
     this.core.trigger("zoom")
