@@ -193,6 +193,7 @@ topologyDOM.prototype.init=function(){
     setOneTimeGrab()
 
     var ur = this.core.undoRedo({isDebug: false});
+    this.ur=ur
     $(document).on("keydown",  (e)=>{
         if (e.ctrlKey && e.target.nodeName === 'BODY')
             if (e.which === 90)   ur.undo();
@@ -604,21 +605,22 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="layoutChange"){ this.applyNewLayout()   }
 }
 
-topologyDOM.prototype.applyNewLayout = function () {
-    var layoutName=globalCache.currentLayoutName
-    
-    var layoutDetail= globalCache.layoutJSON[layoutName]
-    
+topologyDOM.prototype.redrawBasedOnLayoutDetail = function (layoutDetail) {
     //remove all bending edge 
     this.core.edges().forEach(oneEdge=>{
         oneEdge.removeClass('edgebendediting-hasbendpoints')
         oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
+        oneEdge.data("cyedgebendeditingWeights",[])
+        oneEdge.data("cyedgebendeditingDistances",[])
+        oneEdge.data("cyedgecontroleditingWeights",[])
+        oneEdge.data("cyedgecontroleditingDistances",[])
     })
     
     if(layoutDetail==null) return;
     
     var storedPositions={}
     for(var ind in layoutDetail){
+        if(ind == "edges") continue
         storedPositions[ind]={
             x:layoutDetail[ind][0]
             ,y:layoutDetail[ind][1]
@@ -643,6 +645,26 @@ topologyDOM.prototype.applyNewLayout = function () {
             ,obj["cyedgebendeditingDistances"],obj["cyedgecontroleditingWeights"],obj["cyedgecontroleditingDistances"])
         }
     }
+}
+
+topologyDOM.prototype.applyNewLayout = function () {
+    var layoutName=globalCache.currentLayoutName
+    if(layoutName==null) return;
+
+    //store current layout for undo operation
+
+    this.ur.action( "changeLayout"
+        , (arg)=>{
+            var layoutDetail= globalCache.layoutJSON[arg.layout]
+            this.redrawBasedOnLayoutDetail(layoutDetail)        
+            return arg
+        }
+        , (arg)=>{
+            this.redrawBasedOnLayoutDetail(arg.currentLayoutDetail)
+            return arg
+        }
+    )
+    this.ur.do("changeLayout",{firstTime:true,"layout":layoutName,"currentLayoutDetail":this.getCurrentLayoutDetail()})
 }
 
 topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipID
@@ -670,14 +692,9 @@ topologyDOM.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipI
 
 
 
-topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
-    var layoutDict=globalCache.layoutJSON[layoutName]
-    if(!layoutDict){
-        layoutDict=globalCache.layoutJSON[layoutName]={}
-    }
-    
-    if(this.core.nodes().size()==0) return;
-
+topologyDOM.prototype.getCurrentLayoutDetail = function () {
+    var layoutDict={"edges":{}}
+    if(this.core.nodes().size()==0) return layoutDict;
     //store nodes position
     this.core.nodes().forEach(oneNode=>{
         var position=oneNode.position()
@@ -685,9 +702,6 @@ topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
     })
 
     //store any edge bending points or controling points
-
-    if(layoutDict.edges==null) layoutDict.edges={}
-    var edgeEditInstance= this.core.edgeEditing('get');
     this.core.edges().forEach(oneEdge=>{
         var srcID=oneEdge.data("originalInfo")["$sourceId"]
         var relationshipID=oneEdge.data("originalInfo")["$relationshipId"]
@@ -708,9 +722,31 @@ topologyDOM.prototype.saveLayout = function (layoutName,adtName) {
             layoutDict.edges[srcID][relationshipID]["cyedgecontroleditingDistances"]=this.numberPrecision(cyedgecontroleditingDistances)
         }
     })
+    return layoutDict;
+}
 
-    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(globalCache.layoutJSON)})
-    this.broadcastMessage({ "message": "layoutsUpdated"})
+topologyDOM.prototype.saveLayout = async function (layoutName) {
+    var layoutDict=globalCache.layoutJSON[layoutName]
+    if(!layoutDict){
+        layoutDict=globalCache.layoutJSON[layoutName]={}
+    }
+    if(layoutDict["edges"]==null) layoutDict["edges"]={}
+    
+    var showingLayout=this.getCurrentLayoutDetail()
+    var showingEdgesLayout= showingLayout["edges"]
+    delete showingLayout["edges"]
+    for(var ind in showingLayout) layoutDict[ind]=showingLayout[ind]
+    for(var ind in showingEdgesLayout) layoutDict["edges"][ind]=showingEdgesLayout[ind]
+
+    var saveLayoutObj={"layouts":{}}
+    saveLayoutObj["layouts"][layoutName]=JSON.stringify(layoutDict)  
+    try{
+        await msalHelper.callAPI("digitaltwin/saveLayout", "POST", saveLayoutObj,"withProjectID")
+        this.broadcastMessage({ "message": "layoutsUpdated","layoutName":layoutName})
+    }catch(e){
+        console.log(e)
+        if(e.responseText) alert(e.responseText)
+    }
 }
 
 topologyDOM.prototype.numberPrecision = function (number) {
