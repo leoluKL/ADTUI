@@ -190,6 +190,17 @@ topologyDOM.prototype.init=function(){
         })
     }
     setOneTimeGrab()
+
+    var ur = this.core.undoRedo({isDebug: false});
+    $(document).on("keydown", function (e) {
+        if (e.ctrlKey && e.target.nodeName === 'BODY')
+            if (e.which === 90)
+                ur.undo();
+            else if (e.which === 89)
+                ur.redo();
+
+    });
+
     this.core.trigger("zoom")
 }
 
