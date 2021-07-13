@@ -180,11 +180,11 @@ infoPanel.prototype.drawButtons=function(selectType){
     if(selectType==null) return;
 
     if(selectType=="singleRelationship"){
-        var delBtn =  $('<button style="width:50%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+        var delBtn =  $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         this.DOM.append(delBtn)
         delBtn.on("click",()=>{this.deleteSelected()})
     }else if(selectType=="singleNode" || selectType=="multiple"){
-        var delBtn = $('<button style="width:50%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+        var delBtn = $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         var connectToBtn =$('<button style="width:45%"  class="w3-button w3-border">Connect to</button>')
         var connectFromBtn = $('<button style="width:45%" class="w3-button w3-border">Connect from</button>')
         var showInboundBtn = $('<button  style="width:45%" class="w3-button w3-border">Query Inbound</button>')
