@@ -119,11 +119,11 @@ infoPanel.prototype.getRelationShipEditableProperties=function(relationshipName,
 }
 
 infoPanel.prototype.drawButtons=function(selectType){
-    var impBtn=$('<button class="w3-bar-item w3-button w3-blue"><i class="fa fa-arrow-circle-o-down"></i></button>')
+    var impBtn=$('<button class="w3-bar-item w3-button w3-blue"><i class="fas fa-cloud-upload-alt"></i></button>')
     var actualImportTwinsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
     if(selectType!=null){
-        var refreshBtn=$('<button class="w3-bar-item w3-button w3-black"><i class="fa fa-refresh"></i></button>')
-        var expBtn=$('<button class="w3-bar-item w3-button w3-green"><i class="fa fa-arrow-circle-o-up"></i></button>')    
+        var refreshBtn=$('<button class="w3-bar-item w3-button w3-black"><i class="fas fa-sync-alt"></i></button>')
+        var expBtn=$('<button class="w3-bar-item w3-button w3-green"><i class="fas fa-cloud-download-alt"></i></button>')    
         this.DOM.append(refreshBtn,expBtn,impBtn,actualImportTwinsBtn)
         refreshBtn.on("click",()=>{this.refreshInfomation()})
         expBtn.on("click",()=>{
@@ -181,7 +181,23 @@ infoPanel.prototype.drawButtons=function(selectType){
         selectOutBoundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
         coseLayoutBtn.on("click",()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
         hideBtn.on("click",()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
+
+        //some additional buttons when select multiple items
+        this.drawAdvanceAlignmentButtons()
     }
+}
+
+infoPanel.prototype.drawAdvanceAlignmentButtons=async function(){
+    var alignButtonsTable=$("<table><tr><td></td><td></td><td></td></tr><tr><td></td><td style='text-align:center'>ALIGN</td><td></td></tr><tr><td></td><td></td><td></td></tr></table>")
+    this.DOM.append(alignButtonsTable)
+    var alignTopButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-up"></i></button>')
+    var alignLeftButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-left"></i></button>')
+    var alignRightButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-right"></i></button>')
+    var alignBottomButton = $('<button class="w3-button w3-border"><i class="fa fa-arrow-down"></i></button>')
+    alignButtonsTable.find("td").eq(1).append(alignTopButton)
+    alignButtonsTable.find("td").eq(3).append(alignLeftButton)
+    alignButtonsTable.find("td").eq(5).append(alignRightButton)
+    alignButtonsTable.find("td").eq(7).append(alignBottomButton)
 }
 
 infoPanel.prototype.exportSelected=async function(){
