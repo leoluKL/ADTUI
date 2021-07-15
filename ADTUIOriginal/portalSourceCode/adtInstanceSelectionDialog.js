@@ -74,7 +74,7 @@ adtInstanceSelectionDialog.prototype.popup = function () {
         leftSpan.append($('<div style="height:30px" class="w3-bar w3-red"><div class="w3-bar-item" style="">Filters</div></div>'))
 
         var filterList=$('<ul class="w3-ul w3-hoverable">')
-        filterList.css({"overflow-x":"hidden","overflow-y":"auto","height":"340px", "border":"solid 1px lightgray"})
+        filterList.css({"overflow-x":"hidden","overflow-y":"auto","height":"340px", "border-right":"solid 1px lightgray"})
         leftSpan.append(filterList)
 
         this.filterList=filterList;

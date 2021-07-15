@@ -1,28 +1,24 @@
 function globalCache(){
     this.accountInfo=null;
     this.joinedProjectsToken=null;
-    //TODO: going to be changable
-    this.changeCurrentProject("1faede18-c6a0-484b-843a-7105b168568f")
+    this.showFloatInfoPanel=true
+    this.DBModelsArr = []
+    this.DBTwinsArr = []
+    this.modelIDMapToName={}
+    this.modelNameMapToID={}
+    this.twinIDMapToDisplayName={}
+    this.storedTwins = {}
+    this.layoutJSON={}
+    this.visualDefinition={"default":{}}
+
+    this.initStoredInformtion()
 }
 
 
-globalCache.prototype.changeCurrentProject = function (newProjectID) {
-    if(newProjectID==this.currentProjectID) return;
-    this.storedOutboundRelationships = {}
-    this.storedTwins = {}
+globalCache.prototype.initStoredInformtion = function () {
+    this.storedOutboundRelationships = {} 
     //stored data, seperately from ADT service and from cosmosDB service
-    this.DBModelsArr = []
-    this.modelIDMapToName={}
-    this.modelNameMapToID={}
-
-    this.DBTwinsArr = []
-    this.twinIDMapToDisplayName={}
-
-    this.currentLayoutName=null
-    this.layoutJSON={}
-
-    this.visualDefinition={"default":{}}
-    this.currentProjectID=newProjectID
+    this.currentLayoutName=null   
 }
 
 
@@ -105,6 +101,10 @@ globalCache.prototype.storeProjectModelsData=function(DBModels,adtModels){
 
 globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
     var dbtwins=[]
+    for(var ind in this.visualDefinition) delete this.visualDefinition[ind]
+    for(var ind in this.layoutJSON) delete this.layoutJSON[ind]
+    this.visualDefinition["default"]={}
+
     resArr.forEach(element => {
         if(element.type=="visualSchema") {
             //TODO: now there is only one "default" schema to use

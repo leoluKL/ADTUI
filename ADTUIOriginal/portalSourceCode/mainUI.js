@@ -7,6 +7,7 @@ const modelEditorDialog = require("./modelEditorDialog")
 const editLayoutDialog = require("./editLayoutDialog")
 const mainToolbar = require("./mainToolbar")
 const infoPanel= require("./infoPanel")
+const floatInfoWindow=require("./floatInfoWindow")
 
 function mainUI() {
     this.initUILayout()
@@ -39,7 +40,7 @@ mainUI.prototype.assignBroadcastMessage=function(uiComponent){
 
 mainUI.prototype.broadcastMessage=function(source,msgPayload){
     var componentsArr=[this.twinsTree,adtInstanceSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
-         this.mainToolbar,this.topologyInstance,this.infoPanel]
+         this.mainToolbar,this.topologyInstance,this.infoPanel,floatInfoWindow]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

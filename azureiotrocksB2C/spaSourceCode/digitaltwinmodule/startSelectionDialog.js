@@ -141,7 +141,7 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
     
         replaceButton.on("click", () => { this.useStartSelection("replace") })
         appendButton.on("click", () => { this.useStartSelection("append") })
-        this.buttonHolder.append(replaceButton, appendButton)
+        this.buttonHolder.append(appendButton,replaceButton)
     }else{
         var replaceButton = $('<button class="w3-button w3-card w3-deep-orange w3-hover-green" style="height:100%; margin-right:8px">Replace All Data</button>')
         replaceButton.on("click", () => { this.useStartSelection("replace") })
@@ -225,7 +225,11 @@ startSelectionDialog.prototype.listTwins=function(){
 
 
 startSelectionDialog.prototype.useStartSelection=function(action){
-    this.previousSelectedProject=globalCache.currentProjectID
+    if(this.previousSelectedProject!=globalCache.currentProjectID){
+        globalCache.initStoredInformtion()
+        this.previousSelectedProject=globalCache.currentProjectID
+    }
+
     var selectedTwins=this.getSelectedTwins()
     var twinIDs=[]
     selectedTwins.forEach(aTwin=>{twinIDs.push(aTwin["id"])})

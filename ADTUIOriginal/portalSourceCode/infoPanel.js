@@ -53,7 +53,8 @@ infoPanel.prototype.rxMessage=function(msgPayload){
             this.continerDOM.show()
             this.continerDOM.addClass("w3-animate-right")
         }
-    }else if(msgPayload.message=="showInfoSelectedNodes"){
+    }else if(msgPayload.message=="showInfoSelectedNodes" || msgPayload.message=="showInfoHoveredEle"){
+        if (globalCache.showFloatInfoPanel && msgPayload.message=="showInfoHoveredEle") return; //the floating info window will show mouse over element information, do not change info panel content in this case
         this.DOM.empty()
         var arr=msgPayload.info;
 
@@ -81,9 +82,12 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 this.drawStaticInfo(this.DOM,{
                     "$sourceId":singleElementInfo["$sourceId"],
                     "$targetId":singleElementInfo["$targetId"],
-                    "$relationshipName":singleElementInfo["$relationshipName"],
-                    "$relationshipId":singleElementInfo["$relationshipId"]
+                    "$relationshipName":singleElementInfo["$relationshipName"]
                 },"1em","13px")
+                this.drawStaticInfo(this.DOM,{
+                    "$relationshipId":singleElementInfo["$relationshipId"]
+                },"1em","10px")
+                
                 var relationshipName=singleElementInfo["$relationshipName"]
                 var sourceModel=singleElementInfo["sourceModel"]
                 
@@ -716,8 +720,7 @@ infoPanel.prototype.drawMultipleObj=function(){
 
 infoPanel.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize){
     for(var ind in jsonInfo){
-        var keyDiv= $("<label style='display:block'><div class='w3-border' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</div></label>")
-        keyDiv.css({"fontSize":fontSize,"color":"darkGray"})
+        var keyDiv= $("<label style='display:block'><div class='w3-dark-gray' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em;font-size:10px'>"+ind+"</div></label>")
         parent.append(keyDiv)
         keyDiv.css("padding-top",paddingTop)
 
@@ -738,7 +741,7 @@ infoPanel.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize)
 infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,pathArr,isNewTwin){
     if(jsonInfo==null) return;
     for(var ind in jsonInfo){
-        var keyDiv= $("<label style='display:block'><div style='display:inline;padding:.1em .3em .1em .3em; font-weight:bold;color:black'>"+ind+"</div></label>")
+        var keyDiv= $("<label style='display:block'><div style='display:inline;padding:.1em .3em .1em .3em; margin-right:5px'>"+ind+"</div></label>")
         if(isNewTwin){
             if(ind=="$dtId") {
                 parent.prepend(keyDiv)
@@ -754,12 +757,15 @@ infoPanel.prototype.drawEditable=function(parent,jsonInfo,originElementInfo,path
         var contentDOM=$("<label style='padding-top:.2em'></label>")
         var newPath=pathArr.concat([ind])
         if(Array.isArray(jsonInfo[ind])){
+            keyDiv.children(":first").addClass("w3-lime")
             this.drawDropdownOption(contentDOM,newPath,jsonInfo[ind],isNewTwin,originElementInfo)
         }else if(typeof(jsonInfo[ind])==="object") {
+            keyDiv.children(":first").css("font-weight","bold")
             contentDOM.css("display","block")
             contentDOM.css("padding-left","1em")
             this.drawEditable(contentDOM,jsonInfo[ind],originElementInfo,newPath,isNewTwin)
         }else {
+            keyDiv.children(":first").addClass("w3-lime")
             var aInput=$('<input type="text" style="padding:2px;width:50%;outline:none;display:inline" placeholder="type: '+jsonInfo[ind]+'"/>').addClass("w3-input w3-border");  
             contentDOM.append(aInput)
             var val=this.searchValue(originElementInfo,newPath)

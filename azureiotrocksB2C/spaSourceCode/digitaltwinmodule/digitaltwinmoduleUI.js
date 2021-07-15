@@ -10,6 +10,7 @@ const infoPanel= require("./infoPanel");
 const globalAppSettings = require("../globalAppSettings.js");
 const msalHelper=require("../msalHelper")
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
+const floatInfoWindow=require("./floatInfoWindow")
 
 function digitaltwinmoduleUI() {
     this.initUILayout()
@@ -47,7 +48,7 @@ digitaltwinmoduleUI.prototype.initData=async function(){
 
 digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
     var componentsArr=[this.twinsTree,startSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
-         mainToolbar,this.topologyInstance,infoPanel,newTwinDialog]
+         mainToolbar,this.topologyInstance,infoPanel,newTwinDialog,floatInfoWindow]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

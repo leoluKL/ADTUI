@@ -8,6 +8,8 @@ function globalCache(){
     this.selectedADT=null;
 
     this.visualDefinition={}
+
+    this.showFloatInfoPanel=true
 }
 
 globalCache.prototype.storeTwinRelationships=function(relationsData){

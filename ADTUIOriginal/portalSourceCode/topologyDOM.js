@@ -245,15 +245,29 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     if(this.lastHoverTarget) this.lastHoverTarget.removeClass("hover")
     this.lastHoverTarget=e.target
     e.target.addClass("hover")
-    this.broadcastMessage({ "message": "showInfoSelectedNodes", "info": [info] })
+    this.broadcastMessage({ "message": "showInfoHoveredEle", "info": [info],"screenXY":this.convertPosition(e.position.x,e.position.y) })
+}
+
+topologyDOM.prototype.convertPosition=function(x,y){
+    var vpExtent=this.core.extent()
+    var screenW=this.DOM.width()
+    var screenH=this.DOM.height()
+    var screenX = (x-vpExtent.x1)/(vpExtent.w)*screenW + this.DOM.offset().left
+    var screenY=(y-vpExtent.y1)/(vpExtent.h)*screenH+ this.DOM.offset().top
+    return {x:screenX,y:screenY}
 }
 
 topologyDOM.prototype.mouseOutFunction= function (e) {
-    if(globalCache.showingCreateTwinModelID){
-        this.broadcastMessage({ "message": "showInfoGroupNode", "info": {"@id":globalCache.showingCreateTwinModelID} })
-    }else{
-        this.selectFunction()
+    if(globalCache.showFloatInfoPanel){ //since floating window is used for mouse hover element info, so info panel never chagne before, that is why there is no need to restore back the info panel information at mouseout
+        if(globalCache.showingCreateTwinModelID){
+            this.broadcastMessage({ "message": "showInfoGroupNode", "info": {"@id":globalCache.showingCreateTwinModelID} })
+        }else{
+            this.selectFunction()
+        }
     }
+    
+    this.broadcastMessage({ "message": "topologyMouseOut"})
+
     if(this.lastHoverTarget){
         this.lastHoverTarget.removeClass("hover")
         this.lastHoverTarget=null;

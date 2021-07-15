@@ -125,7 +125,11 @@ projectSelectionDialog.prototype.closeDialog=function(){
 }
 
 projectSelectionDialog.prototype.useProject=async function(){
-    this.previousSelectedProject=globalCache.currentProjectID
+    if(this.previousSelectedProject!=globalCache.currentProjectID){
+        globalCache.initStoredInformtion()
+        this.previousSelectedProject=globalCache.currentProjectID
+    }
+    
     try {
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
         globalCache.storeProjectModelsData(res.DBModels, res.adtModels)
