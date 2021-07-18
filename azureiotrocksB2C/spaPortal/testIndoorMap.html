@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Creator indoor maps - Azure Maps Web SDK Samples</title>
+
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta http-equiv="x-ua-compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="This is a demo of the Azure Maps Creator indoor maps tutorial and the how-to implementation for the Azure Maps Web SDK." />
+    <meta name="keywords" content="Microsoft maps, map, gis, API, SDK, Creator, indoor maps, indoor, building" />
+    <meta name="author" content="Microsoft Azure Maps" />
+
+    <!-- Add references to the Azure Maps Map control JavaScript and CSS files. -->
+    <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.css" type="text/css" />
+    <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.js"></script>
+
+    <!-- Add references to the Azure Maps Map Creator module JavaScript and CSS files. -->
+    <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/indoor/0.1/atlas-indoor.min.css" type="text/css" />
+    <script src="https://atlas.microsoft.com/sdk/javascript/indoor/0.1/atlas-indoor.min.js"></script>
+
+    <script type='text/javascript'>
+        var map, indoorManager;
+
+        //Your tileset and stateset ID's for Azure Maps Creator.
+        //const tilesetId = '9eb4a7e5-75d2-3bc3-48d7-f5f95a515ecc'
+        const tilesetId = '4e798a84-c12b-fefd-7854-ade06c7d4133';
+        const statesetId = '';
+
+        function GetMap() {
+            //Initialize a map instance.
+            map = new atlas.Map('myMap', {
+                //center: [103.790,1.3245],//[-122.135, 47.6342],
+                center: [-122.1320, 47.6365],
+                zoom: 19,
+                style: 'road_shaded_relief',
+                view: 'Auto',
+
+                authOptions: {
+                    authType: 'subscriptionKey',
+                    subscriptionKey: 'jmQb_cjjgpEXq1wB6eRjsQHojUfI2XxgUpbAhiFqBtc'
+                }
+            });
+            
+            
+
+            //Wait until the map resources are ready.
+            map.events.add('ready', function () {
+                //Add a map style selection control.
+                map.controls.add(new atlas.control.StyleControl({ mapStyles: "all" }), { position: "top-right" });
+
+                //Create an indoor maps manager.
+                indoorManager = new atlas.indoor.IndoorManager(map, {tilesetId: tilesetId,statesetId: statesetId});
+                
+                indoorManager.setOptions({levelControl: new atlas.control.LevelControl({ position: 'top-right' }) });
+
+                if (statesetId.length > 0) { indoorManager.setDynamicStyling(false); }
+
+                map.events.add("zoom",(e)=>{
+                    //console.log(map.getCamera())
+                    //map.setCamera({"center":[-122.135, 47.6342]})
+
+                    //var layers=map.getLayers()
+                    //console.log(layers)
+                })
+
+                
+                
+                //Add event for when the focused facility level changes.
+                map.events.add('levelchanged', indoorManager, (eventData) => {
+                    writeToInfoPanel('The level has changed:', eventData);
+                });
+
+                //Add event for when the focused facility changes.
+                map.events.add('facilitychanged', indoorManager, (eventData) => {
+                    //code that you want to run after a facility has been changed
+                    writeToInfoPanel('The facility has changed:', eventData);
+                });
+
+                /* Upon a mouse click, log the feature properties to the browser's console. */
+                map.events.add("click", function (e) {
+                    var currentZoom=map.getCamera().zoom
+                    //indoorManager.setOptions({tilesetId: '9eb4a7e5-75d2-3bc3-48d7-f5f95a515ecc', statesetId: ''})
+                    //map.setCamera({"center":[103.790,1.3245]})
+                    var curLoc=map.getCamera().center
+                    var destLoc=[103.790,1.3245]
+                    var lngStep=(destLoc[0]-curLoc[0])/50
+                    var latStep=(destLoc[1]-curLoc[1])/50
+
+                    var tmpF1=(step)=>{
+                        setTimeout(()=>{
+                            map.setCamera({
+                                "zoom":2+step*((16.5-2)/30)
+                                ,"center":destLoc
+                            })
+                        },80*step+2500)
+                    }
+
+                    var tmpF2=(step)=>{
+                        setTimeout(()=>{
+                            map.setCamera({
+                                "center":[curLoc[0]+lngStep*step,curLoc[1]+latStep*step ]
+                            })
+                        },30*step+1000)
+                    }
+                    map.setCamera({"zoom":3})
+                    
+                    setTimeout(()=>{indoorManager.setOptions({tilesetId: '9eb4a7e5-75d2-3bc3-48d7-f5f95a515ecc', statesetId: ''})},5000)
+
+                    for(var i=1;i<=50;i++) tmpF2(i)
+                    for(var i=1;i<=30;i++) tmpF1(i)
+
+                    /*
+                    var features = map.layers.getRenderedShapes(e.position, 'unit');
+                    features.forEach(oneFeature => {
+                        console.log(oneFeature)
+                        writeToInfoPanel("feature",oneFeature.geometry); //it seems this oneFeature.geometry is the polygon shape in lnglat format
+                        var dataSource = new atlas.source.DataSource();
+                        map.sources.add(dataSource);
+
+                        
+                        dataSource.add(new atlas.Shape(new atlas.data.Feature(
+                            new atlas.data.Polygon(oneFeature.geometry.coordinates)
+                        )));
+
+                        
+                        map.layers.add(new atlas.layer.PolygonLayer(dataSource, null, {
+                            fillColor: "red",
+                            fillOpacity: 0.7
+                        }))
+                    });
+                    */
+
+                });
+
+
+                
+
+
+            });
+        }
+
+        function writeToInfoPanel(msg, json) {            
+            document.getElementById('infoPanel-msg').innerHTML = msg;
+
+            //Remove "map" object from json to prevent circular reference, and format JSON string.
+            document.getElementById('infoPanel-json').value = JSON.stringify(Object.assign({}, json, { map: undefined }), null, '\t').replace(/\"([^(\")"]+)\":/g, "$1:");
+        }
+    </script>
+</head>
+<body onload="GetMap()">
+    <div id="myMap" style="position:relative;width:100%;min-width:290px;height:600px;"></div>
+
+    <div id="infoPanel" style="position:absolute;top:10px;left:10px;width:260px;height:580px;border:solid 1px #000;background-color:white;padding:5px;">
+        <div id="infoPanel-msg"></div>
+        <textarea id="infoPanel-json" style="width:250px;height:550px;white-space:nowrap"></textarea>
+    </div>
+
+    <fieldset style="width:calc(100% - 30px);min-width:290px;margin-top:10px;">
+        <legend><h1 style="font-size:16px">Creator indoor maps</h1></legend>
+        This is a demo of the <a href="https://docs.microsoft.com/en-us/azure/azure-maps/tutorial-creator-indoor-maps">Azure Maps Creator indoor maps tutorial</a> and the <a href="https://docs.microsoft.com/en-us/azure/azure-maps/how-to-use-indoor-module">how-to implementation for the Azure Maps Web SDK</a>.
+        Click on the facility to make the level picker appear.
+    </fieldset>
+</body>
+</html>
