@@ -1,5 +1,6 @@
 'use strict';
 const topologyDOM=require("./topologyDOM.js")
+const mapDOM=require("./mapDOM.js")
 const twinsTree=require("./twinsTree")
 const startSelectionDialog = require("./startSelectionDialog")
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
@@ -20,6 +21,8 @@ function digitaltwinmoduleUI() {
     mainToolbar.render()
     this.topologyInstance=new topologyDOM($('#canvas'))
     this.topologyInstance.init()
+
+    this.mapDOM = new mapDOM($('#canvas'))
 
     this.broadcastMessage() //initialize all ui components to have the broadcast capability
 
@@ -48,7 +51,7 @@ digitaltwinmoduleUI.prototype.initData=async function(){
 
 digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
     var componentsArr=[this.twinsTree,startSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
-         mainToolbar,this.topologyInstance,infoPanel,newTwinDialog,floatInfoWindow]
+         mainToolbar,this.topologyInstance,this.mapDOM,infoPanel,newTwinDialog,floatInfoWindow]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

@@ -25,11 +25,20 @@ var testFunc = async () => {
 
     //var re=await azureMapCreatorHelper.listDataset()
     //re.datasets.forEach(ele=>{ console.log(JSON.stringify(ele))})  //+"  "+JSON.stringify(ele.featureCounts))    
+    //b45ae4b4-710f-b250-01bd-fc30ecdfdea1     - playground
+    //f04b79bb-3f6d-e39d-3168-9b708b680817     -sample one
+
+    //var re=await azureMapCreatorHelper.mergeConversionIDToDatasetID('b765b69e-b815-e6b2-0f1a-f08f049a9398','f04b79bb-3f6d-e39d-3168-9b708b680817')
+    //console.log(re)
+
+    //var re=await azureMapCreatorHelper.generateTileset('e6fcbf83-ac33-ccab-f277-388a49254e8d')
+    //console.log(re)
+
 
     //var re=await azureMapCreatorHelper.deleteDataset('04569040-2a36-9c59-bd1c-b3eb959ee8a7')
     
-    var re=await azureMapCreatorHelper.listTileset()
-    re.tilesets.forEach(ele=>{ console.log(JSON.stringify(ele))})  //+"  "+JSON.stringify(ele.featureCounts))   
+    //var re=await azureMapCreatorHelper.listTileset()
+    //re.tilesets.forEach(ele=>{ console.log(JSON.stringify(ele))})  //+"  "+JSON.stringify(ele.featureCounts))   
     //{"tilesetId":"bbd63ae1-f22c-7a26-6d6f-f3f8d53f3105","datasetId":"e74249ed-ac42-10b6-d4f7-0f4d921e70e6","description":"","created":"2021-07-16T04:39:56+00:00","minZoom":13,"maxZoom":20,"bbox":[-122.13285851,47.636152,-122.1316685,47.63695722],"ontology":"facility-2.0"}
 
     //var re=await azureMapCreatorHelper.deleteTileset('a15623ef-f34c-eac4-09f5-af04395370ba')
@@ -39,6 +48,10 @@ var testFunc = async () => {
     //re.statesets.forEach(ele=>{console.log(JSON.stringify(ele))})
     //datasetIds:[e74249ed-ac42-10b6-d4f7-0f4d921e70e6],statesetStyle:{styles:[...]}
 
+    var re=await azureMapCreatorHelper.queryFeature('e6fcbf83-ac33-ccab-f277-388a49254e8d',"unit","UNIT441")
+    //console.log(re)
+    //console.log(re.feature.geometry.coordinates.length)
+    console.log(",\"coordinates\":"+JSON.stringify(re.feature.geometry.coordinates))
 }
 
 testFunc()

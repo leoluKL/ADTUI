@@ -61,7 +61,7 @@ routerAccountManagement.prototype.notShareProjectTo =async function(req,res) {
 }
 
 routerAccountManagement.prototype.deleteProjectTo =async function(req,res) {
-    //TODO:
+    //TODO: delete whole project....
     res.status(400).send("Deleting project is not available yet");
 }
 

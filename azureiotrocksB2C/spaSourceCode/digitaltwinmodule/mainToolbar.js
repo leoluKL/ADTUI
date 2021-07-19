@@ -14,8 +14,8 @@ mainToolbar.prototype.render = function () {
 
     this.switchProjectBtn=$('<a class="w3-bar-item w3-button" href="#">Project</a>')
     this.modelIOBtn=$('<a class="w3-bar-item w3-button" href="#">Models</a>')
-    this.showForgeViewBtn=$('<a class="w3-bar-item w3-button w3-hover-none w3-text-light-grey w3-hover-text-light-grey" style="opacity:.35" href="#">ForgeView</a>')
-    this.showGISViewBtn=$('<a class="w3-bar-item w3-button w3-hover-none w3-text-light-grey w3-hover-text-light-grey" style="opacity:.35" href="#">GISView</a>')
+    //this.showForgeViewBtn=$('<a class="w3-bar-item w3-button w3-hover-none w3-text-light-grey w3-hover-text-light-grey" style="opacity:.35" href="#">ForgeView</a>')
+    //this.showGISViewBtn=$('<a class="w3-bar-item w3-button" href="#">GISView</a>')
     this.editLayoutBtn=$('<a class="w3-bar-item w3-button" href="#"><i class="fa fa-edit"></i></a>')
     this.floatInfoBtn=$('<a class="w3-bar-item w3-button w3-amber" style="height:100%;font-size:80%" href="#"><span class="fa-stack fa-xs"><i class="fas fa-circle fa-stack-2x fa-inverse"></i><i class="fas fa-info fa-stack-1x w3-text-amber"></i></span></a>')
 
@@ -23,14 +23,14 @@ mainToolbar.prototype.render = function () {
     this.testSignalRBtn=$('<a class="w3-bar-item w3-button w3-amber" href="#">Test SignalR</a>')
     this.testSendSignalRBtn=$('<a class="w3-bar-item w3-button w3-amber" href="#">send SignalR message</a>')
 
-
+    this.viewTypeSelector=new simpleSelectMenu("")
     this.switchLayoutSelector=new simpleSelectMenu("Layout")
 
     $("#mainToolBar").empty()
     $("#mainToolBar").append(moduleSwitchDialog.modulesSidebar)
-    $("#mainToolBar").append(moduleSwitchDialog.modulesSwitchButton, this.switchProjectBtn,this.modelIOBtn,this.showForgeViewBtn,this.showGISViewBtn
-        ,this.switchLayoutSelector.DOM,this.editLayoutBtn,this.floatInfoBtn)
+    $("#mainToolBar").append(moduleSwitchDialog.modulesSwitchButton, this.switchProjectBtn,this.modelIOBtn,this.viewTypeSelector.  DOM,this.switchLayoutSelector.DOM,this.editLayoutBtn,this.floatInfoBtn
         //,this.testSignalRBtn,this.testSendSignalRBtn
+    )
 
     this.switchProjectBtn.on("click",()=>{ startSelectionDialog.popup() })
     this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })
@@ -74,6 +74,17 @@ mainToolbar.prototype.render = function () {
           .catch(console.error);
     })
 
+    this.viewTypeSelector.addOption('Topology')
+    this.viewTypeSelector.addOption('GIS')
+    this.viewTypeSelector.callBack_clickOption=(optionText,optionValue,realMouseClick)=>{
+        this.viewTypeSelector.changeName(optionText)
+        if(realMouseClick){
+            if(globalCache.currentViewType == optionText) return;
+            this.broadcastMessage({ "message": "viewTypeChange","viewType":optionText})
+        }
+        globalCache.currentViewType=optionText
+    }
+    this.viewTypeSelector.triggerOptionValue("Topology")
 
     this.switchLayoutSelector.callBack_clickOption=(optionText,optionValue)=>{
         globalCache.currentLayoutName=optionValue

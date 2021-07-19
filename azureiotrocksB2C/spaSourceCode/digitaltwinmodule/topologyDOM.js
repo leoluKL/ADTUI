@@ -6,8 +6,9 @@ const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
 const globalCache = require("../sharedSourceFiles/globalCache")
 const msalHelper=require("../msalHelper")
 
-function topologyDOM(DOM){
-    this.DOM=DOM
+function topologyDOM(containerDOM){
+    this.DOM=$("<div style='height:100%;width:100%'></div>")
+    containerDOM.append(this.DOM)
     this.defaultNodeSize=30
     this.nodeSizeModelAdjustmentRatio={}
 }
@@ -634,6 +635,19 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="rotateSelectedNode") this.rotateSelectedNode(msgPayload.direction)
     else if(msgPayload.message=="mirrorSelectedNode") this.mirrorSelectedNode(msgPayload.direction)
     else if(msgPayload.message=="dimensionSelectedNode") this.dimensionSelectedNode(msgPayload.direction)
+    else if(msgPayload.message=="viewTypeChange"){
+        if(msgPayload.viewType=="Topology") this.showSelf()
+        else this.hideSelf()
+    }
+}
+
+topologyDOM.prototype.showSelf = function (direction) {
+    this.DOM.show()
+    this.DOM.animate({height: "100%"});
+}
+
+topologyDOM.prototype.hideSelf = function (direction) {
+    this.DOM.animate({height: "0%"},()=>{this.DOM.hide()});
 }
 
 topologyDOM.prototype.dimensionSelectedNode = function (direction) {

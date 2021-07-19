@@ -231,7 +231,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
 modelManagerDialog.prototype.confirmDeleteModel=function(modelID){
     var funcAfterEachSuccessDelete = (eachDeletedModelID) => {
         this.tree.deleteLeafNode(globalCache.modelIDMapToName[eachDeletedModelID])
-        //TODO: clear the visualization setting of this deleted model
+        //TODO: clear the visualization setting of this deleted model, but if it is replace, should not, so I comment out first
         /*
         if (globalCache.visualDefinition["default"][modelID]) {
             delete globalCache.visualDefinition["default"][modelID]

@@ -132,4 +132,19 @@ azureMapCreatorHelper.prototype.checkVerificationURL=function(response,descripti
     })
 }
 
+azureMapCreatorHelper.prototype.queryFeature=async function(datasetId,collectionId,featureId){
+    var queryURL=this.completeURL(`wfs/datasets/${datasetId}/collections/${collectionId}/items/${featureId}?`)
+    const response = await got(queryURL, {responseType: 'json' });
+    if(response.statusCode==200) return response.body;
+    else throw new Error("internal error")
+    
+}
+
+azureMapCreatorHelper.prototype.mergeConversionIDToDatasetID=async function(conversionID,datasetID){
+    var mergeDatasetsURL=this.completeURL(`datasets?conversionId=${conversionID}&datasetId=${datasetID}&`)
+    const response = await got.post(mergeDatasetsURL, { json: {} });
+    var resultID = await this.checkVerificationURL(response,"mergeDataset")
+    return resultID
+}
+
 module.exports = new azureMapCreatorHelper();

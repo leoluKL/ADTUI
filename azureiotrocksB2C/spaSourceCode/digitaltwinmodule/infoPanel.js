@@ -15,19 +15,8 @@ function infoPanel() {
 
     this.isMinimized=false;
     var buttonAnim=()=>{
-        if(!this.isMinimized){
-            this.continerDOM.animate({
-                right: "-250px",
-                height:"50px"
-            })
-            this.isMinimized=true;
-        }else{
-            this.continerDOM.animate({
-                right: "0px",
-                height: "70%"
-            })
-            this.isMinimized=false;
-        }
+        if(!this.isMinimized) this.minimizeWindow()
+        else this.expandWindow()
     }
     this.closeButton1.on("click",buttonAnim)
     this.closeButton2.on("click",buttonAnim)
@@ -46,73 +35,101 @@ function infoPanel() {
     this.selectedObjects=null;
 }
 
+infoPanel.prototype.minimizeWindow=function(){
+    this.continerDOM.animate({
+        right: "-250px",
+        height:"50px"
+    })
+    this.isMinimized=true;
+}
+infoPanel.prototype.expandWindow=function(){
+    this.continerDOM.animate({
+        right: "0px",
+        height: "70%"
+    })
+    this.isMinimized=false;
+}
+
 infoPanel.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="startSelectionDialog_closed"){
         if(!this.continerDOM.is(":visible")) {
             this.continerDOM.show()
             this.continerDOM.addClass("w3-animate-right")
         }
+    }else if(msgPayload.message=="mapFlyingStart"){
+        this.minimizeWindow()
+    }else if(msgPayload.message=="mapFlyingEnd"){
+        this.expandWindow()
+    }else if(msgPayload.message=="mapSelectFeature") {
+        if(msgPayload.DBTwin!=null){
+            var twinID=msgPayload.DBTwin.id
+            var adtTwin=globalCache.storedTwins[twinID]
+            this.showInfoOfNodes([adtTwin])
+        }
     }else if(msgPayload.message=="showInfoSelectedNodes" || msgPayload.message=="showInfoHoveredEle"){
         if (globalCache.showFloatInfoPanel && msgPayload.message=="showInfoHoveredEle") return; //the floating info window will show mouse over element information, do not change info panel content in this case
-        this.DOM.empty()
-        var arr=msgPayload.info;
-        
-        if(arr==null || arr.length==0){
-            this.drawButtons(null)
-            this.selectedObjects=[];
-            return;
-        }
-        this.selectedObjects=arr;
-        if(arr.length==1){
-            var singleElementInfo=arr[0];
-            
-            if(singleElementInfo["$dtId"]){// select a node
-                this.drawButtons("singleNode")
-                
-                //instead of draw the $dtId, draw display name instead
-                //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
-                this.drawStaticInfo(this.DOM,{"name":singleElementInfo["displayName"]},"1em","13px")
+        this.showInfoOfNodes(msgPayload.info)
+    }
+}
 
 
-                var modelName=singleElementInfo['$metadata']['$model']
-                
-                if(modelAnalyzer.DTDLModels[modelName]){
-                    this.drawEditable(this.DOM,modelAnalyzer.DTDLModels[modelName].editableProperties,singleElementInfo,[])
-                }
-                //instead of drawing the original infomration, draw more meaningful one
-                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
-                this.drawStaticInfo(this.DOM,{"Model":singleElementInfo["$metadata"]["$model"]},"1em","10px")
-                for(var ind in singleElementInfo["$metadata"]){
-                    if(ind == "$model") continue;
-                    var tmpObj={}
-                    tmpObj[ind]=singleElementInfo["$metadata"][ind]
-                    this.drawStaticInfo(this.DOM,tmpObj,"1em","10px")
-                }
-            }else if(singleElementInfo["$sourceId"]){
-                this.drawButtons("singleRelationship")
-                this.drawStaticInfo(this.DOM,{
-                    "$sourceId":singleElementInfo["$sourceId"],
-                    "$targetId":singleElementInfo["$targetId"],
-                    "$relationshipName":singleElementInfo["$relationshipName"]
-                },"1em","13px")
-                this.drawStaticInfo(this.DOM,{
-                    "$relationshipId":singleElementInfo["$relationshipId"]
-                },"1em","10px")
-                var relationshipName=singleElementInfo["$relationshipName"]
-                var sourceModel=singleElementInfo["sourceModel"]
-                
-                this.drawEditable(this.DOM,this.getRelationShipEditableProperties(relationshipName,sourceModel),singleElementInfo,[])
-                for(var ind in singleElementInfo["$metadata"]){
-                    var tmpObj={}
-                    tmpObj[ind]=singleElementInfo["$metadata"][ind]
-                    this.drawStaticInfo(this.DOM,tmpObj,"1em","10px")
-                }
-                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
+infoPanel.prototype.showInfoOfNodes=function(arr){
+    this.DOM.empty()
+    if (arr == null || arr.length == 0) {
+        this.drawButtons(null)
+        this.selectedObjects = [];
+        return;
+    }
+    this.selectedObjects = arr;
+    if (arr.length == 1) {
+        var singleElementInfo = arr[0];
+
+        if (singleElementInfo["$dtId"]) {// select a node
+            this.drawButtons("singleNode")
+
+            //instead of draw the $dtId, draw display name instead
+            //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
+            this.drawStaticInfo(this.DOM, { "name": singleElementInfo["displayName"] }, "1em", "13px")
+
+
+            var modelName = singleElementInfo['$metadata']['$model']
+
+            if (modelAnalyzer.DTDLModels[modelName]) {
+                this.drawEditable(this.DOM, modelAnalyzer.DTDLModels[modelName].editableProperties, singleElementInfo, [])
             }
-        }else if(arr.length>1){
-            this.drawButtons("multiple")
-            this.drawMultipleObj()
+            //instead of drawing the original infomration, draw more meaningful one
+            //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
+            this.drawStaticInfo(this.DOM, { "Model": singleElementInfo["$metadata"]["$model"] }, "1em", "10px")
+            for (var ind in singleElementInfo["$metadata"]) {
+                if (ind == "$model") continue;
+                var tmpObj = {}
+                tmpObj[ind] = singleElementInfo["$metadata"][ind]
+                this.drawStaticInfo(this.DOM, tmpObj, "1em", "10px")
+            }
+        } else if (singleElementInfo["$sourceId"]) {
+            this.drawButtons("singleRelationship")
+            this.drawStaticInfo(this.DOM, {
+                "$sourceId": singleElementInfo["$sourceId"],
+                "$targetId": singleElementInfo["$targetId"],
+                "$relationshipName": singleElementInfo["$relationshipName"]
+            }, "1em", "13px")
+            this.drawStaticInfo(this.DOM, {
+                "$relationshipId": singleElementInfo["$relationshipId"]
+            }, "1em", "10px")
+            var relationshipName = singleElementInfo["$relationshipName"]
+            var sourceModel = singleElementInfo["sourceModel"]
+
+            this.drawEditable(this.DOM, this.getRelationShipEditableProperties(relationshipName, sourceModel), singleElementInfo, [])
+            for (var ind in singleElementInfo["$metadata"]) {
+                var tmpObj = {}
+                tmpObj[ind] = singleElementInfo["$metadata"][ind]
+                this.drawStaticInfo(this.DOM, tmpObj, "1em", "10px")
+            }
+            //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
         }
+    } else if (arr.length > 1) {
+        this.drawButtons("multiple")
+        this.drawMultipleObj()
     }
 }
 

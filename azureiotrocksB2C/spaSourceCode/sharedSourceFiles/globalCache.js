@@ -107,7 +107,7 @@ globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
 
     resArr.forEach(element => {
         if(element.type=="visualSchema") {
-            //TODO: now there is only one "default" schema to use
+            //TODO: now there is only one "default" schema to use,consider allow creating more user define visual schema
             this.visualDefinition[element.name]=element.detail
         }else if(element.type=="Topology") this.layoutJSON[element.name]=element.detail
         else if(element.type=="DTTwin") dbtwins.push(element)
@@ -131,6 +131,16 @@ globalCache.prototype.getSingleDBTwinByID=function(twinID){
         var ele = this.DBTwinsArr[i]
         if(ele.id==twinID){
             return ele
+        }
+    }
+    return null;
+}
+
+globalCache.prototype.getSingleDBTwinByIndoorFeatureID=function(featureID){
+    for(var i=0;i<this.DBTwinsArr.length;i++){
+        var ele = this.DBTwinsArr[i]
+        if(ele.GIS && ele.GIS.indoor){
+            if(ele.GIS.indoor.IndoorFeatureID==featureID) return ele
         }
     }
     return null;
