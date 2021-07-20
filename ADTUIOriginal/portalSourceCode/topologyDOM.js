@@ -876,7 +876,7 @@ topologyDOM.prototype.getCurrentLayoutDetail = function () {
     return layoutDict;
 }
 
-topologyDOM.prototype.saveLayout = async function (layoutName) {
+topologyDOM.prototype.saveLayout = async function (layoutName,adtName) {
     var layoutDict=globalCache.layoutJSON[layoutName]
     if(!layoutDict){
         layoutDict=globalCache.layoutJSON[layoutName]={}
@@ -889,15 +889,8 @@ topologyDOM.prototype.saveLayout = async function (layoutName) {
     for(var ind in showingLayout) layoutDict[ind]=showingLayout[ind]
     for(var ind in showingEdgesLayout) layoutDict["edges"][ind]=showingEdgesLayout[ind]
 
-    var saveLayoutObj={"layouts":{}}
-    saveLayoutObj["layouts"][layoutName]=JSON.stringify(layoutDict)  
-    try{
-        await msalHelper.callAPI("digitaltwin/saveLayout", "POST", saveLayoutObj,"withProjectID")
-        this.broadcastMessage({ "message": "layoutsUpdated","layoutName":layoutName})
-    }catch(e){
-        console.log(e)
-        if(e.responseText) alert(e.responseText)
-    }
+    $.post("layout/saveLayouts",{"adtName":adtName,"layouts":JSON.stringify(globalCache.layoutJSON)})
+    this.broadcastMessage({ "message": "layoutsUpdated"})
 }
 
 topologyDOM.prototype.numberPrecision = function (number) {
