@@ -626,7 +626,18 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName)   }
     else if (msgPayload.message == "layoutChange") {
         var layoutName = globalCache.currentLayoutName
-        if (layoutName != null) {
+        if(layoutName=="[NA]"){
+            //select all visible nodes and do a COSE layout, clean all bend edge line as well
+            this.core.edges().forEach(oneEdge=>{
+                oneEdge.removeClass('edgebendediting-hasbendpoints')
+                oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
+                oneEdge.data("cyedgebendeditingWeights",[])
+                oneEdge.data("cyedgebendeditingDistances",[])
+                oneEdge.data("cyedgecontroleditingWeights",[])
+                oneEdge.data("cyedgecontroleditingDistances",[])
+            })
+            this.noPosition_cose()
+        }else if (layoutName != null) {
             var layoutDetail = globalCache.layoutJSON[layoutName]
             if (layoutDetail) this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail())
         }
