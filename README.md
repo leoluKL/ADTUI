@@ -91,8 +91,8 @@ A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-pla
 ## Built With
 
 * JQuery
-* Crytoscape.js (https://js.cytoscape.org/#demos)
-* Crytoscape Edge Editing extension (https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing)
+* Cytoscape.js (https://js.cytoscape.org/#demos)
+* Cytoscape Edge Editing extension (https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing)
 * Azure Digital Twin Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/digital-twins-core/?view=azure-node-latest)
 * Azure Identity Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/identity/?view=azure-node-latest)
 * W3.CSS (https://www.w3schools.com/w3css/default.asp)
