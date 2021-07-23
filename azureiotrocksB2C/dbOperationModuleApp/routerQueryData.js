@@ -41,11 +41,10 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
         var oneProject=originalAccountDocument.joinedProjects[i]
         if(oneProject.id==projectID){
             allUsers=oneProject.shareWith
+            allUsers.push(projectOwner)
             break;
         }
     }
-    
-
 
     var queryStr='SELECT * FROM c where '
     queryStr+=`c.projectID='${projectID}'`
