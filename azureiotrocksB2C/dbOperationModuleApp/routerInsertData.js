@@ -9,6 +9,7 @@ function routerInsertData(){
     this.useRoute("newTwin","post")
     this.useRoute("updateVisualSchema","post")
     this.useRoute("updateTopologySchema","post")
+    this.useRoute("setLayoutSharedFlag","post")
 }
 
 routerInsertData.prototype.useRoute=function(routeStr,isPost){
@@ -151,7 +152,23 @@ routerInsertData.prototype.updateTopologySchema =async function(req,res) {
     }
 }
 
+routerInsertData.prototype.setLayoutSharedFlag= async function(req,res){
+    var ownerAccount=req.body.account
+    var projectID=req.body.projectID
+    var layoutName=req.body.layout
+    var isShared=req.body.isShared
 
+    try {
+        var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",ownerAccount,"TopoSchema."+projectID+"."+layoutName)
+        if(originalDocument.length==0) res.status(400).send("Layout "+layoutName+" is not found!")
+        var newLayoutDocument = originalDocument[0]
+        newLayoutDocument["isShared"]=isShared
+        await cosmosdbhelper.insertRecord("appuser", newLayoutDocument)
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+    res.end()
+}
 
 
 
