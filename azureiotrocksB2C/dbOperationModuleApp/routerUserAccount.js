@@ -10,6 +10,7 @@ function routerUserAccount(){
     this.useRoute("newProjectTo","post")
     this.useRoute("deleteProjectTo","post")
     this.useRoute("notShareProjectTo","post")
+    this.useRoute("setDefaultLayout","post")
 }
 
 routerUserAccount.prototype.useRoute=function(routeStr,isPost){
@@ -75,6 +76,28 @@ routerUserAccount.prototype.basic =async function(req,res) {
         cosmosdbhelper.insertRecord('appuser',queryResult[0])
     }
     res.send(queryResult[0])
+}
+
+routerUserAccount.prototype.setDefaultLayout= async function(req,res){
+    var ownerAccount=req.body.account
+    var projectID=req.body.projectID
+    var layoutName=req.body.defaultLayout
+
+    try{
+        var accountDocument=await this.getUserAccountDocument(ownerAccount)
+        var joinedProjects=accountDocument.joinedProjects
+        for(var i=0;i<joinedProjects.length;i++){
+            var oneProject=joinedProjects[i]
+            if(oneProject.id==projectID){
+                oneProject.defaultLayout=layoutName
+                await cosmosdbhelper.insertRecord("appuser",accountDocument)
+                break;
+            }
+        }
+    }catch(e){
+        res.status(400).send(e.message);
+        return;
+    }
 }
 
 routerUserAccount.prototype.newProjectTo =async function(req,res) {
