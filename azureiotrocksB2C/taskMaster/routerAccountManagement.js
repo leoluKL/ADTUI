@@ -4,6 +4,7 @@ const got = require('got');
 function routerAccountManagement(){
     this.router = express.Router();
     this.useRoute("fetchUserAccount")
+    this.useRoute("fetchUserData")
     this.useRoute("changeOwnProjectName","post")
     this.useRoute("shareProjectTo","post")
     this.useRoute("newProjectTo","post")
@@ -65,9 +66,8 @@ routerAccountManagement.prototype.deleteProjectTo =async function(req,res) {
     res.status(400).send("Deleting project is not available yet");
 }
 
-routerAccountManagement.prototype.fetchUserAccount =async function(req,res) {
+routerAccountManagement.prototype.fetchUserAccount =async function(req,res) { //this is for main UI interface, not going into any functionality module (digital twin, device management etc.) yet
     //var url = "http://localhost:5001/"
-    var url = process.env.dboperationAPIURL
     var reqBody={
 		account:req.authInfo.account,
         name:req.authInfo.name,
@@ -75,13 +75,44 @@ routerAccountManagement.prototype.fetchUserAccount =async function(req,res) {
         idp:req.authInfo.idp
 	}
     try{
-        var {body} = await got.post(url+"userAccount/basic", {json:reqBody,responseType: 'json'});
+        var {body} = await got.post(process.env.dboperationAPIURL+"userAccount/basic", {json:reqBody,responseType: 'json'});
         res.send(body)
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
     }  
 }
 
+routerAccountManagement.prototype.fetchUserData =async function(req,res) {
+    //fetch user account infomation and generate JWT of the joined projects
+    var reqBody={ account:req.authInfo.account}
+    try{
+        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/userData", {json:reqBody,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+
+    //get the joinedProject JWT and send it back to frontend
+    var userDetail=null
+    for(var i=0;i<body.length;i++){
+        if(body[i].type=="user") {
+            userDetail=body[i]
+            break;
+        }
+    }
+    if(userDetail && userDetail.joinedProjects){
+        var projects=userDetail.joinedProjects
+        var projectClaim={"availableProjects":{}}
+        projects.forEach(oneProject=>{
+            projectClaim.availableProjects[oneProject.id]=oneProject
+        })
+        const token = jwt.create(projectClaim, process.env.joinedProjectsJWTCreateSecret)
+        token.setExpiration(new Date().getTime() + 3600*1000)
+        body.push({type:"joinedProjectsToken","jwt":token.compact()})
+    }
+
+    res.send(body)
+}
 
 
 module.exports = new routerAccountManagement().router

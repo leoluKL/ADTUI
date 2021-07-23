@@ -80,7 +80,7 @@ msalHelper.prototype.parseJWT=function(token){
 
 msalHelper.prototype.reloadUserAccountData=async function(){
     try{
-        var res=await this.callAPI("digitaltwin/fetchUserData")
+        var res=await this.callAPI("accountManagement/fetchUserData")
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)

@@ -4,6 +4,7 @@ const editLayoutDialog= require("./editLayoutDialog")
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 const globalCache = require("../sharedSourceFiles/globalCache")
 const moduleSwitchDialog=require("../sharedSourceFiles/moduleSwitchDialog")
+const projectSettingDialog=require("../sharedSourceFiles/projectSettingDialog")
 
 function mainToolbar() {
 }
@@ -23,6 +24,8 @@ mainToolbar.prototype.render = function () {
     this.testSignalRBtn=$('<a class="w3-bar-item w3-button w3-amber" href="#">Test SignalR</a>')
     this.testSendSignalRBtn=$('<a class="w3-bar-item w3-button w3-amber" href="#">send SignalR message</a>')
 
+    this.settingBtn=$('<button class="w3-bar-item w3-button w3-right"><i class="fa fa-cog fa-lg"></i></button>')
+
     this.viewTypeSelector=new simpleSelectMenu("")
     this.switchLayoutSelector=new simpleSelectMenu("Layout")
 
@@ -30,10 +33,12 @@ mainToolbar.prototype.render = function () {
     $("#mainToolBar").append(moduleSwitchDialog.modulesSidebar)
     $("#mainToolBar").append(moduleSwitchDialog.modulesSwitchButton, this.switchProjectBtn,this.modelIOBtn,this.viewTypeSelector.  DOM,this.switchLayoutSelector.DOM,this.editLayoutBtn,this.floatInfoBtn
         //,this.testSignalRBtn,this.testSendSignalRBtn
+        ,this.settingBtn
     )
 
     this.switchProjectBtn.on("click",()=>{ startSelectionDialog.popup() })
     this.modelIOBtn.on("click",()=>{ modelManagerDialog.popup() })
+    this.settingBtn.on("click",()=>{ projectSettingDialog.popup() })
     this.editLayoutBtn.on("click",()=>{ editLayoutDialog.popup() })
     this.floatInfoBtn.on("click",()=>{
         if(globalCache.showFloatInfoPanel) globalCache.showFloatInfoPanel=false

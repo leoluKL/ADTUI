@@ -5,7 +5,6 @@ const { v4:uuidv4 } = require('uuid');
 
 function routerDigitalTwin(){
     this.router = express.Router();
-    this.useRoute("fetchUserData")
     this.useRoute("fetchProjectModelsData","isPost")
     this.useRoute("fetchProjectTwinsAndVisualData","isPost")
     
@@ -70,39 +69,6 @@ routerDigitalTwin.prototype.fetchProjectModelsData =async function(req,res) {
 
     res.send({"DBModels":DBModels,"adtModels":adtModels})
 }
-
-routerDigitalTwin.prototype.fetchUserData =async function(req,res) {
-    //fetch user account infomation and generate JWT of the joined projects
-    var reqBody={ account:req.authInfo.account}
-    try{
-        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/userData", {json:reqBody,responseType: 'json'});
-    }catch(e){
-        res.status(e.response.statusCode).send(e.response.body);
-        return;
-    }
-
-    //get the joinedProject JWT and send it back to frontend
-    var userDetail=null
-    for(var i=0;i<body.length;i++){
-        if(body[i].type=="user") {
-            userDetail=body[i]
-            break;
-        }
-    }
-    if(userDetail && userDetail.joinedProjects){
-        var projects=userDetail.joinedProjects
-        var projectClaim={"availableProjects":{}}
-        projects.forEach(oneProject=>{
-            projectClaim.availableProjects[oneProject.id]=oneProject
-        })
-        const token = jwt.create(projectClaim, process.env.joinedProjectsJWTCreateSecret)
-        token.setExpiration(new Date().getTime() + 3600*1000)
-        body.push({type:"joinedProjectsToken","jwt":token.compact()})
-    }
-
-    res.send(body)
-}
-
 
 routerDigitalTwin.prototype.queryOutBound =async function(req,res) {
     //TODO: add stricter security measure that it only operate data belonging to this user

@@ -1,4 +1,3 @@
-const simpleSelectMenu= require("./simpleSelectMenu")
 const simpleConfirmDialog = require("./simpleConfirmDialog")
 const globalCache=require("./globalCache")
 const msalHelper=require("../msalHelper")
