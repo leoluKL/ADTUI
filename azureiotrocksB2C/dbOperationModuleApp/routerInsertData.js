@@ -152,7 +152,7 @@ routerInsertData.prototype.updateTopologySchema =async function(req,res) {
     }
 }
 
-routerInsertData.prototype.strToBool= async function(str){
+routerInsertData.prototype.strToBool= function(str){
     if(str=="true") return true
     if(str=="false") return false
     return str
@@ -163,7 +163,6 @@ routerInsertData.prototype.setLayoutSharedFlag= async function(req,res){
     var projectID=req.body.projectID
     var layoutName=req.body.layout
     var isShared=this.strToBool(req.body.isShared)
-    
 
     try {
         var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",ownerAccount,"TopoSchema."+projectID+"."+layoutName)
