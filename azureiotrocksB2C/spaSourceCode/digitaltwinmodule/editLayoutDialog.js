@@ -15,7 +15,8 @@ editLayoutDialog.prototype.refillOptions = function () {
     this.switchLayoutSelector.clearOptions()
     
     for(var ind in globalCache.layoutJSON){
-        this.switchLayoutSelector.addOption(ind)
+        var oneLayoutObj=globalCache.layoutJSON[ind]
+        if(oneLayoutObj.owner==globalCache.accountInfo.id)  this.switchLayoutSelector.addOption(ind)
     }
 }
 
@@ -94,7 +95,7 @@ editLayoutDialog.prototype.deleteLayout = function (layoutName) {
                         this.refillOptions()
                         this.switchLayoutSelector.triggerOptionIndex(0)
                         try{
-                            await msalHelper.callAPI("digitaltwin/deleteLayout", "POST", { "layoutName": layoutName })
+                            await msalHelper.callAPI("digitaltwin/deleteLayout", "POST", { "layoutName": layoutName },"withProjectID")
                         }catch(e){
                             console.log(e)
                             if(e.responseText) alert(e.responseText)

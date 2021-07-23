@@ -440,15 +440,19 @@ topologyDOM.prototype.drawTwins=function(twinsData,animation){
     if(animation){
         eles.forEach((ele)=>{ this.animateANode(ele) })
     }
-
-    //if there is currently a layout there, apply it
-    var layoutName=globalCache.currentLayoutName
-    if(layoutName!=null){
-        var layoutDetail= globalCache.layoutJSON[layoutName]
-        if(layoutDetail) this.applyNewLayoutWithUndo(layoutDetail,this.getCurrentLayoutDetail())
-    }
     
     return eles
+}
+
+topologyDOM.prototype.applyCurrentLayoutWithNoAnimtaion = function () {
+    var layoutName = globalCache.currentLayoutName
+    if (layoutName != null) {
+        var layoutDetail = globalCache.layoutJSON[layoutName].detail
+        if (layoutDetail) {
+            this.redrawBasedOnLayoutDetail(layoutDetail, null, "noAnimation")
+        }
+    }
+    this.core.center(this.core.nodes())
 }
 
 topologyDOM.prototype.drawRelations=function(relationsData){
@@ -557,17 +561,19 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="replaceAllTwins") {
         this.core.nodes().remove()
         var eles= this.drawTwins(msgPayload.info)
-        this.core.center(eles)
+        this.applyCurrentLayoutWithNoAnimtaion()
     }else if(msgPayload.message=="visualDefinitionRefresh") {
         this.applyVisualDefinition()
     }else if(msgPayload.message=="appendAllTwins") {
         var eles= this.drawTwins(msgPayload.info,"animate")
-        this.core.center(eles)
         this.reviewStoredRelationshipsToDraw()
+        this.applyCurrentLayoutWithNoAnimtaion()
     }else if(msgPayload.message=="drawAllRelations"){
         var edges= this.drawRelations(msgPayload.info)
         if(edges!=null) {
-            if(globalCache.currentLayoutName==null)  this.noPosition_cose()
+            var layoutDetail = globalCache.layoutJSON[globalCache.currentLayoutName].detail
+            if(layoutDetail==null)  this.noPosition_cose()
+            else this.applyCurrentLayoutWithNoAnimtaion()
         }
     }else if(msgPayload.message=="addNewTwin") {
         this.core.nodes().unselect()
@@ -624,24 +630,8 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="hideSelectedNodes"){ this.hideSelectedNodes()   }
     else if(msgPayload.message=="COSESelectedNodes"){ this.COSESelectedNodes()   }
     else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName)   }
-    else if (msgPayload.message == "layoutChange") {
-        var layoutName = globalCache.currentLayoutName
-        if(layoutName=="[NA]"){
-            //select all visible nodes and do a COSE layout, clean all bend edge line as well
-            this.core.edges().forEach(oneEdge=>{
-                oneEdge.removeClass('edgebendediting-hasbendpoints')
-                oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
-                oneEdge.data("cyedgebendeditingWeights",[])
-                oneEdge.data("cyedgebendeditingDistances",[])
-                oneEdge.data("cyedgecontroleditingWeights",[])
-                oneEdge.data("cyedgecontroleditingDistances",[])
-            })
-            this.noPosition_cose()
-        }else if (layoutName != null) {
-            var layoutDetail = globalCache.layoutJSON[layoutName]
-            if (layoutDetail) this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail())
-        }
-    }else if(msgPayload.message=="alignSelectedNode") this.alignSelectedNodes(msgPayload.direction)
+    else if (msgPayload.message == "layoutChange") this.chooseLayout(globalCache.currentLayoutName)
+    else if(msgPayload.message=="alignSelectedNode") this.alignSelectedNodes(msgPayload.direction)
     else if(msgPayload.message=="distributeSelectedNode") this.distributeSelectedNode(msgPayload.direction)
     else if(msgPayload.message=="rotateSelectedNode") this.rotateSelectedNode(msgPayload.direction)
     else if(msgPayload.message=="mirrorSelectedNode") this.mirrorSelectedNode(msgPayload.direction)
@@ -651,6 +641,27 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         else this.hideSelf()
     }
 }
+
+topologyDOM.prototype.chooseLayout = function (layoutName) {
+    if (layoutName == "[NA]") {
+        //select all visible nodes and do a COSE layout, clean all bend edge line as well
+        this.core.edges().forEach(oneEdge => {
+            oneEdge.removeClass('edgebendediting-hasbendpoints')
+            oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
+            oneEdge.data("cyedgebendeditingWeights", [])
+            oneEdge.data("cyedgebendeditingDistances", [])
+            oneEdge.data("cyedgecontroleditingWeights", [])
+            oneEdge.data("cyedgecontroleditingDistances", [])
+        })
+        this.noPosition_cose()
+    } else if (layoutName != null) {
+        var layoutDetail = globalCache.layoutJSON[layoutName].detail
+        if (layoutDetail) {
+            this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail())
+        }
+    }
+}
+
 
 topologyDOM.prototype.showSelf = function (direction) {
     this.DOM.show()
@@ -792,7 +803,7 @@ topologyDOM.prototype.alignSelectedNodes = function (direction) {
     this.applyNewLayoutWithUndo(newLayout,oldLayout,"onlyAdjustNodePosition")
 }
 
-topologyDOM.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,onlyAdjustNodePosition) {
+topologyDOM.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,onlyAdjustNodePosition,noAnimation) {
     //remove all bending edge 
     if(!onlyAdjustNodePosition){
         this.core.edges().forEach(oneEdge=>{
@@ -820,7 +831,7 @@ topologyDOM.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,onlyAdj
         name: 'preset',
         positions:storedPositions,
         fit:false,
-        animate: true,
+        animate: ((noAnimation)?false:true),
         animationDuration: 300,
     })
     newLayout.run()
@@ -913,9 +924,10 @@ topologyDOM.prototype.getCurrentLayoutDetail = function () {
 }
 
 topologyDOM.prototype.saveLayout = async function (layoutName) {
-    var layoutDict=globalCache.layoutJSON[layoutName]
+    var layoutDict=globalCache.layoutJSON[layoutName].detail
     if(!layoutDict){
-        layoutDict=globalCache.layoutJSON[layoutName]={}
+        layoutDict={}
+        globalCache.recordSingleLayout(layoutDict,globalCache.accountInfo.id,layoutName,false)
     }
     if(layoutDict["edges"]==null) layoutDict["edges"]={}
     

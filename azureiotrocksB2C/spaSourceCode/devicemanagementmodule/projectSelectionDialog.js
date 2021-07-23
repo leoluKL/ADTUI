@@ -57,18 +57,11 @@ projectSelectionDialog.prototype.popup = async function() {
         switchProjectSelector.triggerOptionIndex(0)
     }
 }
-projectSelectionDialog.prototype.getProjectInfo = function (projectID) {
-    var joinedProjects=globalCache.accountInfo.joinedProjects
-    for(var i=0;i<joinedProjects.length;i++){
-        var aProject=joinedProjects[i]
-        if(aProject.id==projectID) return aProject
-    }
-}
 
 projectSelectionDialog.prototype.chooseProject = async function (selectedProjectID) {
     this.buttonHolder.empty()
 
-    var projectInfo=this.getProjectInfo(selectedProjectID)
+    var projectInfo=globalCache.findProjectInfo(selectedProjectID)
     if(projectInfo.owner==globalCache.accountInfo.accountID){
         this.editProjectBtn.show()
         this.deleteProjectBtn.show()
@@ -129,7 +122,10 @@ projectSelectionDialog.prototype.useProject=async function(){
         globalCache.initStoredInformtion()
         this.previousSelectedProject=globalCache.currentProjectID
     }
-    
+    var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectI)
+    var projectOwner=projectInfo.owner
+
+
     try {
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
         globalCache.storeProjectModelsData(res.DBModels, res.adtModels)
@@ -137,7 +133,7 @@ projectSelectionDialog.prototype.useProject=async function(){
         modelAnalyzer.addModels(res.adtModels)
         modelAnalyzer.analyze();
 
-        var res = await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData", "POST", null, "withProjectID")
+        var res = await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData", "POST", {"projectOwner":projectOwner}, "withProjectID")
         globalCache.storeProjectTwinsAndVisualData(res)
     } catch (e) {
         console.log(e)

@@ -81,7 +81,6 @@ msalHelper.prototype.parseJWT=function(token){
 msalHelper.prototype.reloadUserAccountData=async function(){
     try{
         var res=await this.callAPI("accountManagement/fetchUserData")
-        console.log(res)
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)

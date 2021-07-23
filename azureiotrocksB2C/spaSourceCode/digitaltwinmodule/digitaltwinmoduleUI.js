@@ -4,6 +4,7 @@ const mapDOM=require("./mapDOM.js")
 const twinsTree=require("./twinsTree")
 const startSelectionDialog = require("./startSelectionDialog")
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
+const projectSettingDialog = require("../sharedSourceFiles/projectSettingDialog")
 const modelEditorDialog = require("../sharedSourceFiles/modelEditorDialog")
 const editLayoutDialog = require("./editLayoutDialog")
 const mainToolbar = require("./mainToolbar")
@@ -51,7 +52,7 @@ digitaltwinmoduleUI.prototype.initData=async function(){
 
 digitaltwinmoduleUI.prototype.broadcastMessage=function(source,msgPayload){
     var componentsArr=[this.twinsTree,startSelectionDialog,modelManagerDialog,modelEditorDialog,editLayoutDialog,
-         mainToolbar,this.topologyInstance,this.mapDOM,infoPanel,newTwinDialog,floatInfoWindow]
+         mainToolbar,this.topologyInstance,this.mapDOM,infoPanel,newTwinDialog,floatInfoWindow,projectSettingDialog]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

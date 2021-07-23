@@ -99,21 +99,25 @@ mainToolbar.prototype.render = function () {
     }
 }
 
-mainToolbar.prototype.updateLayoutSelector = function () {
-    var curSelect=this.switchLayoutSelector.curSelectVal
+mainToolbar.prototype.updateLayoutSelector = function (chooseLayoutName) {
+    var curSelect=chooseLayoutName||this.switchLayoutSelector.curSelectVal
     this.switchLayoutSelector.clearOptions()
     this.switchLayoutSelector.addOption('[No Layout Specified]','[NA]')
 
     for (var ind in globalCache.layoutJSON) {
-        this.switchLayoutSelector.addOption(ind)
+        var oneLayoutObj=globalCache.layoutJSON[ind]
+        if(oneLayoutObj.owner==globalCache.accountInfo.id) this.switchLayoutSelector.addOption(ind)
     }
 
-    if(curSelect!=null && this.switchLayoutSelector.findOption(curSelect)==null) this.switchLayoutSelector.changeName("Layout","")
+    if(curSelect!=null){
+        if(this.switchLayoutSelector.findOption(curSelect)==null) this.switchLayoutSelector.changeName("Layout","")
+        else this.switchLayoutSelector.changeName("Layout:",curSelect)
+    }
 }
 
 mainToolbar.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="layoutsUpdated") {
-        this.updateLayoutSelector()
+        this.updateLayoutSelector(msgPayload.selectLayout)
     }else if(msgPayload.message=="popupLayoutEditing"){
         editLayoutDialog.popup()
     }

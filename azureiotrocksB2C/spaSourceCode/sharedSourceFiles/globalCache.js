@@ -21,6 +21,14 @@ globalCache.prototype.initStoredInformtion = function () {
     this.currentLayoutName=null   
 }
 
+globalCache.prototype.findProjectInfo=function(projectID){
+    var joinedProjects=this.accountInfo.joinedProjects
+    for(var i=0;i<joinedProjects.length;i++){
+        var oneProject=joinedProjects[i]
+        if(oneProject.id==projectID) return oneProject
+    }
+}
+
 
 globalCache.prototype.storeADTTwins=function(twinsData){
     twinsData.forEach((oneNode)=>{this.storeSingleADTTwin(oneNode)});
@@ -108,11 +116,22 @@ globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
     resArr.forEach(element => {
         if(element.type=="visualSchema") {
             //TODO: now there is only one "default" schema to use,consider allow creating more user define visual schema
-            this.visualDefinition[element.name]=element.detail
-        }else if(element.type=="Topology") this.layoutJSON[element.name]=element.detail
-        else if(element.type=="DTTwin") dbtwins.push(element)
+            //TODO: only choose the schema belongs to self
+            if(element.accountID==this.accountInfo.id){
+                this.visualDefinition[element.name]=element.detail
+            }
+        }else if(element.type=="Topology") {
+            this.recordSingleLayout(element.detail,element.accountID,element.name,element.isShared)
+        }else if(element.type=="DTTwin") dbtwins.push(element)
     });
     this.storeDBTwinsArr(dbtwins)
+}
+
+globalCache.prototype.recordSingleLayout=function(detail,accountID,oname,isShared){
+    if (accountID == this.accountInfo.id) var layoutName = oname
+    else layoutName = oname + `(from ${accountID})`
+    var dict = { "detail": detail, "isShared": isShared, "owner": accountID, "name": layoutName, "oname":oname }
+    this.layoutJSON[layoutName] = dict
 }
 
 globalCache.prototype.getDBTwinsByModelID=function(modelID){

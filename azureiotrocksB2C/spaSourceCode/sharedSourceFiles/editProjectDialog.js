@@ -117,46 +117,4 @@ editProjectDialog.prototype.drawSharedAccounts=function(){
     })
 }
 
-
-
-editProjectDialog.prototype.deleteLayout = function (layoutName) {
-    if(layoutName=="" || layoutName==null){
-        alert("Please choose target layout Name")
-        return;
-    }
-
-    var confirmDialogDiv=new simpleConfirmDialog()
-
-    confirmDialogDiv.show(
-        { width: "250px" },
-        {
-            title: "Confirm"
-            , content: "Confirm deleting layout \"" + layoutName + "\"?"
-            , buttons:[
-                {
-                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": async () => {
-                        delete globalCache.layoutJSON[layoutName]
-                        if (layoutName == globalCache.currentLayoutName) globalCache.currentLayoutName = null
-                        confirmDialogDiv.close()
-                        this.broadcastMessage({ "message": "layoutsUpdated"})
-                        this.refillOptions()
-                        this.switchLayoutSelector.triggerOptionIndex(0)
-                        try{
-                            await msalHelper.callAPI("digitaltwin/deleteLayout", "POST", { "layoutName": layoutName })
-                        }catch(e){
-                            console.log(e)
-                            if(e.responseText) alert(e.responseText)
-                        }
-                    }
-                },
-                {
-                    colorClass: "w3-gray",text: "Cancel", "clickFunc": () => {
-                        confirmDialogDiv.close()
-                }}
-            ]
-        }
-    )
-
-}
-
 module.exports = new editProjectDialog();

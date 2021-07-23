@@ -79,18 +79,10 @@ startSelectionDialog.prototype.popup = async function() {
     }
 }
 
-startSelectionDialog.prototype.getProjectInfo = function (projectID) {
-    var joinedProjects=globalCache.accountInfo.joinedProjects
-    for(var i=0;i<joinedProjects.length;i++){
-        var aProject=joinedProjects[i]
-        if(aProject.id==projectID) return aProject
-    }
-}
-
 startSelectionDialog.prototype.chooseProject = async function (selectedProjectID) {
     this.buttonHolder.empty()
 
-    var projectInfo=this.getProjectInfo(selectedProjectID)
+    var projectInfo=globalCache.findProjectInfo(selectedProjectID)
     if(projectInfo.owner==globalCache.accountInfo.accountID){
         this.editProjectBtn.show()
         this.deleteProjectBtn.show()
@@ -148,14 +140,15 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
         this.buttonHolder.append(replaceButton)
     }
     globalCache.currentProjectID = selectedProjectID
-    
+
+    var projectOwner=projectInfo.owner
     try {
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
         globalCache.storeProjectModelsData(res.DBModels, res.adtModels)
         modelAnalyzer.clearAllModels();
         modelAnalyzer.addModels(res.adtModels)
         modelAnalyzer.analyze();
-        var res = await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData", "POST", null, "withProjectID")
+        var res = await msalHelper.callAPI("digitaltwin/fetchProjectTwinsAndVisualData", "POST", {"projectOwner":projectOwner}, "withProjectID")
         globalCache.storeProjectTwinsAndVisualData(res)
     } catch (e) {
         console.log(e)
@@ -239,7 +232,10 @@ startSelectionDialog.prototype.useStartSelection=function(action){
 
     this.broadcastMessage({ "message": "startSelection_"+action, "twinIDs": twinIDs,"modelIDs":modelIDs })
     this.broadcastMessage({ "message": "visualDefinitionRefresh"})
-    this.broadcastMessage({ "message": "layoutsUpdated"})
+    var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectID)
+    if(projectInfo.defaultLayout && projectInfo.defaultLayout!="") globalCache.currentLayoutName=projectInfo.defaultLayout
+    
+    this.broadcastMessage({ "message": "layoutsUpdated","selectLayout":projectInfo.defaultLayout})
     this.closeDialog()
 
     if(globalCache.DBModelsArr.length==0){
