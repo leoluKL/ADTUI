@@ -35,6 +35,7 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
 
     var originalAccountDocument=await cosmosdbhelper.getDocByID("appuser","accountID",projectOwner,projectOwner)
     if(originalAccountDocument.length==0) res.status(400).send("Internal Error")
+    originalAccountDocument=originalAccountDocument[0]
     var allUsers=[accountID]
     for(var i=0;i<originalAccountDocument.joinedProjects;i++){
         var oneProject=originalAccountDocument.joinedProjects[i]
@@ -43,6 +44,7 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
             break;
         }
     }
+    
 
 
     var queryStr='SELECT * FROM c where '
