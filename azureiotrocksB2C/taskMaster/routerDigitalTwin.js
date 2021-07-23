@@ -1,6 +1,5 @@
 const express = require("express");
 const got = require('got');
-const jwt = require('njwt')
 const { v4:uuidv4 } = require('uuid');
 
 function routerDigitalTwin(){

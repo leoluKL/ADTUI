@@ -67,6 +67,7 @@ projectSettingDialog.prototype.addOneLayoutBar=function(layoutName,parentDiv){
     var nameLbl=$('<a class="w3-bar-item w3-button" href="#">'+layoutName+'</a>')
     var defaultLbl=$("<a class='w3-lime w3-bar-item' style='font-size:9px;padding:1px 2px;margin-top:9px;border-radius: 2px;'>default</a>")
     defaultLbl.hide()
+    oneLayout.data("layoutName",layoutName)
     oneLayout.data("defaultLbl",defaultLbl)
     oneLayout.append(nameLbl,defaultLbl)
 
@@ -105,9 +106,20 @@ projectSettingDialog.prototype.setAsDefaultLayout=function(oneLayoutDOM){
     })
     var defaultLbl=oneLayoutDOM.data("defaultLbl")
     defaultLbl.show()
-    //console.log(globalCache.accountInfo)
-    //console.log(globalCache.currentProjectID)
 
+    var layoutName=oneLayoutDOM.data("layoutName")
+    var curProjectID=globalCache.currentProjectID
+    
+    var joinedProjects=globalCache.accountInfo.joinedProjects
+    for(var i=0;i<joinedProjects.length;i++){
+        var oneProject=joinedProjects[i]
+        if(oneProject.id==curProjectID){
+            oneProject.defaultLayout=layoutName
+            //update database
+            
+            break;
+        }
+    }
 }
 
 module.exports = new projectSettingDialog();

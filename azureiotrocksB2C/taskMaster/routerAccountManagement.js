@@ -1,5 +1,6 @@
 const express = require("express");
 const got = require('got');
+const jwt = require('njwt')
 
 function routerAccountManagement(){
     this.router = express.Router();
@@ -10,6 +11,7 @@ function routerAccountManagement(){
     this.useRoute("newProjectTo","post")
     this.useRoute("deleteProjectTo","post")
     this.useRoute("notShareProjectTo","post")
+    this.useRoute("setProjectDefaultLayout","post")
 }
 
 routerAccountManagement.prototype.useRoute=function(routeStr,isPost){
@@ -112,6 +114,10 @@ routerAccountManagement.prototype.fetchUserData =async function(req,res) {
     }
 
     res.send(body)
+}
+
+routerAccountManagement.prototype.setProjectDefaultLayout =async function(req,res) {
+
 }
 
 
