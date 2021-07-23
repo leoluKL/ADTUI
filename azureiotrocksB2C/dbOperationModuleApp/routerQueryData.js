@@ -37,7 +37,7 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
     if(originalAccountDocument.length==0) res.status(400).send("Internal Error")
     originalAccountDocument=originalAccountDocument[0]
     var allUsers=[accountID]
-    for(var i=0;i<originalAccountDocument.joinedProjects;i++){
+    for(var i=0;i<originalAccountDocument.joinedProjects.length;i++){
         var oneProject=originalAccountDocument.joinedProjects[i]
         if(oneProject.id==projectID){
             allUsers=oneProject.shareWith
@@ -45,6 +45,7 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
             break;
         }
     }
+    
 
     var queryStr='SELECT * FROM c where '
     queryStr+=`c.projectID='${projectID}'`
