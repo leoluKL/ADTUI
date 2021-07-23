@@ -30,6 +30,20 @@ routerQueryData.prototype.userData =async function(req,res) {
 routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
     var projectID=req.body.projectID
     var accountID=req.body.account
+    var projectOwner=req.body.projectOwner
+
+
+    var originalAccountDocument=await cosmosdbhelper.getDocByID("appuser","accountID",projectOwner,projectOwner)
+    if(originalAccountDocument.length==0) res.status(400).send("Internal Error")
+    var allUsers=[accountID]
+    for(var i=0;i<originalAccountDocument.joinedProjects;i++){
+        var oneProject=originalAccountDocument.joinedProjects[i]
+        if(oneProject.id==projectID){
+            allUsers=oneProject.shareWith
+            break;
+        }
+    }
+
 
     var queryStr='SELECT * FROM c where '
     queryStr+=`c.projectID='${projectID}'`
@@ -42,17 +56,19 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
         res.status(400).send(e.message)
     }
 
-    var queryStr='SELECT * FROM c where '
-    queryStr+=`c.accountID='${accountID}'`
-    queryStr+=` and c.projectID='${projectID}'`
-    queryStr+=` and c.type IN ('visualSchema','Topology')`
-    try{
-        var queryResult=await cosmosdbhelper.query('appuser',queryStr)
-        resultArr=resultArr.concat(queryResult)
-    }catch(e){
-        res.status(400).send(e.message)
+    for(var i=0;i<allUsers.length;i++){
+        var oneAccount=allUsers[i]
+        var queryStr='SELECT * FROM c where '
+        queryStr+=`c.accountID='${oneAccount}'`
+        queryStr+=` and c.projectID='${projectID}'`
+        queryStr+=` and c.type IN ('visualSchema','Topology')`
+        try{
+            var queryResult=await cosmosdbhelper.query('appuser',queryStr)
+            resultArr=resultArr.concat(queryResult)
+        }catch(e){
+        }
     }
-    
+
     res.send(resultArr)
 }
     
