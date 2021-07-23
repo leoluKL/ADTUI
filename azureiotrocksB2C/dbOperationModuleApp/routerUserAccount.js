@@ -94,6 +94,7 @@ routerUserAccount.prototype.setDefaultLayout= async function(req,res){
                 break;
             }
         }
+        res.end()
     }catch(e){
         res.status(400).send(e.message);
         return;
