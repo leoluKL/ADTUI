@@ -117,7 +117,14 @@ routerAccountManagement.prototype.fetchUserData =async function(req,res) {
 }
 
 routerAccountManagement.prototype.setProjectDefaultLayout =async function(req,res) {
-
+    var reqBody=req.body
+    reqBody.account=req.authInfo.account
+    try{
+        await got.post(process.env.dboperationAPIURL+"userAccount/setDefaultLayout", {json:reqBody,responseType: 'json'});
+        res.end()
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+    }  
 }
 
 
