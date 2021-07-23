@@ -36,7 +36,8 @@ routerDigitalTwin.prototype.useRoute=function(routeStr,isPost){
 }
 
 routerDigitalTwin.prototype.fetchProjectTwinsAndVisualData =async function(req,res) {
-    var reqBody={ projectID:req.body.projectID, account:req.authInfo.account}
+    var reqBody=req.body
+    reqBody.account=req.authInfo.account
     try{
         var {body} = await got.post(process.env.dboperationAPIURL+"queryData/projectTwinsAndVisual", {json:reqBody,responseType: 'json'});
     }catch(e){
