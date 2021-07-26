@@ -7,7 +7,7 @@ function iothubHelper() {
     this.iothubClient = new iothub.Client.fromTokenCredential(process.env.IoTHubEndpoint,credential)
     this.iothubRegistry = new iothub.Registry.fromTokenCredential(process.env.IoTHubEndpoint,credential)
 
-    //this.manualRenewToken()
+    this.manualRenewToken()
 }
 
 
