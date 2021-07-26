@@ -55,7 +55,7 @@ projectSettingDialog.prototype.fillLayoutDivContent = function () {
     this.layoutContentDiv.append(showOtherUserLayoutCheck, showOtherUserLayoutText)
     if(this.showSharedLayouts) showOtherUserLayoutCheck.prop( "checked", true );
     showOtherUserLayoutCheck.on("change",()=>{
-        this.showSharedLayouts=!this.showSharedLayouts
+        this.showSharedLayouts=showOtherUserLayoutCheck.prop('checked')
         this.refillLayouts()
     })
 
@@ -72,7 +72,20 @@ projectSettingDialog.prototype.fillVisualSchemaContent= function () {
     var shareSelfVisualSchemaCheck = $('<input class="w3-check" style="width:20px;margin-left:10px;margin-right:10px" type="checkbox">')
     var shareSelfVisualSchemaText = $('<label style="padding:2px 8px;">Share graph legend setting</label>')
     this.visualSchemaContentDiv.append(shareSelfVisualSchemaCheck, shareSelfVisualSchemaText)
+
+    if(globalCache.visualDefinition["default"].isShared) shareSelfVisualSchemaCheck.prop( "checked", true );
     
+    shareSelfVisualSchemaCheck.on("change", async () => {
+        globalCache.visualDefinition["default"].isShared=shareSelfVisualSchemaCheck.prop('checked')
+
+        var visualSchemaName = "default" //fixed in current version, there is only "default" schema for each user
+        try {
+            await msalHelper.callAPI("digitaltwin/setVisualSchemaSharedFlag", "POST", { "visualSchema": "default", "isShared": shareSelfVisualSchemaCheck.prop('checked') }, "withProjectID")
+        } catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+        }
+    })
 }
 
 projectSettingDialog.prototype.refillLayouts=function(){
