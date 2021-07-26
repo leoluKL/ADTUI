@@ -116,17 +116,23 @@ routerInsertData.prototype.updateVisualSchema =async function(req,res) {
     var projectID=req.body.projectID
     var visualDefinitionJson = JSON.parse(req.body.visualDefinitionJson)
     try {
-        var re=await cosmosdbhelper.insertRecord("appuser",{
-            id:"VisualSchema."+projectID+".default"
-            ,"type":"visualSchema"
-            ,"accountID":accountID
-            ,"projectID":projectID
-            ,"name":"default"
-            ,"detail":visualDefinitionJson
-        })
+        var aVisualSchema=this.getEmptyVisualSchema(projectID,accountID)
+        aVisualSchema.detail=visualDefinitionJson
+        var re=await cosmosdbhelper.insertRecord("appuser",aVisualSchema)
         res.end()
     } catch (e) {
         res.status(400).send(e.message)
+    }
+}
+
+routerInsertData.prototype.getEmptyVisualSchema = function(projectID,accountID) {
+    return {
+        id:"VisualSchema."+projectID+".default"
+        ,"type":"visualSchema"
+        ,"accountID":accountID
+        ,"projectID":projectID
+        ,"name":"default"
+        ,"detail":{}
     }
 }
 
@@ -185,8 +191,9 @@ routerInsertData.prototype.setVisualSchemaSharedFlag= async function(req,res){
 
     try {
         var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",ownerAccount,"VisualSchema."+projectID+"."+visualSchemaName)
-        if(originalDocument.length==0) res.status(400).send("VisualSchema "+visualSchemaName+" is not found!")
-        var newDocument = originalDocument[0]
+        if(originalDocument.length==0)  var newDocument=this.getEmptyVisualSchema(projectID,ownerAccount)
+        else newDocument = originalDocument[0]
+        
         newDocument["isShared"]=isShared
         await cosmosdbhelper.insertRecord("appuser", newDocument)
     } catch (e) {
