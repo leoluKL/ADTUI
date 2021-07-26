@@ -190,7 +190,7 @@ singleTwinIcon.prototype.redrawIcon=function(){
     this.iconDOM.empty()
     var modelID= this.twinInfo.modelID;
 
-    var visualJson=globalCache.visualDefinition["default"]
+    var visualJson=globalCache.visualDefinition["default"].detail
     var fillColor="darkGray"
     if(visualJson[modelID] && visualJson[modelID].color) fillColor=visualJson[modelID].color
     var dimension=30;

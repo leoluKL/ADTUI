@@ -221,6 +221,7 @@ startSelectionDialog.prototype.useStartSelection=function(action){
     if(this.previousSelectedProject!=globalCache.currentProjectID){
         globalCache.initStoredInformtion()
         this.previousSelectedProject=globalCache.currentProjectID
+        this.broadcastMessage({ "message": "projectIsChanged"})
     }
 
     var selectedTwins=this.getSelectedTwins()

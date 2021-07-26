@@ -532,7 +532,7 @@ topologyDOM.prototype.drawTwinsAndRelations=function(data){
 }
 
 topologyDOM.prototype.applyVisualDefinition=function(){
-    var visualJson=globalCache.visualDefinition["default"]
+    var visualJson=globalCache.visualDefinition["default"].detail
     if(visualJson==null) return;
     for(var modelID in visualJson){
         if(visualJson[modelID].color) this.updateModelTwinColor(modelID,visualJson[modelID].color)
@@ -571,7 +571,8 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="drawAllRelations"){
         var edges= this.drawRelations(msgPayload.info)
         if(edges!=null) {
-            var layoutDetail = globalCache.layoutJSON[globalCache.currentLayoutName].detail
+            var layoutDetail=null
+            if(globalCache.currentLayoutName!=null) layoutDetail = globalCache.layoutJSON[globalCache.currentLayoutName].detail
             if(layoutDetail==null)  this.noPosition_cose()
             else this.applyCurrentLayoutWithNoAnimtaion()
         }

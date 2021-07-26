@@ -121,6 +121,7 @@ projectSelectionDialog.prototype.useProject=async function(){
     if(this.previousSelectedProject!=globalCache.currentProjectID){
         globalCache.initStoredInformtion()
         this.previousSelectedProject=globalCache.currentProjectID
+        this.broadcastMessage({ "message": "projectIsChanged"})
     }
     var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectID)
     var projectOwner=projectInfo.owner

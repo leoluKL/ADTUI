@@ -14,8 +14,8 @@ function twinsTree(DOM, searchDOM) {
         var shape="ellipse"
         var avarta=null
         var dimension=20;
-        if(globalCache.visualDefinition["default"][modelClass]){
-            var visualJson =globalCache.visualDefinition["default"][modelClass]
+        if(globalCache.visualDefinition["default"].detail[modelClass]){
+            var visualJson =globalCache.visualDefinition["default"].detail[modelClass]
             var colorCode= visualJson.color || "darkGray"
             var shape=  visualJson.shape || "ellipse"
             var avarta= visualJson.avarta 

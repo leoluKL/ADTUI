@@ -153,7 +153,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
         }
         if (this.avartaImg) this.avartaImg.attr("src", dataUrl)
 
-        var visualJson = globalCache.visualDefinition["default"]
+        var visualJson = globalCache.visualDefinition["default"].detail
         if (!visualJson[modelID]) visualJson[modelID] = {}
         visualJson[modelID].avarta = dataUrl
         this.saveVisualDefinition()
@@ -163,7 +163,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     })
 
     clearAvartaBtn.on("click", () => {
-        var visualJson = globalCache.visualDefinition["default"]
+        var visualJson = globalCache.visualDefinition["default"].detail
         if (visualJson[modelID]) delete visualJson[modelID].avarta
         if (this.avartaImg) this.avartaImg.removeAttr('src');
         this.saveVisualDefinition()
@@ -233,8 +233,8 @@ modelManagerDialog.prototype.confirmDeleteModel=function(modelID){
         this.tree.deleteLeafNode(globalCache.modelIDMapToName[eachDeletedModelID])
         //TODO: clear the visualization setting of this deleted model, but if it is replace, should not, so I comment out first
         /*
-        if (globalCache.visualDefinition["default"][modelID]) {
-            delete globalCache.visualDefinition["default"][modelID]
+        if (globalCache.visualDefinition["default"].detail[modelID]) {
+            delete globalCache.visualDefinition["default"].detail[modelID]
             this.saveVisualDefinition()
         }*/
     }
@@ -270,7 +270,7 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     
     var avartaImg=$("<img style='height:45px'></img>")
     rightPart.append(avartaImg)
-    var visualJson=globalCache.visualDefinition["default"]
+    var visualJson=globalCache.visualDefinition["default"].detail
     if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)
     this.avartaImg=avartaImg;
     this.addOneVisualizationRow(modelID,leftPart)
@@ -293,7 +293,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     var definedShape=null
     var definedDimensionRatio=null
     var definedEdgeWidth=null
-    var visualJson=globalCache.visualDefinition["default"]
+    var visualJson=globalCache.visualDefinition["default"].detail
     if(relatinshipName==null){
         if(visualJson[modelID] && visualJson[modelID].color) definedColor=visualJson[modelID].color
         if(visualJson[modelID] && visualJson[modelID].shape) definedShape=visualJson[modelID].shape
@@ -323,7 +323,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     colorSelector.change((eve)=>{
         var selectColorCode=eve.target.value
         colorSelector.css("color",selectColorCode)
-        var visualJson=globalCache.visualDefinition["default"]
+        var visualJson=globalCache.visualDefinition["default"].detail
 
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
@@ -353,7 +353,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     }
     shapeSelector.change((eve)=>{
         var selectShape=eve.target.value
-        var visualJson = globalCache.visualDefinition["default"]
+        var visualJson = globalCache.visualDefinition["default"].detail
 
         if(!visualJson[modelID]) visualJson[modelID]={}
         if(!relatinshipName) {
@@ -391,7 +391,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     
     sizeAdjustSelector.change((eve)=>{
         var chooseVal=eve.target.value
-        var visualJson = globalCache.visualDefinition["default"]
+        var visualJson = globalCache.visualDefinition["default"].detail
 
         if(!relatinshipName) {
             if(!visualJson[modelID]) visualJson[modelID]={}
@@ -410,7 +410,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 
 modelManagerDialog.prototype.saveVisualDefinition=async function(){
     try{
-        await msalHelper.callAPI("digitaltwin/saveVisualDefinition", "POST", {"visualDefinitionJson":JSON.stringify(globalCache.visualDefinition["default"])},"withProjectID")
+        await msalHelper.callAPI("digitaltwin/saveVisualDefinition", "POST", {"visualDefinitionJson":JSON.stringify(globalCache.visualDefinition["default"].detail)},"withProjectID")
     }catch(e){
         console.log(e)
         if(e.responseText) alert(e.responseText)
@@ -561,8 +561,8 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
             var shape = "ellipse"
             var avarta = null
             var dimension=20;
-            if (globalCache.visualDefinition["default"][modelClass]) {
-                var visualJson = globalCache.visualDefinition["default"][modelClass]
+            if (globalCache.visualDefinition["default"].detail[modelClass]) {
+                var visualJson = globalCache.visualDefinition["default"].detail[modelClass]
                 var colorCode = visualJson.color || "darkGray"
                 var shape = visualJson.shape || "ellipse"
                 var avarta = visualJson.avarta

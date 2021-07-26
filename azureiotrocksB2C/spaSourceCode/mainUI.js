@@ -15,7 +15,6 @@ function mainUI() {
 }
 
 mainUI.prototype.afterSignedIn=async function(anAccount,noAnimation){
-    console.log(anAccount)
     if(noAnimation){
         $('#headerPart').css({height:"100vh","padding":"15px"})
         this.showModuleButtons()
@@ -56,16 +55,19 @@ mainUI.prototype.showModuleButtons=function(){
         this.myMSALObj.logoutPopup(logoutRequest);
     })
 
-    adtUIBtn.on("click",()=>{
-        window.open("digitaltwinmodule.html", "_blank");
+    adtUIBtn.on("click",(e)=>{
+        if(e.ctrlKey) window.location.replace("digitaltwinmodule.html");
+        else window.open("digitaltwinmodule.html", "_blank");
     })
 
     deviceManageBtn.on("click",()=>{
-        window.open("devicemanagement.html", "_blank");
+        if(e.ctrlKey) window.location.replace("devicemanagement.html");
+        else window.open("devicemanagement.html", "_blank");
     })
 
     eventLogBtn.on("click",()=>{
-        window.open("eventlogmodule.html", "_blank");
+        if(e.ctrlKey) window.location.replace("eventlogmodule.html");
+        else window.open("eventlogmodule.html", "_blank");
     })
  
     //if this page is open in localhost environment, add three buttons to allow pages opening and using local running api app instead

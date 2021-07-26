@@ -10,6 +10,14 @@ function projectSettingDialog() {
     }
 }
 
+projectSettingDialog.prototype.rxMessage=function(msgPayload){
+    if(msgPayload.message=="projectIsChanged"){
+        this.contentInitialized=false
+        this.DOM.empty()
+        this.DOM.hide()
+    }
+}
+
 projectSettingDialog.prototype.popup = function (projectInfo) {
     this.DOM.show()
     if(this.contentInitialized)return;
@@ -86,6 +94,81 @@ projectSettingDialog.prototype.fillVisualSchemaContent= function () {
             if (e.responseText) alert(e.responseText)
         }
     })
+
+    var visualSchemaDiv=$('<div class="w3-border" style="margin-top:10px;max-height:200px;overflow-x:hidden;overflow-y:auto"></div>')
+    this.visualSchemaContentDiv.append(visualSchemaDiv)
+    this.visualSchemaDiv=visualSchemaDiv
+
+    this.refillVisualSchemas()
+}
+
+projectSettingDialog.prototype.refillVisualSchemas=function(){
+    this.visualSchemaDiv.empty()
+    var selfSchema
+    for (var ind in globalCache.visualDefinition) {
+        var oneSchema=globalCache.visualDefinition[ind]
+        if(oneSchema.owner!=null && oneSchema.owner!=globalCache.accountInfo.id) this.addOneVisualSchema(oneSchema,this.visualSchemaDiv)
+        else selfSchema=oneSchema
+    }
+    this.addOneVisualSchema(selfSchema,this.visualSchemaDiv)
+}
+
+projectSettingDialog.prototype.addOneVisualSchema=function(oneSchemaObj,parentDiv){
+    var owner= oneSchemaObj.owner || globalCache.accountInfo.id
+    
+    var oneSchemaRow=$('<a href="#" class="w3-bar w3-button w3-border-bottom"></a>')
+    parentDiv.append(oneSchemaRow)
+    var lblStr=(owner==globalCache.accountInfo.id)?"Self":"Shared by "+owner
+    //var nameLbl=$('<a style="text-align:left;color:grey;margin:5px 0px;display:block">'+lblStr+'</a>')
+    var titleRow=$('<a href="#" class="w3-bar w3-text-grey"  ></a>')
+    oneSchemaRow.append(titleRow)
+    var nameLbl=$('<a class="w3-bar-item w3-button" >'+lblStr+'</a>')
+    var copyBtn=$('<button class="w3-bar-item w3-button w3-right w3-lime w3-hover-amber">Copy</button>')
+    titleRow.append(nameLbl)
+    if(owner!=globalCache.accountInfo.id) titleRow.append(copyBtn)
+
+    var detail=oneSchemaObj.detail
+
+    copyBtn.on("click", async ()=>{
+        //replace self visual schema
+        globalCache.visualDefinition["default"].detail=JSON.parse(JSON.stringify(detail))
+        this.refillVisualSchemas()
+        try{
+            await msalHelper.callAPI("digitaltwin/saveVisualDefinition", "POST", {"visualDefinitionJson":JSON.stringify(detail)},"withProjectID")
+        }catch(e){
+            console.log(e)
+            if(e.responseText) alert(e.responseText)
+        }
+    })
+
+    for(var modelID in detail){
+        var visualJson=detail[modelID]
+        var avarta = null
+        var dimension = 20;
+        var colorCode = visualJson.color || "darkGray"
+        var shape = visualJson.shape || "ellipse"
+        var avarta = visualJson.avarta
+        if (visualJson.dimensionRatio) dimension *= parseFloat(visualJson.dimensionRatio)
+        var iconDOM = $("<div style='width:" + dimension + "px;height:" + dimension + "px;float:left;position:relative'></div>")
+        var imgSrc = encodeURIComponent(this.shapeSvg(shape, colorCode))
+        iconDOM.append($("<img src='data:image/svg+xml;utf8," + imgSrc + "'></img>"))
+        if (avarta) {
+            var avartaimg = $("<img style='position:absolute;left:0px;width:60%;margin:20%' src='" + avarta + "'></img>")
+            iconDOM.append(avartaimg)
+        }
+        oneSchemaRow.append(iconDOM)
+    }
+
+}
+
+projectSettingDialog.prototype.shapeSvg=function(shape,color){
+    if(shape=="ellipse"){
+        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><circle cx="50" cy="50" r="50"  fill="'+color+'"/></svg>'
+    }else if(shape=="hexagon"){
+        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25"  fill="'+color+'" /></svg>'
+    }else if(shape=="round-rectangle"){
+        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><rect x="10" y="10" rx="10" ry="10" width="80" height="80" fill="'+color+'" /></svg>'
+    }
 }
 
 projectSettingDialog.prototype.refillLayouts=function(){

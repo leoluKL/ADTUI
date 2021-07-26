@@ -9,7 +9,7 @@ function globalCache(){
     this.twinIDMapToDisplayName={}
     this.storedTwins = {}
     this.layoutJSON={}
-    this.visualDefinition={"default":{}}
+    this.visualDefinition={"default":{"detail":{}}}
 
     this.initStoredInformtion()
 }
@@ -111,20 +111,25 @@ globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
     var dbtwins=[]
     for(var ind in this.visualDefinition) delete this.visualDefinition[ind]
     for(var ind in this.layoutJSON) delete this.layoutJSON[ind]
-    this.visualDefinition["default"]={}
+    this.visualDefinition["default"]={"detail":{}}
 
     resArr.forEach(element => {
         if(element.type=="visualSchema") {
             //TODO: now there is only one "default" schema to use,consider allow creating more user define visual schema
             //TODO: only choose the schema belongs to self
-            if(element.accountID==this.accountInfo.id){
-                this.visualDefinition[element.name]=element.detail
-            }
+            this.recordSingleVisualSchema(element.detail,element.accountID,element.name,element.isShared)
         }else if(element.type=="Topology") {
             this.recordSingleLayout(element.detail,element.accountID,element.name,element.isShared)
         }else if(element.type=="DTTwin") dbtwins.push(element)
     });
     this.storeDBTwinsArr(dbtwins)
+}
+
+globalCache.prototype.recordSingleVisualSchema=function(detail,accountID,oname,isShared){
+    if (accountID == this.accountInfo.id) var vsName = oname
+    else vsName = oname + `(from ${accountID})`
+    var dict = { "detail": detail, "isShared": isShared, "owner": accountID, "oname": oname}
+    this.visualDefinition[vsName]=dict
 }
 
 globalCache.prototype.recordSingleLayout=function(detail,accountID,oname,isShared){
