@@ -116,8 +116,14 @@ routerInsertData.prototype.updateVisualSchema =async function(req,res) {
     var projectID=req.body.projectID
     var visualDefinitionJson = JSON.parse(req.body.visualDefinitionJson)
     try {
-        var aVisualSchema=this.getEmptyVisualSchema(projectID,accountID)
+        var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",accountID,"VisualSchema."+projectID+".default")
+        if(originalDocument.length==0) {
+            var aVisualSchema=this.getEmptyVisualSchema(projectID,accountID)
+        }else{
+            aVisualSchema = originalDocument[0]
+        }
         aVisualSchema.detail=visualDefinitionJson
+
         var re=await cosmosdbhelper.insertRecord("appuser",aVisualSchema)
         res.end()
     } catch (e) {
@@ -144,14 +150,23 @@ routerInsertData.prototype.updateTopologySchema =async function(req,res) {
     try {
         for(var layoutName in layouts){
             var content=JSON.parse(layouts[layoutName])
-            var re=await cosmosdbhelper.insertRecord("appuser",{
-                id:"TopoSchema."+projectID+"."+layoutName
-                ,"type":"Topology"
-                ,"accountID":accountID
-                ,"projectID":projectID
-                ,"name":layoutName
-                ,"detail":content
-            })
+
+            var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",accountID,"TopoSchema."+projectID+"."+layoutName)
+            if(originalDocument.length==0) {
+                var newLayoutDocument={
+                    id:"TopoSchema."+projectID+"."+layoutName
+                    ,"type":"Topology"
+                    ,"accountID":accountID
+                    ,"projectID":projectID
+                    ,"name":layoutName
+                    ,"detail":content
+                }
+            }else{
+                var newLayoutDocument = originalDocument[0]
+                newLayoutDocument.detail=content
+            }
+
+            var re=await cosmosdbhelper.insertRecord("appuser",newLayoutDocument)
         }
         res.end()
     } catch (e) {
