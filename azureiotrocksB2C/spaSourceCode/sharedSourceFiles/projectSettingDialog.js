@@ -27,9 +27,10 @@ projectSettingDialog.prototype.popup = function (projectInfo) {
     this.DOM.append(tabControl)
 
     this.layoutContentDiv=$('<div class="w3-animate-opacity" style="padding:10px;display:none"></div>')
-    this.visualSchemaContentDiv=$('<div class="w3-animate-opacity" style="padding:10px;display:none">Visual Schema</div>')
+    this.visualSchemaContentDiv=$('<div class="w3-animate-opacity" style="padding:10px;display:none"></div>')
     this.DOM.append(this.layoutContentDiv,this.visualSchemaContentDiv)
     this.fillLayoutDivContent()
+    this.fillVisualSchemaContent()
 
     layoutBtn.on("click",()=>{
         layoutBtn.addClass("w3-dark-grey")
@@ -64,6 +65,14 @@ projectSettingDialog.prototype.fillLayoutDivContent = function () {
     this.layoutsDiv=layoutsDiv
 
     this.refillLayouts()
+}
+
+
+projectSettingDialog.prototype.fillVisualSchemaContent= function () {
+    var shareSelfVisualSchemaCheck = $('<input class="w3-check" style="width:20px;margin-left:10px;margin-right:10px" type="checkbox">')
+    var shareSelfVisualSchemaText = $('<label style="padding:2px 8px;">Share graph legend setting</label>')
+    this.visualSchemaContentDiv.append(shareSelfVisualSchemaCheck, shareSelfVisualSchemaText)
+    
 }
 
 projectSettingDialog.prototype.refillLayouts=function(){

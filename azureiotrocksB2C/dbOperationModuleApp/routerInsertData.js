@@ -10,6 +10,7 @@ function routerInsertData(){
     this.useRoute("updateVisualSchema","post")
     this.useRoute("updateTopologySchema","post")
     this.useRoute("setLayoutSharedFlag","post")
+    this.useRoute("setVisualSchemaSharedFlag","post")
 }
 
 routerInsertData.prototype.useRoute=function(routeStr,isPost){
@@ -170,6 +171,24 @@ routerInsertData.prototype.setLayoutSharedFlag= async function(req,res){
         var newLayoutDocument = originalDocument[0]
         newLayoutDocument["isShared"]=isShared
         await cosmosdbhelper.insertRecord("appuser", newLayoutDocument)
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+    res.end()
+}
+
+routerInsertData.prototype.setVisualSchemaSharedFlag= async function(req,res){
+    var ownerAccount=req.body.account
+    var projectID=req.body.projectID
+    var visualSchemaName=req.body.visualSchema
+    var isShared=this.strToBool(req.body.isShared)
+
+    try {
+        var originalDocument=await cosmosdbhelper.getDocByID("appuser","accountID",ownerAccount,"VisualSchema."+projectID+"."+visualSchemaName)
+        if(originalDocument.length==0) res.status(400).send("VisualSchema "+visualSchemaName+" is not found!")
+        var newDocument = originalDocument[0]
+        newDocument["isShared"]=isShared
+        await cosmosdbhelper.insertRecord("appuser", newDocument)
     } catch (e) {
         res.status(400).send(e.message)
     }
