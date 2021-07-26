@@ -15,6 +15,7 @@ function mainUI() {
 }
 
 mainUI.prototype.afterSignedIn=async function(anAccount,noAnimation){
+    console.log(anAccount)
     if(noAnimation){
         $('#headerPart').css({height:"100vh","padding":"15px"})
         this.showModuleButtons()

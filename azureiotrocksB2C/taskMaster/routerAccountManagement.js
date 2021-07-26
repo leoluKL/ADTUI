@@ -73,8 +73,7 @@ routerAccountManagement.prototype.fetchUserAccount =async function(req,res) { //
     var reqBody={
 		account:req.authInfo.account,
         name:req.authInfo.name,
-        country:req.authInfo.country,
-        idp:req.authInfo.idp
+        country:req.authInfo.country
 	}
     try{
         var {body} = await got.post(process.env.dboperationAPIURL+"userAccount/basic", {json:reqBody,responseType: 'json'});

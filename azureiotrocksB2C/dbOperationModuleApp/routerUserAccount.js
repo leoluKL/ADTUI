@@ -44,10 +44,8 @@ routerUserAccount.prototype.uuidv4=function() {
 
 routerUserAccount.prototype.basic =async function(req,res) {
     var accountID=req.body.account
-    var idp= req.body.idp
     var queryStr='SELECT * FROM c where '
     queryStr+=`c.accountID='${accountID}'`
-    queryStr+=` and c.profile.idp='${idp}'`
     try{
         var queryResult=await cosmosdbhelper.query('appuser',queryStr)
     }catch(e){
