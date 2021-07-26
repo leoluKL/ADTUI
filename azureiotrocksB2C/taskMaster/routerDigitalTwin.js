@@ -26,6 +26,7 @@ function routerDigitalTwin(){
     this.useRoute("deleteRelations","isPost")
     this.useRoute("deleteTwins","isPost")
     this.useRoute("setLayoutSharedFlag","isPost")
+    this.useRoute("setVisualSchemaSharedFlag","isPost")
 }
 
 
@@ -121,6 +122,18 @@ routerDigitalTwin.prototype.setLayoutSharedFlag =async function(req,res) {
     reqBody.account=req.authInfo.account
     try{
         await got.post(process.env.dboperationAPIURL+"insertData/setLayoutSharedFlag", {json:reqBody,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.end()
+}
+
+routerDigitalTwin.prototype.setVisualSchemaSharedFlag =async function(req,res) {
+    var reqBody=req.body;
+    reqBody.account=req.authInfo.account
+    try{
+        await got.post(process.env.dboperationAPIURL+"insertData/setVisualSchemaSharedFlag", {json:reqBody,responseType: 'json'});
     }catch(e){
         res.status(e.response.statusCode).send(e.response.body);
         return;
