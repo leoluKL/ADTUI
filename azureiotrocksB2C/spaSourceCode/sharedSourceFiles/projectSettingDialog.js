@@ -78,7 +78,7 @@ projectSettingDialog.prototype.fillLayoutDivContent = function () {
 
 projectSettingDialog.prototype.fillVisualSchemaContent= function () {
     var shareSelfVisualSchemaCheck = $('<input class="w3-check" style="width:20px;margin-left:10px;margin-right:10px" type="checkbox">')
-    var shareSelfVisualSchemaText = $('<label style="padding:2px 8px;">Share graph legend setting</label>')
+    var shareSelfVisualSchemaText = $('<label style="padding:2px 8px;">Share my own visual legend</label>')
     this.visualSchemaContentDiv.append(shareSelfVisualSchemaCheck, shareSelfVisualSchemaText)
 
     if(globalCache.visualDefinition["default"].isShared) shareSelfVisualSchemaCheck.prop( "checked", true );
