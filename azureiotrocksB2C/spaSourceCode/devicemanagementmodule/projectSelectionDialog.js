@@ -122,7 +122,7 @@ projectSelectionDialog.prototype.useProject=async function(){
         globalCache.initStoredInformtion()
         this.previousSelectedProject=globalCache.currentProjectID
     }
-    var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectI)
+    var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectID)
     var projectOwner=projectInfo.owner
 
 
