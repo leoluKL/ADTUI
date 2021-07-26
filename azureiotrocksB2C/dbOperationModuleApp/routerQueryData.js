@@ -64,7 +64,9 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
         queryStr+=`c.accountID='${oneAccount}'`
         queryStr+=` and c.projectID='${projectID}'`
         queryStr+=` and c.type IN ('visualSchema','Topology')`
-        queryStr+=` and c.isShared =true`
+        
+        if(oneAccount!=accountID) queryStr+=` and c.isShared =true`
+        
         try{
             var queryResult=await cosmosdbhelper.query('appuser',queryStr)
             resultArr=resultArr.concat(queryResult)
