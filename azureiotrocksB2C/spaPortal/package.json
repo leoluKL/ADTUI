@@ -5,7 +5,7 @@
   "description": "",
   "devDependencies": {},
   "scripts": {
-    "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js & npm install -g npm-run-all",
+    "preparedev": "npm install -g browserify & npm install watchify -g & npm install -g uglify-js & npm install -g npm-run-all & npm install -g jshint",
     "build": "npm install",
     "bundleSPAMain": "watchify ..\\spaSourceCode\\mainUI.js  --debug -o .\\bundle.js -v",
     "bundleDigitaltwinModule": "watchify ..\\spaSourceCode\\digitaltwinmodule\\digitaltwinmoduleUI.js  --debug -o .\\bundle.digitaltwinmodule.js -v",

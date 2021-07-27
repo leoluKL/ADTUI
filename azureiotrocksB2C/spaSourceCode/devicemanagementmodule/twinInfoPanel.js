@@ -44,6 +44,10 @@ class twinInfoPanel extends baseInfoPanel{
                 //instead of draw the $dtId, draw display name instead
                 //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
                 this.drawStaticInfo(this.DOM, { "name": singleDBTwinInfo["displayName"] }, "1em", "13px")
+
+                if(singleDBTwinInfo["connectState"]) this.drawStaticInfo(this.DOM, { "Connection": true }, "1em", "13px","green")
+                else this.drawStaticInfo(this.DOM, { "Connection": false }, "1em", "13px","red")
+                
                 if (modelAnalyzer.DTDLModels[modelID]) {
                     this.drawEditable(this.DOM, modelAnalyzer.DTDLModels[modelID].editableProperties, singleADTTwinInfo, [])
                 }
@@ -64,7 +68,7 @@ class twinInfoPanel extends baseInfoPanel{
         }
     }
 
-    drawButtons=function(selectType){
+    drawButtons(selectType){
         if(selectType==null){
             this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Define IoT setting in model so its twin type can be mapped to physical IoT device type</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press ctrl or shift key to select multiple twins</a>")
             return;

@@ -65,7 +65,8 @@ class baseInfoPanel {
         }    
     }
 
-    drawStaticInfo(parent,jsonInfo,paddingTop,fontSize){
+    drawStaticInfo(parent,jsonInfo,paddingTop,fontSize,fontColor){
+        fontColor=fontColor||"black"
         for(var ind in jsonInfo){
             var keyDiv= $("<label style='display:block'><div class='w3-dark-gray' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em;font-size:10px'>"+ind+"</div></label>")
             parent.append(keyDiv)
@@ -80,7 +81,7 @@ class baseInfoPanel {
                 contentDOM.css("padding-top",".2em")
                 contentDOM.text(jsonInfo[ind])
             }
-            contentDOM.css({"fontSize":fontSize,"color":"black"})
+            contentDOM.css({"fontSize":fontSize,"color":fontColor})
             keyDiv.append(contentDOM)
         }
     }
