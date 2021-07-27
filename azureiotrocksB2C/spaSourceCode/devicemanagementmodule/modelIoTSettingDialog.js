@@ -203,11 +203,12 @@ modelIoTSettingDialog.prototype.commitChange = async function() {
         postBody.updateInfo.isIoTDeviceModel=false
     }
 
-    var curDesiredPropertyStr=JSON.stringify(postBody.updateInfo.desiredProperties)
-    if(curDesiredPropertyStr!=this.originalDesiredPropertiesStr) {
-        postBody.forceRefreshDeviceDesired=true
+    if(this.iotInfo){
+        var curDesiredPropertyStr=JSON.stringify(postBody.updateInfo.desiredProperties)
+        if(curDesiredPropertyStr!=this.originalDesiredPropertiesStr) {
+            postBody.forceRefreshDeviceDesired=true
+        }
     }
-
 
     postBody.updateInfo = JSON.stringify(postBody.updateInfo)
     try {
