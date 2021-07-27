@@ -26,8 +26,6 @@ class twinInfoPanel extends baseInfoPanel{
                 this.drawButtons("singleNode")
                 var singleDBTwinInfo = arr[0];
                 var modelID = singleDBTwinInfo.modelID
-                var theDBModel = globalCache.getSingleDBModelByID(modelID)
-
 
                 if (!globalCache.storedTwins[singleDBTwinInfo.id]) {
                     //query all twins of this parent model if they havenot been queried from ADT yet
@@ -39,7 +37,7 @@ class twinInfoPanel extends baseInfoPanel{
                     globalCache.storeADTTwins(twinsData)
                 }
 
-                var singleADTTwinInfo = globalCache.storedTwins[singleDBTwinInfo.id]
+                var singleADTTwinInfo = globalCache.storedTwins[singleDBTwinInfo.id] 
 
                 //instead of draw the $dtId, draw display name instead
                 //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
