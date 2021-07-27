@@ -664,12 +664,12 @@ topologyDOM.prototype.chooseLayout = function (layoutName) {
 }
 
 
-topologyDOM.prototype.showSelf = function (direction) {
+topologyDOM.prototype.showSelf = function () {
     this.DOM.show()
     this.DOM.animate({height: "100%"});
 }
 
-topologyDOM.prototype.hideSelf = function (direction) {
+topologyDOM.prototype.hideSelf = function () {
     this.DOM.animate({height: "0%"},()=>{this.DOM.hide()});
 }
 
@@ -785,7 +785,8 @@ topologyDOM.prototype.alignSelectedNodes = function (direction) {
         if(direction=="top"|| direction=="bottom") numArr.push(position['y'])
         else if(direction=="left"|| direction=="right") numArr.push(position['x'])
     })
-    var targetX=targetY=null
+    var targetX=null
+    var targetY=null
     if(direction=="top") var targetY= Math.min(...numArr)
     else if(direction=="bottom") var targetY= Math.max(...numArr)
     if(direction=="left") var targetX= Math.min(...numArr)
@@ -1050,8 +1051,8 @@ topologyDOM.prototype.createOneConnectionAdjustRow = function (oneRow,confirmDia
         connectionTypes.forEach(oneType=>{
             switchTypeSelector.addOption(oneType)
         })
-        returnObj["from"]=fromNodefromNode.data().originalInfo["$dtId"]
-        returnObj["to"]=toNodefromNode.data().originalInfo["$dtId"]
+        returnObj["from"]=fromNode.data().originalInfo["$dtId"]
+        returnObj["to"]=toNode.data().originalInfo["$dtId"]
         returnObj["connect"]=connectionTypes[0]
         switchTypeSelector.callBack_clickOption=(optionText,optionValue)=>{
             returnObj["connect"]=optionText
@@ -1127,7 +1128,9 @@ topologyDOM.prototype.setKeyDownFunc=function(includeCancelConnectOperation){
                 return false
             }
         }
-        if (e.keyCode == 27) this.cancelTargetNodeMode()    
+        if(includeCancelConnectOperation){
+            if (e.keyCode == 27) this.cancelTargetNodeMode()    
+        }
     });
 }
 
@@ -1170,7 +1173,6 @@ topologyDOM.prototype.noPosition_cose=function(eles){
 
     var newLayout =eles.layout({
         name: 'cose',
-        animate: true,
         gravity:1,
         animate: false
         ,fit:false

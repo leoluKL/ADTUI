@@ -491,7 +491,8 @@ modelManagerDialog.prototype.addAPartInRightSpan=function(partName){
 modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files){
     // files is a FileList of File objects. List some properties.
     var fileContentArr=[]
-    for (var i = 0, f; f = files[i]; i++) {
+    for (var i = 0;i< files.length; i++) {
+        var f=files[i]
         // Only process json files.
         if (f.type!="application/json") continue;
         try{
@@ -505,7 +506,7 @@ modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files
     }
     if(fileContentArr.length==0) return;
     try {
-        var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", {"models":JSON.stringify(fileContentArr)},"withProjectID")
+        await msalHelper.callAPI("digitaltwin/importModels", "POST", {"models":JSON.stringify(fileContentArr)},"withProjectID")
         this.listModels("shouldBroadCast")
     }catch(e){
         console.log(e)
@@ -543,7 +544,7 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
         return
     }
 
-    if(jQuery.isEmptyObject(modelAnalyzer.DTDLModels)){
+    if($.isEmptyObject(modelAnalyzer.DTDLModels)){
         var zeroModelItem=$('<li style="font-size:0.9em">zero model record. Please import...</li>')
         this.modelList.append(zeroModelItem)
         zeroModelItem.css("cursor","default")

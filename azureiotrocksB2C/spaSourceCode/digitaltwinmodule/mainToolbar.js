@@ -54,7 +54,7 @@ mainToolbar.prototype.render = function () {
 
     this.testSendSignalRBtn.on("click",async ()=>{
         const msalHelper=require("../msalHelper")
-        var re = await msalHelper.callAzureFunctionsService("messages","POST",{
+        await msalHelper.callAzureFunctionsService("messages","POST",{
             recipient: "5eb81f5f-fd9e-481d-996b-4d0b9536f477",
             text: "how do you do"
           })

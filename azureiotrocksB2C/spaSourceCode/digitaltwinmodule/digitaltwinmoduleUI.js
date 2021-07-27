@@ -72,7 +72,7 @@ digitaltwinmoduleUI.prototype.assignBroadcastMessage=function(uiComponent){
 }
 
 digitaltwinmoduleUI.prototype.initUILayout = function () {
-    var myLayout = $('body').layout({
+    $('body').layout({
         //	reference only - these options are NOT required because 'true' is the default
         closable: true	// pane can open & close
         , resizable: true	// when open, pane can be resized 
@@ -94,10 +94,8 @@ digitaltwinmoduleUI.prototype.initUILayout = function () {
         , west__minSize: 100
         , east__size: 300
         , east__minSize: 200
-        , east__maxSize: .5 // 50% of layout width
+        , east__maxSize: 0.5 // 50% of layout width
         , center__minWidth: 100
-        ,east__closable: false
-        ,west__closable: false
         ,east__initClosed:	true
     });
 

@@ -11,7 +11,7 @@ modelAnalyzer.prototype.clearAllModels=function(){
     for(var id in this.DTDLModels) delete this.DTDLModels[id]
 }
 
-modelAnalyzer.prototype.resetAllModels=function(arr){
+modelAnalyzer.prototype.resetAllModels=function(){
     for(var modelID in this.DTDLModels){
         var jsonStr=this.DTDLModels[modelID]["original"]
         this.DTDLModels[modelID]=JSON.parse(jsonStr)

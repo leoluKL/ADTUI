@@ -5,7 +5,23 @@
     "undef":true,
     "unused":true,
     "node": true,
+    "validthis": true,
+    "shadow":true,
+    "laxcomma":true,
+    "laxbreak":true,
+    "funcscope":true,
+    "loopfunc":true,
     "globals": {
-        "$": false
+        "$": false,
+        "msal": false,
+        "window": false,
+        "alert": false,
+        "document":false,
+        "FileReader":false,
+        "signalR":false,
+        "atlas":false,
+        "cytoscape":false,
+        "Image":false,
+        "URL":false
     }
 }

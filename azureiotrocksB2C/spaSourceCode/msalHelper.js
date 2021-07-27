@@ -26,7 +26,7 @@ msalHelper.prototype.setAccount=function(theAccount){
     this.userName=theAccount.name;
 }
 
-msalHelper.prototype.fetchAccount=function(noAnimation){
+msalHelper.prototype.fetchAccount=function(){
     const currentAccounts = this.myMSALObj.getAllAccounts();
     if (currentAccounts.length < 1) return;
     var foundAccount=null;
@@ -155,7 +155,7 @@ msalHelper.prototype.getToken=async function(b2cScope){
     
         var response = await this.myMSALObj.acquireTokenSilent(tokenRequest)
         if (!response.accessToken || response.accessToken === "") {
-            throw new msal.InteractionRequiredAuthError;
+            throw new msal.InteractionRequiredAuthError();
         }
         this.storedToken[b2cScope]={"accessToken":response.accessToken,"expire":response.idTokenClaims.exp}
     }catch(error){

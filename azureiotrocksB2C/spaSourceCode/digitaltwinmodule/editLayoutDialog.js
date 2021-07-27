@@ -37,7 +37,7 @@ editLayoutDialog.prototype.popup = function () {
     saveAsNewBtn.on("click",()=>{this.saveIntoLayout(nameInput.val())})
 
 
-    if(!jQuery.isEmptyObject(globalCache.layoutJSON)){
+    if(!$.isEmptyObject(globalCache.layoutJSON)){
         var lbl=$('<div class="w3-bar w3-padding-16" style="text-align:center;">- OR -</div>')
         this.DOM.append(lbl) 
         var switchLayoutSelector=new simpleSelectMenu("",{fontSize:"1em",colorClass:"w3-light-gray",width:"120px"})

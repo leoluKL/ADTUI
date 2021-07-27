@@ -95,7 +95,7 @@ modelEditorDialog.prototype.replaceModel=function(){
 
 modelEditorDialog.prototype.importModelArr=async function(modelToBeImported,forReplacing,afterFailure){
     try {
-        var response = await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) },"withProjectID")
+        await msalHelper.callAPI("digitaltwin/importModels", "POST", { "models": JSON.stringify(modelToBeImported) },"withProjectID")
         if(forReplacing) alert("Model " + this.dtdlobj["displayName"] + " is modified successfully!")
         else alert("Model " + this.dtdlobj["displayName"] + " is created!")
 

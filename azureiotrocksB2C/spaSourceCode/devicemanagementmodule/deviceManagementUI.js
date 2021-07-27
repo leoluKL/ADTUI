@@ -6,7 +6,6 @@ const modelEditorDialog = require("../sharedSourceFiles/modelEditorDialog")
 const modelIoTSettingDialog= require("./modelIoTSettingDialog")
 const twinInfoPanel= require("./twinInfoPanel");
 const modelManagerDialog = require("../sharedSourceFiles/modelManagerDialog")
-const globalCache=require("../sharedSourceFiles/globalCache")
 const twinsList=require("./twinsList")
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 const projectSelectionDialog=require("./projectSelectionDialog")

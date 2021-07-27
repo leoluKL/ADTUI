@@ -362,7 +362,8 @@ class infoPanel extends baseInfoPanel {
     async readTwinsFilesContentAndImport(files) {
         var importTwins = []
         var importRelations = []
-        for (var i = 0, f; f = files[i]; i++) {
+        for (var i = 0; i< files.length; i++) {
+            var f=files[i]
             // Only process json files.
             if (f.type != "application/json") continue;
             try {

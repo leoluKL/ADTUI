@@ -10,11 +10,11 @@ function floatInfoWindow() {
     }
 }
 
-floatInfoWindow.prototype.hideSelf=function(msgPayload){
+floatInfoWindow.prototype.hideSelf=function(){
     this.DOM.hide()
     this.DOM.css("width","0px") 
 }
-floatInfoWindow.prototype.showSelf=function(msgPayload){
+floatInfoWindow.prototype.showSelf=function(){
     this.DOM.css("width","295px")
     this.DOM.show()
 }

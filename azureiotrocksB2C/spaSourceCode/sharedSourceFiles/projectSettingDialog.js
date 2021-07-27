@@ -18,7 +18,7 @@ projectSettingDialog.prototype.rxMessage=function(msgPayload){
     }
 }
 
-projectSettingDialog.prototype.popup = function (projectInfo) {
+projectSettingDialog.prototype.popup = function () {
     this.DOM.show()
     if(this.contentInitialized)return;
     this.contentInitialized=true; 
@@ -88,7 +88,7 @@ projectSettingDialog.prototype.fillVisualSchemaContent= function () {
 
         var visualSchemaName = "default" //fixed in current version, there is only "default" schema for each user
         try {
-            await msalHelper.callAPI("digitaltwin/setVisualSchemaSharedFlag", "POST", { "visualSchema": "default", "isShared": shareSelfVisualSchemaCheck.prop('checked') }, "withProjectID")
+            await msalHelper.callAPI("digitaltwin/setVisualSchemaSharedFlag", "POST", { "visualSchema": visualSchemaName, "isShared": shareSelfVisualSchemaCheck.prop('checked') }, "withProjectID")
         } catch (e) {
             console.log(e)
             if (e.responseText) alert(e.responseText)

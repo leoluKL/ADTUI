@@ -164,12 +164,12 @@ mapDOM.prototype.deg2rad = function (deg) {
     return deg * (Math.PI / 180)
 }
 
-mapDOM.prototype.showSelf = function (direction) {
+mapDOM.prototype.showSelf = function () {
     this.DOM.show()
     this.DOM.animate({height: "100%"},()=>{this.map.resize()});
 }
 
-mapDOM.prototype.hideSelf = function (direction) {
+mapDOM.prototype.hideSelf = function () {
     this.DOM.animate({height: "0%"},()=>{this.DOM.hide()});
 }
 
