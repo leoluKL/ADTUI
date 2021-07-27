@@ -31,16 +31,21 @@ routerControlPlane.prototype.provisionDevice =async function(req,res) {
     var tags=req.body.tags
     var desiredProperties= req.body.desiredProperties
 
+    
     try{
-        await iothubHelper.iothubRegistry.create({"deviceId":deviceID})
-        await iothubHelper.iothubRegistry.updateTwin(deviceID
-        ,{
-            "tags":tags,
-            "properties":{
-                "desired":desiredProperties
+        try{
+            await iothubHelper.iothubRegistry.get(deviceID)
+        }catch(e){ //if the device is not registered yet, really provision it
+            await iothubHelper.iothubRegistry.create({"deviceId":deviceID})
+            await iothubHelper.iothubRegistry.updateTwin(deviceID
+            ,{
+                "tags":tags,
+                "properties":{
+                    "desired":desiredProperties
+                }
             }
+            ,"*")
         }
-        ,"*")
         res.end()
     }catch(e){
         res.status(400).send(e.message)
