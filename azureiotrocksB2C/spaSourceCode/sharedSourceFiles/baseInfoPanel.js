@@ -84,12 +84,31 @@ class baseInfoPanel {
         }    
     }
 
+    generateKeyDivForStaticInfo(str,paddingTop){
+        var keyDiv = $("<label style='display:block'><div class='w3-border' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em;font-size:10px'>"+str+"</div></label>")
+        keyDiv.css("padding-top",paddingTop)
+        return keyDiv
+    }
+
+    drawConnectionStatus(status) {
+        var keyDiv=this.generateKeyDivForStaticInfo("Connection",".5em")
+        this.DOM.append(keyDiv)
+        var contentDOM = $('<span class="fa-stack" style="font-size:.5em;padding-left:5px"></span>')
+        if(status) {
+            contentDOM.addClass("w3-text-lime")
+            contentDOM.html('<i class="fas fa-signal fa-stack-2x"></i>')
+        }else{
+            contentDOM.addClass("w3-text-red")
+            contentDOM.html('<i class="fas fa-signal fa-stack-2x"></i><i class="fas fa-slash fa-stack-2x"></i>')
+        }
+        keyDiv.append(contentDOM)
+    }
+
     drawStaticInfo(parent,jsonInfo,paddingTop,fontSize,fontColor){
         fontColor=fontColor||"black"
         for(var ind in jsonInfo){
-            var keyDiv= $("<label style='display:block'><div class='w3-border' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em;font-size:10px'>"+ind+"</div></label>")
+            var keyDiv=this.generateKeyDivForStaticInfo(ind,paddingTop)
             parent.append(keyDiv)
-            keyDiv.css("padding-top",paddingTop)
     
             var contentDOM=$("<label></label>")
             if(typeof(jsonInfo[ind])==="object") {
@@ -119,9 +138,7 @@ class baseInfoPanel {
         if (theDBModel.isIoTDeviceModel) {
             this.DOM.append($('<table style="font-size:smaller;margin:3px 0px"><tr><td class="'+constTelemetryColor+'">&nbsp;&nbsp;</td><td>telemetry</td><td class="'+constReportColor+'">&nbsp;&nbsp;</td><td>report</td><td class="'+constDesiredColor+'">&nbsp;&nbsp;</td><td>desired</td><td class="'+constCommonColor+'">&nbsp;&nbsp;</td><td>common</td></tr></table>'))
 
-
-            if (singleDBTwinInfo["connectState"]) this.drawStaticInfo(this.DOM, { "Connection": true }, ".1em", "13px", "green")
-            else this.drawStaticInfo(this.DOM, { "Connection": false }, ".1em", "13px", "red")
+            this.drawConnectionStatus(singleDBTwinInfo["connectState"])
         }
 
         if (modelAnalyzer.DTDLModels[modelID]) {

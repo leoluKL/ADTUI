@@ -118,9 +118,9 @@ singleModelTwinsList.prototype.refreshTwinsInfo=function(){
 function singleTwinIcon(singleDBTwin,parentModelTwinsList) {
     this.twinInfo=singleDBTwin
     this.parentModelTwinsList=parentModelTwinsList
-    this.DOM=$("<div class='w3-hover-gray'  style='width:80px;float:left;height:100px;margin:8px;cursor:default'/>")
+    this.DOM=$("<div class='w3-hover-gray'  style='width:80px;float:left;height:100px;margin:8px;cursor:default;text-align:center'/>")
 
-    this.IoTLable=$("<div style='width:30%;text-align:center;border-radius: 3px;margin:5px 35%;height:15px;font-weight:bold;font-size:80%'>IoT</div>")
+    this.IoTLable=$('<span class="w3-text-amber fa-stack fa-xs" style="opacity: 100;"><i class="fas fa-signal fa-stack-2x"></i><i class="fas fa-slash fa-stack-2x"></i></span>')
 
     this.iconDOM=$("<div style='width:30px;height:30px;margin:0 auto;margin-top:10px;position:relative'></div>")
     this.nameDOM=$("<div style='word-break: break-word;width:100%;text-align:center;margin-top:5px'>"+this.twinInfo.displayName+"</div>")
@@ -173,17 +173,20 @@ singleTwinIcon.prototype.refreshTwinInfo=function(){
 }
 
 singleTwinIcon.prototype.redrawIoTState=function(){
-    this.IoTLable.addClass("w3-gray")
-    this.IoTLable.removeClass("w3-lime")
     this.IoTLable.css("opacity",0)
-
     if(this.twinInfo.IoTDeviceID!=null) {
         this.IoTLable.css("opacity",100) //use opacity to control so it holds its visual space even when it is no visible
         if(this.twinInfo.connectState) {
-            this.IoTLable.removeClass("w3-gray")
-            this.IoTLable.addClass("w3-lime")
+            this.IoTLable.removeClass("w3-text-red")
+            this.IoTLable.addClass("w3-text-lime")
+            this.IoTLable.html('<i class="fas fa-signal fa-stack-2x"></i>')
+        }else{
+            this.IoTLable.addClass("w3-text-red")
+            this.IoTLable.removeClass("w3-text-lime")
+            this.IoTLable.html('<i class="fas fa-signal fa-stack-2x"></i><i class="fas fa-slash fa-stack-2x"></i>')
         }
     }
+
 }
 
 singleTwinIcon.prototype.redrawIcon=function(){
