@@ -33,13 +33,17 @@ stages:
     - task: CmdLine@2
       inputs:
         script: |
+          workingDirectory: $(workingDirectory)
+          echo  'this is a new line'
           echo  '$(System.DefaultWorkingDirectory)'
           dir
     - bash: |
+        workingDirectory: $(workingDirectory)
         if [ -f extensions.csproj ]
         then
             dotnet build extensions.csproj --output ./bin
         fi
+        cd 
         npm install 
         npm run build --if-present
         npm prune --production
