@@ -1,4 +1,3 @@
-const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer");
 const globalCache = require("../sharedSourceFiles/globalCache")
 const msalHelper = require("../msalHelper")
 const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
@@ -40,25 +39,7 @@ class twinInfoPanel extends baseInfoPanel{
                 }
 
                 var singleADTTwinInfo = globalCache.storedTwins[singleDBTwinInfo.id] 
-
-                //instead of draw the $dtId, draw display name instead
-                //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
-                this.drawStaticInfo(this.DOM, { "name": singleDBTwinInfo["displayName"] }, "1em", "13px")
-
-                if(singleDBTwinInfo["connectState"]) this.drawStaticInfo(this.DOM, { "Connection": true }, "1em", "13px","green")
-                else this.drawStaticInfo(this.DOM, { "Connection": false }, "1em", "13px","red")
-                
-                if (modelAnalyzer.DTDLModels[modelID]) {
-                    this.drawEditable(this.DOM, modelAnalyzer.DTDLModels[modelID].editableProperties, singleADTTwinInfo, [])
-                }
-
-                this.drawStaticInfo(this.DOM, { "Model": modelID }, "1em", "10px")
-                for (var ind in singleADTTwinInfo["$metadata"]) {
-                    if (ind == "$model") continue;
-                    var tmpObj = {}
-                    tmpObj[ind] = singleADTTwinInfo["$metadata"][ind]
-                    this.drawStaticInfo(this.DOM, tmpObj, "1em", "10px")
-                }
+                this.drawSingleNodeProperties(singleDBTwinInfo,singleADTTwinInfo)
             } else if (arr.length > 1) {
                 this.drawButtons("multiple")
                 var textDiv = $("<label style='display:block;margin-top:10px'></label>")

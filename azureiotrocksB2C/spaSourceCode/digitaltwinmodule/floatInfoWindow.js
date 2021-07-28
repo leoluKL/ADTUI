@@ -77,7 +77,7 @@ floatInfoWindow.prototype.getRelationShipEditableProperties=function(relationshi
 
 floatInfoWindow.prototype.drawStaticInfo=function(parent,jsonInfo,paddingTop,fontSize){
     for(var ind in jsonInfo){
-        var keyDiv= $("<label style='display:block'><div class='w3-dark-gray' style='display:inline;padding:.1em .3em .1em .3em;margin-right:.3em;font-size:10px'>"+ind+"</div></label>")
+        var keyDiv= $("<label style='display:block'><div class='w3-border' style='display:inline;padding:.1em .3em .1em .3em;margin-right:.3em;font-size:10px'>"+ind+"</div></label>")
         parent.append(keyDiv)
         keyDiv.css("padding-top",paddingTop)
 
@@ -111,7 +111,7 @@ floatInfoWindow.prototype.drawEditable=function(parent,jsonInfo,originElementInf
             contentDOM.css("padding-left","1em")
             this.drawEditable(contentDOM,jsonInfo[ind],originElementInfo,newPath)
         }else {
-            keyDiv.children(":first").addClass("w3-lime")
+            keyDiv.children(":first").addClass("w3-dark-gray")
             var val=this.searchValue(originElementInfo,newPath)
             if(val==null){
                 contentDOM.css({"color":"gray","font-size":"9px"})

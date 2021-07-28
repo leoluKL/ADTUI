@@ -88,26 +88,8 @@ class infoPanel extends baseInfoPanel {
 
             if (singleElementInfo["$dtId"]) {// select a node
                 this.drawButtons("singleNode")
-
-                //instead of draw the $dtId, draw display name instead
-                //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
-                this.drawStaticInfo(this.DOM, { "name": singleElementInfo["displayName"] }, "1em", "13px")
-
-
-                var modelName = singleElementInfo['$metadata']['$model']
-
-                if (modelAnalyzer.DTDLModels[modelName]) {
-                    this.drawEditable(this.DOM, modelAnalyzer.DTDLModels[modelName].editableProperties, singleElementInfo, [])
-                }
-                //instead of drawing the original infomration, draw more meaningful one
-                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
-                this.drawStaticInfo(this.DOM, { "Model": singleElementInfo["$metadata"]["$model"] }, "1em", "10px")
-                for (var ind in singleElementInfo["$metadata"]) {
-                    if (ind == "$model") continue;
-                    var tmpObj = {}
-                    tmpObj[ind] = singleElementInfo["$metadata"][ind]
-                    this.drawStaticInfo(this.DOM, tmpObj, "1em", "10px")
-                }
+                var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
+                this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo)
             } else if (singleElementInfo["$sourceId"]) {
                 this.drawButtons("singleRelationship")
                 this.drawStaticInfo(this.DOM, {
