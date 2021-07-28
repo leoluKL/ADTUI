@@ -51,7 +51,7 @@ stages:
         archiveFile: "$(System.DefaultWorkingDirectory)/$(workingDirectory)/build$(Build.BuildId).zip"
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(System.DefaultWorkingDirectory)/$(workingDirectory)/build$(Build.BuildId).zip'
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
         artifactName: 'drop'
 
 - stage: Deploy
@@ -77,4 +77,4 @@ stages:
               azureSubscription: '$(azureSubscription)'
               appType: functionApp
               appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              package: '$(Pipeline.Workspace)/drop/build$(Build.BuildId).zip'
