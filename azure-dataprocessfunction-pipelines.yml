@@ -1,0 +1,80 @@
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - azureiotrocksB2C/dataProcessingFunc
+
+variables:
+  # Azure Resource Manager connection created during pipeline creation
+  azureSubscription: '48fd4898-e781-4dd7-a307-51fe1613e0ff'
+
+  # Function app name
+  functionAppName: 'azureiotrocksfunctions'
+
+  # Agent VM image name
+  vmImageName: 'vs2017-win2016'
+
+  # Working Directory
+  workingDirectory: 'azureiotrocksB2C/dataProcessingFunc'
+
+stages:
+- stage: Build
+  displayName: Build stage
+
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+
+    steps:
+    - bash: |
+        if [ -f extensions.csproj ]
+        then
+            dotnet build extensions.csproj --output ./bin
+        fi
+    - script: echo $(System.DefaultWorkingDirectory)/$(workingDirectory)
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)
+    - script: npm install 
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)  
+    - script: npm run build --if-present
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)  
+    - script: npm prune --production
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)
+    - task: ArchiveFiles@2
+      displayName: "Archive files"
+      inputs:
+        rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(workingDirectory)"
+        includeRootFolder: false
+        archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+        artifactName: 'drop'
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  condition: succeeded()
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: 'development'
+    pool:
+      vmImage: $(vmImageName)
+
+    strategy:
+      runOnce:
+        deploy:
+
+          steps:
+          - task: AzureFunctionApp@1
+            displayName: 'Azure functions app deploy'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              appType: functionApp
+              appName: $(functionAppName)
+              package: '$(Pipeline.Workspace)/drop/build$(Build.BuildId).zip'
