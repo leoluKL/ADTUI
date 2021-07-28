@@ -17,7 +17,15 @@ class baseInfoPanel {
             if(funcGetKeyLblColorClass) keyLabelColorClass=funcGetKeyLblColorClass(newPath)
             if(Array.isArray(jsonInfo[ind])){
                 keyDiv.children(":first").addClass(keyLabelColorClass)
-                this.drawDropdownOption(contentDOM,newPath,jsonInfo[ind],originElementInfo)
+                if (this.readOnly) {
+                    var val = this.searchValue(originElementInfo, newPath)
+                    if (val == null) {
+                        contentDOM.css({ "color": "gray", "font-size": "9px" })
+                        contentDOM.text("[empty]")
+                    } else contentDOM.text(val)
+                }else{
+                    this.drawDropdownOption(contentDOM,newPath,jsonInfo[ind],originElementInfo)
+                }
             }else if(typeof(jsonInfo[ind])==="object") {
                 keyDiv.children(":first").css("font-weight","bold")
                 contentDOM.css("display","block")
@@ -25,15 +33,22 @@ class baseInfoPanel {
                 this.drawEditable(contentDOM,jsonInfo[ind],originElementInfo,newPath,funcGetKeyLblColorClass)
             }else {
                 keyDiv.children(":first").addClass(keyLabelColorClass)
-                var aInput=$('<input type="text" style="padding:2px;width:50%;outline:none;display:inline" placeholder="type: '+jsonInfo[ind]+'"/>').addClass("w3-input w3-border");  
-                contentDOM.append(aInput)
-                var val=this.searchValue(originElementInfo,newPath)
-                if(val!=null) aInput.val(val)
-                aInput.data("path", newPath)
-                aInput.data("dataType", jsonInfo[ind])
-                aInput.change((e)=>{
-                    this.editDTProperty(originElementInfo,$(e.target).data("path"),$(e.target).val(),$(e.target).data("dataType"))
-                })
+                var val = this.searchValue(originElementInfo, newPath)
+                if (this.readOnly) {
+                    if (val == null) {
+                        contentDOM.css({ "color": "gray", "font-size": "9px" })
+                        contentDOM.text("[empty]")
+                    } else contentDOM.text(val)
+                } else {
+                    var aInput = $('<input type="text" style="padding:2px;width:50%;outline:none;display:inline" placeholder="type: ' + jsonInfo[ind] + '"/>').addClass("w3-input w3-border");
+                    contentDOM.append(aInput)
+                    if (val != null) aInput.val(val)
+                    aInput.data("path", newPath)
+                    aInput.data("dataType", jsonInfo[ind])
+                    aInput.change((e) => {
+                        this.editDTProperty(originElementInfo, $(e.target).data("path"), $(e.target).val(), $(e.target).data("dataType"))
+                    })
+                }
             }
             keyDiv.append(contentDOM)
         }
