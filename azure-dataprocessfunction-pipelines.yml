@@ -30,6 +30,11 @@ stages:
       vmImage: $(vmImageName)
 
     steps:
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo  '$(System.DefaultWorkingDirectory)'
+          dir
     - bash: |
         if [ -f extensions.csproj ]
         then
