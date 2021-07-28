@@ -497,7 +497,8 @@ modelManagerDialog.prototype.addAPartInRightSpan=function(partName){
 modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files){
     // files is a FileList of File objects. List some properties.
     var fileContentArr=[]
-    for (var i = 0, f; f = files[i]; i++) {
+    for (var i = 0; i< files.length; i++) {
+        var f=files[i]
         // Only process json files.
         if (f.type!="application/json") continue;
         try{

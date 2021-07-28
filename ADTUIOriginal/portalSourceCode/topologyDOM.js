@@ -747,7 +747,8 @@ topologyDOM.prototype.alignSelectedNodes = function (direction) {
         if(direction=="top"|| direction=="bottom") numArr.push(position['y'])
         else if(direction=="left"|| direction=="right") numArr.push(position['x'])
     })
-    var targetX=targetY=null
+    var targetX=null
+    var targetY=null
     if(direction=="top") var targetY= Math.min(...numArr)
     else if(direction=="bottom") var targetY= Math.max(...numArr)
     if(direction=="left") var targetX= Math.min(...numArr)
@@ -1122,7 +1123,6 @@ topologyDOM.prototype.noPosition_cose=function(eles){
 
     var newLayout =eles.layout({
         name: 'cose',
-        animate: true,
         gravity:1,
         animate: false
         ,fit:false

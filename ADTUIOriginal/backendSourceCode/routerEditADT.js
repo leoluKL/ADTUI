@@ -137,7 +137,7 @@ routerEditADT.prototype.upsertDigitalTwin = async function (adtClient, req, res)
 routerEditADT.prototype.importModels =async function(adtClient,req,res) {
     var models=JSON.parse(req.body.models);
     try{
-        re = await adtClient.createModels(models)
+        await adtClient.createModels(models)
         res.end()
     }catch(e){
         res.statusCode = 200;
@@ -148,7 +148,7 @@ routerEditADT.prototype.importModels =async function(adtClient,req,res) {
 routerEditADT.prototype.deleteModel =async function(adtClient,req,res) {
     var model=req.body.model;
     try{
-        re = await adtClient.deleteModel(model)
+        await adtClient.deleteModel(model)
         res.end()
     }catch(e){
         res.statusCode = 200;
