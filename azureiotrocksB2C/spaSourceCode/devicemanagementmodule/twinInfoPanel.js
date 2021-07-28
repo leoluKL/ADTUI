@@ -12,6 +12,8 @@ class twinInfoPanel extends baseInfoPanel{
     }
 
     async rxMessage(msgPayload) {
+        var tt=this.abc+1
+        
         if (msgPayload.message == "showInfoSelectedDevices") {
             this.DOM.empty()
             var arr = msgPayload.info;

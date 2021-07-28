@@ -1,9 +1,8 @@
 {
-    "esversion": 8,
+    "esversion": 9,
     "asi": true,
     "sub": true,
     "undef":true,
-    "unused":true,
     "node": true,
     "validthis": true,
     "shadow":true,

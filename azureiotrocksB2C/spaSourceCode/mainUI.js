@@ -60,12 +60,12 @@ mainUI.prototype.showModuleButtons=function(){
         else window.open("digitaltwinmodule.html", "_blank");
     })
 
-    deviceManageBtn.on("click",()=>{
+    deviceManageBtn.on("click",(e)=>{
         if(e.ctrlKey) window.location.replace("devicemanagement.html");
         else window.open("devicemanagement.html", "_blank");
     })
 
-    eventLogBtn.on("click",()=>{
+    eventLogBtn.on("click",(e)=>{
         if(e.ctrlKey) window.location.replace("eventlogmodule.html");
         else window.open("eventlogmodule.html", "_blank");
     })

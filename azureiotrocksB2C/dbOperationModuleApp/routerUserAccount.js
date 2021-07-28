@@ -64,8 +64,7 @@ routerUserAccount.prototype.basic =async function(req,res) {
             "accountID": accountID,
             "profile": {
                 "country": req.body.country,
-                "name": req.body.name,
-                "idp": idp
+                "name": req.body.name
             },
             "joinedProjects":[
                 {"id":firstProjectID,"name":"Project 1","owner":accountID,"shareWith":[]}

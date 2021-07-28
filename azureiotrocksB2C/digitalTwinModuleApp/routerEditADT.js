@@ -60,7 +60,7 @@ routerEditADT.prototype.upsertDigitalTwin =async function(req,res) {
 routerEditADT.prototype.deleteModel =async function(req,res) {
     var model=req.body.model;
     try{
-        re = await adtHelper.ADTClient.deleteModel(model)
+        await adtHelper.ADTClient.deleteModel(model)
         res.end()
     }catch(e){
         res.status(400).send(e.message);
@@ -220,7 +220,7 @@ routerEditADT.prototype.importModels =async function(req,res) {
     var models=JSON.parse(req.body.models);
     
     try{
-        re = await adtHelper.ADTClient.createModels(models)
+        await adtHelper.ADTClient.createModels(models)
         res.status(200).end()
     }catch(e){
         res.status(400).send(e.message);
