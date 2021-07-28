@@ -1194,16 +1194,5 @@ topologyDOM.prototype.noPosition_concentric=function(eles,box){
     newLayout.run()
 }
 
-topologyDOM.prototype.layoutWithNodePosition=function(nodePosition){
-    var newLayout = this.core.layout({
-        name: 'preset',
-        positions: nodePosition,
-        animate: false, // whether to transition the node positions
-        animationDuration: 500, // duration of animation in ms if enabled
-    })
-    newLayout.run()
-}
-
-
 
 module.exports = topologyDOM;
