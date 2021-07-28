@@ -30,15 +30,7 @@ stages:
       vmImage: $(vmImageName)
 
     steps:
-    - task: CmdLine@2
-      inputs:
-        script: |
-          workingDirectory: $(workingDirectory)
-          echo  'this is a new line'
-          echo  '$(System.DefaultWorkingDirectory)'
-          dir
     - bash: |
-        workingDirectory: $(workingDirectory)
         if [ -f extensions.csproj ]
         then
             dotnet build extensions.csproj --output ./bin
@@ -47,15 +39,16 @@ stages:
         npm install 
         npm run build --if-present
         npm prune --production
+        workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)
     - task: ArchiveFiles@2
       displayName: "Archive files"
       inputs:
-        rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+        rootFolderOrFile: "$(System.DefaultWorkingDirectory)/$(workingDirectory)"
         includeRootFolder: false
-        archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+        archiveFile: "$(System.DefaultWorkingDirectory)/$(workingDirectory)/build$(Build.BuildId).zip"
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/$(workingDirectory)/build$(Build.BuildId).zip'
         artifactName: 'drop'
 
 - stage: Deploy
