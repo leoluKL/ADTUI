@@ -30,16 +30,14 @@ stages:
       vmImage: $(vmImageName)
 
     steps:
-    - bash: |
-        if [ -f extensions.csproj ]
-        then
-            dotnet build extensions.csproj --output ./bin
-        fi
-        cd 
-        npm install 
-        npm run build --if-present
-        npm prune --production
-        workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)
+    - script: echo $(System.DefaultWorkingDirectory)/$(workingDirectory)
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)
+    - script: npm install 
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)  
+    - script: npm run build --if-present
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)  
+    - script: npm prune --production
+      workingDirectory: $(System.DefaultWorkingDirectory)/$(workingDirectory)  
     - task: ArchiveFiles@2
       displayName: "Archive files"
       inputs:
