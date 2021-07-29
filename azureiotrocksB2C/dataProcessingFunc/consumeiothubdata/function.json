@@ -10,11 +10,15 @@
       "consumerGroup": "consumedbyfunction"
     },
     {
-      "type": "queue",
+      "type": "cosmosDB",
       "direction": "out",
-      "name": "outputQueueItem",
-      "queueName": "outqueue",
-      "connection": "azureiotrocksfuncstorage_STORAGE"
+      "name": "outputDocToCosmosDB",
+      "databaseName": "azureiotrocksdb1",
+      "collectionName": "twinhistorydata",
+      "createIfNotExists": false,
+      "connectionStringSetting": "azureiotrockscosmosdb",
+      "partitionKey": "undefined",
+      "collectionThroughput": "undefined"
     }
   ],
   "disabled": false
