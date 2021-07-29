@@ -153,7 +153,9 @@ msalHelper.prototype.getToken=async function(b2cScope){
             account: this.myMSALObj.getAccountByHomeId(this.accountId)
         }
     
+        console.log("try to silently get token")
         var response = await this.myMSALObj.acquireTokenSilent(tokenRequest)
+        console.log("get token successfully")
         if (!response.accessToken || response.accessToken === "") {
             throw new msal.InteractionRequiredAuthError();
         }
