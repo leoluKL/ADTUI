@@ -31,7 +31,7 @@ routerControlPlane.prototype.provisionDevice =async function(req,res) {
     var tags=req.body.tags
     var desiredProperties= req.body.desiredProperties
 
-    
+    /*
     try{
         try{
             await iothubHelper.iothubRegistry.get(deviceID)
@@ -50,6 +50,34 @@ routerControlPlane.prototype.provisionDevice =async function(req,res) {
     }catch(e){
         res.status(400).send(e.message)
     }
+    */
+
+    try{
+        try{
+            await iothubHelper.iothubRegistry.get(deviceID)
+        }catch(e){ //if the device is not registered yet, really provision it
+            await iothubHelper.iothubRegistry.create({"deviceId":deviceID})
+            await iothubHelper.iothubRegistry.updateTwin(deviceID
+            ,{
+                "tags":tags,
+                "properties":{
+                    "desired":desiredProperties
+                }
+            }
+            ,"*")
+        }
+        res.send(`Device created with ID ${deviceID}. Expiry: ${iothubHelper.iothubRegistry._restApiClient._accessToken.expiresOnTimestamp}`) //
+    }catch(e){
+        res.status(400)
+        if (Date.now() > iothubHelper.iothubRegistry._restApiClient._accessToken.expiresOnTimestamp) {
+            res.send(`USED EXPIRED TOKEN (${iothubHelper.iothubRegistry._restApiClient._accessToken.expiresOnTimestamp}): ${e}`)
+        } else {
+            res.send(`Device create failed (${iothubHelper.iothubRegistry._restApiClient._accessToken.expiresOnTimestamp}): ${e}`)
+        }
+    }
+
+
+
 }
 
 routerControlPlane.prototype.updateDeviceDesiredProperties=async function(req,res){
