@@ -108,7 +108,7 @@ routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
     } catch (e) {
         res.status(400).send(e.message)
     }
-    res.send(updatedTwinDoc)
+    res.send(newTwinDocument)
 }
 
 

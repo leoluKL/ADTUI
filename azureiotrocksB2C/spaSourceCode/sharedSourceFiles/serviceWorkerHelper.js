@@ -14,8 +14,9 @@ serviceWorkerHelper.prototype.subscribeMessagePush = async function (projectID) 
             userVisibleOnly: true,
             applicationServerKey: publicVapidKey
         });
-        //console.log("service worker message subsribed project"+projectID)
-        //console.log(JSON.stringify(subscription))
+        
+        msalHelper.callAPI("digitaltwin/serviceWorkerSubscription", "POST", {"serviceWorkerSub":JSON.stringify(subscription)}, "withProjectID")
+
         navigator.serviceWorker.onmessage = function (e) {
             // messages from service worker.
             console.log("service worker receive:", e.data);
