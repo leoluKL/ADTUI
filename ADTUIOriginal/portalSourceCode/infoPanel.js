@@ -69,6 +69,7 @@ infoPanel.prototype.rxMessage=function(msgPayload){
             var singleElementInfo=arr[0];
             
             if(singleElementInfo["$dtId"]){// select a node
+                singleElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]]
                 this.drawButtons("singleNode")
                 this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
                 var modelName=singleElementInfo['$metadata']['$model']
@@ -78,6 +79,13 @@ infoPanel.prototype.rxMessage=function(msgPayload){
                 }
                 this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"],"$metadata":singleElementInfo["$metadata"]},"1em","10px")
             }else if(singleElementInfo["$sourceId"]){
+                var arr=globalCache.storedOutboundRelationships[singleElementInfo["$sourceId"]]
+                for(var i=0;i<arr.length;i++){
+                    if(arr[i]['$relationshipId']==singleElementInfo["$relationshipId"]){
+                        singleElementInfo=arr[i]
+                        break;
+                    }
+                }
                 this.drawButtons("singleRelationship")
                 this.drawStaticInfo(this.DOM,{
                     "$sourceId":singleElementInfo["$sourceId"],
