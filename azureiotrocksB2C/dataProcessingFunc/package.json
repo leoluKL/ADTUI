@@ -6,6 +6,8 @@
     "start": "func start",
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "web-push": "^3.4.5"
+  },
   "devDependencies": {}
 }

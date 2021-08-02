@@ -28,6 +28,16 @@ mainUI.prototype.afterSignedIn=async function(anAccount,noAnimation){
 
     //also notify taskmaster to check user info in cosmosDB, incase it is new user, create the user in cosmosDB
     msalHelper.callAPI("accountManagement/fetchUserAccount")
+
+    //register service worker even in module choosing UI there is no need to push data from server side
+    //but register worker earlier so in case it is the first time, the later module page such as digital twin UI will be able
+    //to successfully received server pushing message
+    try {
+        const registration = await navigator.serviceWorker.register('/worker.js', { scope: '/' });
+        console.log("register service worker")
+    } catch (e) {
+        console.log(e)
+    }
 }
 
 mainUI.prototype.showModuleButtons=function(){

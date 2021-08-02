@@ -218,10 +218,11 @@ startSelectionDialog.prototype.listTwins=function(){
 
 
 startSelectionDialog.prototype.useStartSelection=function(action){
+    var bool_broadCastProjectChanged=false
     if(this.previousSelectedProject!=globalCache.currentProjectID){
         globalCache.initStoredInformtion()
         this.previousSelectedProject=globalCache.currentProjectID
-        this.broadcastMessage({ "message": "projectIsChanged"})
+        bool_broadCastProjectChanged=true
     }
 
     var selectedTwins=this.getSelectedTwins()
@@ -232,10 +233,13 @@ startSelectionDialog.prototype.useStartSelection=function(action){
     globalCache.DBModelsArr.forEach(oneModel=>{modelIDs.push(oneModel["id"])})
 
     this.broadcastMessage({ "message": "startSelection_"+action, "twinIDs": twinIDs,"modelIDs":modelIDs })
-    this.broadcastMessage({ "message": "visualDefinitionRefresh"})
     var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectID)
     if(projectInfo.defaultLayout && projectInfo.defaultLayout!="") globalCache.currentLayoutName=projectInfo.defaultLayout
     
+    if(bool_broadCastProjectChanged){
+        this.broadcastMessage({ "message": "projectIsChanged","projectID":globalCache.currentProjectID})
+    }
+
     this.broadcastMessage({ "message": "layoutsUpdated","selectLayout":projectInfo.defaultLayout})
     this.closeDialog()
 

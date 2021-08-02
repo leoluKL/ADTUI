@@ -562,7 +562,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         this.core.nodes().remove()
         var eles= this.drawTwins(msgPayload.info)
         this.applyCurrentLayoutWithNoAnimtaion()
-    }else if(msgPayload.message=="visualDefinitionRefresh") {
+    }else if(msgPayload.message=="projectIsChanged") {
         this.applyVisualDefinition()
     }else if(msgPayload.message=="appendAllTwins") {
         var eles= this.drawTwins(msgPayload.info,"animate")

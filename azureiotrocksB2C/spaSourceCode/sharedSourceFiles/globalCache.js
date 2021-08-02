@@ -14,7 +14,6 @@ function globalCache(){
     this.initStoredInformtion()
 }
 
-
 globalCache.prototype.initStoredInformtion = function () {
     this.storedOutboundRelationships = {} 
     //stored data, seperately from ADT service and from cosmosDB service

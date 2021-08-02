@@ -35,7 +35,7 @@ twinsList.prototype.refill=function(){
 }
 
 twinsList.prototype.rxMessage=function(msgPayload){
-    if(msgPayload.message=="startProject"){
+    if(msgPayload.message=="projectIsChanged"){
         this.refill()
     }else if(msgPayload.message=="visualDefinitionChange"){
         if(msgPayload.modelID)  var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(msgPayload.modelID)

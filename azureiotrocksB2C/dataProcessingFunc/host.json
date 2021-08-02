@@ -1,6 +1,10 @@
 {
   "version": "2.0",
   "logging": {
+    "logLevel": {
+      "Function.consumeiothubdata.User": "Information",
+      "Function": "Error"
+    },
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,

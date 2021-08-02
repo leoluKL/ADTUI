@@ -21,6 +21,7 @@
         "atlas":false,
         "cytoscape":false,
         "Image":false,
-        "URL":false
+        "URL":false,
+        "navigator":false
     }
 }

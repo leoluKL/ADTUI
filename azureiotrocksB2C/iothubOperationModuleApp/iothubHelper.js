@@ -17,7 +17,7 @@ iothubHelper.prototype.manualRenewToken=function(credential){
     setInterval(() => {
         this.iothubClient = new iothub.Client.fromTokenCredential(process.env.IoTHubEndpoint,credential)
         this.iothubRegistry = new iothub.Registry.fromTokenCredential(process.env.IoTHubEndpoint,credential)
-    }, 3600*1000);
+    }, 12*3600*1000);
 
 }
 

@@ -10,15 +10,13 @@
       "consumerGroup": "consumedbyfunction"
     },
     {
-      "type": "cosmosDB",
-      "direction": "out",
       "name": "outputDocToCosmosDB",
+      "type": "cosmosDB",
       "databaseName": "azureiotrocksdb1",
       "collectionName": "twinhistorydata",
       "createIfNotExists": false,
       "connectionStringSetting": "azureiotrockscosmosdb",
-      "partitionKey": "undefined",
-      "collectionThroughput": "undefined"
+      "direction": "out"
     }
   ],
   "disabled": false

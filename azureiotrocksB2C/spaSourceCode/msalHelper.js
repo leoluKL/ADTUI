@@ -120,7 +120,6 @@ msalHelper.prototype.callAPI=async function(APIString,RESTMethod,payload,withPro
         }
 
     }
-
     return new Promise((resolve, reject) => {
         var ajaxContent={
             type: RESTMethod || 'GET',

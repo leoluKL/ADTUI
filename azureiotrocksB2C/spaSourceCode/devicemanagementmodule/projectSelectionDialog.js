@@ -102,13 +102,13 @@ projectSelectionDialog.prototype.chooseProject = async function (selectedProject
     })
     
     if(this.previousSelectedProject == selectedProjectID){
-        var replaceButton = $('<button class="w3-button w3-card w3-hover-deep-orange w3-green" style="height:100%; margin-right:8px">Start</button>')
-        replaceButton.on("click", () => { this.closeDialog() })
-        this.buttonHolder.append(replaceButton)
+        var startButton = $('<button class="w3-button w3-card w3-hover-deep-orange w3-green" style="height:100%; margin-right:8px">Start</button>')
+        startButton.on("click", () => { this.closeDialog() })
+        this.buttonHolder.append(startButton)
     }else{
-        var replaceButton = $('<button class="w3-button w3-card w3-hover-deep-orange w3-green" style="height:100%; margin-right:8px">Start</button>')
-        replaceButton.on("click", () => { this.useProject() })
-        this.buttonHolder.append(replaceButton)
+        var startButton = $('<button class="w3-button w3-card w3-hover-deep-orange w3-green" style="height:100%; margin-right:8px">Start</button>')
+        startButton.on("click", () => { this.useProject() })
+        this.buttonHolder.append(startButton)
     }
     globalCache.currentProjectID = selectedProjectID
 }
@@ -118,14 +118,14 @@ projectSelectionDialog.prototype.closeDialog=function(){
 }
 
 projectSelectionDialog.prototype.useProject=async function(){
+    var bool_broadCastProjectChanged=false
     if(this.previousSelectedProject!=globalCache.currentProjectID){
         globalCache.initStoredInformtion()
         this.previousSelectedProject=globalCache.currentProjectID
-        this.broadcastMessage({ "message": "projectIsChanged"})
+        bool_broadCastProjectChanged=true
     }
     var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectID)
     var projectOwner=projectInfo.owner
-
 
     try {
         var res = await msalHelper.callAPI("digitaltwin/fetchProjectModelsData", "POST", null, "withProjectID")
@@ -156,8 +156,10 @@ projectSelectionDialog.prototype.useProject=async function(){
             popWin.fadeOut("slow",()=>{popWin.remove()});
         },3000)
     }
-    
-    this.broadcastMessage({ "message": "startProject"})
+
+    if(bool_broadCastProjectChanged){
+        this.broadcastMessage({ "message": "projectIsChanged","projectID":globalCache.currentProjectID})
+    }
 
     this.closeDialog()
 }

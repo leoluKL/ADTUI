@@ -1,7 +1,253 @@
-<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1664px" height="1260px" viewBox="-0.5 -0.5 1664 1260" content="&lt;mxfile&gt;&lt;diagram id=&quot;Gv-LFwFbANpFk3CrltmL&quot; name=&quot;Page-1&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;" style="background-color: rgb(255, 255, 255);">
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1664px" height="1301px" viewBox="-0.5 -0.5 1664 1301" content="&lt;mxfile&gt;&lt;diagram id=&quot;Gv-LFwFbANpFk3CrltmL&quot; name=&quot;Page-1&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;" style="background-color: rgb(255, 255, 255);">
     <defs/>
     <g>
         <rect x="0" y="120" width="819" height="622" fill="#cccccc" stroke="#000000" pointer-events="all"/>
+        <rect x="110" y="9.5" width="304" height="57" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 38px; margin-left: 262px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 22px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: all; font-weight: bold; white-space: nowrap; ">
+                                Cosmos DB Schema Design
+                                <br/>
+                                <div style="text-align: left">
+                                    <span style="font-size: 17px ; font-weight: normal">
+                                        <font color="#666666">
+                                            Database Name: azureiotrocksdb1
+                                        </font>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="262" y="45" fill="#333333" font-family="Helvetica" font-size="22px" text-anchor="middle" font-weight="bold">
+                    Cosmos DB Schema Design...
+                </text>
+            </switch>
+        </g>
+        <rect x="6" y="247" width="233" height="259" fill="#ffe6cc" stroke="#d79b00" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 227px; height: 1px; padding-top: 254px; margin-left: 12px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
+                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                <b>
+                                    User
+                                </b>
+                                <br/>
+                                {
+                                <br/>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                id:...
+                                <br/>
+                                ,type:"user"
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                ,accountID:
+                                <br/>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                ,profile:{country:.., displayname:..},
+                                <br/>
+                                joinedProjects:[
+                                <br/>
+                                {id:projectID,defaultLayout:
+                                <br/>
+                                ,name:,owner:..,shareWith:[email1,...]}
+                                <br/>
+                                ]
+                                <br/>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="12" y="270" fill="#333333" font-family="Helvetica" font-size="16px">
+                    User...
+                </text>
+            </switch>
+        </g>
+        <image x="12.5" y="-0.5" width="75" height="75" xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJhYzM3ZmJjNC1lNzcxLTQ2MGUtYWYxNS1iNWY5NmJjZmVkMzMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij4mI3hhOyAgPGRlZnM+JiN4YTsgICAgPHJhZGlhbEdyYWRpZW50IGlkPSJiN2Y2ZGQxOS0yY2U2LTQ3ZmEtYWQ1Mi1hODUyYmQwMDYyNzkiIGN4PSItODAuMDgiIGN5PSItMzQuMTIxIiByPSI1Ljk1NCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSg5MS45MjggNDMuNDMxKSBzY2FsZSgxLjAzNiAxLjAyNykiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4mI3hhOyAgICAgIDxzdG9wIG9mZnNldD0iMC4xODMiIHN0b3AtY29sb3I9IiM1ZWEwZWYiLz4mI3hhOyAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwNzhkNCIvPiYjeGE7ICAgIDwvcmFkaWFsR3JhZGllbnQ+JiN4YTsgICAgPGNsaXBQYXRoIGlkPSJiNWVjNmY4Zi02NTc1LTQ0YzYtYmY1Yy1lZTZiN2ZmN2MxNzgiPiYjeGE7ICAgICAgPHBhdGggZD0iTTE0Ljk2OSw2Ljk3MUE2LjEzNyw2LjEzNywwLDEsMSw3LjU3NCwyLjQyNyw2LjEzNiw2LjEzNiwwLDAsMSwxNC45NjksNi45NzFaIiBmaWxsPSJub25lIi8+JiN4YTsgICAgPC9jbGlwUGF0aD4mI3hhOyAgPC9kZWZzPiYjeGE7ICA8dGl0bGU+SWNvbi1pb3QtMTkxPC90aXRsZT4mI3hhOyAgPHBhdGggZD0iTTIuOTU0LDQuNzA3YS4xNzYuMTc2LDAsMCwxLS4xNzYtLjE3NmgwQTIuMDExLDIuMDExLDAsMCwwLC43NjksMi41MjJhLjE3Ny4xNzcsMCwwLDEtLjE3Ni0uMTc2aDBhLjE3OC4xNzgsMCwwLDEsLjE3Ni0uMTc3QTIuMDExLDIuMDExLDAsMCwwLDIuNzc4LjE2MWEuMTc2LjE3NiwwLDAsMSwuMTc2LS4xNzdoMEEuMTc2LjE3NiwwLDAsMSwzLjEzLjE2MWgwQTIuMDExLDIuMDExLDAsMCwwLDUuMTM5LDIuMTY5YS4xNzYuMTc2LDAsMCwxLC4xNzYuMTc3aDBhLjE3Ni4xNzYsMCwwLDEtLjE3Ni4xNzZoMEEyLjAxMSwyLjAxMSwwLDAsMCwzLjEzLDQuNTMxLjE3OC4xNzgsMCwwLDEsMi45NTQsNC43MDdaIiBmaWxsPSIjNTBlNmZmIi8+JiN4YTsgIDxwYXRoIGQ9Ik0xNS42MTEsMTYuOWEuMTQxLjE0MSwwLDAsMS0uMTQxLS4xNDFoMGExLjYwOSwxLjYwOSwwLDAsMC0xLjYwNy0xLjYwNy4xNDEuMTQxLDAsMCwxLS4xNDEtLjE0aDBhLjE0MS4xNDEsMCwwLDEsLjE0MS0uMTQxaDBBMS42MDksMS42MDksMCwwLDAsMTUuNDcsMTMuMjZhLjE0MS4xNDEsMCwwLDEsLjE0MS0uMTQxaDBhLjE0MS4xNDEsMCwwLDEsLjE0MS4xNDFoMGExLjYwOSwxLjYwOSwwLDAsMCwxLjYwNywxLjYwNy4xNDEuMTQxLDAsMCwxLDAsLjI4MmgwYTEuNjA5LDEuNjA5LDAsMCwwLTEuNjA3LDEuNjA3QS4xNDEuMTQxLDAsMCwxLDE1LjYxMSwxNi45WiIgZmlsbD0iIzUwZTZmZiIvPiYjeGE7ICA8Zz4mI3hhOyAgICA8cGF0aCBkPSJNMTQuOTY5LDYuOTcxQTYuMTM3LDYuMTM3LDAsMSwxLDcuNTc0LDIuNDI3LDYuMTM2LDYuMTM2LDAsMCwxLDE0Ljk2OSw2Ljk3MVoiIGZpbGw9InVybCgjYjdmNmRkMTktMmNlNi00N2ZhLWFkNTItYTg1MmJkMDA2Mjc5KSIvPiYjeGE7ICAgIDxnIGNsaXAtcGF0aD0idXJsKCNiNWVjNmY4Zi02NTc1LTQ0YzYtYmY1Yy1lZTZiN2ZmN2MxNzgpIj4mI3hhOyAgICAgIDxwYXRoIGQ9Ik01LjcwOSwxMi41NTZhMS42MzgsMS42MzgsMCwxLDAsLjAwNS0zLjI3NSwxLjMwNywxLjMwNywwLDAsMCwuMDA3LS4xMzlBMS42NTIsMS42NTIsMCwwLDAsNC4wNiw3LjVIMi44MzJhNi4yNTQsNi4yNTQsMCwwLDAsMS41OTUsNS4wNTJaIiBmaWxsPSIjZjJmMmYyIi8+JiN4YTsgICAgICA8cGF0aCBkPSJNMTUuMDQ1LDcuMjU1YzAtLjAxNCwwLS4wMjktLjAwNy0uMDQ0YTUuOTg3LDUuOTg3LDAsMCwwLTEuNDA2LTIuODgsMS43MjQsMS43MjQsMCwwLDAtLjI4OS0uMDg5LDEuODA2LDEuODA2LDAsMCwwLTIuMywxLjY2MywxLjczNiwxLjczNiwwLDAsMC0uNzg1LDMuMzYsMS40NTIsMS40NTIsMCwwLDAsLjU0MS4xaDIuMDNBMTMuNDI1LDEzLjQyNSwwLDAsMCwxNS4wNDUsNy4yNTVaIiBmaWxsPSIjZjJmMmYyIi8+JiN4YTsgICAgPC9nPiYjeGE7ICA8L2c+JiN4YTsgIDxwYXRoIGQ9Ik0xNy4xOTEsMy4yNzNjLS42MjktMS4wNDgtMi4xLTEuNDU2LTQuMTU1LTEuMTQ5YTE0LjczNywxNC43MzcsMCwwLDAtMi4wODIuNDUxLDYuNDk0LDYuNDk0LDAsMCwxLDEuNTI4Ljc2N2MuMjQxLS4wNTMuNDgzLS4xMTYuNzE1LS4xNUE3LjUsNy41LDAsMCwxLDE0LjMsMy4xYTIuMTg4LDIuMTg4LDAsMCwxLDEuOTU5LjcyNWgwYy4zODMuNjM4LjA2LDEuNzMtLjg4NiwzYTE2LjcwNywxNi43MDcsMCwwLDEtNC43NDksNC4wNTFBMTYuNzU4LDE2Ljc1OCwwLDAsMSw0LjgsMTMuMTM1Yy0xLjU2NC4yMzQtMi42ODIsMC0zLjA2NS0uNjM1cy0uMDYtMS43My44ODYtMi45OTVjLjExNy0uMTU4LjE0Ni0uMjM1LjI3OS0uMzkyYTYuMjUxLDYuMjUxLDAsMCwxLC4wMjYtMS42M0ExMS41NDUsMTEuNTQ1LDAsMCwwLDEuNzU2LDguODU5Qy41MTcsMTAuNTE3LjE4MSwxMi4wMDcuODA5LDEzLjA1NGEzLjE2NywzLjE2NywwLDAsMCwyLjksMS4yNDgsOC41NjMsOC41NjMsMCwwLDAsMS4yNTEtLjEsMTcuODM5LDE3LjgzOSwwLDAsMCw2LjIxOS0yLjQsMTcuNzkzLDE3Ljc5MywwLDAsMCw1LjA2MS00LjMzMkMxNy40ODMsNS44MSwxNy44MTksNC4zMiwxNy4xOTEsMy4yNzNaIiBmaWxsPSIjNTBlNmZmIi8+JiN4YTs8L3N2Zz4=" preserveAspectRatio="none"/>
+        <path d="M 138 742 L 260.77 631.01" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="stroke"/>
+        <ellipse cx="263" cy="629" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="all"/>
+        <path d="M 139 743 L 74.54 635.57" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="stroke"/>
+        <ellipse cx="73" cy="633" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="all"/>
+        <path d="M 628.18 746 L 586.99 627.83" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="stroke"/>
+        <ellipse cx="586" cy="625" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="all"/>
+        <rect x="458" y="746" width="355" height="42" rx="21" ry="21" fill="#000000" stroke="#000000" pointer-events="all" transform="translate(2,3)" opacity="0.25"/>
+        <rect x="458" y="746" width="355" height="42" rx="21" ry="21" fill="#f8cecc" stroke="#b85450" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 349px; height: 1px; padding-top: 767px; margin-left: 461px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                Currently there is only one visual schema allowed for each account, named as "default"
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="636" y="772" fill="#333333" font-family="Helvetica" font-size="16px" text-anchor="middle">
+                    Currently there is only one visual schema al...
+                </text>
+            </switch>
+        </g>
+        <rect x="850" y="117" width="812.05" height="452.13" fill="#cccccc" stroke="#000000" pointer-events="none"/>
+        <rect x="864" y="236.65" width="378" height="315.25" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 372px; height: 1px; padding-top: 244px; margin-left: 870px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
+                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
+                                <b>
+                                    Twin property calculation fomula
+                                </b>
+                                <br/>
+                                {
+                                <br/>
+                                id:... (Twin uuid),
+                                <br/>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                ,type:"Formula"
+                                <br/>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                ,formula:...
+                                <font color="#00cc66">
+                                    (example, twindata[uuid1]["attr1"]+twindata[uuid2]["attr2"])
+                                </font>
+                                <br/>
+                                ,
+                                <strike>
+                                    usedByTwinsFormula:[twin1,twin2... ]
+                                    <br/>
+                                </strike>
+                                ,singnalRRequest:[  {accountName:..., reqTime:...},...]
+                                <br/>
+                                <strike>
+                                    modelID:...
+                                    <br/>
+                                    accountID:...
+                                </strike>
+                                <br/>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="870" y="260" fill="#333333" font-family="Helvetica" font-size="16px">
+                    Twin property calculation fomula...
+                </text>
+            </switch>
+        </g>
+        <rect x="1266" y="237.69" width="375.37" height="201.84" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 369px; height: 1px; padding-top: 245px; margin-left: 1272px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
+                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
+                                <b>
+                                    Twin property value to calculate
+                                </b>
+                                (for example, for the above fomula sample, uuid1's attr1 and uuid2's attr2 will be stored)
+                                <br/>
+                                {
+                                <br/>
+                                id:... (such as uuid1)
+                                <br/>
+                                ,type:"propertyvalue"
+                                <br/>
+                                ,propertyPathAndValue:{
+                                <br/>
+                                "path1":..., "path2":...
+                                <br/>
+                                }
+                                <br/>
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="1272" y="261" fill="#333333" font-family="Helvetica" font-size="16px">
+                    Twin property value to calculate (for example,...
+                </text>
+            </switch>
+        </g>
+        <rect x="850" y="117" width="810" height="94" fill="#647687" stroke="#314354" pointer-events="none"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 808px; height: 1px; padding-top: 144px; margin-left: 851px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 22px; font-family: Helvetica; color: #E6E6E6; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
+                                <br/>
+                                <br/>
+                                <span style="font-family: &quot;helvetica&quot; ; font-size: 22px ; font-style: normal ; font-weight: 400 ; letter-spacing: normal ; text-align: center ; text-indent: 0px ; text-transform: none ; word-spacing: 0px ; display: inline ; float: none">
+                                    Container 3 (Name:twincalculation)
+                                </span>
+                                <br/>
+                                <span style="font-size: 14px">
+                                    Partition By TwinID
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="1255" y="151" fill="#E6E6E6" font-family="Helvetica" font-size="22px" text-anchor="middle">
+                    Container 3 (Name:twincalculation)...
+                </text>
+            </switch>
+        </g>
+        <rect x="1059" y="425" width="293" height="58" rx="29" ry="29" fill="#000000" stroke="#000000" pointer-events="none" transform="translate(2,3)" opacity="0.25"/>
+        <rect x="1059" y="425" width="293" height="58" rx="29" ry="29" fill="#f8cecc" stroke="#b85450" pointer-events="none"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 287px; height: 1px; padding-top: 454px; margin-left: 1062px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
+                                delete reason:
+                                <br/>
+                                use adt to query all twins this twin linking to
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="1206" y="459" fill="#333333" font-family="Helvetica" font-size="16px" text-anchor="middle">
+                    delete reason:...
+                </text>
+            </switch>
+        </g>
+        <rect x="864" y="495" width="338" height="60" rx="30" ry="30" fill="#000000" stroke="#000000" pointer-events="none" transform="translate(2,3)" opacity="0.25"/>
+        <rect x="864" y="495" width="338" height="60" rx="30" ry="30" fill="#f8cecc" stroke="#b85450" pointer-events="none"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 332px; height: 1px; padding-top: 525px; margin-left: 867px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
+                                delete reason: these two are put into iot hub device twin tags and they are going to be enriched into telemetry msg
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="1033" y="530" fill="#333333" font-family="Helvetica" font-size="16px" text-anchor="middle">
+                    delete reason: these two are put into iot...
+                </text>
+            </switch>
+        </g>
+        <path d="M 1131.12 422.22 L 1113.13 377.78" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
+        <ellipse cx="1132.25" cy="425" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
+        <ellipse cx="1112" cy="375" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
+        <path d="M 1030.44 493.43 L 937.56 436.57" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
+        <ellipse cx="1033" cy="495" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
+        <ellipse cx="935" cy="435" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
         <rect x="0" y="120" width="820" height="117" fill="#647687" stroke="#314354" pointer-events="none"/>
         <g transform="translate(-0.5 -0.5)">
             <switch>
@@ -246,12 +492,12 @@
                 </text>
             </switch>
         </g>
-        <rect x="7" y="802" width="819" height="443" fill="#cccccc" stroke="#000000" pointer-events="none"/>
+        <rect x="7" y="802" width="819" height="498" fill="#cccccc" stroke="#000000" pointer-events="none"/>
         <rect x="7" y="802" width="820" height="117" fill="#647687" stroke="#314354" pointer-events="none"/>
         <g transform="translate(-0.5 -0.5)">
             <switch>
                 <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 818px; height: 1px; padding-top: 841px; margin-left: 8px;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 818px; height: 1px; padding-top: 840px; margin-left: 8px;">
                         <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
                             <div style="display: inline-block; font-size: 22px; font-family: Helvetica; color: #E6E6E6; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
                                 <br/>
@@ -320,7 +566,7 @@
                 </text>
             </switch>
         </g>
-        <rect x="55" y="945" width="300" height="297" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
+        <rect x="55" y="945" width="300" height="353" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
         <g transform="translate(-0.5 -0.5)">
             <switch>
                 <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
@@ -353,6 +599,10 @@
                                 ,IoTDeviceID:...
                                 <br/>
                                 ,connectState:
+                                <br/>
+                                ,lastdisconnectTime:
+                                <br/>
+                                ,lastconnectTime:
                                 <br/>
                                 ,GIS:{
                                 <br/>
@@ -556,251 +806,83 @@
         <path d="M 1069.97 788.82 L 1019.03 928.18" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
         <ellipse cx="1071" cy="786" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
         <ellipse cx="1018" cy="931" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
+        <rect x="1259" y="591" width="395.52" height="352" fill="#cccccc" stroke="#000000" pointer-events="none"/>
+        <rect x="1259" y="591" width="396" height="116" fill="#647687" stroke="#314354" pointer-events="none"/>
         <g transform="translate(-0.5 -0.5)">
             <switch>
                 <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 38px; margin-left: 262px;">
-                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
-                            <div style="display: inline-block; font-size: 22px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; font-weight: bold; white-space: nowrap; ">
-                                Cosmos DB Schema Design
-                                <br/>
-                                <div style="text-align: left">
-                                    <span style="font-size: 17px ; font-weight: normal">
-                                        <font color="#666666">
-                                            Database Name: azureiotrocksdb1
-                                        </font>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </foreignObject>
-                <text x="262" y="45" fill="#333333" font-family="Helvetica" font-size="22px" text-anchor="middle" font-weight="bold">
-                    Cosmos DB Schema Design...
-                </text>
-            </switch>
-        </g>
-        <rect x="6" y="247" width="233" height="259" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
-        <g transform="translate(-0.5 -0.5)">
-            <switch>
-                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 227px; height: 1px; padding-top: 254px; margin-left: 12px;">
-                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
-                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
-                                <b>
-                                    User
-                                </b>
-                                <br/>
-                                {
-                                <br/>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                id:...
-                                <br/>
-                                ,type:"user"
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                ,accountID:
-                                <br/>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                ,profile:{country:.., displayname:..},
-                                <br/>
-                                joinedProjects:[
-                                <br/>
-                                {id:projectID,defaultLayout:
-                                <br/>
-                                ,name:,owner:..,shareWith:[email1,...]}
-                                <br/>
-                                ]
-                                <br/>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </foreignObject>
-                <text x="12" y="270" fill="#333333" font-family="Helvetica" font-size="16px">
-                    User...
-                </text>
-            </switch>
-        </g>
-        <image x="12.5" y="-0.5" width="75" height="75" xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJhYzM3ZmJjNC1lNzcxLTQ2MGUtYWYxNS1iNWY5NmJjZmVkMzMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDE4IDE4Ij4mI3hhOyAgPGRlZnM+JiN4YTsgICAgPHJhZGlhbEdyYWRpZW50IGlkPSJiN2Y2ZGQxOS0yY2U2LTQ3ZmEtYWQ1Mi1hODUyYmQwMDYyNzkiIGN4PSItODAuMDgiIGN5PSItMzQuMTIxIiByPSI1Ljk1NCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSg5MS45MjggNDMuNDMxKSBzY2FsZSgxLjAzNiAxLjAyNykiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4mI3hhOyAgICAgIDxzdG9wIG9mZnNldD0iMC4xODMiIHN0b3AtY29sb3I9IiM1ZWEwZWYiLz4mI3hhOyAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwNzhkNCIvPiYjeGE7ICAgIDwvcmFkaWFsR3JhZGllbnQ+JiN4YTsgICAgPGNsaXBQYXRoIGlkPSJiNWVjNmY4Zi02NTc1LTQ0YzYtYmY1Yy1lZTZiN2ZmN2MxNzgiPiYjeGE7ICAgICAgPHBhdGggZD0iTTE0Ljk2OSw2Ljk3MUE2LjEzNyw2LjEzNywwLDEsMSw3LjU3NCwyLjQyNyw2LjEzNiw2LjEzNiwwLDAsMSwxNC45NjksNi45NzFaIiBmaWxsPSJub25lIi8+JiN4YTsgICAgPC9jbGlwUGF0aD4mI3hhOyAgPC9kZWZzPiYjeGE7ICA8dGl0bGU+SWNvbi1pb3QtMTkxPC90aXRsZT4mI3hhOyAgPHBhdGggZD0iTTIuOTU0LDQuNzA3YS4xNzYuMTc2LDAsMCwxLS4xNzYtLjE3NmgwQTIuMDExLDIuMDExLDAsMCwwLC43NjksMi41MjJhLjE3Ny4xNzcsMCwwLDEtLjE3Ni0uMTc2aDBhLjE3OC4xNzgsMCwwLDEsLjE3Ni0uMTc3QTIuMDExLDIuMDExLDAsMCwwLDIuNzc4LjE2MWEuMTc2LjE3NiwwLDAsMSwuMTc2LS4xNzdoMEEuMTc2LjE3NiwwLDAsMSwzLjEzLjE2MWgwQTIuMDExLDIuMDExLDAsMCwwLDUuMTM5LDIuMTY5YS4xNzYuMTc2LDAsMCwxLC4xNzYuMTc3aDBhLjE3Ni4xNzYsMCwwLDEtLjE3Ni4xNzZoMEEyLjAxMSwyLjAxMSwwLDAsMCwzLjEzLDQuNTMxLjE3OC4xNzgsMCwwLDEsMi45NTQsNC43MDdaIiBmaWxsPSIjNTBlNmZmIi8+JiN4YTsgIDxwYXRoIGQ9Ik0xNS42MTEsMTYuOWEuMTQxLjE0MSwwLDAsMS0uMTQxLS4xNDFoMGExLjYwOSwxLjYwOSwwLDAsMC0xLjYwNy0xLjYwNy4xNDEuMTQxLDAsMCwxLS4xNDEtLjE0aDBhLjE0MS4xNDEsMCwwLDEsLjE0MS0uMTQxaDBBMS42MDksMS42MDksMCwwLDAsMTUuNDcsMTMuMjZhLjE0MS4xNDEsMCwwLDEsLjE0MS0uMTQxaDBhLjE0MS4xNDEsMCwwLDEsLjE0MS4xNDFoMGExLjYwOSwxLjYwOSwwLDAsMCwxLjYwNywxLjYwNy4xNDEuMTQxLDAsMCwxLDAsLjI4MmgwYTEuNjA5LDEuNjA5LDAsMCwwLTEuNjA3LDEuNjA3QS4xNDEuMTQxLDAsMCwxLDE1LjYxMSwxNi45WiIgZmlsbD0iIzUwZTZmZiIvPiYjeGE7ICA8Zz4mI3hhOyAgICA8cGF0aCBkPSJNMTQuOTY5LDYuOTcxQTYuMTM3LDYuMTM3LDAsMSwxLDcuNTc0LDIuNDI3LDYuMTM2LDYuMTM2LDAsMCwxLDE0Ljk2OSw2Ljk3MVoiIGZpbGw9InVybCgjYjdmNmRkMTktMmNlNi00N2ZhLWFkNTItYTg1MmJkMDA2Mjc5KSIvPiYjeGE7ICAgIDxnIGNsaXAtcGF0aD0idXJsKCNiNWVjNmY4Zi02NTc1LTQ0YzYtYmY1Yy1lZTZiN2ZmN2MxNzgpIj4mI3hhOyAgICAgIDxwYXRoIGQ9Ik01LjcwOSwxMi41NTZhMS42MzgsMS42MzgsMCwxLDAsLjAwNS0zLjI3NSwxLjMwNywxLjMwNywwLDAsMCwuMDA3LS4xMzlBMS42NTIsMS42NTIsMCwwLDAsNC4wNiw3LjVIMi44MzJhNi4yNTQsNi4yNTQsMCwwLDAsMS41OTUsNS4wNTJaIiBmaWxsPSIjZjJmMmYyIi8+JiN4YTsgICAgICA8cGF0aCBkPSJNMTUuMDQ1LDcuMjU1YzAtLjAxNCwwLS4wMjktLjAwNy0uMDQ0YTUuOTg3LDUuOTg3LDAsMCwwLTEuNDA2LTIuODgsMS43MjQsMS43MjQsMCwwLDAtLjI4OS0uMDg5LDEuODA2LDEuODA2LDAsMCwwLTIuMywxLjY2MywxLjczNiwxLjczNiwwLDAsMC0uNzg1LDMuMzYsMS40NTIsMS40NTIsMCwwLDAsLjU0MS4xaDIuMDNBMTMuNDI1LDEzLjQyNSwwLDAsMCwxNS4wNDUsNy4yNTVaIiBmaWxsPSIjZjJmMmYyIi8+JiN4YTsgICAgPC9nPiYjeGE7ICA8L2c+JiN4YTsgIDxwYXRoIGQ9Ik0xNy4xOTEsMy4yNzNjLS42MjktMS4wNDgtMi4xLTEuNDU2LTQuMTU1LTEuMTQ5YTE0LjczNywxNC43MzcsMCwwLDAtMi4wODIuNDUxLDYuNDk0LDYuNDk0LDAsMCwxLDEuNTI4Ljc2N2MuMjQxLS4wNTMuNDgzLS4xMTYuNzE1LS4xNUE3LjUsNy41LDAsMCwxLDE0LjMsMy4xYTIuMTg4LDIuMTg4LDAsMCwxLDEuOTU5LjcyNWgwYy4zODMuNjM4LjA2LDEuNzMtLjg4NiwzYTE2LjcwNywxNi43MDcsMCwwLDEtNC43NDksNC4wNTFBMTYuNzU4LDE2Ljc1OCwwLDAsMSw0LjgsMTMuMTM1Yy0xLjU2NC4yMzQtMi42ODIsMC0zLjA2NS0uNjM1cy0uMDYtMS43My44ODYtMi45OTVjLjExNy0uMTU4LjE0Ni0uMjM1LjI3OS0uMzkyYTYuMjUxLDYuMjUxLDAsMCwxLC4wMjYtMS42M0ExMS41NDUsMTEuNTQ1LDAsMCwwLDEuNzU2LDguODU5Qy41MTcsMTAuNTE3LjE4MSwxMi4wMDcuODA5LDEzLjA1NGEzLjE2NywzLjE2NywwLDAsMCwyLjksMS4yNDgsOC41NjMsOC41NjMsMCwwLDAsMS4yNTEtLjEsMTcuODM5LDE3LjgzOSwwLDAsMCw2LjIxOS0yLjQsMTcuNzkzLDE3Ljc5MywwLDAsMCw1LjA2MS00LjMzMkMxNy40ODMsNS44MSwxNy44MTksNC4zMiwxNy4xOTEsMy4yNzNaIiBmaWxsPSIjNTBlNmZmIi8+JiN4YTs8L3N2Zz4=" preserveAspectRatio="none" pointer-events="none"/>
-        <path d="M 138 742 L 260.77 631.01" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
-        <ellipse cx="263" cy="629" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
-        <path d="M 139 743 L 74.54 635.57" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
-        <ellipse cx="73" cy="633" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
-        <path d="M 628.18 746 L 586.99 627.83" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
-        <ellipse cx="586" cy="625" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
-        <rect x="458" y="746" width="355" height="42" rx="21" ry="21" fill="#000000" stroke="#000000" pointer-events="none" transform="translate(2,3)" opacity="0.25"/>
-        <rect x="458" y="746" width="355" height="42" rx="21" ry="21" fill="#f8cecc" stroke="#b85450" pointer-events="none"/>
-        <g transform="translate(-0.5 -0.5)">
-            <switch>
-                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 349px; height: 1px; padding-top: 767px; margin-left: 461px;">
-                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
-                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
-                                Currently there is only one visual schema allowed for each account, named as "default"
-                            </div>
-                        </div>
-                    </div>
-                </foreignObject>
-                <text x="636" y="772" fill="#333333" font-family="Helvetica" font-size="16px" text-anchor="middle">
-                    Currently there is only one visual schema al...
-                </text>
-            </switch>
-        </g>
-        <rect x="850" y="117" width="812.05" height="452.13" fill="#cccccc" stroke="#000000" pointer-events="none"/>
-        <rect x="864" y="236.65" width="378" height="315.25" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
-        <g transform="translate(-0.5 -0.5)">
-            <switch>
-                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 372px; height: 1px; padding-top: 244px; margin-left: 870px;">
-                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
-                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
-                                <b>
-                                    Twin property calculation fomula
-                                </b>
-                                <br/>
-                                {
-                                <br/>
-                                id:... (Twin uuid),
-                                <br/>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                ,type:"Formula"
-                                <br/>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                ,formula:...
-                                <font color="#00cc66">
-                                    (example, twindata[uuid1]["attr1"]+twindata[uuid2]["attr2"])
-                                </font>
-                                <br/>
-                                ,
-                                <strike>
-                                    usedByTwinsFormula:[twin1,twin2... ]
-                                    <br/>
-                                </strike>
-                                ,singnalRRequest:[  {accountName:..., reqTime:...},...]
-                                <br/>
-                                <strike>
-                                    modelID:...
-                                    <br/>
-                                    accountID:...
-                                </strike>
-                                <br/>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </foreignObject>
-                <text x="870" y="260" fill="#333333" font-family="Helvetica" font-size="16px">
-                    Twin property calculation fomula...
-                </text>
-            </switch>
-        </g>
-        <rect x="1266" y="237.69" width="375.37" height="201.84" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
-        <g transform="translate(-0.5 -0.5)">
-            <switch>
-                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 369px; height: 1px; padding-top: 245px; margin-left: 1272px;">
-                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
-                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
-                                <b>
-                                    Twin property value to calculate
-                                </b>
-                                (for example, for the above fomula sample, uuid1's attr1 and uuid2's attr2 will be stored)
-                                <br/>
-                                {
-                                <br/>
-                                id:... (such as uuid1)
-                                <br/>
-                                ,type:"propertyvalue"
-                                <br/>
-                                ,propertyPathAndValue:{
-                                <br/>
-                                "path1":..., "path2":...
-                                <br/>
-                                }
-                                <br/>
-                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </foreignObject>
-                <text x="1272" y="261" fill="#333333" font-family="Helvetica" font-size="16px">
-                    Twin property value to calculate (for example,...
-                </text>
-            </switch>
-        </g>
-        <rect x="850" y="117" width="810" height="94" fill="#647687" stroke="#314354" pointer-events="none"/>
-        <g transform="translate(-0.5 -0.5)">
-            <switch>
-                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 808px; height: 1px; padding-top: 144px; margin-left: 851px;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 394px; height: 1px; padding-top: 629px; margin-left: 1260px;">
                         <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
                             <div style="display: inline-block; font-size: 22px; font-family: Helvetica; color: #E6E6E6; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
                                 <br/>
                                 <br/>
                                 <span style="font-family: &quot;helvetica&quot; ; font-size: 22px ; font-style: normal ; font-weight: 400 ; letter-spacing: normal ; text-align: center ; text-indent: 0px ; text-transform: none ; word-spacing: 0px ; display: inline ; float: none">
-                                    Container 3 (Name:twincalculation)
+                                    Container 4 (Name: serverPushInfo)
                                 </span>
                                 <br/>
-                                <span style="font-size: 14px">
-                                    Partition By TwinID
-                                </span>
+                                <font style="font-size: 14px">
+                                    Partition by projectID
+                                </font>
                             </div>
                         </div>
                     </div>
                 </foreignObject>
-                <text x="1255" y="151" fill="#E6E6E6" font-family="Helvetica" font-size="22px" text-anchor="middle">
-                    Container 3 (Name:twincalculation)...
+                <text x="1457" y="636" fill="#E6E6E6" font-family="Helvetica" font-size="22px" text-anchor="middle">
+                    Container 4 (Name: serverPushInfo)...
                 </text>
             </switch>
         </g>
-        <rect x="1059" y="425" width="293" height="58" rx="29" ry="29" fill="#000000" stroke="#000000" pointer-events="none" transform="translate(2,3)" opacity="0.25"/>
-        <rect x="1059" y="425" width="293" height="58" rx="29" ry="29" fill="#f8cecc" stroke="#b85450" pointer-events="none"/>
+        <rect x="1266" y="718" width="305" height="203" fill="#ffe6cc" stroke="#d79b00" pointer-events="none"/>
         <g transform="translate(-0.5 -0.5)">
             <switch>
                 <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 287px; height: 1px; padding-top: 454px; margin-left: 1062px;">
-                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 299px; height: 1px; padding-top: 725px; margin-left: 1272px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: left; ">
                             <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
-                                delete reason:
+                                <b>
+                                    ServiceWorkerSubscription
+                                </b>
                                 <br/>
-                                use adt to query all twins this twin linking to
+                                {
+                                <br/>
+                                id:[accountID]
+                                <blockquote style="margin: 0 0 0 40px ; border: none ; padding: 0px"></blockquote>
+                                serviceWorkerSubscription:{
+                                <br/>
+                                <span>
+                                </span>
+                                <div>
+                                    endpoint:'https://fcm.googleapis.com/...
+                                </div>
+                                <div>
+                                    expirationTime: null,
+                                </div>
+                                <div>
+                                    keys: {
+                                    <span>
+                                        p256dh:..,
+                                    </span>
+                                    <span>
+                                        auth:..
+                                    </span>
+                                    <span>
+                                        }
+                                    </span>
+                                </div>
+                                },
+                                <br/>
+                                projectID:...
+                                <br/>
+                                }
                             </div>
                         </div>
                     </div>
                 </foreignObject>
-                <text x="1206" y="459" fill="#333333" font-family="Helvetica" font-size="16px" text-anchor="middle">
-                    delete reason:...
+                <text x="1272" y="741" fill="#333333" font-family="Helvetica" font-size="16px">
+                    ServiceWorkerSubscription...
                 </text>
             </switch>
         </g>
-        <rect x="864" y="495" width="338" height="60" rx="30" ry="30" fill="#000000" stroke="#000000" pointer-events="none" transform="translate(2,3)" opacity="0.25"/>
-        <rect x="864" y="495" width="338" height="60" rx="30" ry="30" fill="#f8cecc" stroke="#b85450" pointer-events="none"/>
-        <g transform="translate(-0.5 -0.5)">
-            <switch>
-                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 332px; height: 1px; padding-top: 525px; margin-left: 867px;">
-                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
-                            <div style="display: inline-block; font-size: 16px; font-family: Helvetica; color: #333333; line-height: 1.2; pointer-events: none; white-space: normal; word-wrap: normal; ">
-                                delete reason: these two are put into iot hub device twin tags and they are going to be enriched into telemetry msg
-                            </div>
-                        </div>
-                    </div>
-                </foreignObject>
-                <text x="1033" y="530" fill="#333333" font-family="Helvetica" font-size="16px" text-anchor="middle">
-                    delete reason: these two are put into iot...
-                </text>
-            </switch>
-        </g>
-        <path d="M 1131.12 422.22 L 1113.13 377.78" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
-        <ellipse cx="1132.25" cy="425" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
-        <ellipse cx="1112" cy="375" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
-        <path d="M 1030.44 493.43 L 937.56 436.57" fill="none" stroke="#9933ff" stroke-miterlimit="10" pointer-events="none"/>
-        <ellipse cx="1033" cy="495" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
-        <ellipse cx="935" cy="435" rx="3" ry="3" fill="#9933ff" stroke="#9933ff" pointer-events="none"/>
     </g>
     <switch>
         <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>

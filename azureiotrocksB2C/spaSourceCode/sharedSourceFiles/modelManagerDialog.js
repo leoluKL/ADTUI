@@ -15,7 +15,6 @@ function modelManagerDialog() {
     this.showRelationVisualizationSettings=true;
 }
 
-
 modelManagerDialog.prototype.popup = async function() {
     this.DOM.show()
     this.DOM.empty()
