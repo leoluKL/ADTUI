@@ -1,3 +1,4 @@
+const globalCache = require("../sharedSourceFiles/globalCache");
 const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer")
 const singleModelTwinsList=require("./singleModelTwinsList")
 
@@ -48,6 +49,16 @@ twinsList.prototype.rxMessage=function(msgPayload){
     }else if(msgPayload.message=="addNewTwin"){
         var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(msgPayload.DBTwinInfo.modelID)
         theSingleModelTwinsList.addTwin(msgPayload.DBTwinInfo) 
+    }else if(msgPayload.message=="liveData"){
+        var msgBody=msgPayload.body
+        if(msgBody.connectionState && msgBody.projectID==globalCache.currentProjectID){
+            var twinID=msgBody.twinID
+            var twinDBInfo=globalCache.getSingleDBTwinByID(twinID)
+            var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(twinDBInfo.modelID)
+            var theTwinIcon=theSingleModelTwinsList.getSingleTwinIcon(twinID)
+            if(theTwinIcon) theTwinIcon.redrawIoTState()
+        }
+        //if(msgBody.)
     }
 }
 

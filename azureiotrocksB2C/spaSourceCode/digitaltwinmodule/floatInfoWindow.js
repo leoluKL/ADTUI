@@ -41,9 +41,18 @@ class floatInfoWindow extends baseInfoPanel{
 
             var singleElementInfo = arr[0];
             if (singleElementInfo["$dtId"]) {// select a node
+                singleElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]]
                 var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
                 this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo)
             } else if (singleElementInfo["$sourceId"]) {
+                var arr=globalCache.storedOutboundRelationships[singleElementInfo["$sourceId"]]
+                for(var i=0;i<arr.length;i++){
+                    if(arr[i]['$relationshipId']==singleElementInfo["$relationshipId"]){
+                        singleElementInfo=arr[i]
+                        break;
+                    }
+                }
+
                 this.drawStaticInfo(this.DOM, {
                     "$sourceId": singleElementInfo["$sourceId"],
                     "$targetId": singleElementInfo["$targetId"],

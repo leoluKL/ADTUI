@@ -8,16 +8,7 @@
       "connection": "IoTHubConnectionString",
       "cardinality": "many",
       "consumerGroup": "consumedbyfunction"
-    },
-    {
-      "name": "outputDocToCosmosDB",
-      "type": "cosmosDB",
-      "databaseName": "azureiotrocksdb1",
-      "collectionName": "twinhistorydata",
-      "createIfNotExists": false,
-      "connectionStringSetting": "azureiotrockscosmosdb",
-      "direction": "out"
     }
   ],
-  "disabled": false
+  "disabled": true
 }

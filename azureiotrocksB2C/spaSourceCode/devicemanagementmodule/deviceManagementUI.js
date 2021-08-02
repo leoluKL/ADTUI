@@ -10,6 +10,7 @@ const twinsList=require("./twinsList")
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 const projectSelectionDialog=require("./projectSelectionDialog")
 const serviceWorkerHelper=require("../sharedSourceFiles/serviceWorkerHelper")
+const globalCache = require("../sharedSourceFiles/globalCache")
 
 function deviceManagementUI() {
     deviceManagementMainToolbar.render()
@@ -36,7 +37,7 @@ deviceManagementUI.prototype.initData=async function(){
 }
 
 deviceManagementUI.prototype.broadcastMessage=function(source,msgPayload){
-    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,twinsList,newTwinDialog,modelIoTSettingDialog,twinInfoPanel,projectSelectionDialog,serviceWorkerHelper]
+    var componentsArr=[modelManagerDialog,modelEditorDialog,deviceManagementMainToolbar,twinsList,newTwinDialog,modelIoTSettingDialog,twinInfoPanel,projectSelectionDialog,serviceWorkerHelper,globalCache]
 
     if(source==null){
         for(var i=0;i<componentsArr.length;i++){

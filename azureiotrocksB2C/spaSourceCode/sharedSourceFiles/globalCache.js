@@ -36,6 +36,7 @@ globalCache.prototype.storeADTTwins=function(twinsData){
 globalCache.prototype.storeSingleADTTwin=function(oneNode){
     this.storedTwins[oneNode["$dtId"]] = oneNode
     oneNode["displayName"]= this.twinIDMapToDisplayName[oneNode["$dtId"]]
+    //this.broadcastMessage({ "message": "ADTTwinInfoUpdate","twinID":oneNode["$dtId"]})
 }
 
 

@@ -110,6 +110,13 @@ singleModelTwinsList.prototype.refreshTwinsInfo=function(){
     this.childTwins.forEach(aTwin=>{aTwin.refreshTwinInfo()})
 }
 
+singleModelTwinsList.prototype.getSingleTwinIcon=function(twinID){
+    for(var i=0;i<this.childTwins.length;i++){
+        var oneTwinIcon=this.childTwins[i]
+        if(oneTwinIcon.twinInfo.id==twinID) return oneTwinIcon
+    }
+    return null;
+}
 
 
 

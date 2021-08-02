@@ -88,9 +88,18 @@ class infoPanel extends baseInfoPanel {
 
             if (singleElementInfo["$dtId"]) {// select a node
                 this.drawButtons("singleNode")
+                singleElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]] //note that dynamical property value is not stored in topology node, so always get refresh data from globalcache
                 var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
                 this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo)
             } else if (singleElementInfo["$sourceId"]) {
+                var arr=globalCache.storedOutboundRelationships[singleElementInfo["$sourceId"]]
+                for(var i=0;i<arr.length;i++){
+                    if(arr[i]['$relationshipId']==singleElementInfo["$relationshipId"]){
+                        singleElementInfo=arr[i]
+                        break;
+                    }
+                }
+
                 this.drawButtons("singleRelationship")
                 this.drawStaticInfo(this.DOM, {
                     "$sourceId": singleElementInfo["$sourceId"],
@@ -443,7 +452,7 @@ class infoPanel extends baseInfoPanel {
             twinsdata.forEach(oneRe => {
                 var twinID = oneRe['$dtId']
                 if (globalCache.storedTwins[twinID] != null) {
-                    for (var ind in oneRe) globalCache.storeSingleADTTwin(oneRe[ind])
+                    globalCache.storeSingleADTTwin(oneRe)
                 }
             })
         } catch (e) {
@@ -719,7 +728,6 @@ class infoPanel extends baseInfoPanel {
             if (theJson[key] == null) theJson[key] = {}
             theJson = theJson[key]
         }
-        return
     }
 }
 

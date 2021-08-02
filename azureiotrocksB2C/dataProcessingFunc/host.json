@@ -3,7 +3,8 @@
   "logging": {
     "logLevel": {
       "Function.consumeiothubdata.User": "Information",
-      "Function": "Error"
+      "Host.Results": "Warning",
+      "Function": "Warning"
     },
     "applicationInsights": {
       "samplingSettings": {

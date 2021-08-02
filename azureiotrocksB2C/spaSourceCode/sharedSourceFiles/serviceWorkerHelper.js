@@ -1,4 +1,5 @@
 const msalHelper=require("../msalHelper")
+const globalCache = require("../sharedSourceFiles/globalCache");
 
 function serviceWorkerHelper(){
 
@@ -17,12 +18,22 @@ serviceWorkerHelper.prototype.subscribeMessagePush = async function (projectID) 
         
         msalHelper.callAPI("digitaltwin/serviceWorkerSubscription", "POST", {"serviceWorkerSub":JSON.stringify(subscription)}, "withProjectID")
 
-        navigator.serviceWorker.onmessage = function (e) {
-            // messages from service worker.
-            console.log("service worker receive:", e.data);
+        navigator.serviceWorker.onmessage = (e)=> {
+            this.processLiveMessage(e.data)
+            this.broadcastMessage({ "message": "liveData","body":e.data })
         };
     } catch (e) {
         console.log(e)
+    }
+}
+
+serviceWorkerHelper.prototype.processLiveMessage=function(msgBody){
+    if(msgBody.connectionState && msgBody.projectID==globalCache.currentProjectID){
+        var twinID=msgBody.twinID
+        var twinDBInfo=globalCache.getSingleDBTwinByID(twinID)
+        if(msgBody.connectionState=="deviceConnected") twinDBInfo.connectState=true
+        else twinDBInfo.connectState=false
+        //console.log(msgBody)
     }
 }
 
