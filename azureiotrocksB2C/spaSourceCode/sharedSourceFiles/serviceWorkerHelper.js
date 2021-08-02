@@ -1,3 +1,5 @@
+const msalHelper=require("../msalHelper")
+
 function serviceWorkerHelper(){
 
 }

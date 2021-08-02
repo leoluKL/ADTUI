@@ -102,7 +102,7 @@ routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
         var newTwinDocument={
             "id":accountID,
             "projectID":projectID,
-            "serviceWorkerSubscription":serviceWorkerSub
+            "serviceWorkerSubscription":JSON.parse(serviceWorkerSub)
         }
         await cosmosdbhelper.insertRecord("serverPushInfo", newTwinDocument)
     } catch (e) {
