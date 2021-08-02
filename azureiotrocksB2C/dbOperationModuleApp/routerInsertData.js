@@ -11,6 +11,7 @@ function routerInsertData(){
     this.useRoute("updateTopologySchema","post")
     this.useRoute("setLayoutSharedFlag","post")
     this.useRoute("setVisualSchemaSharedFlag","post")
+    this.useRoute("serviceWorkerSubscription","post")
 }
 
 routerInsertData.prototype.useRoute=function(routeStr,isPost){
@@ -85,6 +86,25 @@ routerInsertData.prototype.updateTwin =async function(req,res) {
             newTwinDocument[ind]=updateInfo[ind]
         }
         var updatedTwinDoc=await cosmosdbhelper.insertRecord("dtproject", newTwinDocument)
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+    res.send(updatedTwinDoc)
+}
+
+
+routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
+    var projectID=req.body.projectID
+    var serviceWorkerSub=req.body.serviceWorkerSub
+    var accountID=req.body.account
+
+    try {
+        var newTwinDocument={
+            "id":accountID,
+            "projectID":projectID,
+            "serviceWorkerSubscription":serviceWorkerSub
+        }
+        await cosmosdbhelper.insertRecord("serverPushInfo", newTwinDocument)
     } catch (e) {
         res.status(400).send(e.message)
     }
