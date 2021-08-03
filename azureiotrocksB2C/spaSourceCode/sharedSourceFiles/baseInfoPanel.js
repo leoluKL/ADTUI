@@ -136,10 +136,9 @@ class baseInfoPanel {
         this.drawStaticInfo(this.DOM, { "name": singleDBTwinInfo["displayName"] }, "1em", "13px")
         var theDBModel = globalCache.getSingleDBModelByID(modelID)
         if (theDBModel.isIoTDeviceModel) {
-            this.DOM.append($('<table style="font-size:smaller;margin:3px 0px"><tr><td class="'+constTelemetryColor+'">&nbsp;&nbsp;</td><td>telemetry</td><td class="'+constReportColor+'">&nbsp;&nbsp;</td><td>report</td><td class="'+constDesiredColor+'">&nbsp;&nbsp;</td><td>desired</td><td class="'+constCommonColor+'">&nbsp;&nbsp;</td><td>common</td></tr></table>'))
-
             this.drawConnectionStatus(singleDBTwinInfo["connectState"])
-            this.drawStaticInfo(this.DOM, { "Connection State Time": singleDBTwinInfo["connectStateUpdateTime"] }, "1em", "10px")
+            this.drawStaticInfo(this.DOM, { "Connection State Time": singleDBTwinInfo["connectStateUpdateTime"] }, ".5em", "10px")
+            this.DOM.append($('<table style="font-size:smaller;margin:3px 0px"><tr><td class="'+constTelemetryColor+'">&nbsp;&nbsp;</td><td>telemetry</td><td class="'+constReportColor+'">&nbsp;&nbsp;</td><td>report</td><td class="'+constDesiredColor+'">&nbsp;&nbsp;</td><td>desired</td><td class="'+constCommonColor+'">&nbsp;&nbsp;</td><td>common</td></tr></table>'))
         }
 
         if (modelAnalyzer.DTDLModels[modelID]) {

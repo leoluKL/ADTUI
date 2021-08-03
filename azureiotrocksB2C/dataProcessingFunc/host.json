@@ -3,6 +3,7 @@
   "logging": {
     "logLevel": {
       "Function.consumeiothubdata.User": "Information",
+      "Function.TwinPropertyCalculator.User": "Information",
       "Host.Results": "Warning",
       "Function": "Warning"
     },

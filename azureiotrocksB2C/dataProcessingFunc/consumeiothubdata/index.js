@@ -17,11 +17,11 @@ module.exports = async function (context, IoTHubMessages) {
 
         var devID = context.bindingData.systemPropertiesArray[index]["iothub-connection-device-id"]
         var eventType=context.bindingData.systemPropertiesArray[index]["iothub-message-source"]
-        context.log(eventType)
+        //context.log(eventType)
         if(eventType=="deviceConnectionStateEvents"){
             var allProperties=context.bindingData.propertiesArray[index]
             var opType=allProperties["opType"]
-            context.log("connection state:"+opType) 
+            //context.log("connection state:"+opType) 
             var projectID=allProperties["project"]
             var modelID=allProperties["modelID"]
             var opTimestamp=allProperties["operationTimestamp"]

@@ -926,11 +926,11 @@ topologyDOM.prototype.getCurrentLayoutDetail = function () {
 }
 
 topologyDOM.prototype.saveLayout = async function (layoutName) {
-    var layoutDict=globalCache.layoutJSON[layoutName].detail
-    if(!layoutDict){
-        layoutDict={}
+    if(!globalCache.layoutJSON[layoutName]){
+        var layoutDict={}
         globalCache.recordSingleLayout(layoutDict,globalCache.accountInfo.id,layoutName,false)
-    }
+    }else layoutDict=globalCache.layoutJSON[layoutName].detail
+    
     if(layoutDict["edges"]==null) layoutDict["edges"]={}
     
     var showingLayout=this.getCurrentLayoutDetail()
