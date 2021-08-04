@@ -96,9 +96,8 @@ routerInsertData.prototype.updateTwin =async function(req,res) {
 
 
 routerInsertData.prototype.updateFormula =async function(req,res) {
-    var payload=JSON.stringify(req.body.payload)
+    var payload=JSON.parse(req.body.payload)
     var accountID=req.body.account
-
     try {
         var newDocument={
             "id":payload.twinID,
