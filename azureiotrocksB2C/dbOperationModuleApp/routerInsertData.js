@@ -113,7 +113,7 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
         for(var i=0;i<payload.calculationInputs.length;i++){
             var oneInput=payload.calculationInputs[i]
             var aDoc={
-                "id": oneInput.twinID+"/"+oneInput.path.join("/")
+                "id": oneInput.twinID+"."+oneInput.path.join(".")
                 ,"twinID":payload.twinID
                 ,"type":"value"
                 ,"path":oneInput.path
