@@ -7,6 +7,7 @@ function globalCache(){
     this.modelIDMapToName={}
     this.modelNameMapToID={}
     this.twinIDMapToDisplayName={}
+    this.twinDisplayNameMapToID={}
     this.storedTwins = {}
     this.layoutJSON={}
     this.visualDefinition={"default":{"detail":{}}}
@@ -51,14 +52,18 @@ globalCache.prototype.storeSingleDBTwin=function(DBTwin){
     this.DBTwinsArr.push(DBTwin)
 
     this.twinIDMapToDisplayName[DBTwin["id"]]=DBTwin["displayName"]
+    this.twinDisplayNameMapToID[DBTwin["displayName"]]=DBTwin["id"]
 }
 
 globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
     this.DBTwinsArr.length=0
     this.DBTwinsArr=this.DBTwinsArr.concat(DBTwinsArr)
     for(var ind in this.twinIDMapToDisplayName) delete this.twinIDMapToDisplayName[ind]
+    for(var ind in this.twinDisplayNameMapToID) delete this.twinDisplayNameMapToID[ind]
+    
     this.DBTwinsArr.forEach(oneDBTwin=>{
         this.twinIDMapToDisplayName[oneDBTwin["id"]]=oneDBTwin["displayName"]
+        this.twinDisplayNameMapToID[oneDBTwin["displayName"]]=oneDBTwin["id"]
     })
 }
 
@@ -154,6 +159,16 @@ globalCache.prototype.getSingleDBTwinByID=function(twinID){
     for(var i=0;i<this.DBTwinsArr.length;i++){
         var ele = this.DBTwinsArr[i]
         if(ele.id==twinID){
+            return ele
+        }
+    }
+    return null;
+}
+
+globalCache.prototype.getSingleDBTwinByName=function(twinName){
+    for(var i=0;i<this.DBTwinsArr.length;i++){
+        var ele = this.DBTwinsArr[i]
+        if(ele.displayName==twinName){
             return ele
         }
     }

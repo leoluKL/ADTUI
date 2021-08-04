@@ -1,6 +1,7 @@
 const simpleSelectMenu= require("./simpleSelectMenu")
 const globalCache = require("../sharedSourceFiles/globalCache")
 const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer");
+const msalHelper = require("../msalHelper")
 
 class baseInfoPanel {
     drawEditable(parent,jsonInfo,originElementInfo,pathArr,funcGetKeyLblColorClass){
@@ -215,6 +216,61 @@ class baseInfoPanel {
             this.drawStaticInfo(parentDom, tmpObj, "1em", "10px")
         }
     }
+
+    async editDTProperty(originElementInfo, path, newVal, dataType) {
+        if (["double", "boolean", "float", "integer", "long"].includes(dataType)) newVal = Number(newVal)
+
+        //{ "op": "add", "path": "/x", "value": 30 }
+        if (path.length == 1) {
+            var str = ""
+            path.forEach(segment => { str += "/" + segment })
+            var jsonPatch = [{ "op": "add", "path": str, "value": newVal }]
+        } else {
+            //it is a property inside a object type of root property,update the whole root property
+            var rootProperty = path[0]
+            var patchValue = originElementInfo[rootProperty]
+            if (patchValue == null) patchValue = {}
+            else patchValue = JSON.parse(JSON.stringify(patchValue)) //make a copy
+            this.updateOriginObjectValue(patchValue, path.slice(1), newVal)
+
+            var jsonPatch = [{ "op": "add", "path": "/" + rootProperty, "value": patchValue }]
+        }
+
+        if (originElementInfo["$dtId"]) { //edit a node property
+            var twinID = originElementInfo["$dtId"]
+            var payLoad = { "jsonPatch": JSON.stringify(jsonPatch), "twinID": twinID }
+        } else if (originElementInfo["$relationshipId"]) { //edit a relationship property
+            var twinID = originElementInfo["$sourceId"]
+            var relationshipID = originElementInfo["$relationshipId"]
+            var payLoad = { "jsonPatch": JSON.stringify(jsonPatch), "twinID": twinID, "relationshipID": relationshipID }
+        }
+
+
+        try {
+            await msalHelper.callAPI("digitaltwin/changeAttribute", "POST", payLoad)
+            this.updateOriginObjectValue(originElementInfo, path, newVal)
+        } catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+        }
+
+    }
+
+    updateOriginObjectValue(nodeInfo, pathArr, newVal) {
+        if (pathArr.length == 0) return;
+        var theJson = nodeInfo
+        for (var i = 0; i < pathArr.length; i++) {
+            var key = pathArr[i]
+
+            if (i == pathArr.length - 1) {
+                theJson[key] = newVal
+                break
+            }
+            if (theJson[key] == null) theJson[key] = {}
+            theJson = theJson[key]
+        }
+    }
+
 }
 
 module.exports = baseInfoPanel;

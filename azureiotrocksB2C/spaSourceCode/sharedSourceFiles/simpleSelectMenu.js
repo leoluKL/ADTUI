@@ -26,7 +26,7 @@ function simpleSelectMenu(buttonName,options){
     if(options.adjustPositionAnchor) this.adjustPositionAnchor=options.adjustPositionAnchor
 
     this.optionContentDOM=$('<div class="w3-dropdown-content w3-bar-block w3-card-4"></div>')
-    if(options.optionListHeight) this.optionContentDOM.css({height:options.optionListHeight+"px","overflow-y":"auto","overflow-x":"visible"})
+    if(options.optionListHeight) this.optionContentDOM.css({"max-height":options.optionListHeight+"px","overflow-y":"auto","overflow-x":"visible"})
     if(options.optionListMarginTop) this.optionContentDOM.css({"margin-top":options.optionListMarginTop+"px"})
     if(options.optionListMarginLeft) this.optionContentDOM.css({"margin-left":options.optionListMarginLeft+"px"})
     
@@ -75,7 +75,7 @@ simpleSelectMenu.prototype.addOptionArr=function(arr){
 }
 
 simpleSelectMenu.prototype.addOption=function(optionText,optionValue,colorClass){
-    var optionItem=$('<a href="#" class="w3-bar-item w3-button">'+optionText+'</a>')
+    var optionItem=$('<a href="#" class="w3-bar-item w3-button" style="white-space:nowrap">'+optionText+'</a>')
     if(colorClass) optionItem.addClass(colorClass)
     this.optionContentDOM.append(optionItem)
     optionItem.data("optionValue",optionValue||optionText)

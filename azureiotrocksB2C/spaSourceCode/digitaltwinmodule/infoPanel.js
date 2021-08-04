@@ -4,12 +4,13 @@ const globalCache = require("../sharedSourceFiles/globalCache")
 const msalHelper = require("../msalHelper")
 const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
 const simpleExpandableSection= require("../sharedSourceFiles/simpleExpandableSection")
+const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 
 class infoPanel extends baseInfoPanel {
     constructor() {
         super()
         this.openLiveCalculationSection=false
-        this.openFunctionButtonSection=true
+        this.openFunctionButtonSection=false
         this.openPropertiesSection=true
         this.continerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
         this.continerDOM.hide()
@@ -93,7 +94,7 @@ class infoPanel extends baseInfoPanel {
             singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
             if (singleElementInfo["$dtId"]) {// select a node
                 this.drawButtons("singleNode")
-                this.drawFormulaSection(singleElementInfo["$dtId"])
+                this.drawFormulaSection(singleElementInfo["$dtId"],singleElementInfo["$metadata"]["$model"])
             }else if (singleElementInfo["$sourceId"]) {
                 this.drawButtons("singleRelationship")
             }
@@ -522,17 +523,17 @@ class infoPanel extends baseInfoPanel {
         )
     }
 
-    drawFormulaSection(twinID){
+    drawFormulaSection(formulaTwinID,formulaTwinModelID){
         var formulaSection= new simpleExpandableSection("Live Calculation Section",this.DOM)
         formulaSection.callBack_change=(status)=>{this.openLiveCalculationSection=status}
         if(this.openLiveCalculationSection) formulaSection.expand()
 
         //list all incoming twins
-        var incomingNeighbourLbl=this.generateSmallKeyDiv("Incoming Twins","2px")
+        var incomingNeighbourLbl=this.generateSmallKeyDiv("Incoming Twins And Self","2px")
         incomingNeighbourLbl.css("display","inline")
         var lbl1=$('<lbl style="font-size:10px;color:gray">(Click to add twin name to script)</lbl>')
         formulaSection.listDOM.append($('<div/>').append(incomingNeighbourLbl,lbl1))
-        var incomingTwins=globalCache.getStoredAllInboundRelationsSources(twinID)
+        var incomingTwins=globalCache.getStoredAllInboundRelationsSources(formulaTwinID)
         var scriptLbl=this.generateSmallKeyDiv("Calculation Script","2px")
         scriptLbl.css("display","inline")
         var lbl2=$('<lbl style="font-size:10px;color:gray">(Build in variables:_self _twinVal)</lbl>')
@@ -559,13 +560,14 @@ class infoPanel extends baseInfoPanel {
             hasIncomingTwins=true
             var twinName=globalCache.twinIDMapToDisplayName[twinID]
             twinNamesForHighlight.push({ "highlight": twinName, "className": highlightColors[colorIndex][0]})
-            var quickNameBtn= $(`<button class="w3-border w3-hover-gray">${twinName}</button>`)
-            quickNameBtn.css("background-color",highlightColors[colorIndex][1])
+
+            this.createQuickBtnForTwin(twinName,highlightColors[colorIndex][1],formulaSection.listDOM,scriptTextArea)
             colorIndex++
             if(colorIndex>=highlightColors.length)colorIndex=0
-            formulaSection.listDOM.append(quickNameBtn)
-            this.createQuickTextBtn(quickNameBtn,scriptTextArea)
         }
+
+        this.createQuickBtnForTwin("Self","gray",formulaSection.listDOM,scriptTextArea,formulaTwinModelID)
+
         if(!hasIncomingTwins)formulaSection.listDOM.append($('<label>No incoming twins</label>'))
         formulaSection.listDOM.append($('<div/>').append(scriptLbl,lbl2))
         formulaSection.listDOM.append(scriptTextArea)
@@ -575,26 +577,148 @@ class infoPanel extends baseInfoPanel {
         var confirmBtn = $('<button class="w3-button w3-green  w3-hover-amber">Confirm</button>')
         formulaSection.listDOM.append(testScriptBtn, confirmBtn)
 
-    }
+        confirmBtn.on("click",()=>{
+            //translate script
+            var scriptContent=scriptTextArea.val()
+            var translateResult=this.convertToActualScript(scriptContent)
+            //analyze all variables that can not be as input as they are changed during calcuation
+            //they disqualify as input as they will trigger infinite calculation
+            var inputArr = this.findAllInputsInScript(translateResult,formulaTwinID)
 
-    createQuickTextBtn(btn,textAreaDom) {
-        btn.on("click",()=>{
-            var str=btn.text()
-            this.insertToTextArea(str,textAreaDom)
-            textAreaDom.highlightWithinTextarea('update');
-            textAreaDom.focus()
+            var valueTemplate={}
+            this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties
+                ,[],valueTemplate)
+            var theBody={
+                "twinID": formulaTwinID,
+                "originalScript":scriptContent,
+                "actualScript":translateResult,
+                "calculationInputs":inputArr,
+                "baseValueTemplate":valueTemplate
+            }
+            //console.log({"payload":JSON.stringify(theBody) })
+            //by using withProjectID it will ensure it is the authorized person send the command
+            try{
+                msalHelper.callAPI("digitaltwin/updateFormula", "POST", {"payload":JSON.stringify(theBody) }, "withProjectID")
+            }catch (e) {
+                console.log(e)
+                if (e.responseText) alert(e.responseText)
+            }
+            
         })
     }
 
+    getPropertyValueTemplate(jsonInfo,pathArr,valueTemplateRoot){
+        for(var ind in jsonInfo){
+            var newPath=pathArr.concat([ind])
+            if(!Array.isArray(jsonInfo[ind]) && typeof(jsonInfo[ind])==="object") {
+                valueTemplateRoot[ind]={}
+                this.getPropertyValueTemplate(jsonInfo[ind],newPath,valueTemplateRoot[ind])
+            }
+        }
+    }
+
+    findAllInputsInScript(actualScript,formulaTwinID){
+        //find all properties in the script
+        var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
+        var allSelfProperties=actualScript.match(patt)||[];
+
+        var patt = /_twinVal(?<=_twinVal)\[\".*?(?=\"\][^\[])\"\]/g; 
+        var allOtherTwinProperties=actualScript.match(patt)||[];
+
+        //analyze all variables that can not be as input as they are changed during calcuation
+        //they disqualify as input as they will trigger infinite calculation, all these belongs to _self
+        var noninputpatt = /_self(?<=_self)\[\"[^;{]*?[^\=](?=\=[^\=])/g;
+        var notInputProperties=actualScript.match(noninputpatt)||[];
+        
+        var allProperties=allSelfProperties.concat(allOtherTwinProperties)
+        var seen = {};
+        allProperties=allProperties.filter(function(item) {
+            return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+        });
+
+        var inputPropertiesArr = allProperties.filter(function (el) {
+            return !notInputProperties.includes(el);
+        });
+
+        var returnArr=[]
+        inputPropertiesArr.forEach(oneProperty=>{
+            var oneInputObj={} //twinID, path, value
+            var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
+            if(oneProperty.startsWith("_self")){
+                oneInputObj.twinID=formulaTwinID
+                oneInputObj.path=oneProperty.match(fetchpropertypatt);
+                oneInputObj.value=this.searchValue(globalCache.storedTwins[formulaTwinID],oneInputObj.path)
+            }if(oneProperty.startsWith("_twinVal")){
+                var arr=oneProperty.match(fetchpropertypatt);
+                oneInputObj.twinID=arr[0]
+                arr.shift()
+                oneInputObj.path=arr
+                oneInputObj.value=this.searchValue(globalCache.storedTwins[oneInputObj.twinID],oneInputObj.path)
+            }
+            returnArr.push(oneInputObj)
+        })
+        return returnArr
+    }
+
+    convertToActualScript(scriptContent){
+        //change all the twin name to twin ID
+        var patt = /(?<=_twinVal\[\").*?(?=\"\])/g;
+        var result = scriptContent.replace(patt,(aTwinName)=>{
+            var aTwinID=globalCache.twinDisplayNameMapToID[aTwinName]
+            return aTwinID
+        } );
+        return result;
+    }
+
+
+    getTwinPropertyOptionsArr(jsonInfo,pathArr,optionsArr){
+        for(var ind in jsonInfo){
+            var newPath=pathArr.concat([ind])
+            if(!Array.isArray(jsonInfo[ind]) && typeof(jsonInfo[ind])==="object") {
+                this.getTwinPropertyOptionsArr(jsonInfo[ind],newPath,optionsArr)
+            }else {
+                optionsArr.push('["'+newPath.join('"]["')+'"]')
+            }
+        }
+    }
+    
+    createQuickBtnForTwin(twinName,colorCode,parentDOM,textAreaDom,selfModelID) {
+        var aSelectMenu=new simpleSelectMenu(twinName,{"optionListHeight":200,"buttonCSS":{"background-color":colorCode,"padding":"2px 5px","margin-right":"1px"}})
+
+        if(twinName!="Self"){
+            var aDBTwin=globalCache.getSingleDBTwinByName(twinName)
+            var modelID=aDBTwin["modelID"]
+        }else{
+            modelID=selfModelID
+        }
+        
+        var properties=modelAnalyzer.DTDLModels[modelID].editableProperties
+        var optionsArr=[]
+        var pathArr=[]
+        this.getTwinPropertyOptionsArr(properties,pathArr,optionsArr)
+        optionsArr.forEach((oneOption)=>{
+            aSelectMenu.addOption(oneOption)
+        })
+        parentDOM.append(aSelectMenu.DOM) 
+        aSelectMenu.callBack_clickOption=(optionText,optionValue,realMouseClick)=>{
+            if(twinName=="Self") var str='_self'+optionText
+            else str='_twinVal["'+twinName+'"]'+optionText
+            this.insertToTextArea(str,textAreaDom)
+            textAreaDom.highlightWithinTextarea('update');
+            textAreaDom.focus()
+        }
+    }
+
     insertToTextArea(str,textAreaDom){
+        textAreaDom.focus();
         var startPos = textAreaDom[0].selectionStart;
         var endPos = textAreaDom[0].selectionEnd;
-        var newContent=textAreaDom.val()
-        newContent=newContent.substring(0, startPos)+ str + newContent.substring(endPos, newContent.length);
-        textAreaDom.val(newContent)
+        //var newContent=textAreaDom.val()
+        //newContent=newContent.substring(0, startPos)+ str + newContent.substring(endPos, newContent.length);
+        //textAreaDom.val(newContent)
+        document.execCommand('insertText', false, str); //this way will allow undo still works
         textAreaDom[0].selectionStart=startPos+str.length;
         textAreaDom[0].selectionEnd=startPos+str.length;
-
     }
 
     async deleteTwins(twinIDArr) {
@@ -740,60 +864,6 @@ class infoPanel extends baseInfoPanel {
         var textDiv = $("<label style='display:block;margin-top:10px;margin-left:16px'></label>")
         textDiv.text(numOfNode + " node" + ((numOfNode <= 1) ? "" : "s") + ", " + numOfEdge + " relationship" + ((numOfEdge <= 1) ? "" : "s"))
         this.DOM.append(textDiv)
-    }
-
-    async editDTProperty(originElementInfo, path, newVal, dataType) {
-        if (["double", "boolean", "float", "integer", "long"].includes(dataType)) newVal = Number(newVal)
-
-        //{ "op": "add", "path": "/x", "value": 30 }
-        if (path.length == 1) {
-            var str = ""
-            path.forEach(segment => { str += "/" + segment })
-            var jsonPatch = [{ "op": "add", "path": str, "value": newVal }]
-        } else {
-            //it is a property inside a object type of root property,update the whole root property
-            var rootProperty = path[0]
-            var patchValue = originElementInfo[rootProperty]
-            if (patchValue == null) patchValue = {}
-            else patchValue = JSON.parse(JSON.stringify(patchValue)) //make a copy
-            this.updateOriginObjectValue(patchValue, path.slice(1), newVal)
-
-            var jsonPatch = [{ "op": "add", "path": "/" + rootProperty, "value": patchValue }]
-        }
-
-        if (originElementInfo["$dtId"]) { //edit a node property
-            var twinID = originElementInfo["$dtId"]
-            var payLoad = { "jsonPatch": JSON.stringify(jsonPatch), "twinID": twinID }
-        } else if (originElementInfo["$relationshipId"]) { //edit a relationship property
-            var twinID = originElementInfo["$sourceId"]
-            var relationshipID = originElementInfo["$relationshipId"]
-            var payLoad = { "jsonPatch": JSON.stringify(jsonPatch), "twinID": twinID, "relationshipID": relationshipID }
-        }
-
-
-        try {
-            await msalHelper.callAPI("digitaltwin/changeAttribute", "POST", payLoad)
-            this.updateOriginObjectValue(originElementInfo, path, newVal)
-        } catch (e) {
-            console.log(e)
-            if (e.responseText) alert(e.responseText)
-        }
-
-    }
-
-    updateOriginObjectValue(nodeInfo, pathArr, newVal) {
-        if (pathArr.length == 0) return;
-        var theJson = nodeInfo
-        for (var i = 0; i < pathArr.length; i++) {
-            var key = pathArr[i]
-
-            if (i == pathArr.length - 1) {
-                theJson[key] = newVal
-                break
-            }
-            if (theJson[key] == null) theJson[key] = {}
-            theJson = theJson[key]
-        }
     }
 }
 

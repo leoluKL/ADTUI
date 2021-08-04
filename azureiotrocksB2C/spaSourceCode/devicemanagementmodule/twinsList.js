@@ -58,7 +58,6 @@ twinsList.prototype.rxMessage=function(msgPayload){
             var theTwinIcon=theSingleModelTwinsList.getSingleTwinIcon(twinID)
             if(theTwinIcon) theTwinIcon.redrawIoTState()
         }
-        //if(msgBody.)
     }
 }
 
