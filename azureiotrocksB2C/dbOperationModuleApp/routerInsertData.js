@@ -12,6 +12,7 @@ function routerInsertData(){
     this.useRoute("setLayoutSharedFlag","post")
     this.useRoute("setVisualSchemaSharedFlag","post")
     this.useRoute("serviceWorkerSubscription","post")
+    this.useRoute("updateFormula","post")
 }
 
 routerInsertData.prototype.useRoute=function(routeStr,isPost){
@@ -92,6 +93,27 @@ routerInsertData.prototype.updateTwin =async function(req,res) {
     res.send(updatedTwinDoc)
 }
 
+
+
+routerInsertData.prototype.updateFormula =async function(req,res) {
+    var payload=JSON.stringify(req.body.payload)
+    var accountID=req.body.account
+
+    try {
+        var newDocument={
+            "id":payload.twinID,
+            "twinID":payload.twinID,
+            "type":"Formula",
+            "originalScript":payload.originalScript,
+            "actualScript":payload.actualScript,
+            "author":accountID
+        }
+        await cosmosdbhelper.insertRecord("twincalculation", newDocument)
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+    res.send(newDocument)
+}
 
 routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
     var projectID=req.body.projectID
