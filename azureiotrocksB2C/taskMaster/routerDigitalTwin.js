@@ -27,6 +27,8 @@ function routerDigitalTwin(){
     this.useRoute("deleteTwins","isPost")
     this.useRoute("setLayoutSharedFlag","isPost")
     this.useRoute("setVisualSchemaSharedFlag","isPost")
+    this.useRoute("updateFormula","isPost")
+    
 
     this.useRoute("serviceWorkerSubscription","isPost")
 }
@@ -49,6 +51,19 @@ routerDigitalTwin.prototype.serviceWorkerSubscription =async function(req,res) {
     }
     res.send(body)
 }
+
+routerDigitalTwin.prototype.updateFormula =async function(req,res) {
+    var reqBody=req.body
+    reqBody.account=req.authInfo.account
+    try{
+        var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateFormula", {json:reqBody,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.end()
+}
+
 
 routerDigitalTwin.prototype.fetchProjectTwinsAndVisualData =async function(req,res) {
     var reqBody=req.body
