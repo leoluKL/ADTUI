@@ -90,9 +90,10 @@ class baseInfoPanel {
         return keyDiv
     }
 
-    drawConnectionStatus(status) {
+    drawConnectionStatus(status,parentDom) {
+        parentDom=parentDom||this.DOM
         var keyDiv=this.generateSmallKeyDiv("Connection",".5em")
-        this.DOM.append(keyDiv)
+        parentDom.append(keyDiv)
         var contentDOM = $('<span class="fa-stack" style="font-size:.5em;padding-left:5px"></span>')
         if(status) {
             contentDOM.addClass("w3-text-lime")
@@ -124,21 +125,65 @@ class baseInfoPanel {
         }
     }
 
-    drawSingleNodeProperties(singleDBTwinInfo,singleADTTwinInfo) {
+    fetchRealElementInfo(singleElementInfo){ //the input is possibly from topology view which might not be precise about property value
+        var returnElementInfo={}
+        if (singleElementInfo["$dtId"]) {
+            returnElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]] //note that dynamical property value is not stored in topology node, so always get refresh data from globalcache
+        }else if (singleElementInfo["$sourceId"]) {
+            var arr=globalCache.storedOutboundRelationships[singleElementInfo["$sourceId"]]
+            for(var i=0;i<arr.length;i++){
+                if(arr[i]['$relationshipId']==singleElementInfo["$relationshipId"]){
+                    returnElementInfo=arr[i]
+                    break;
+                }
+            }
+        }
+        return returnElementInfo
+    }
+
+    drawSingleRelationProperties(singleRelationInfo,parentDom) {
+        parentDom=parentDom||this.DOM
+        this.drawStaticInfo(parentDom, {
+            "sourceI":globalCache.twinIDMapToDisplayName[singleRelationInfo["$sourceId"]],
+            "target": globalCache.twinIDMapToDisplayName[singleRelationInfo["$targetId"]],
+            "$relationshipName": singleRelationInfo["$relationshipName"]
+        }, "1em", "13px")
+        this.drawStaticInfo(parentDom, {
+            "$relationshipId": singleRelationInfo["$relationshipId"]
+        }, "1em", "10px")
+        var relationshipName = singleRelationInfo["$relationshipName"]
+        var sourceModel = singleRelationInfo["sourceModel"]
+
+        this.drawEditable(parentDom, this.getRelationShipEditableProperties(relationshipName, sourceModel), singleRelationInfo, [])
+        for (var ind in singleRelationInfo["$metadata"]) {
+            var tmpObj = {}
+            tmpObj[ind] = singleRelationInfo["$metadata"][ind]
+            this.drawStaticInfo(parentDom, tmpObj, "1em", "10px")
+        }
+        //this.drawStaticInfo(parentDom,{"$etag":singleRelationInfo["$etag"]},"1em","10px","DarkGray")
+    }
+
+    getRelationShipEditableProperties(relationshipName, sourceModel) {
+        if (!modelAnalyzer.DTDLModels[sourceModel] || !modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]) return
+        return modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName].editableRelationshipProperties
+    }
+
+    drawSingleNodeProperties(singleDBTwinInfo,singleADTTwinInfo,parentDom) {
         //instead of draw the $dtId, draw display name instead
         //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
+        parentDom=parentDom||this.DOM
         const constDesiredColor="w3-amber"
         const constReportColor="w3-blue"
         const constTelemetryColor="w3-lime"
         const constCommonColor="w3-dark-gray"
 
         var modelID = singleDBTwinInfo.modelID
-        this.drawStaticInfo(this.DOM, { "name": singleDBTwinInfo["displayName"] }, "1em", "13px")
+        this.drawStaticInfo(parentDom, { "name": singleDBTwinInfo["displayName"] }, "1em", "13px")
         var theDBModel = globalCache.getSingleDBModelByID(modelID)
         if (theDBModel.isIoTDeviceModel) {
-            this.drawConnectionStatus(singleDBTwinInfo["connectState"])
-            this.drawStaticInfo(this.DOM, { "Connection State Time": singleDBTwinInfo["connectStateUpdateTime"] }, ".5em", "10px")
-            this.DOM.append($('<table style="font-size:smaller;margin:3px 0px"><tr><td class="'+constTelemetryColor+'">&nbsp;&nbsp;</td><td>telemetry</td><td class="'+constReportColor+'">&nbsp;&nbsp;</td><td>report</td><td class="'+constDesiredColor+'">&nbsp;&nbsp;</td><td>desired</td><td class="'+constCommonColor+'">&nbsp;&nbsp;</td><td>common</td></tr></table>'))
+            this.drawConnectionStatus(singleDBTwinInfo["connectState"],parentDom)
+            this.drawStaticInfo(parentDom, { "Connection State Time": singleDBTwinInfo["connectStateUpdateTime"] }, ".5em", "10px")
+            parentDom.append($('<table style="font-size:smaller;margin:3px 0px"><tr><td class="'+constTelemetryColor+'">&nbsp;&nbsp;</td><td>telemetry</td><td class="'+constReportColor+'">&nbsp;&nbsp;</td><td>report</td><td class="'+constDesiredColor+'">&nbsp;&nbsp;</td><td>desired</td><td class="'+constCommonColor+'">&nbsp;&nbsp;</td><td>common</td></tr></table>'))
         }
 
         if (modelAnalyzer.DTDLModels[modelID]) {
@@ -159,15 +204,15 @@ class baseInfoPanel {
                     else return constCommonColor
                 }
             }
-            this.drawEditable(this.DOM, modelAnalyzer.DTDLModels[modelID].editableProperties, singleADTTwinInfo, [], funcGetKeyLblColorClass)
+            this.drawEditable(parentDom, modelAnalyzer.DTDLModels[modelID].editableProperties, singleADTTwinInfo, [], funcGetKeyLblColorClass)
         }
 
-        this.drawStaticInfo(this.DOM, { "Model": modelID }, "1em", "10px")
+        this.drawStaticInfo(parentDom, { "Model": modelID }, "1em", "10px")
         for (var ind in singleADTTwinInfo["$metadata"]) {
             if (ind == "$model") continue;
             var tmpObj = {}
             tmpObj[ind] = singleADTTwinInfo["$metadata"][ind]
-            this.drawStaticInfo(this.DOM, tmpObj, "1em", "10px")
+            this.drawStaticInfo(parentDom, tmpObj, "1em", "10px")
         }
     }
 }

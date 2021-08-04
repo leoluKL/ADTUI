@@ -4,6 +4,7 @@ const simpleConfirmDialog = require("./simpleConfirmDialog")
 const modelEditorDialog = require("./modelEditorDialog")
 const globalCache = require("./globalCache")
 const msalHelper=require("../msalHelper")
+const simpleExpandableSection= require("../sharedSourceFiles/simpleExpandableSection")
 
 function modelManagerDialog() {
     if(!this.DOM){
@@ -209,7 +210,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
         
     })
     
-    var VisualizationDOM=this.addAPartInRightSpan("Visualization")
+    var VisualizationDOM=this.addAPartInRightSpan("Visualization",{"marginTop":0}) 
     var editablePropertiesDOM=this.addAPartInRightSpan("Editable Properties And Relationships")
     var baseClassesDOM=this.addAPartInRightSpan("Base Classes")
     var originalDefinitionDOM=this.addAPartInRightSpan("Original Definition")
@@ -471,20 +472,11 @@ modelManagerDialog.prototype.fillEditableProperties=function(jsonInfo,parentDom)
 }
 
 
-modelManagerDialog.prototype.addAPartInRightSpan=function(partName){
-    var headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align" style="font-weight:bold"></button>')
-    headerDOM.text(partName)
-    var listDOM=$('<div class="w3-container w3-hide w3-border w3-show" style="background-color:white"></div>')
-    this.panelCard.append(headerDOM,listDOM)
-
-    headerDOM.on("click",(evt)=> {
-        if(listDOM.hasClass("w3-show")) listDOM.removeClass("w3-show")
-        else listDOM.addClass("w3-show")
- 
-        return false;
-    });
-    
-    return listDOM;
+modelManagerDialog.prototype.addAPartInRightSpan=function(partName,options){
+    options=options||{}
+    var section= new simpleExpandableSection(partName,this.panelCard,options)
+    section.expand()
+    return section.listDOM;
 }
 
 modelManagerDialog.prototype.readModelFilesContentAndImport=async function(files){

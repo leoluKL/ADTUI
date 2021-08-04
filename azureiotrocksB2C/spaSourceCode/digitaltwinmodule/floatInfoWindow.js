@@ -40,32 +40,13 @@ class floatInfoWindow extends baseInfoPanel{
             var documentBodyWidth = $('body').width()
 
             var singleElementInfo = arr[0];
+            singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
+
             if (singleElementInfo["$dtId"]) {// select a node
-                singleElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]]
                 var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
                 this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo)
             } else if (singleElementInfo["$sourceId"]) {
-                var arr=globalCache.storedOutboundRelationships[singleElementInfo["$sourceId"]]
-                for(var i=0;i<arr.length;i++){
-                    if(arr[i]['$relationshipId']==singleElementInfo["$relationshipId"]){
-                        singleElementInfo=arr[i]
-                        break;
-                    }
-                }
-
-                this.drawStaticInfo(this.DOM, {
-                    "$sourceId": singleElementInfo["$sourceId"],
-                    "$targetId": singleElementInfo["$targetId"],
-                    "$relationshipName": singleElementInfo["$relationshipName"]
-                }, "1em", "13px")
-                this.drawStaticInfo(this.DOM, {
-                    "$relationshipId": singleElementInfo["$relationshipId"]
-                }, "1em", "10px")
-                var relationshipName = singleElementInfo["$relationshipName"]
-                var sourceModel = singleElementInfo["sourceModel"]
-
-                this.drawEditable(this.DOM, this.getRelationShipEditableProperties(relationshipName, sourceModel), singleElementInfo, [])
-                this.drawStaticInfo(this.DOM, { "$etag": singleElementInfo["$etag"] }, "1em", "10px", "DarkGray")
+                this.drawSingleRelationProperties(singleElementInfo)
             }
 
             var screenXY = msgPayload.screenXY
@@ -79,12 +60,6 @@ class floatInfoWindow extends baseInfoPanel{
             this.DOM.css({ "left": windowLeft + "px", "top": windowTop + "px" })
         }
     }
-
-    getRelationShipEditableProperties(relationshipName,sourceModel){
-        if(!modelAnalyzer.DTDLModels[sourceModel] || !modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]) return
-        return modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName].editableRelationshipProperties
-    }
-
 
 }
 

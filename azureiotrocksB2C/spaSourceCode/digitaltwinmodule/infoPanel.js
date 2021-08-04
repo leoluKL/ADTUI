@@ -3,11 +3,14 @@ const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
 const globalCache = require("../sharedSourceFiles/globalCache")
 const msalHelper = require("../msalHelper")
 const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
+const simpleExpandableSection= require("../sharedSourceFiles/simpleExpandableSection")
 
 class infoPanel extends baseInfoPanel {
     constructor() {
         super()
         this.openLiveCalculationSection=false
+        this.openFunctionButtonSection=true
+        this.openPropertiesSection=true
         this.continerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
         this.continerDOM.hide()
         this.continerDOM.append($('<div style="height:50px" class="w3-bar w3-red"></div>'))
@@ -24,7 +27,7 @@ class infoPanel extends baseInfoPanel {
         this.closeButton1.on("click", buttonAnim)
         this.closeButton2.on("click", buttonAnim)
 
-        this.DOM = $('<div class="w3-container" style="postion:absolute;top:50px;height:calc(100% - 50px);overflow:auto"></div>')
+        this.DOM = $('<div class="w3-container" style="padding:0px;postion:absolute;top:50px;height:calc(100% - 50px);overflow:auto"></div>')
         this.continerDOM.css("background-color", "rgba(255, 255, 255, 0.8)")
         this.continerDOM.hover(() => {
             this.continerDOM.css("background-color", "rgba(255, 255, 255, 1)")
@@ -87,40 +90,23 @@ class infoPanel extends baseInfoPanel {
         if (arr.length == 1) {
             var singleElementInfo = arr[0];
 
+            singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
             if (singleElementInfo["$dtId"]) {// select a node
                 this.drawButtons("singleNode")
                 this.drawFormulaSection(singleElementInfo["$dtId"])
-                singleElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]] //note that dynamical property value is not stored in topology node, so always get refresh data from globalcache
-                var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
-                this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo)
-            } else if (singleElementInfo["$sourceId"]) {
-                var arr=globalCache.storedOutboundRelationships[singleElementInfo["$sourceId"]]
-                for(var i=0;i<arr.length;i++){
-                    if(arr[i]['$relationshipId']==singleElementInfo["$relationshipId"]){
-                        singleElementInfo=arr[i]
-                        break;
-                    }
-                }
-
+            }else if (singleElementInfo["$sourceId"]) {
                 this.drawButtons("singleRelationship")
-                this.drawStaticInfo(this.DOM, {
-                    "$sourceId": singleElementInfo["$sourceId"],
-                    "$targetId": singleElementInfo["$targetId"],
-                    "$relationshipName": singleElementInfo["$relationshipName"]
-                }, "1em", "13px")
-                this.drawStaticInfo(this.DOM, {
-                    "$relationshipId": singleElementInfo["$relationshipId"]
-                }, "1em", "10px")
-                var relationshipName = singleElementInfo["$relationshipName"]
-                var sourceModel = singleElementInfo["sourceModel"]
+            }
 
-                this.drawEditable(this.DOM, this.getRelationShipEditableProperties(relationshipName, sourceModel), singleElementInfo, [])
-                for (var ind in singleElementInfo["$metadata"]) {
-                    var tmpObj = {}
-                    tmpObj[ind] = singleElementInfo["$metadata"][ind]
-                    this.drawStaticInfo(this.DOM, tmpObj, "1em", "10px")
-                }
-                //this.drawStaticInfo(this.DOM,{"$etag":singleElementInfo["$etag"]},"1em","10px","DarkGray")
+            var propertiesSection= new simpleExpandableSection("Properties Section",this.DOM)
+            propertiesSection.callBack_change=(status)=>{this.openPropertiesSection=status}
+            if(this.openPropertiesSection) propertiesSection.expand()
+
+            if (singleElementInfo["$dtId"]) {// select a node
+                var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
+                this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo,propertiesSection.listDOM)
+            } else if (singleElementInfo["$sourceId"]) {
+                this.drawSingleRelationProperties(singleElementInfo,propertiesSection.listDOM)
             }
         } else if (arr.length > 1) {
             this.drawButtons("multiple")
@@ -128,18 +114,22 @@ class infoPanel extends baseInfoPanel {
         }
     }
 
-    getRelationShipEditableProperties(relationshipName, sourceModel) {
-        if (!modelAnalyzer.DTDLModels[sourceModel] || !modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]) return
-        return modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName].editableRelationshipProperties
-    }
 
     drawButtons(selectType) {
+        if(selectType==null){
+            this.DOM.html("<div style='padding:8px'><a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to draw box and select multiple twins in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl+z and ctrl+y to undo/redo in topology view; ctrl+s to save layout</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press shift or ctrl key to select multiple twins in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:12px;padding-bottom:5px'>Import twins data by clicking button below</a></div>") 
+        }
+
+        var buttonSection= new simpleExpandableSection("Function Buttons Section",this.DOM,{"marginTop":0})
+        buttonSection.callBack_change=(status)=>{this.openFunctionButtonSection=status}
+        if(this.openFunctionButtonSection) buttonSection.expand()
+
         var impBtn = $('<button class="w3-bar-item w3-button w3-blue"><i class="fas fa-cloud-upload-alt"></i></button>')
         var actualImportTwinsBtn = $('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
         if (selectType != null) {
             var refreshBtn = $('<button class="w3-bar-item w3-button w3-black"><i class="fas fa-sync-alt"></i></button>')
             var expBtn = $('<button class="w3-bar-item w3-button w3-green"><i class="fas fa-cloud-download-alt"></i></button>')
-            this.DOM.append(refreshBtn, expBtn, impBtn, actualImportTwinsBtn)
+            buttonSection.listDOM.append(refreshBtn, expBtn, impBtn, actualImportTwinsBtn)
             refreshBtn.on("click", () => { this.refreshInfomation() })
             expBtn.on("click", () => {
                 //find out the twins in selection and their connections (filter both src and target within the selected twins)
@@ -147,8 +137,7 @@ class infoPanel extends baseInfoPanel {
                 this.exportSelected()
             })
         } else {
-            this.DOM.html("<a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to draw box and select multiple twins in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl+z and ctrl+y to undo/redo in topology view; ctrl+s to save layout</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press shift or ctrl key to select multiple twins in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:12px;padding-bottom:5px'>Import twins data by clicking button below</a>")
-            this.DOM.append(impBtn, actualImportTwinsBtn)
+            buttonSection.listDOM.append(impBtn, actualImportTwinsBtn)
         }
 
         impBtn.on("click", () => { actualImportTwinsBtn.trigger('click'); })
@@ -161,7 +150,7 @@ class infoPanel extends baseInfoPanel {
 
         if (selectType == "singleRelationship") {
             var delBtn = $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
-            this.DOM.append(delBtn)
+            buttonSection.listDOM.append(delBtn)
             delBtn.on("click", () => { this.deleteSelected() })
         } else if (selectType == "singleNode" || selectType == "multiple") {
             var delBtn = $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
@@ -170,7 +159,7 @@ class infoPanel extends baseInfoPanel {
             var showInboundBtn = $('<button  style="width:45%" class="w3-button w3-border">Query Inbound</button>')
             var showOutBoundBtn = $('<button style="width:45%" class="w3-button w3-border">Query Outbound</button>')
 
-            this.DOM.append(delBtn, connectToBtn, connectFromBtn, showInboundBtn, showOutBoundBtn)
+            buttonSection.listDOM.append(delBtn, connectToBtn, connectFromBtn, showInboundBtn, showOutBoundBtn)
 
             showOutBoundBtn.on("click", () => { this.showOutBound() })
             showInboundBtn.on("click", () => { this.showInBound() })
@@ -190,7 +179,7 @@ class infoPanel extends baseInfoPanel {
             var selectOutBoundBtn = $('<button class="w3-button w3-border">+Select Outbound</button>')
             var coseLayoutBtn = $('<button class="w3-button w3-border">COSE View</button>')
             var hideBtn = $('<button class="w3-button w3-border">Hide</button>')
-            this.DOM.append(selectInboundBtn, selectOutBoundBtn, coseLayoutBtn, hideBtn)
+            buttonSection.listDOM.append(selectInboundBtn, selectOutBoundBtn, coseLayoutBtn, hideBtn)
 
             selectInboundBtn.on("click", () => { this.broadcastMessage({ "message": "addSelectInbound" }) })
             selectOutBoundBtn.on("click", () => { this.broadcastMessage({ "message": "addSelectOutbound" }) })
@@ -534,29 +523,21 @@ class infoPanel extends baseInfoPanel {
     }
 
     drawFormulaSection(twinID){
-        var headerDOM = $('<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom" style="margin-top:10px">Live Calculation Section</button>')
-        var listDOM = $('<div class="w3-container w3-hide" style="padding:1px"></div>')
-        this.DOM.append(headerDOM,listDOM)
-        
-        headerDOM.on("click", (evt) => {
-            if (listDOM.hasClass("w3-show")){
-                listDOM.removeClass("w3-show")
-                this.openLiveCalculationSection=false
-            } else{
-                listDOM.addClass("w3-show")
-                this.openLiveCalculationSection=true
-            } 
-            
-            return false;
-        });
-        if(this.openLiveCalculationSection) headerDOM.trigger("click")
+        var formulaSection= new simpleExpandableSection("Live Calculation Section",this.DOM)
+        formulaSection.callBack_change=(status)=>{this.openLiveCalculationSection=status}
+        if(this.openLiveCalculationSection) formulaSection.expand()
 
         //list all incoming twins
-        var incomingNeighbourLbl=this.generateSmallKeyDiv("Incoming Twins (Click to add twin name to script)","2px")
-        listDOM.append(incomingNeighbourLbl)
+        var incomingNeighbourLbl=this.generateSmallKeyDiv("Incoming Twins","2px")
+        incomingNeighbourLbl.css("display","inline")
+        var lbl1=$('<lbl style="font-size:10px;color:gray">(Click to add twin name to script)</lbl>')
+        formulaSection.listDOM.append($('<div/>').append(incomingNeighbourLbl,lbl1))
         var incomingTwins=globalCache.getStoredAllInboundRelationsSources(twinID)
         var scriptLbl=this.generateSmallKeyDiv("Calculation Script","2px")
-        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:270px;width:100%;overflow-x:hidden;overflow-y:auto"></textarea>')
+        scriptLbl.css("display","inline")
+        var lbl2=$('<lbl style="font-size:10px;color:gray">(Build in variables:_self _twinVal)</lbl>')
+
+        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:240px;width:100%;overflow-x:hidden;overflow-y:auto"></textarea>')
         scriptTextArea.on("keydown", (e) => {
             if (e.keyCode == 9){
                 this.insertToTextArea('\t',scriptTextArea)
@@ -582,13 +563,18 @@ class infoPanel extends baseInfoPanel {
             quickNameBtn.css("background-color",highlightColors[colorIndex][1])
             colorIndex++
             if(colorIndex>=highlightColors.length)colorIndex=0
-            listDOM.append(quickNameBtn)
+            formulaSection.listDOM.append(quickNameBtn)
             this.createQuickTextBtn(quickNameBtn,scriptTextArea)
         }
-        if(!hasIncomingTwins)listDOM.append($('<label>No incoming twins</label>'))
-        listDOM.append(scriptLbl)
-        listDOM.append(scriptTextArea)
+        if(!hasIncomingTwins)formulaSection.listDOM.append($('<label>No incoming twins</label>'))
+        formulaSection.listDOM.append($('<div/>').append(scriptLbl,lbl2))
+        formulaSection.listDOM.append(scriptTextArea)
         scriptTextArea.highlightWithinTextarea({highlight: twinNamesForHighlight});
+
+        var testScriptBtn = $('<button class="w3-button w3-light-gray w3-hover-amber">Test</button>')
+        var confirmBtn = $('<button class="w3-button w3-green  w3-hover-amber">Confirm</button>')
+        formulaSection.listDOM.append(testScriptBtn, confirmBtn)
+
     }
 
     createQuickTextBtn(btn,textAreaDom) {
@@ -751,7 +737,7 @@ class infoPanel extends baseInfoPanel {
             if (element['$sourceId']) numOfEdge++
             else numOfNode++
         });
-        var textDiv = $("<label style='display:block;margin-top:10px'></label>")
+        var textDiv = $("<label style='display:block;margin-top:10px;margin-left:16px'></label>")
         textDiv.text(numOfNode + " node" + ((numOfNode <= 1) ? "" : "s") + ", " + numOfEdge + " relationship" + ((numOfEdge <= 1) ? "" : "s"))
         this.DOM.append(textDiv)
     }
