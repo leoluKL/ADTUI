@@ -103,15 +103,28 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
             "id":payload.twinID,
             "twinID":payload.twinID,
             "type":"Formula",
+            "baseValueTemplate":payload.baseValueTemplate,
             "originalScript":payload.originalScript,
             "actualScript":payload.actualScript,
+            "calculationInputs":payload.calculationInputs,
             "author":accountID
         }
         await cosmosdbhelper.insertRecord("twincalculation", newDocument)
+        for(var i=0;i<payload.calculationInputs.length;i++){
+            var oneInput=payload.calculationInputs[i]
+            var aDoc={
+                "id": oneInput.twinID+"/"+oneInput.path.join("/")
+                ,"twinID":payload.twinID
+                ,"type":"value"
+                ,"path":oneInput.path
+                ,"value":oneInput.value
+            }
+            await cosmosdbhelper.insertRecord("twincalculation", aDoc)
+        }
     } catch (e) {
         res.status(400).send(e.message)
     }
-    res.send(newDocument)
+    res.end()
 }
 
 routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
