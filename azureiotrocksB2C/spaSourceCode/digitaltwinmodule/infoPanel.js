@@ -7,6 +7,7 @@ const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
 class infoPanel extends baseInfoPanel {
     constructor() {
         super()
+        this.openLiveCalculationSection=false
         this.continerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
         this.continerDOM.hide()
         this.continerDOM.append($('<div style="height:50px" class="w3-bar w3-red"></div>'))
@@ -88,6 +89,7 @@ class infoPanel extends baseInfoPanel {
 
             if (singleElementInfo["$dtId"]) {// select a node
                 this.drawButtons("singleNode")
+                this.drawFormulaSection(singleElementInfo["$dtId"])
                 singleElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]] //note that dynamical property value is not stored in topology node, so always get refresh data from globalcache
                 var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
                 this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo)
@@ -529,6 +531,84 @@ class infoPanel extends baseInfoPanel {
                 ]
             }
         )
+    }
+
+    drawFormulaSection(twinID){
+        var headerDOM = $('<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom" style="margin-top:10px">Live Calculation Section</button>')
+        var listDOM = $('<div class="w3-container w3-hide" style="padding:1px"></div>')
+        this.DOM.append(headerDOM,listDOM)
+        
+        headerDOM.on("click", (evt) => {
+            if (listDOM.hasClass("w3-show")){
+                listDOM.removeClass("w3-show")
+                this.openLiveCalculationSection=false
+            } else{
+                listDOM.addClass("w3-show")
+                this.openLiveCalculationSection=true
+            } 
+            
+            return false;
+        });
+        if(this.openLiveCalculationSection) headerDOM.trigger("click")
+
+        //list all incoming twins
+        var incomingNeighbourLbl=this.generateSmallKeyDiv("Incoming Twins (Click to add twin name to script)","2px")
+        listDOM.append(incomingNeighbourLbl)
+        var incomingTwins=globalCache.getStoredAllInboundRelationsSources(twinID)
+        var scriptLbl=this.generateSmallKeyDiv("Calculation Script","2px")
+        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:270px;width:100%;overflow-x:hidden;overflow-y:auto"></textarea>')
+        scriptTextArea.on("keydown", (e) => {
+            if (e.keyCode == 9){
+                this.insertToTextArea('\t',scriptTextArea)
+                return false;
+            }
+        })
+
+        
+        var highlightColors=[
+            ["Purple","#d0bfff"],["Cyan","#00bcd4"],["Amber","#ffc107"],["Lime","#cddc39"],["Pink","#e91e63"]
+        ]
+        var hasIncomingTwins=false
+        var twinNamesForHighlight=[]
+        //build in key word
+        twinNamesForHighlight.push({ "highlight": "_self", "className": "keyword"})
+        twinNamesForHighlight.push({ "highlight": "_twinVal", "className": "keyword"})
+        var colorIndex=0;
+        for(var twinID in incomingTwins){
+            hasIncomingTwins=true
+            var twinName=globalCache.twinIDMapToDisplayName[twinID]
+            twinNamesForHighlight.push({ "highlight": twinName, "className": highlightColors[colorIndex][0]})
+            var quickNameBtn= $(`<button class="w3-border w3-hover-gray">${twinName}</button>`)
+            quickNameBtn.css("background-color",highlightColors[colorIndex][1])
+            colorIndex++
+            if(colorIndex>=highlightColors.length)colorIndex=0
+            listDOM.append(quickNameBtn)
+            this.createQuickTextBtn(quickNameBtn,scriptTextArea)
+        }
+        if(!hasIncomingTwins)listDOM.append($('<label>No incoming twins</label>'))
+        listDOM.append(scriptLbl)
+        listDOM.append(scriptTextArea)
+        scriptTextArea.highlightWithinTextarea({highlight: twinNamesForHighlight});
+    }
+
+    createQuickTextBtn(btn,textAreaDom) {
+        btn.on("click",()=>{
+            var str=btn.text()
+            this.insertToTextArea(str,textAreaDom)
+            textAreaDom.highlightWithinTextarea('update');
+            textAreaDom.focus()
+        })
+    }
+
+    insertToTextArea(str,textAreaDom){
+        var startPos = textAreaDom[0].selectionStart;
+        var endPos = textAreaDom[0].selectionEnd;
+        var newContent=textAreaDom.val()
+        newContent=newContent.substring(0, startPos)+ str + newContent.substring(endPos, newContent.length);
+        textAreaDom.val(newContent)
+        textAreaDom[0].selectionStart=startPos+str.length;
+        textAreaDom[0].selectionEnd=startPos+str.length;
+
     }
 
     async deleteTwins(twinIDArr) {

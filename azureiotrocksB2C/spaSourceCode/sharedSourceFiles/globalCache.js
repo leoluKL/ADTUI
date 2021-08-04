@@ -210,6 +210,17 @@ globalCache.prototype.sortDBModelsArr=function(){
 }
 
 
+globalCache.prototype.getStoredAllInboundRelationsSources=function(twinID){
+    var srcTwins={}
+    for(var srcTwin in this.storedOutboundRelationships){
+        var arr=this.storedOutboundRelationships[srcTwin]
+        arr.forEach(oneRelation=>{
+            if(oneRelation["$targetId"]==twinID) srcTwins[oneRelation["$sourceId"]]=1
+        })
+    }
+    return srcTwins;
+}
+
 globalCache.prototype.storeTwinRelationships=function(relationsData){
     relationsData.forEach((oneRelationship)=>{
         var twinID=oneRelationship['$sourceId']

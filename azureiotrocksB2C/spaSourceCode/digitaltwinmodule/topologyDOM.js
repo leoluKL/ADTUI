@@ -258,7 +258,7 @@ topologyDOM.prototype.convertPosition=function(x,y){
 }
 
 topologyDOM.prototype.mouseOutFunction= function (e) {
-    if(globalCache.showFloatInfoPanel){ //since floating window is used for mouse hover element info, so info panel never chagne before, that is why there is no need to restore back the info panel information at mouseout
+    if(!globalCache.showFloatInfoPanel){ //since floating window is used for mouse hover element info, so info panel never chagne before, that is why there is no need to restore back the info panel information at mouseout
         if(globalCache.showingCreateTwinModelID){
             this.broadcastMessage({ "message": "showInfoGroupNode", "info": {"@id":globalCache.showingCreateTwinModelID} })
         }else{
@@ -359,10 +359,18 @@ topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipNa
 }
 
 topologyDOM.prototype.updateRelationshipShape=function(srcModelID,relationshipName,shape){
-    this.core.style()
+    if(shape=="solid"){
+        this.core.style()
         .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
         .style({'line-style': shape})
         .update()   
+    }else if(shape=="dotted"){
+        this.core.style()
+        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
+        .style({'line-style': 'dashed','line-dash-pattern':[8,8]})
+        .update()   
+    }
+    
 }
 topologyDOM.prototype.updateRelationshipWidth=function(srcModelID,relationshipName,edgeWidth){
     this.core.style()

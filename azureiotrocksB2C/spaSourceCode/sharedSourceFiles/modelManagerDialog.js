@@ -370,7 +370,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 
     var sizeAdjustSelector = $('<select class="w3-border" style="outline:none;width:110px"></select>')
     if(relatinshipName==null){
-        for(var f=0.2;f<2;f+=0.2){
+        for(var f=0.2;f<=3;f+=0.4){
             var val=f.toFixed(1)+""
             sizeAdjustSelector.append($("<option value="+val+">dimension*"+val+"</option>"))
         }

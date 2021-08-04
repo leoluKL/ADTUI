@@ -84,14 +84,14 @@ class baseInfoPanel {
         }    
     }
 
-    generateKeyDivForStaticInfo(str,paddingTop){
+    generateSmallKeyDiv(str,paddingTop){
         var keyDiv = $("<label style='display:block'><div class='w3-border' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em;font-size:10px'>"+str+"</div></label>")
         keyDiv.css("padding-top",paddingTop)
         return keyDiv
     }
 
     drawConnectionStatus(status) {
-        var keyDiv=this.generateKeyDivForStaticInfo("Connection",".5em")
+        var keyDiv=this.generateSmallKeyDiv("Connection",".5em")
         this.DOM.append(keyDiv)
         var contentDOM = $('<span class="fa-stack" style="font-size:.5em;padding-left:5px"></span>')
         if(status) {
@@ -107,7 +107,7 @@ class baseInfoPanel {
     drawStaticInfo(parent,jsonInfo,paddingTop,fontSize,fontColor){
         fontColor=fontColor||"black"
         for(var ind in jsonInfo){
-            var keyDiv=this.generateKeyDivForStaticInfo(ind,paddingTop)
+            var keyDiv=this.generateSmallKeyDiv(ind,paddingTop)
             parent.append(keyDiv)
     
             var contentDOM=$("<label></label>")

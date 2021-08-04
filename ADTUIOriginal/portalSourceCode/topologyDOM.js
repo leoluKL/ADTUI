@@ -258,7 +258,7 @@ topologyDOM.prototype.convertPosition=function(x,y){
 }
 
 topologyDOM.prototype.mouseOutFunction= function (e) {
-    if(globalCache.showFloatInfoPanel){ //since floating window is used for mouse hover element info, so info panel never chagne before, that is why there is no need to restore back the info panel information at mouseout
+    if(!globalCache.showFloatInfoPanel){ //since floating window is used for mouse hover element info, so info panel never chagne before, that is why there is no need to restore back the info panel information at mouseout
         if(globalCache.showingCreateTwinModelID){
             this.broadcastMessage({ "message": "showInfoGroupNode", "info": {"@id":globalCache.showingCreateTwinModelID} })
         }else{
