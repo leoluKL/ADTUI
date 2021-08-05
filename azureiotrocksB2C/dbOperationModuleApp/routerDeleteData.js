@@ -14,6 +14,7 @@ routerDeleteData.prototype.useRoute=function(routeStr,isPost){
     })
 }
 
+
 routerDeleteData.prototype.deleteModel =async function(req,res) {
     var projectID=req.body.projectID
     var modelID=req.body.model
@@ -33,6 +34,8 @@ routerDeleteData.prototype.deleteTwins =async function(req,res) {
     var promiseArr=[]
     twinIDs.forEach(oneTwinID=>{
         promiseArr.push(cosmosdbhelper.deleteRecord("dtproject",projectID,oneTwinID))
+        promiseArr.push(cosmosdbhelper.deleteAllRecordsInAPartition("twinhistorydata","twinID",oneTwinID))
+        promiseArr.push(cosmosdbhelper.deleteAllRecordsInAPartition("twincalculation","twinID",oneTwinID))
     })
 
     try{

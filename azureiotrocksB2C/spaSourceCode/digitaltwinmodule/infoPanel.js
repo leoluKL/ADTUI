@@ -538,7 +538,8 @@ class infoPanel extends baseInfoPanel {
         scriptLbl.css("display","inline")
         var lbl2=$('<lbl style="font-size:10px;color:gray">(Build in variables:_self _twinVal)</lbl>')
 
-        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:240px;width:100%;overflow-x:hidden;overflow-y:auto"></textarea>')
+        var placeHolderStr='Sample&#160;Script&#58;&#10;&#10;if(_twinVal["intwin1"]["p1"]["childProp"]){&#10;&#9;_self["outProp"]=_twinVal["intwin1"]["p2"]&#10;}else{&#10;&#9;_self["outProp"]=_twinVal["intwin1"]["p2"]&#32;+&#32;&#10;&#9;&#9;_twinVal["intwin2"]["p3"]["p4"]&#10;}'
+        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:240px;width:100%;overflow-x:hidden;overflow-y:auto" placeholder='+placeHolderStr+'></textarea>')
         scriptTextArea.on("keydown", (e) => {
             if (e.keyCode == 9){
                 this.insertToTextArea('\t',scriptTextArea)

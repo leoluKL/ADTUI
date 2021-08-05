@@ -60,5 +60,25 @@ cosmosdbhelper.prototype.deleteRecord=async function(containerID,partitionFieldV
     }
 }
 
+cosmosdbhelper.prototype.deleteAllRecordsInAPartition=async function(containerID,patitionKey,patitionKeyValue){
+    var queryStr='SELECT c.id FROM c where '
+    queryStr+=`c.${patitionKey}='${patitionKeyValue}'`
+    try{
+        var docsArr=await this.query(containerID,queryStr)
+    }catch(e){
+        throw e;
+    }
+
+    try{
+        var promiseArr=[]
+        docsArr.forEach(oneDoc=>{
+            promiseArr.push(this.deleteRecord(containerID,patitionKeyValue,oneDoc.id))
+        })
+        var results=await Promise.allSettled(promiseArr);
+    }catch(e){
+        throw e;
+    }
+}
+
 
 module.exports = new cosmosdbhelper();
