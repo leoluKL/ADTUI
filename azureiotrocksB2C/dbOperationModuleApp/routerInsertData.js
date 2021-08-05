@@ -107,7 +107,8 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
             "originalScript":payload.originalScript,
             "actualScript":payload.actualScript,
             "calculationInputs":payload.calculationInputs,
-            "author":accountID
+            "author":accountID,
+            "projectID":payload.projectID
         }
         await cosmosdbhelper.insertRecord("twincalculation", newDocument)
         for(var i=0;i<payload.calculationInputs.length;i++){

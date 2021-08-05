@@ -594,7 +594,8 @@ class infoPanel extends baseInfoPanel {
                 "originalScript":scriptContent,
                 "actualScript":translateResult,
                 "calculationInputs":inputArr,
-                "baseValueTemplate":valueTemplate
+                "baseValueTemplate":valueTemplate,
+                "projectID":globalCache.currentProjectID
             }
             //console.log({"payload":JSON.stringify(theBody) })
             //by using withProjectID it will ensure it is the authorized person send the command
