@@ -60,7 +60,7 @@ mapDOM.prototype.rxMessage=function(msgPayload){
         selectedTwinsArr.forEach(aTwin=>{
             var twinID=aTwin['$dtId']
             if(!twinID) return;
-            var theDBTwin=globalCache.getSingleDBTwinByID(twinID)
+            var theDBTwin=globalCache.DBTwins[twinID]
             selectedDBTwins.push(theDBTwin)
         })
         this.highlightTwins(selectedDBTwins)

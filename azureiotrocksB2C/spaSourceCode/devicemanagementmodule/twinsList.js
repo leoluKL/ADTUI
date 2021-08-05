@@ -53,7 +53,7 @@ twinsList.prototype.rxMessage=function(msgPayload){
         var msgBody=msgPayload.body
         if(msgBody.connectionState && msgBody.projectID==globalCache.currentProjectID){
             var twinID=msgBody.twinID
-            var twinDBInfo=globalCache.getSingleDBTwinByID(twinID)
+            var twinDBInfo=globalCache.DBTwins[twinID]
             var theSingleModelTwinsList=this.findSingleModelTwinsListByModelID(twinDBInfo.modelID)
             var theTwinIcon=theSingleModelTwinsList.getSingleTwinIcon(twinID)
             if(theTwinIcon) theTwinIcon.redrawIoTState()

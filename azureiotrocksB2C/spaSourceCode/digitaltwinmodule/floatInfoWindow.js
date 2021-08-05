@@ -43,7 +43,7 @@ class floatInfoWindow extends baseInfoPanel{
             singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
 
             if (singleElementInfo["$dtId"]) {// select a node
-                var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
+                var singleDBTwinInfo=globalCache.DBTwins[singleElementInfo["$dtId"]]
                 this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo)
             } else if (singleElementInfo["$sourceId"]) {
                 this.drawSingleRelationProperties(singleElementInfo)

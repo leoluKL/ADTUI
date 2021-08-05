@@ -181,10 +181,11 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
         //check how many twins are under this model ID
         var numberOfTwins=0
         var checkTwinsModelArr=[modelID].concat(relatedModelIDs)
-        globalCache.DBTwinsArr.forEach(oneDBTwin=>{
+        for(var oneTwinID in globalCache.DBTwins){
+            var oneDBTwin = globalCache.DBTwins[oneTwinID]
             var theIndex=checkTwinsModelArr.indexOf(oneDBTwin["modelID"])
             if(theIndex!=-1) numberOfTwins++
-        })
+        }
 
         dialogStr+=" (There will be "+((numberOfTwins>1)?(numberOfTwins+" twins"):(numberOfTwins+" twin") ) + " being impacted)"
         confirmDialogDiv.show(

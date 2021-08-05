@@ -27,9 +27,10 @@ singleModelTwinsList.prototype.createDOM=function(){
 
     //fill in the twins under this model
     var twins=[]
-    globalCache.DBTwinsArr.forEach(aTwin=>{
+    for(var twinID in globalCache.DBTwins){
+        var aTwin=globalCache.DBTwins[twinID]
         if(aTwin.modelID==this.info["@id"]) twins.push(aTwin)
-    })
+    }
     twins.sort(function (a, b) { 
         var aName=a.displayName.toLowerCase()
         var bName=b.displayName.toLowerCase()
@@ -176,7 +177,7 @@ singleTwinIcon.prototype.clickSelf=function(mouseClickDetail){
 
 singleTwinIcon.prototype.refreshTwinInfo=function(){
     var twinID=this.twinInfo.id
-    this.twinInfo=globalCache.getSingleDBTwinByID(twinID)
+    this.twinInfo=globalCache.DBTwins[twinID]
 }
 
 singleTwinIcon.prototype.redrawIoTState=function(){

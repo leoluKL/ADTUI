@@ -3,7 +3,7 @@ function globalCache(){
     this.joinedProjectsToken=null;
     this.showFloatInfoPanel=true
     this.DBModelsArr = []
-    this.DBTwinsArr = []
+    this.DBTwins = {}
     this.modelIDMapToName={}
     this.modelNameMapToID={}
     this.twinIDMapToDisplayName={}
@@ -42,43 +42,25 @@ globalCache.prototype.storeSingleADTTwin=function(oneNode){
 
 
 globalCache.prototype.storeSingleDBTwin=function(DBTwin){
-    for(var i=0;i<this.DBTwinsArr.length;i++){
-        var oneDBTwin=this.DBTwinsArr[i]
-        if(oneDBTwin["id"]==DBTwin["id"]){
-            this.DBTwinsArr.splice(i,1)
-            break;
-        }
-    }
-    this.DBTwinsArr.push(DBTwin)
-
+    this.DBTwins[DBTwin["id"]]=DBTwin
     this.twinIDMapToDisplayName[DBTwin["id"]]=DBTwin["displayName"]
     this.twinDisplayNameMapToID[DBTwin["displayName"]]=DBTwin["id"]
 }
 
 globalCache.prototype.storeDBTwinsArr=function(DBTwinsArr){
-    this.DBTwinsArr.length=0
-    this.DBTwinsArr=this.DBTwinsArr.concat(DBTwinsArr)
+    for(var ind in this.DBTwins) delete this.DBTwins[ind]
     for(var ind in this.twinIDMapToDisplayName) delete this.twinIDMapToDisplayName[ind]
     for(var ind in this.twinDisplayNameMapToID) delete this.twinDisplayNameMapToID[ind]
-    
-    this.DBTwinsArr.forEach(oneDBTwin=>{
-        this.twinIDMapToDisplayName[oneDBTwin["id"]]=oneDBTwin["displayName"]
-        this.twinDisplayNameMapToID[oneDBTwin["displayName"]]=oneDBTwin["id"]
-    })
+
+    this.mergeDBTwinsArr(DBTwinsArr)
 }
 
 globalCache.prototype.mergeDBTwinsArr=function(DBTwinsArr){
-    var idList={}
-    var arr=[].concat(DBTwinsArr)
-    arr.forEach(aDBTwin=>{
-        idList[aDBTwin.id]=1
+    DBTwinsArr.forEach(oneDBTwin=>{
+        this.DBTwins[oneDBTwin["id"]]=oneDBTwin
+        this.twinIDMapToDisplayName[oneDBTwin["id"]]=oneDBTwin["displayName"]
+        this.twinDisplayNameMapToID[oneDBTwin["displayName"]]=oneDBTwin["id"]
     })
-    this.DBTwinsArr.forEach(aDBTwin=>{
-        if(idList[aDBTwin.id]) return;
-        arr.push(aDBTwin)
-    })
-
-    this.storeDBTwinsArr(arr)
 }
 
 globalCache.prototype.storeUserData=function(res){
@@ -128,6 +110,19 @@ globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
         }else if(element.type=="DTTwin") dbtwins.push(element)
     });
     this.storeDBTwinsArr(dbtwins)
+
+    resArr.forEach(element => {
+        if(element.originalScript!=null) { 
+            var twinID=element.id
+            var oneDBTwin=this.DBTwins[twinID]
+            if(oneDBTwin){
+                oneDBTwin["originalScript"]=element["originalScript"]
+                oneDBTwin["lastExecutionTime"]=element["lastExecutionTime"]
+                oneDBTwin["author"]=element["author"]
+                oneDBTwin["invalidFlag"]=element["invalidFlag"]
+            }
+        }
+    });
 }
 
 globalCache.prototype.recordSingleVisualSchema=function(detail,accountID,oname,isShared){
@@ -146,8 +141,8 @@ globalCache.prototype.recordSingleLayout=function(detail,accountID,oname,isShare
 
 globalCache.prototype.getDBTwinsByModelID=function(modelID){
     var resultArr=[]
-    for(var i=0;i<this.DBTwinsArr.length;i++){
-        var ele = this.DBTwinsArr[i]
+    for(var ind in this.DBTwins){
+        var ele=this.DBTwins[ind]
         if(ele.modelID==modelID){
             resultArr.push(ele)
         }
@@ -155,29 +150,14 @@ globalCache.prototype.getDBTwinsByModelID=function(modelID){
     return resultArr;
 }
 
-globalCache.prototype.getSingleDBTwinByID=function(twinID){
-    for(var i=0;i<this.DBTwinsArr.length;i++){
-        var ele = this.DBTwinsArr[i]
-        if(ele.id==twinID){
-            return ele
-        }
-    }
-    return null;
-}
-
 globalCache.prototype.getSingleDBTwinByName=function(twinName){
-    for(var i=0;i<this.DBTwinsArr.length;i++){
-        var ele = this.DBTwinsArr[i]
-        if(ele.displayName==twinName){
-            return ele
-        }
-    }
-    return null;
+    var twinID=this.twinDisplayNameMapToID[twinName]
+    return this.DBTwins[twinID]
 }
 
 globalCache.prototype.getSingleDBTwinByIndoorFeatureID=function(featureID){
-    for(var i=0;i<this.DBTwinsArr.length;i++){
-        var ele = this.DBTwinsArr[i]
+    for(var ind in this.DBTwins){
+        var ele=this.DBTwins[ind]
         if(ele.GIS && ele.GIS.indoor){
             if(ele.GIS.indoor.IndoorFeatureID==featureID) return ele
         }

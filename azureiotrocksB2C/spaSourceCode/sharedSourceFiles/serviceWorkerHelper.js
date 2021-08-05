@@ -30,7 +30,7 @@ serviceWorkerHelper.prototype.subscribeMessagePush = async function (projectID) 
 serviceWorkerHelper.prototype.processLiveMessage=function(msgBody){
     if(msgBody.connectionState && msgBody.projectID==globalCache.currentProjectID){
         var twinID=msgBody.twinID
-        var twinDBInfo=globalCache.getSingleDBTwinByID(twinID)
+        var twinDBInfo=globalCache.DBTwins[twinID]
         if(msgBody.connectionState=="deviceConnected") twinDBInfo.connectState=true
         else twinDBInfo.connectState=false
         //console.log(msgBody)

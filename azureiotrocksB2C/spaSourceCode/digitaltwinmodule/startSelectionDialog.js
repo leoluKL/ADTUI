@@ -194,9 +194,10 @@ startSelectionDialog.prototype.getSelectedTwins=function(){
         if($(this).attr("id")=="ALL") return;
         chosenModels[$(this).attr("id")]=1
     });
-    globalCache.DBTwinsArr.forEach(aTwin=>{
+    for(var twinID in globalCache.DBTwins){
+        var aTwin=globalCache.DBTwins[twinID]
         if(chosenModels[aTwin["modelID"]])  reArr.push(aTwin)
-    })
+    }
     return reArr;
 }
 

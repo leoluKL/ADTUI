@@ -102,7 +102,7 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
         var newDocument={
             "id":payload.twinID,
             "twinID":payload.twinID,
-            "type":"Formula",
+            "type":"formula",
             "baseValueTemplate":payload.baseValueTemplate,
             "originalScript":payload.originalScript,
             "actualScript":payload.actualScript,

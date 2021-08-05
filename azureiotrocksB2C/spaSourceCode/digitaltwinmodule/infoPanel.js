@@ -104,7 +104,7 @@ class infoPanel extends baseInfoPanel {
             if(this.openPropertiesSection) propertiesSection.expand()
 
             if (singleElementInfo["$dtId"]) {// select a node
-                var singleDBTwinInfo=globalCache.getSingleDBTwinByID(singleElementInfo["$dtId"])
+                var singleDBTwinInfo=globalCache.DBTwins[singleElementInfo["$dtId"]]
                 this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo,propertiesSection.listDOM)
             } else if (singleElementInfo["$sourceId"]) {
                 this.drawSingleRelationProperties(singleElementInfo,propertiesSection.listDOM)
@@ -546,7 +546,8 @@ class infoPanel extends baseInfoPanel {
                 return false;
             }
         })
-
+        var DBFormulaTwin=globalCache.DBTwins[formulaTwinID]
+        if(DBFormulaTwin && DBFormulaTwin["originalScript"]) scriptTextArea.val(DBFormulaTwin["originalScript"])
         
         var highlightColors=[
             ["Purple","#d0bfff"],["Cyan","#00bcd4"],["Amber","#ffc107"],["Lime","#cddc39"],["Pink","#e91e63"]
@@ -726,7 +727,7 @@ class infoPanel extends baseInfoPanel {
     async deleteTwins(twinIDArr) {
         var ioTDevices = []
         twinIDArr.forEach(oneTwinID => {
-            var dbTwinInfo = globalCache.getSingleDBTwinByID(oneTwinID)
+            var dbTwinInfo = globalCache.DBTwins[oneTwinID]
             if (dbTwinInfo.IoTDeviceID != null && dbTwinInfo.IoTDeviceID != "") {
                 ioTDevices.push(dbTwinInfo.IoTDeviceID)
             }

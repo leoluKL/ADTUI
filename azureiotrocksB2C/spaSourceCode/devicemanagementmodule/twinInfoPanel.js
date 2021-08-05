@@ -34,9 +34,10 @@ class twinInfoPanel extends baseInfoPanel{
                 if (!globalCache.storedTwins[singleDBTwinInfo.id]) {
                     //query all twins of this parent model if they havenot been queried from ADT yet
                     var twinIDs = []
-                    globalCache.DBTwinsArr.forEach(ele => {
+                    for(var twinID in globalCache.DBTwins){
+                        var ele=globalCache.DBTwins[twinID]
                         if (ele.modelID == modelID) twinIDs.push(ele.id)
-                    })
+                    }
                     var twinsData = await msalHelper.callAPI("digitaltwin/listTwinsForIDs", "POST", twinIDs)
                     globalCache.storeADTTwins(twinsData)
                 }
