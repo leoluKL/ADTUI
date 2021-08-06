@@ -557,10 +557,11 @@ class infoPanel extends baseInfoPanel {
         var highlightColors=[
             ["Purple","#d0bfff"],["Cyan","#00bcd4"],["Amber","#ffc107"],["Lime","#cddc39"],["Pink","#e91e63"]
         ]
+        //["Gray","#9e9e9e"]
         var hasIncomingTwins=false
         var twinNamesForHighlight=[]
         //build in key word
-        twinNamesForHighlight.push({ "highlight": "_self", "className": "keyword"})
+        twinNamesForHighlight.push({ "highlight": "_self", "className": "Gray"})
         twinNamesForHighlight.push({ "highlight": "_twinVal", "className": "keyword"})
         var colorIndex=0;
         for(var twinID in incomingTwins){
@@ -573,7 +574,7 @@ class infoPanel extends baseInfoPanel {
             if(colorIndex>=highlightColors.length)colorIndex=0
         }
 
-        this.createQuickBtnForTwin("Self","gray",formulaSection.listDOM,scriptTextArea,formulaTwinModelID)
+        this.createQuickBtnForTwin("Self","#9e9e9e",formulaSection.listDOM,scriptTextArea,formulaTwinModelID)
 
         if(!hasIncomingTwins)formulaSection.listDOM.append($('<label>No incoming twins</label>'))
         formulaSection.listDOM.append(scriptLbl)
@@ -584,11 +585,17 @@ class infoPanel extends baseInfoPanel {
         var confirmScriptBtn = $('<button class="w3-ripple w3-button w3-green  w3-hover-amber">Confirm</button>')
         formulaSection.listDOM.append(testScriptBtn, confirmScriptBtn)
 
+
+        scriptTextArea.on("keyup",()=>{
+            scriptTestDialog.scriptContent=scriptTextArea.val()
+        })
+
         testScriptBtn.on("click",()=>{
             var valueTemplate={}
             this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties,[],valueTemplate)
             var inputArr = this.findAllInputsInScript(scriptTextArea.val(),formulaTwinID,"forTestingScriptPurpose")
-            scriptTestDialog.popup(inputArr,scriptTextArea.val(),formulaTwinID,formulaTwinModelID,valueTemplate)
+            scriptTestDialog.popup(inputArr,formulaTwinID,formulaTwinModelID,valueTemplate)
+            scriptTestDialog.scriptContent=scriptTextArea.val()
         })
         confirmScriptBtn.on("click",()=>{
             this.confirmScript(scriptTextArea.val(),formulaTwinID,formulaTwinModelID)
