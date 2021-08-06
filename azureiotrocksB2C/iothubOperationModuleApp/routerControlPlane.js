@@ -66,7 +66,7 @@ routerControlPlane.prototype.provisionDevice =async function(req,res) {
             }
             ,"*")
         }
-        res.send(`Device created with ID ${deviceID}. Expiry: ${iothubHelper.iothubRegistry._restApiClient._accessToken.expiresOnTimestamp}`) //
+        res.end()
     }catch(e){
         res.status(400)
         if (Date.now() > iothubHelper.iothubRegistry._restApiClient._accessToken.expiresOnTimestamp) {
