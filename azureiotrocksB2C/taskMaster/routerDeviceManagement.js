@@ -64,11 +64,13 @@ routerDeviceManagement.prototype._provisionIoTDeviceTwin = async function(twinUU
     try{
         var provisionDevicePayload={"deviceID":twinUUID,"tags":tags,"desiredProperties":desiredInDeviceTwin}
         await got.post(process.env.iothuboperationAPIURL+"controlPlane/provisionDevice", {json:provisionDevicePayload,responseType: 'json'});
-
+        console.log("here")
         var postLoad={"projectID":projectID,"twinID":twinUUID,"updateInfo":JSON.stringify({"IoTDeviceID":twinUUID})}
+        console.log(postLoad)
         var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateTwin", {json:postLoad,responseType: 'json'});
         return body
     }catch(e){
+        console.log(e)
         throw e;
     }
 }
