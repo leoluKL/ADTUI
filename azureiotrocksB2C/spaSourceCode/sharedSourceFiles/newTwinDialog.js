@@ -23,7 +23,7 @@ newTwinDialog.prototype.popup = async function(twinInfo) {
     this.contentDOM.children(':first').append(closeButton)
     closeButton.on("click", () => { this.DOM.hide() })
 
-    var addButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Add</button>')
+    var addButton = $('<button class="w3-ripple w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Add</button>')
     this.contentDOM.children(':first').append(addButton)
     addButton.on("click", async () => { this.addNewTwin() })
     

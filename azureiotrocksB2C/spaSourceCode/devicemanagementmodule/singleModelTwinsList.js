@@ -1,6 +1,7 @@
 const globalCache = require("../sharedSourceFiles/globalCache");
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 const modelIoTSettingDialog = require("./modelIoTSettingDialog")
+const simpleExpandableSection = require("../sharedSourceFiles/simpleExpandableSection")
 
 function singleModelTwinsList(singleADTModel,parentTwinsList) {
     this.parentTwinsList=parentTwinsList
@@ -11,19 +12,9 @@ function singleModelTwinsList(singleADTModel,parentTwinsList) {
 }
 
 singleModelTwinsList.prototype.createDOM=function(){
-    this.DOM=$("<div></div>")
-    this.parentTwinsList.DOM.append(this.DOM)
-
-    this.headerDOM=$('<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom"></button>')
-
-    this.listDOM=$('<div class="w3-container w3-hide w3-border w3-padding-16"></div>')
-    this.DOM.append(this.headerDOM,this.listDOM)
-
-    this.headerDOM.on("click",(evt)=> {
-        if(this.listDOM.hasClass("w3-show")) this.shrink()
-        else this.expand()
-        return false;
-    });
+    var oneSection= new simpleExpandableSection("Properties Section",this.parentTwinsList.DOM,{"marginTop":"1px"})
+    this.oneSection=oneSection
+    this.listDOM=oneSection.listDOM
 
     //fill in the twins under this model
     var twins=[]
@@ -48,15 +39,9 @@ singleModelTwinsList.prototype.addTwin=function(DBTwinInfo){
     this.refreshName()
 }
 
-singleModelTwinsList.prototype.expand=function(){
-    this.listDOM.addClass("w3-show")
-}
-singleModelTwinsList.prototype.shrink=function(){
-    this.listDOM.removeClass("w3-show")
-}
 
 singleModelTwinsList.prototype.refreshName=function(){
-    this.headerDOM.empty()
+    this.oneSection.headerTextDOM.empty()
     var nameDiv=$("<div class='w3-text-dark-gray' style='display:inline;padding-right:3px;vertical-align:middle;font-weight:bold;color:darkgray'></div>")
     nameDiv.text(this.name)
 
@@ -75,9 +60,9 @@ singleModelTwinsList.prototype.refreshName=function(){
 
     var numberlabel2=$("<label class='w3-lime' style='display:inline;font-size:9px;padding:2px 4px;font-weight:normal;border-radius: 2px;'>"+countIoTDevices+" IoT Devices</label>")
     
-    var addButton= $('<button class="w3-bar-item w3-button w3-red w3-hover-amber w3-right" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
+    var addButton= $('<button class="w3-ripple w3-bar-item w3-button w3-red w3-hover-pink w3-right" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
     addButton.on("click",(e)=>{
-        this.expand()
+        this.oneSection.expand()
         newTwinDialog.popup({
             "$metadata": {
                 "$model": this.info["@id"]
@@ -86,17 +71,17 @@ singleModelTwinsList.prototype.refreshName=function(){
         return false
     })
 
-    var iotSetButton=$('<button class="w3-bar-item w3-button w3-red w3-hover-amber w3-right" style="margin-top:2px;margin-left:10px;font-size:1.2em;padding:4px 8px"><i class="fa fa-cog fa-lg"></i> IoT Setting</button>')
+    var iotSetButton=$('<button class="w3-ripple w3-bar-item w3-button w3-red w3-hover-pink w3-right" style="margin-top:2px;margin-left:10px;font-size:1.2em;padding:4px 8px"><i class="fa fa-cog fa-lg"></i> IoT Setting</button>')
     iotSetButton.on("click",(e)=>{
-        this.expand()
+        this.oneSection.expand()
         modelIoTSettingDialog.popup(this.info["@id"])
         return false
     })
 
 
-    this.headerDOM.append(nameDiv,numberlabel)
-    if(singleDBModel && singleDBModel.isIoTDeviceModel) this.headerDOM.append(numberlabel2)
-    this.headerDOM.append(iotSetButton,addButton)
+    this.oneSection.headerTextDOM.append(nameDiv,numberlabel)
+    if(singleDBModel && singleDBModel.isIoTDeviceModel) this.oneSection.headerTextDOM.append(numberlabel2)
+    this.oneSection.headerTextDOM.append(iotSetButton,addButton)
 }
 
 singleModelTwinsList.prototype.refreshTwinsIcon=function(){

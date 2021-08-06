@@ -5,6 +5,7 @@ const msalHelper = require("../msalHelper")
 const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
 const simpleExpandableSection= require("../sharedSourceFiles/simpleExpandableSection")
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
+const scriptTestDialog = require("../sharedSourceFiles/scriptTestDialog")
 
 class infoPanel extends baseInfoPanel {
     constructor() {
@@ -12,7 +13,7 @@ class infoPanel extends baseInfoPanel {
         this.openLiveCalculationSection=false
         this.openFunctionButtonSection=false
         this.openPropertiesSection=true
-        this.continerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:300px;transform: translateY(-50%);"></div>')
+        this.continerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:350px;transform: translateY(-50%);"></div>')
         this.continerDOM.hide()
         this.continerDOM.append($('<div style="height:50px" class="w3-bar w3-red"></div>'))
 
@@ -128,8 +129,8 @@ class infoPanel extends baseInfoPanel {
         var impBtn = $('<button class="w3-bar-item w3-button w3-blue"><i class="fas fa-cloud-upload-alt"></i></button>')
         var actualImportTwinsBtn = $('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
         if (selectType != null) {
-            var refreshBtn = $('<button class="w3-bar-item w3-button w3-black"><i class="fas fa-sync-alt"></i></button>')
-            var expBtn = $('<button class="w3-bar-item w3-button w3-green"><i class="fas fa-cloud-download-alt"></i></button>')
+            var refreshBtn = $('<button class="w3-ripple w3-bar-item w3-button w3-black"><i class="fas fa-sync-alt"></i></button>')
+            var expBtn = $('<button class="w3-ripple w3-bar-item w3-button w3-green"><i class="fas fa-cloud-download-alt"></i></button>')
             buttonSection.listDOM.append(refreshBtn, expBtn, impBtn, actualImportTwinsBtn)
             refreshBtn.on("click", () => { this.refreshInfomation() })
             expBtn.on("click", () => {
@@ -150,15 +151,15 @@ class infoPanel extends baseInfoPanel {
         if (selectType == null) return;
 
         if (selectType == "singleRelationship") {
-            var delBtn = $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+            var delBtn = $('<button style="width:104px" class="w3-ripple w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
             buttonSection.listDOM.append(delBtn)
             delBtn.on("click", () => { this.deleteSelected() })
         } else if (selectType == "singleNode" || selectType == "multiple") {
-            var delBtn = $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
-            var connectToBtn = $('<button style="width:45%"  class="w3-button w3-border">Connect to</button>')
-            var connectFromBtn = $('<button style="width:45%" class="w3-button w3-border">Connect from</button>')
-            var showInboundBtn = $('<button  style="width:45%" class="w3-button w3-border">Query Inbound</button>')
-            var showOutBoundBtn = $('<button style="width:45%" class="w3-button w3-border">Query Outbound</button>')
+            var delBtn = $('<button style="width:104px" class="w3-ripple w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+            var connectToBtn = $('<button style="width:45%"  class="w3-ripple w3-button w3-border">Connect to</button>')
+            var connectFromBtn = $('<button style="width:45%" class="w3-ripple w3-button w3-border">Connect from</button>')
+            var showInboundBtn = $('<button  style="width:45%" class="w3-ripple w3-button w3-border">Query Inbound</button>')
+            var showOutBoundBtn = $('<button style="width:45%" class="w3-ripple w3-button w3-border">Query Outbound</button>')
 
             buttonSection.listDOM.append(delBtn, connectToBtn, connectFromBtn, showInboundBtn, showOutBoundBtn)
 
@@ -176,10 +177,10 @@ class infoPanel extends baseInfoPanel {
             if (element['$dtId']) numOfNode++
         });
         if (numOfNode > 0) {
-            var selectInboundBtn = $('<button class="w3-button w3-border">+Select Inbound</button>')
-            var selectOutBoundBtn = $('<button class="w3-button w3-border">+Select Outbound</button>')
-            var coseLayoutBtn = $('<button class="w3-button w3-border">COSE View</button>')
-            var hideBtn = $('<button class="w3-button w3-border">Hide</button>')
+            var selectInboundBtn = $('<button class="w3-ripple w3-button w3-border">+Select Inbound</button>')
+            var selectOutBoundBtn = $('<button class="w3-ripple w3-button w3-border">+Select Outbound</button>')
+            var coseLayoutBtn = $('<button class="w3-ripple w3-button w3-border">COSE View</button>')
+            var hideBtn = $('<button class="w3-ripple w3-button w3-border">Hide</button>')
             buttonSection.listDOM.append(selectInboundBtn, selectOutBoundBtn, coseLayoutBtn, hideBtn)
 
             selectInboundBtn.on("click", () => { this.broadcastMessage({ "message": "addSelectInbound" }) })
@@ -198,10 +199,10 @@ class infoPanel extends baseInfoPanel {
         this.DOM.append(label)
         var alignButtonsTable = $("<table style='margin:0 auto'><tr><td></td><td></td><td></td></tr><tr><td></td><td style='text-align:center;font-weight:bold;color:darkGray'>ALIGN</td><td></td></tr><tr><td></td><td></td><td></td></tr></table>")
         this.DOM.append(alignButtonsTable)
-        var alignTopButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-up"></i></button>')
-        var alignLeftButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-left"></i></button>')
-        var alignRightButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-right"></i></button>')
-        var alignBottomButton = $('<button class="w3-button w3-border"><i class="fas fa-chevron-down"></i></button>')
+        var alignTopButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-chevron-up"></i></button>')
+        var alignLeftButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-chevron-left"></i></button>')
+        var alignRightButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-chevron-right"></i></button>')
+        var alignBottomButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-chevron-down"></i></button>')
         alignButtonsTable.find("td").eq(1).append(alignTopButton)
         alignButtonsTable.find("td").eq(3).append(alignLeftButton)
         alignButtonsTable.find("td").eq(5).append(alignRightButton)
@@ -211,14 +212,14 @@ class infoPanel extends baseInfoPanel {
         var arrangeTable = $("<table style='margin:0 auto'><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>")
         this.DOM.append(arrangeTable)
 
-        var distributeHButton = $('<button class="w3-button w3-border"><i class="fas fa-ellipsis-h fa-lg"></i></button>')
-        var distributeVButton = $('<button class="w3-button w3-border"><i class="fas fa-ellipsis-v fa-lg"></i></button>')
-        var leftRotateButton = $('<button class="w3-button w3-border"><i class="fas fa-undo-alt fa-lg"></i></button>')
-        var rightRotateButton = $('<button class="w3-button w3-border"><i class="fas fa-redo-alt fa-lg"></i></button>')
-        var mirrorHButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-arrows-alt-h"></i></button>')
-        var mirrorVButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-arrows-alt-v"></i></button>')
-        var expandButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-expand-arrows-alt"></i></button>')
-        var compressButton = $('<button class="w3-button w3-border" style="width:100%"><i class="fas fa-compress-arrows-alt"></i></button>')
+        var distributeHButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-ellipsis-h fa-lg"></i></button>')
+        var distributeVButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-ellipsis-v fa-lg"></i></button>')
+        var leftRotateButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-undo-alt fa-lg"></i></button>')
+        var rightRotateButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-redo-alt fa-lg"></i></button>')
+        var mirrorHButton = $('<button class="w3-ripple w3-button w3-border" style="width:100%"><i class="fas fa-arrows-alt-h"></i></button>')
+        var mirrorVButton = $('<button class="w3-ripple w3-button w3-border" style="width:100%"><i class="fas fa-arrows-alt-v"></i></button>')
+        var expandButton = $('<button class="w3-ripple w3-button w3-border" style="width:100%"><i class="fas fa-expand-arrows-alt"></i></button>')
+        var compressButton = $('<button class="w3-ripple w3-button w3-border" style="width:100%"><i class="fas fa-compress-arrows-alt"></i></button>')
 
         arrangeTable.find("td").eq(0).append(distributeHButton)
         arrangeTable.find("td").eq(1).append(distributeVButton)
@@ -530,16 +531,20 @@ class infoPanel extends baseInfoPanel {
 
         //list all incoming twins
         var incomingNeighbourLbl=this.generateSmallKeyDiv("Incoming Twins And Self","2px")
-        incomingNeighbourLbl.css("display","inline")
         var lbl1=$('<lbl style="font-size:10px;color:gray">(Click to add twin name to script)</lbl>')
-        formulaSection.listDOM.append($('<div/>').append(incomingNeighbourLbl,lbl1))
+        incomingNeighbourLbl.append(lbl1)
+        formulaSection.listDOM.append(incomingNeighbourLbl)
+        
         var incomingTwins=globalCache.getStoredAllInboundRelationsSources(formulaTwinID)
+        
         var scriptLbl=this.generateSmallKeyDiv("Calculation Script","2px")
-        scriptLbl.css("display","inline")
+        scriptLbl.css("margin-top","10px")
+
         var lbl2=$('<lbl style="font-size:10px;color:gray">(Build in variables:_self _twinVal)</lbl>')
+        scriptLbl.append(lbl2)
 
         var placeHolderStr='Sample&#160;Script&#58;&#10;&#10;if(_twinVal["intwin1"]["p1"]["childProp"]){&#10;&#9;_self["outProp"]=_twinVal["intwin1"]["p2"]&#10;}else{&#10;&#9;_self["outProp"]=_twinVal["intwin1"]["p2"]&#32;+&#32;&#10;&#9;&#9;_twinVal["intwin2"]["p3"]["p4"]&#10;}'
-        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:240px;width:100%;overflow-x:hidden;overflow-y:auto" placeholder='+placeHolderStr+'></textarea>')
+        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:240px;width:100%;font-family:Verdana" placeholder='+placeHolderStr+'></textarea>')
         scriptTextArea.on("keydown", (e) => {
             if (e.keyCode == 9){
                 this.insertToTextArea('\t',scriptTextArea)
@@ -571,44 +576,55 @@ class infoPanel extends baseInfoPanel {
         this.createQuickBtnForTwin("Self","gray",formulaSection.listDOM,scriptTextArea,formulaTwinModelID)
 
         if(!hasIncomingTwins)formulaSection.listDOM.append($('<label>No incoming twins</label>'))
-        formulaSection.listDOM.append($('<div/>').append(scriptLbl,lbl2))
+        formulaSection.listDOM.append(scriptLbl)
         formulaSection.listDOM.append(scriptTextArea)
         scriptTextArea.highlightWithinTextarea({highlight: twinNamesForHighlight});
 
-        var testScriptBtn = $('<button class="w3-button w3-light-gray w3-hover-amber">Test</button>')
-        var confirmBtn = $('<button class="w3-button w3-green  w3-hover-amber">Confirm</button>')
-        formulaSection.listDOM.append(testScriptBtn, confirmBtn)
+        var testScriptBtn = $('<button class="w3-ripple w3-button w3-light-gray w3-hover-amber">Test</button>')
+        var confirmScriptBtn = $('<button class="w3-ripple w3-button w3-green  w3-hover-amber">Confirm</button>')
+        formulaSection.listDOM.append(testScriptBtn, confirmScriptBtn)
 
-        confirmBtn.on("click",()=>{
-            //translate script
-            var scriptContent=scriptTextArea.val()
-            var translateResult=this.convertToActualScript(scriptContent)
-            //analyze all variables that can not be as input as they are changed during calcuation
-            //they disqualify as input as they will trigger infinite calculation
-            var inputArr = this.findAllInputsInScript(translateResult,formulaTwinID)
-
+        testScriptBtn.on("click",()=>{
             var valueTemplate={}
-            this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties
-                ,[],valueTemplate)
-            var theBody={
-                "twinID": formulaTwinID,
-                "originalScript":scriptContent,
-                "actualScript":translateResult,
-                "calculationInputs":inputArr,
-                "baseValueTemplate":valueTemplate,
-                "projectID":globalCache.currentProjectID
-            }
-            //console.log({"payload":JSON.stringify(theBody) })
-            //by using withProjectID it will ensure it is the authorized person send the command
-            try{
-                msalHelper.callAPI("digitaltwin/updateFormula", "POST", {"payload":JSON.stringify(theBody) }, "withProjectID")
-            }catch (e) {
-                console.log(e)
-                if (e.responseText) alert(e.responseText)
-            }
-            
+            this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties,[],valueTemplate)
+            var inputArr = this.findAllInputsInScript(scriptTextArea.val(),formulaTwinID,"forTestingScriptPurpose")
+            scriptTestDialog.popup(inputArr,scriptTextArea.val(),formulaTwinID,formulaTwinModelID,valueTemplate)
+        })
+        confirmScriptBtn.on("click",()=>{
+            this.confirmScript(scriptTextArea.val(),formulaTwinID,formulaTwinModelID)
         })
     }
+
+    confirmScript(scriptContent,formulaTwinID,formulaTwinModelID){
+        //translate script
+        var translateResult=this.convertToActualScript(scriptContent)
+        //analyze all variables that can not be as input as they are changed during calcuation
+        //they disqualify as input as they will trigger infinite calculation
+        var inputArr = this.findAllInputsInScript(translateResult,formulaTwinID)
+
+        var valueTemplate={}
+        this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties
+            ,[],valueTemplate)
+        var theBody={
+            "twinID": formulaTwinID,
+            "originalScript":scriptContent,
+            "actualScript":translateResult,
+            "calculationInputs":inputArr,
+            "baseValueTemplate":valueTemplate,
+            "projectID":globalCache.currentProjectID
+        }
+        globalCache.DBTwins[formulaTwinID]["originalScript"]=scriptContent
+
+        //console.log({"payload":JSON.stringify(theBody) })
+        //by using withProjectID it will ensure it is the authorized person send the command
+        try{
+            msalHelper.callAPI("digitaltwin/updateFormula", "POST", {"payload":JSON.stringify(theBody) }, "withProjectID")
+        }catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+        }
+    }
+
 
     getPropertyValueTemplate(jsonInfo,pathArr,valueTemplateRoot){
         for(var ind in jsonInfo){
@@ -620,7 +636,7 @@ class infoPanel extends baseInfoPanel {
         }
     }
 
-    findAllInputsInScript(actualScript,formulaTwinID){
+    findAllInputsInScript(actualScript,formulaTwinID,forTestingScript){
         //find all properties in the script
         var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
         var allSelfProperties=actualScript.match(patt)||[];
@@ -642,6 +658,9 @@ class infoPanel extends baseInfoPanel {
         var inputPropertiesArr = allProperties.filter(function (el) {
             return !notInputProperties.includes(el);
         });
+        if(forTestingScript){
+            return inputPropertiesArr
+        }
 
         var returnArr=[]
         inputPropertiesArr.forEach(oneProperty=>{

@@ -49,7 +49,7 @@ editLayoutDialog.prototype.popup = function () {
         }
             
         var saveAsBtn=$('<button class="w3-button w3-green w3-hover-light-green" style="margin-left:2px;margin-right:5px">Save As</button>')
-        var deleteBtn=$('<button class="w3-button w3-red w3-hover-pink" style="margin-left:5px">Delete Layout</button>')
+        var deleteBtn=$('<button class="w3-ripple w3-button w3-red w3-hover-pink" style="margin-left:5px">Delete Layout</button>')
         this.DOM.append(saveAsBtn,switchLayoutSelector.DOM,deleteBtn)
         saveAsBtn.on("click",()=>{this.saveIntoLayout(switchLayoutSelector.curSelectVal)})
         deleteBtn.on("click",()=>{this.deleteLayout(switchLayoutSelector.curSelectVal)})

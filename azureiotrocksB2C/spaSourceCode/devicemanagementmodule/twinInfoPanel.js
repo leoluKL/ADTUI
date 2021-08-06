@@ -66,10 +66,10 @@ class twinInfoPanel extends baseInfoPanel{
         buttonSection.callBack_change=(status)=>{this.openFunctionButtonSection=status}
         if(this.openFunctionButtonSection) buttonSection.expand()
 
-        var delBtn =  $('<button style="width:45%" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
+        var delBtn =  $('<button style="width:45%" class="w3-ripple w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         buttonSection.listDOM.append(delBtn)
         //delBtn.on("click",()=>{this.deleteSelected()})
-        var latestTelemetryBtn=$('<button style="width:45%"  class="w3-button w3-border">Telemetry</button>')
+        var latestTelemetryBtn=$('<button style="width:45%"  class="w3-ripple w3-button w3-border">Telemetry</button>')
         buttonSection.listDOM.append(latestTelemetryBtn)
     
         var allAreIOT=true
@@ -83,19 +83,19 @@ class twinInfoPanel extends baseInfoPanel{
         }
     
         if(allAreIOT){
-            var provisionBtn =$('<button style="width:45%"  class="w3-button w3-border">IoT Provision</button>')
-            var deprovisionBtn =$('<button style="width:45%"  class="w3-button w3-border">IoT Deprovision</button>')
+            var provisionBtn =$('<button style="width:45%"  class="w3-ripple w3-button w3-border">IoT Provision</button>')
+            var deprovisionBtn =$('<button style="width:45%"  class="w3-ripple w3-button w3-border">IoT Deprovision</button>')
             buttonSection.listDOM.append(provisionBtn,deprovisionBtn)
             
             if(selectType=="singleNode"){
-                var sampleCodeBtn =$('<button style="width:90%"  class="w3-button w3-border">Sample Code</button>')
+                var sampleCodeBtn =$('<button style="width:90%"  class="w3-ripple w3-button w3-border">Sample Code</button>')
                 buttonSection.listDOM.append(sampleCodeBtn) 
             }
         }
     
         if(selectType=="singleNode"){
-            var refreshBtn =$('<button style="width:45%"  class="w3-button w3-border">Refresh</button>')
-            var inputSimulationBtn =$('<button style="width:45%"  class="w3-button w3-border">Input Simulation</button>')
+            var refreshBtn =$('<button style="width:45%"  class="w3-ripple w3-button w3-border">Refresh</button>')
+            var inputSimulationBtn =$('<button style="width:45%"  class="w3-ripple w3-button w3-border">Input Simulation</button>')
             buttonSection.listDOM.append(refreshBtn,inputSimulationBtn)
         }
         

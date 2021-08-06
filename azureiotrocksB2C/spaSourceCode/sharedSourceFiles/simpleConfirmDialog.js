@@ -19,7 +19,7 @@ simpleConfirmDialog.prototype.show=function(cssOptions,otherOptions){
     this.DOM.append(this.bottomBar)
 
     otherOptions.buttons.forEach(btn=>{
-        var aButton=$('<button class="w3-button w3-right '+(btn.colorClass||"")+'" style="margin-right:2px;margin-left:2px">'+btn.text+'</button>')
+        var aButton=$('<button class="w3-ripple w3-button w3-right '+(btn.colorClass||"")+'" style="margin-right:2px;margin-left:2px">'+btn.text+'</button>')
         aButton.on("click",()=> { btn.clickFunc()  }  )
         this.bottomBar.append(aButton)    
     })

@@ -123,7 +123,7 @@ projectSettingDialog.prototype.addOneVisualSchema=function(oneSchemaObj,parentDi
     var titleRow=$('<a href="#" class="w3-bar w3-text-grey"  ></a>')
     oneSchemaRow.append(titleRow)
     var nameLbl=$('<a class="w3-bar-item w3-button" >'+lblStr+'</a>')
-    var copyBtn=$('<button class="w3-bar-item w3-button w3-right w3-lime w3-hover-amber">Copy</button>')
+    var copyBtn=$('<button class="w3-ripple w3-bar-item w3-button w3-right w3-lime w3-hover-amber">Copy</button>')
     titleRow.append(nameLbl)
     if(owner!=globalCache.accountInfo.id) titleRow.append(copyBtn)
 
@@ -212,7 +212,7 @@ projectSettingDialog.prototype.addOneLayoutBar=function(oneLayoutObj,parentDiv,d
 
     if(selfLayout){
         var str=(sharedFlag)?"Shared":"Share"
-        var shareBtn=$('<button class="w3-bar-item w3-button w3-right w3-hover-amber">'+str+'</button>')
+        var shareBtn=$('<button class="w3-ripple w3-bar-item w3-button w3-right w3-hover-amber">'+str+'</button>')
         oneLayout.data("shareBtn",shareBtn)
         
         var deleteBtn=$('<button class="w3-bar-item w3-button w3-right w3-hover-amber"><i class="fa fa-trash fa-lg"></i></button>')
@@ -243,7 +243,7 @@ projectSettingDialog.prototype.addOneLayoutBar=function(oneLayoutObj,parentDiv,d
         })    
     }else{
         oneLayout.addClass("w3-gray","w3-hover-gray")
-        var copyBtn=$('<button class="w3-bar-item w3-button w3-right w3-lime w3-hover-amber">Copy</button>')
+        var copyBtn=$('<button class="w3-ripple w3-bar-item w3-button w3-right w3-lime w3-hover-amber">Copy</button>')
         oneLayout.append(copyBtn)
         copyBtn.on("click",()=>{
             this.copyLayout(oneLayout.data("layoutObj"))

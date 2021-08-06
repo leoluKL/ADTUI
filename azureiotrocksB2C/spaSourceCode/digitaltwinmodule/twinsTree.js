@@ -38,7 +38,7 @@ function twinsTree(DOM, searchDOM) {
     }
 
     this.tree.options.groupNodeTailButtonFunc = (gn) => {
-        var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="font-size:1.2em;padding:4px 8px;position:absolute;top:50%;height:27px; right:10px;transform:translateY(-50%)">+</button>')
+        var addButton = $('<button class="w3-ripple w3-bar-item w3-button w3-red w3-hover-amber" style="font-size:1.2em;padding:4px 8px;position:absolute;top:50%;height:27px; right:10px;transform:translateY(-50%)">+</button>')
         addButton.on("click", (e) => {
             gn.expand()
             newTwinDialog.popup({
@@ -66,7 +66,7 @@ function twinsTree(DOM, searchDOM) {
     this.searchBox=$('<input type="text"  placeholder="search..."/>').addClass("w3-input");
     this.searchBox.css({"outline":"none","height":"100%","width":"100%"}) 
     searchDOM.append(this.searchBox)
-    var hideOrShowEmptyGroup=$('<button style="height:20px;border:none;padding-left:2px" class="w3-block w3-tiny w3-hover-red w3-amber">Hide Empty Models</button>')
+    var hideOrShowEmptyGroup=$('<button style="height:20px;border:none;padding-left:2px" class="w3-ripple w3-block w3-tiny w3-hover-red w3-amber">Hide Empty Models</button>')
     searchDOM.append(hideOrShowEmptyGroup)
     DOM.css("top","50px")
     hideOrShowEmptyGroup.attr("status","show")

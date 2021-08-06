@@ -3,8 +3,10 @@ function simpleExpandableSection(titleStr,parentDOM,options) {
     options=options||{}
     var marginTop=10
     if(options.marginTop!=null) marginTop=options.marginTop
-    this.headerDOM = $(`<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom w3-hover-amber w3-text-gray" style="margin-top:${marginTop}px;font-weight:bold">${titleStr}<i class="w3-margin-left fas fa-caret-up"></i></button>`)
+    this.headerDOM = $(`<button class="w3-button w3-block w3-light-grey w3-left-align w3-border-bottom w3-hover-amber w3-text-gray" style="margin-top:${marginTop}px;font-weight:bold"><a>${titleStr}</a><i class="w3-margin-left fas fa-caret-up"></i></button>`)
     this.listDOM = $('<div class="w3-container w3-hide" style="padding-top:2px"></div>')
+
+    this.headerTextDOM=this.headerDOM.children(":first")
 
     this.triangle=this.headerDOM.children('i').eq(0)
     parentDOM.append(this.headerDOM, this.listDOM)

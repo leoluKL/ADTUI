@@ -189,7 +189,7 @@ module.exports = new modelEditorDialog();
 function baseClassesRow(dtdlObj,parentDOM,refreshDTDLF){
     var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item  w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Base Classes<p style="position:absolute;text-align:left;top:-10px;font-weight:normal;width:200px" class="w3-text w3-tag w3-tiny">Base class model\'s parameters and relationship type are inherited</p></div></div>')
 
-    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
+    var addButton = $('<button class="w3-ripple w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
     rowDOM.append(addButton)
     parentDOM.append(rowDOM)
     var contentDOM=$('<div style="padding-left:10px"></div>')
@@ -240,7 +240,7 @@ function singleBaseclassRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj){
 function componentsRow(dtdlObj,parentDOM,refreshDTDLF){
     var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item  w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Components<p style="position:absolute;text-align:left;top:-10px;font-weight:normal;width:200px" class="w3-text w3-tag w3-tiny">Component model\'s parameters are embedded under a name</p></div></div>')
 
-    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
+    var addButton = $('<button class="w3-ripple w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
     rowDOM.append(addButton)
     parentDOM.append(rowDOM)
     var contentDOM=$('<div style="padding-left:10px"></div>')
@@ -300,7 +300,7 @@ function relationsRow(dtdlObj,parentDOM,refreshDTDLF,dialogOffset){
     var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Relationship Types<p style="position:absolute;text-align:left;top:-10px;font-weight:normal;width:200px" class="w3-text w3-tag w3-tiny">Relationship can have its own parameters</p></div></div>')
 
 
-    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
+    var addButton = $('<button class="w3-ripple w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
     rowDOM.append(addButton)
     parentDOM.append(rowDOM)
     var contentDOM=$('<div style="padding-left:10px"></div>')
@@ -327,7 +327,7 @@ function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,dial
     var DOM = $('<div class="w3-cell-row"></div>')
     var relationNameInput=$('<input type="text" style="outline:none;display:inline;width:90px;padding:4px"  placeholder="relation name"/>').addClass("w3-bar-item w3-input w3-border");
     var targetModelID=$('<input type="text" style="outline:none;display:inline;width:140px;padding:4px"  placeholder="(optional)target model"/>').addClass("w3-bar-item w3-input w3-border");
-    var addButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-cog fa-lg"></i></button>')
+    var addButton = $('<button class="w3-ripple w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-cog fa-lg"></i></button>')
     var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
     DOM.append(relationNameInput,targetModelID,addButton,removeButton)
 
@@ -379,7 +379,7 @@ function singleRelationTypeRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,dial
 
 function parametersRow(dtdlObj,parentDOM,refreshDTDLF,dialogOffset){
     var rowDOM=$('<div class="w3-bar"><div class="w3-bar-item" style="font-size:1.2em;padding-left:2px;font-weight:bold;color:gray">Parameters</div></div>')
-    var addButton = $('<button class="w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
+    var addButton = $('<button class="w3-ripple w3-bar-item w3-button w3-red w3-hover-amber" style="margin-top:2px;font-size:1.2em;padding:4px 8px">+</button>')
     rowDOM.append(addButton)
     parentDOM.append(rowDOM)
     var contentDOM=$('<div style="padding-left:10px"></div>')
@@ -406,7 +406,7 @@ function singleParameterRow(dtdlObj,parentDOM,refreshDTDLF,parentDtdlObj,topLeve
     var DOM = $('<div class="w3-cell-row"></div>')
     var parameterNameInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="parameter name"/>').addClass("w3-bar-item w3-input w3-border");
     var enumValueInput=$('<input type="text" style="outline:none;display:inline;width:100px;padding:4px"  placeholder="str1,str2,..."/>').addClass("w3-bar-item w3-input w3-border");
-    var addButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-plus fa-lg"></i></button>')
+    var addButton = $('<button class="w3-ripple w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-plus fa-lg"></i></button>')
     var removeButton = $('<button class="w3-bar-item w3-button w3-hover-amber" style="color:gray;margin-left:3px;margin-top:2px;font-size:1.2em;padding:2px"><i class="fa fa-trash fa-lg"></i></button>')
     var ptypeSelector=new simpleSelectMenu(" ",{withBorder:1,fontSize:"1em",colorClass:"w3-light-gray w3-bar-item",buttonCSS:{"padding":"4px 5px"},"optionListHeight":300,"isClickable":1,"optionListMarginTop":-150,"optionListMarginLeft":60,
     "adjustPositionAnchor":dialogOffset})

@@ -29,7 +29,7 @@ modelManagerDialog.prototype.popup = async function() {
     var importModelsBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Import</button>')
     var actualImportModelsBtn =$('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
     var modelEditorBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Create/Modify Model</button>')
-    var exportModelBtn = $('<button class="w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Export All Models</button>')
+    var exportModelBtn = $('<button class="w3-ripple w3-button w3-card w3-deep-orange w3-hover-light-green" style="height:100%">Export All Models</button>')
     this.contentDOM.children(':first').append(importModelsBtn,actualImportModelsBtn, modelEditorBtn,exportModelBtn)
     importModelsBtn.on("click", ()=>{
         actualImportModelsBtn.trigger('click');
@@ -120,13 +120,13 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     this.panelCard.empty()
     this.modelButtonBar.empty()
 
-    var delBtn = $('<button style="margin-bottom:2px" class="w3-button w3-light-gray w3-hover-pink w3-border-right">Delete Model</button>')
+    var delBtn = $('<button style="margin-bottom:2px" class="w3-ripple w3-button w3-light-gray w3-hover-pink w3-border-right">Delete Model</button>')
     this.modelButtonBar.append(delBtn)
 
 
     var importPicBtn = $('<button class="w3-button w3-light-gray w3-hover-amber w3-border-right">Upload Avarta</button>')
     var actualImportPicBtn = $('<input type="file" name="img" style="display:none"></input>')
-    var clearAvartaBtn = $('<button class="w3-button w3-light-gray w3-hover-pink w3-border-right">Clear Avarta</button>')
+    var clearAvartaBtn = $('<button class="w3-ripple w3-button w3-light-gray w3-hover-pink w3-border-right">Clear Avarta</button>')
     this.modelButtonBar.append(importPicBtn, actualImportPicBtn, clearAvartaBtn)
     importPicBtn.on("click", () => {
         actualImportPicBtn.trigger('click');
