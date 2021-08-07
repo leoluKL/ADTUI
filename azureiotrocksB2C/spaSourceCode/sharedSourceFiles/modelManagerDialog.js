@@ -354,7 +354,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         })
     }
     createAColorSelector(definedColor,"color")
-    createAColorSelector(definedColor2,"secondColor")
+    if(relatinshipName==null) createAColorSelector(definedColor2,"secondColor")
 
 
     
