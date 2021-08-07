@@ -73,7 +73,7 @@ scriptTestDialog.prototype.popup = async function(inputsArr,formulaTwinID,formul
         td3.append(valueEdit)
     })
 
-    var randomInputBtn = $('<button class="w3-ripple w3-card w3-margin-right w3-light-gray w3-button w3-hover-pink w3-margin-top w3-margin-bottom">Generate Random Input Value</button>')
+    var randomInputBtn = $('<button class="w3-ripple w3-card w3-margin-right w3-light-gray w3-button w3-hover-pink w3-margin-top w3-margin-bottom">Generate Random Input & Execute</button>')
 
     randomInputBtn.on("click",()=>{
         valueEditorArr.forEach(ele=>{

@@ -603,6 +603,15 @@ class infoPanel extends baseInfoPanel {
     }
 
     confirmScript(scriptContent,formulaTwinID,formulaTwinModelID){
+        //detect if there is prohibitted words, if so, reject the submit request
+        var prohibitWords=["eval(","setTimeout(","setInterval("]
+        for(var i=0;i<prohibitWords.length;i++){
+            var oneWord=prohibitWords[i]
+            if(scriptContent.indexOf(oneWord)!=-1){
+                alert("These words are not allowed in script:\n"+prohibitWords.join(", "))
+                return;
+            }
+        }
         //translate script
         var translateResult=this.convertToActualScript(scriptContent)
         //analyze all variables that can not be as input as they are changed during calcuation
@@ -645,6 +654,7 @@ class infoPanel extends baseInfoPanel {
 
     findAllInputsInScript(actualScript,formulaTwinID,forTestingScript){
         //find all properties in the script
+        actualScript+="\n" //make sure the below patterns using "[^. ] not fail because of it is the end of string "
         var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
         var allSelfProperties=actualScript.match(patt)||[];
 

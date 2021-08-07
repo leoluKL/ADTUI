@@ -66,8 +66,8 @@ mainUI.prototype.showModuleButtons=function(){
     })
 
     adtUIBtn.on("click",(e)=>{
-        if(e.ctrlKey) window.location.replace("digitaltwinmodule.html");
-        else window.open("digitaltwinmodule.html", "_blank");
+        window.location.replace("digitaltwinmodule.html");
+        //window.open("digitaltwinmodule.html", "_blank");
     })
 
     deviceManageBtn.on("click",(e)=>{
