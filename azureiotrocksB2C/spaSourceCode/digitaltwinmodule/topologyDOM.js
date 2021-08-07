@@ -11,6 +11,7 @@ function topologyDOM(containerDOM){
     containerDOM.append(this.DOM)
     this.defaultNodeSize=30
     this.nodeSizeModelAdjustmentRatio={}
+    this.lastCalcInputStyleNodes=[]
 }
 
 topologyDOM.prototype.init=function(){
@@ -97,15 +98,15 @@ topologyDOM.prototype.init=function(){
             {selector: 'node.hover',
             style: {
                 'background-blacken':0.5
-            }}
-            
-            ,{selector: 'edge.hover',
+            }},
+            {selector: 'edge.hover',
             style: {
                 'width':5
-            }}
-            
+            }},
         ]
     });
+
+    this.highPriorityStyleDefinition()
 
     //cytoscape edge editing plug-in
     this.core.edgeEditing({
@@ -198,6 +199,39 @@ topologyDOM.prototype.init=function(){
     this.setKeyDownFunc()
 }
 
+topologyDOM.prototype.highPriorityStyleDefinition = function () {
+    this.core.style()
+    .selector('node.calcInput')
+    .style({
+        'border-color':"red",
+        'border-width':1,
+        'background-fill':'linear-gradient',
+        'background-gradient-stop-colors':['red','red', 'white',"white","red"],
+        'background-gradient-stop-positions':['0%','50%','51%',"90%","91%"]
+    })
+    .update() 
+    
+
+    this.core.style()
+        .selector('edge.calcInput')
+        .style({
+            'width':'5',
+            'line-color': 'red',
+            'target-label':'data(ppath)',
+            'font-size':'11px',
+            'target-text-offset':'40%',
+            'text-background-color':'white',
+            'text-background-opacity':1,
+            'text-border-opacity':1,
+            'text-border-width':1,
+            'text-background-padding':'2px',
+            'color':'gray',
+            'text-border-color':'gray'
+        })
+        .update() 
+}
+
+
 topologyDOM.prototype.smartPositionNode = function (mousePosition) {
     var zoomLevel=this.core.zoom()
     if(!this.draggingNode) return
@@ -243,6 +277,10 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     var info=e.target.data().originalInfo
     if(info==null) return;
     if(this.lastHoverTarget) this.lastHoverTarget.removeClass("hover")
+
+    this.lastCalcInputStyleNodes.forEach(ele=>{ele.removeClass("calcInput")})
+    this.lastCalcInputStyleNodes.length=0
+
     this.lastHoverTarget=e.target
     e.target.addClass("hover")
     this.broadcastMessage({ "message": "showInfoHoveredEle", "info": [info],"screenXY":this.convertPosition(e.position.x,e.position.y) })
@@ -254,7 +292,23 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
         var calcScript=dbtwin["originalScript"]
         var inputArr = globalCache.findAllInputsInScript(calcScript,dbtwin["displayName"],"Bool_forTestingScriptPurpose")
 
-        console.log(inputArr)
+        inputArr.forEach(oneInput=>{
+            var inputTwinNode=this.core.nodes("#"+oneInput["twinName_origin"])
+            if(inputTwinNode) {
+                inputTwinNode.addClass("calcInput")
+                this.lastCalcInputStyleNodes.push(inputTwinNode)
+                //find the first relationship link from this node to hovered node
+                var edges=inputTwinNode.edgesTo(e.target)
+                if(edges.length>0) {
+                    edges[0].addClass("calcInput")
+                    var currentPPath=edges[0].data('ppath')||""
+                    if(currentPPath!="") currentPPath+=";"
+                    currentPPath+=oneInput.path.join("/")
+                    edges[0].data('ppath',currentPPath)
+                    this.lastCalcInputStyleNodes.push(edges[0])
+                }
+            }
+        })
     }
     
 
@@ -284,6 +338,11 @@ topologyDOM.prototype.mouseOutFunction= function (e) {
         this.lastHoverTarget.removeClass("hover")
         this.lastHoverTarget=null;
     } 
+    this.lastCalcInputStyleNodes.forEach(ele=>{
+        ele.removeClass("calcInput")
+        ele.data('ppath',null)
+    })
+    this.lastCalcInputStyleNodes.length=0
 
 }
 
@@ -337,11 +396,24 @@ topologyDOM.prototype.updateModelAvarta=function(modelID,dataUrl){
     }
     
 }
-topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode){
-    this.core.style()
-        .selector('node[modelID = "'+modelID+'"]')
-        .style({'background-color': colorCode})
-        .update()   
+topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode,secondColorCode){
+    if (secondColorCode == null) {
+        this.core.style()
+            .selector('node[modelID = "' + modelID + '"]')
+            .style({ 'background-color': colorCode })
+            .update()
+    } else {
+        colorCode=colorCode||"darkGray"
+        this.core.style()
+            .selector('node[modelID = "' + modelID + '"]')
+            .style({
+                'background-fill': 'linear-gradient',
+                'background-gradient-stop-colors': [colorCode, colorCode, secondColorCode],
+                'background-gradient-stop-positions': ['0%', '50%', '51%']
+            })
+            .update()
+    }
+    this.highPriorityStyleDefinition()
 }
 
 topologyDOM.prototype.updateModelTwinShape=function(modelID,shape){
@@ -364,10 +436,12 @@ topologyDOM.prototype.updateModelTwinDimension=function(modelID,dimensionRatio){
 }
 
 topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){
+    
     this.core.style()
         .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
         .style({'line-color': colorCode})
         .update()   
+    this.highPriorityStyleDefinition()
 }
 
 topologyDOM.prototype.updateRelationshipShape=function(srcModelID,relationshipName,shape){
@@ -396,7 +470,8 @@ topologyDOM.prototype.updateRelationshipWidth=function(srcModelID,relationshipNa
     this.core.style()
         .selector('edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
         .style({'width':parseFloat(edgeWidth)+3})
-        .update()   
+        .update()
+    this.highPriorityStyleDefinition() 
 }
 
 topologyDOM.prototype.deleteRelations=function(relations){
@@ -555,7 +630,7 @@ topologyDOM.prototype.applyVisualDefinition=function(){
     var visualJson=globalCache.visualDefinition["default"].detail
     if(visualJson==null) return;
     for(var modelID in visualJson){
-        if(visualJson[modelID].color) this.updateModelTwinColor(modelID,visualJson[modelID].color)
+        if(visualJson[modelID].color) this.updateModelTwinColor(modelID,visualJson[modelID].color,visualJson[modelID].secondColor)
         if(visualJson[modelID].shape) this.updateModelTwinShape(modelID,visualJson[modelID].shape)
         if(visualJson[modelID].avarta) this.updateModelAvarta(modelID,visualJson[modelID].avarta)
         if(visualJson[modelID].dimensionRatio) this.updateModelTwinDimension(modelID,visualJson[modelID].dimensionRatio)
@@ -636,7 +711,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
             else if(msgPayload.edgeWidth) this.updateRelationshipWidth(msgPayload.srcModelID,msgPayload.relationshipName,msgPayload.edgeWidth)
         } 
         else{
-            if(msgPayload.color) this.updateModelTwinColor(msgPayload.modelID,msgPayload.color)
+            if(msgPayload.color) this.updateModelTwinColor(msgPayload.modelID,msgPayload.color,msgPayload.secondColor)
             else if(msgPayload.shape) this.updateModelTwinShape(msgPayload.modelID,msgPayload.shape)
             else if(msgPayload.avarta) this.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
             else if(msgPayload.noAvarta)  this.updateModelAvarta(msgPayload.modelID,null)

@@ -19,7 +19,7 @@ function modelManagerDialog() {
 modelManagerDialog.prototype.popup = async function() {
     this.DOM.show()
     this.DOM.empty()
-    this.contentDOM = $('<div style="width:650px"></div>')
+    this.contentDOM = $('<div style="width:700px"></div>')
     this.DOM.append(this.contentDOM)
     this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Digital Twin Models</div></div>'))
     var closeButton = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em;padding-top:4px">×</button>')
@@ -70,7 +70,7 @@ modelManagerDialog.prototype.popup = async function() {
     panelCardOut.append(this.modelButtonBar)
 
     rightSpan.append(panelCardOut)
-    var panelCard=$('<div style="width:410px;height:412px;overflow:auto;margin-top:2px"></div>')
+    var panelCard=$('<div style="width:460px;height:412px;overflow:auto;margin-top:2px"></div>')
     panelCardOut.append(panelCard)
     this.panelCard=panelCard;
 
@@ -291,12 +291,14 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     containerDiv.append(contentDOM)
 
     var definedColor=null
+    var definedColor2=null
     var definedShape=null
     var definedDimensionRatio=null
     var definedEdgeWidth=null
     var visualJson=globalCache.visualDefinition["default"].detail
     if(relatinshipName==null){
         if(visualJson[modelID] && visualJson[modelID].color) definedColor=visualJson[modelID].color
+        if(visualJson[modelID] && visualJson[modelID].secondColor) definedColor2=visualJson[modelID].secondColor
         if(visualJson[modelID] && visualJson[modelID].shape) definedShape=visualJson[modelID].shape
         if(visualJson[modelID] && visualJson[modelID].dimensionRatio) definedDimensionRatio=visualJson[modelID].dimensionRatio
     }else{
@@ -307,38 +309,55 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
         }
     }
 
-    var colorSelector=$('<select class="w3-border" style="outline:none;width:75px"></select>')
-    containerDiv.append(colorSelector)
-    var colorArr=["darkGray","Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
-    colorArr.forEach((oneColorCode)=>{
-        var anOption=$("<option value='"+oneColorCode+"'>"+oneColorCode+"▧</option>")
-        colorSelector.append(anOption)
-        anOption.css("color",oneColorCode)
-    })
-    if(definedColor!=null) {
-        colorSelector.val(definedColor)
-        colorSelector.css("color",definedColor)
-    }else{
-        colorSelector.css("color","darkGray")
-    }
-    colorSelector.change((eve)=>{
-        var selectColorCode=eve.target.value
-        colorSelector.css("color",selectColorCode)
-        var visualJson=globalCache.visualDefinition["default"].detail
+    var createAColorSelector=(predefinedColor,nameOfColorField)=>{
+        var colorSelector=$('<select class="w3-border" style="outline:none;width:75px"></select>')
+        containerDiv.append(colorSelector)
 
-        if(!visualJson[modelID]) visualJson[modelID]={}
-        if(!relatinshipName) {
-            visualJson[modelID].color=selectColorCode
-            this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"color":selectColorCode })
-            this.refreshModelTreeLabel()
+        var colorArr=["darkGray","Black","LightGray","Red","Green","Blue","Bisque","Brown","Coral","Crimson","DodgerBlue","Gold"]
+        colorArr.forEach((oneColorCode)=>{
+            var anOption=$("<option value='"+oneColorCode+"'>"+oneColorCode+"▧</option>")
+            colorSelector.append(anOption)
+            anOption.css("color",oneColorCode)
+        })
+        if(predefinedColor!=null) {
+            colorSelector.val(predefinedColor)
+            colorSelector.css("color",predefinedColor)
         }else{
-            if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
-            if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
-            visualJson[modelID]["rels"][relatinshipName].color=selectColorCode
-            this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"color":selectColorCode })
+            colorSelector.css("color","darkGray")
         }
-        this.saveVisualDefinition()
-    })
+        if(nameOfColorField=="secondColor") {
+            var anOption=$("<option value='none'>none</option>")
+            colorSelector.append(anOption)
+            if(predefinedColor==null) colorSelector.val("none")
+        }
+        
+        colorSelector.change((eve)=>{
+            var selectColorCode=eve.target.value
+            if(selectColorCode=="none") colorSelector.css("color","darkGray")
+            else colorSelector.css("color",selectColorCode)
+            var visualJson=globalCache.visualDefinition["default"].detail
+    
+            if(!visualJson[modelID]) visualJson[modelID]={}
+            if(!relatinshipName) {
+                if(selectColorCode=="none") delete visualJson[modelID]["secondColor"]
+                else visualJson[modelID][nameOfColorField]=selectColorCode
+                this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID
+                    ,"color":visualJson[modelID]["color"],"secondColor":visualJson[modelID]["secondColor"] })
+                this.refreshModelTreeLabel()
+            }else{
+                if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
+                if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
+                visualJson[modelID]["rels"][relatinshipName].color=selectColorCode
+                this.broadcastMessage({ "message": "visualDefinitionChange", "srcModelID":modelID,"relationshipName":relatinshipName,"color":selectColorCode })
+            }
+            this.saveVisualDefinition()
+        })
+    }
+    createAColorSelector(definedColor,"color")
+    createAColorSelector(definedColor2,"secondColor")
+
+
+    
     var shapeSelector = $('<select class="w3-border" style="outline:none"></select>')
     containerDiv.append(shapeSelector)
     if(relatinshipName==null){
@@ -557,6 +576,7 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
             if (globalCache.visualDefinition["default"].detail[modelClass]) {
                 var visualJson = globalCache.visualDefinition["default"].detail[modelClass]
                 var colorCode = visualJson.color || "darkGray"
+                var secondColor = visualJson.secondColor
                 var shape = visualJson.shape || "ellipse"
                 var avarta = visualJson.avarta
                 if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
@@ -569,7 +589,7 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
             }
 
 
-            var imgSrc=encodeURIComponent(this.shapeSvg(shape,colorCode))
+            var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,colorCode,secondColor))
             iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
             if(avarta){
                 var avartaimg=$("<img style='position:absolute;left:0px;width:60%;margin:20%' src='"+avarta+"'></img>")
@@ -601,16 +621,6 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
     }
     
     if(shouldBroadcast) this.broadcastMessage({ "message": "ADTModelsChange"})
-}
-
-modelManagerDialog.prototype.shapeSvg=function(shape,color){
-    if(shape=="ellipse"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><circle cx="50" cy="50" r="50"  fill="'+color+'"/></svg>'
-    }else if(shape=="hexagon"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25"  fill="'+color+'" /></svg>'
-    }else if(shape=="round-rectangle"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><rect x="10" y="10" rx="10" ry="10" width="80" height="80" fill="'+color+'" /></svg>'
-    }
 }
 
 modelManagerDialog.prototype.modelNameToGroupName=function(modelName){

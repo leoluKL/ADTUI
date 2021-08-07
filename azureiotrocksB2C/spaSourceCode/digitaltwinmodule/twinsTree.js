@@ -17,6 +17,7 @@ function twinsTree(DOM, searchDOM) {
         if(globalCache.visualDefinition["default"].detail[modelClass]){
             var visualJson =globalCache.visualDefinition["default"].detail[modelClass]
             var colorCode= visualJson.color || "darkGray"
+            var secondColorCode = visualJson.secondColor
             var shape=  visualJson.shape || "ellipse"
             var avarta= visualJson.avarta 
             if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
@@ -28,7 +29,7 @@ function twinsTree(DOM, searchDOM) {
             iconDOM.append(iotDiv)
         }
 
-        var imgSrc=encodeURIComponent(this.shapeSvg(shape,colorCode))
+        var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,colorCode,secondColorCode))
         iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
         if(avarta){
             var avartaimg=$("<img style='position:absolute;left:0px;width:60%;margin:20%' src='"+avarta+"'></img>")
@@ -94,17 +95,6 @@ function twinsTree(DOM, searchDOM) {
         }
     });
 }
-
-twinsTree.prototype.shapeSvg=function(shape,color){
-    if(shape=="ellipse"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><circle cx="50" cy="50" r="50"  fill="'+color+'"/></svg>'
-    }else if(shape=="hexagon"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25"  fill="'+color+'" /></svg>'
-    }else if(shape=="round-rectangle"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><rect x="10" y="10" rx="10" ry="10" width="80" height="80" fill="'+color+'" /></svg>'
-    }
-}
-
 
 twinsTree.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="startSelection_replace") this.loadStartSelection(msgPayload.twinIDs,msgPayload.modelIDs,"replace")

@@ -116,7 +116,7 @@ scriptTestDialog.prototype.testFlight=function(valueEditorArr){
     this.resultDiv.empty()
     try{
         var evalStr=this.scriptContent+"\n_self"
-        var result=eval(evalStr)
+        var result=eval(evalStr) // jshint ignore:line
         this.resultDiv.append($('<pre style="margin:0px;font-size:11px" id="json">'+JSON.stringify(result,null,2)+'</pre>')) 
     }catch(e){
         this.resultDiv.append($('<pre style="margin:0px;font-size:11px" id="json">'+e+'</pre>'))

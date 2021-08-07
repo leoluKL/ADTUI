@@ -189,6 +189,7 @@ singleTwinIcon.prototype.redrawIcon=function(){
     var visualJson=globalCache.visualDefinition["default"].detail
     var fillColor="darkGray"
     if(visualJson[modelID] && visualJson[modelID].color) fillColor=visualJson[modelID].color
+    if(visualJson[modelID]) var secondColor=visualJson[modelID].secondColor
     var dimension=30;
     if(visualJson[modelID] && visualJson[modelID].dimensionRatio){
         dimension*=parseFloat(visualJson[modelID].dimensionRatio)
@@ -199,23 +200,12 @@ singleTwinIcon.prototype.redrawIcon=function(){
     var avarta=null
     if(visualJson[modelID] && visualJson[modelID].avarta) avarta=visualJson[modelID].avarta
 
-    var imgSrc=encodeURIComponent(this.shapeSvg(shape,fillColor))
+    var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,fillColor,secondColor))
 
     this.iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
     if(avarta){
         var avartaimg=$("<img style='position:absolute;left:0px;width:60%;margin:20%' src='"+avarta+"'></img>")
         this.iconDOM.append(avartaimg)
-    }
-}
-
-
-singleTwinIcon.prototype.shapeSvg=function(shape,color){//round-rectangle":"▉","hexagon
-    if(shape=="ellipse"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><circle cx="50" cy="50" r="50"  fill="'+color+'"/></svg>'
-    }else if(shape=="hexagon"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25"  fill="'+color+'" /></svg>'
-    }else if(shape=="round-rectangle"){
-        return '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" ><rect x="10" y="10" rx="10" ry="10" width="80" height="80" fill="'+color+'" /></svg>'
     }
 }
 

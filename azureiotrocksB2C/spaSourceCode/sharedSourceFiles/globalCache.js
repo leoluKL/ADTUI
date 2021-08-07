@@ -315,4 +315,25 @@ globalCache.prototype.searchValue=function(originElementInfo,pathArr){
     return theJson //it should be the final value
 }
 
+globalCache.prototype.shapeSvg=function(shape,color,secondColor){
+    var svgStart='<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" >'
+    if(secondColor){
+        var gradientDefinition='<defs>'+
+            '<linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">'+
+            '<stop offset="0%" style="stop-color:'+color+';stop-opacity:1" />'+
+            '<stop offset="50%" style="stop-color:'+color+';stop-opacity:1" />'+
+            '<stop offset="51%" style="stop-color:'+secondColor+';stop-opacity:1" />'+
+            '</linearGradient></defs>'
+        svgStart+=gradientDefinition
+    }
+    var colorStr=(secondColor)?"url(#grad1)":color
+    if(shape=="ellipse"){
+        return svgStart+'<circle cx="50" cy="50" r="50"  fill="'+colorStr+'"/></svg>'
+    }else if(shape=="hexagon"){
+        return svgStart+'<polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25"  fill="'+colorStr+'" /></svg>'
+    }else if(shape=="round-rectangle"){
+        return svgStart+'<rect x="10" y="10" rx="10" ry="10" width="80" height="80" fill="'+colorStr+'" /></svg>'
+    }
+}
+
 module.exports = new globalCache();
