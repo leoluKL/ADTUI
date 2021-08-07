@@ -19,7 +19,7 @@ class baseInfoPanel {
             if(Array.isArray(jsonInfo[ind])){
                 keyDiv.children(":first").addClass(keyLabelColorClass)
                 if (this.readOnly) {
-                    var val = this.searchValue(originElementInfo, newPath)
+                    var val = globalCache.searchValue(originElementInfo, newPath)
                     if (val == null) {
                         contentDOM.css({ "color": "gray", "font-size": "9px" })
                         contentDOM.text("[empty]")
@@ -34,7 +34,7 @@ class baseInfoPanel {
                 this.drawEditable(contentDOM,jsonInfo[ind],originElementInfo,newPath,funcGetKeyLblColorClass)
             }else {
                 keyDiv.children(":first").addClass(keyLabelColorClass)
-                var val = this.searchValue(originElementInfo, newPath)
+                var val = globalCache.searchValue(originElementInfo, newPath)
                 if (this.readOnly) {
                     if (val == null) {
                         contentDOM.css({ "color": "gray", "font-size": "9px" })
@@ -55,18 +55,6 @@ class baseInfoPanel {
         }
     }
 
-
-    searchValue(originElementInfo,pathArr){
-        if(pathArr.length==0) return null;
-        var theJson=originElementInfo
-        for(var i=0;i<pathArr.length;i++){
-            var key=pathArr[i]
-            theJson=theJson[key]
-            if(theJson==null) return null;
-        }
-        return theJson //it should be the final value
-    }
-
     drawDropdownOption(contentDOM,newPath,valueArr,originElementInfo){
         var aSelectMenu=new simpleSelectMenu("",{buttonCSS:{"padding":"4px 16px"}})
         contentDOM.append(aSelectMenu.DOM)
@@ -79,7 +67,7 @@ class baseInfoPanel {
             aSelectMenu.changeName(optionText)
             if(realMouseClick) this.editDTProperty(originElementInfo,aSelectMenu.DOM.data("path"),optionValue,"string")
         }
-        var val=this.searchValue(originElementInfo,newPath)
+        var val=globalCache.searchValue(originElementInfo,newPath)
         if(val!=null){
             aSelectMenu.triggerOptionValue(val)
         }    

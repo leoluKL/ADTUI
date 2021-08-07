@@ -67,17 +67,19 @@ class floatInfoWindow extends baseInfoPanel{
             if(!dbtwin || !dbtwin.originalScript || dbtwin.originalScript=="") return;
             //var div=$('<div>'+dbtwin.originalScript+'</div>')
             //this.DOM.append(div)
-            var holderDiv=$('<div/>')
+            var holderDiv=$('<div style="padding:1px"/>')
             var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;width:100%;font-family:Verdana">'+dbtwin["originalScript"]+'</textarea>')
             this.DOM.append(holderDiv.append(scriptTextArea))
             scriptTextArea.css("height","1px") //to expand scriptTextArea to the height that shows all code
-            scriptTextArea.css("height",scriptTextArea[0].scrollHeight+2+"px")
+            var theHeight=scriptTextArea[0].scrollHeight+2
+            scriptTextArea.css("height",theHeight+"px")
             scriptTextArea.highlightWithinTextarea(
                 { highlight: [
                     { "highlight": "_self", "className": "Gray"},
                     { "highlight": "_twinVal", "className": "keyword"},
                 ]}
             );
+            holderDiv.css("height",theHeight+"px")
             holderDiv.hide()
 
             var div=$('<div class="w3-amber" style="font-size:6px;text-align:center"><i class="fas fa-ellipsis-h"></i></div>')

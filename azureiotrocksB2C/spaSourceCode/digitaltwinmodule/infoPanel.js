@@ -593,8 +593,8 @@ class infoPanel extends baseInfoPanel {
         testScriptBtn.on("click",()=>{
             var valueTemplate={}
             this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties,[],valueTemplate)
-            var inputArr = this.findAllInputsInScript(scriptTextArea.val(),formulaTwinID,"forTestingScriptPurpose")
-            scriptTestDialog.popup(inputArr,formulaTwinID,formulaTwinModelID,valueTemplate)
+            var inputArr = globalCache.findAllInputsInScript(scriptTextArea.val(),DBFormulaTwin["displayName"],"Bool_forTestingScriptPurpose")
+            scriptTestDialog.popup(inputArr,DBFormulaTwin["displayName"],formulaTwinModelID,valueTemplate)
             scriptTestDialog.scriptContent=scriptTextArea.val()
         })
         confirmScriptBtn.on("click",()=>{
@@ -616,7 +616,7 @@ class infoPanel extends baseInfoPanel {
         var translateResult=this.convertToActualScript(scriptContent)
         //analyze all variables that can not be as input as they are changed during calcuation
         //they disqualify as input as they will trigger infinite calculation
-        var inputArr = this.findAllInputsInScript(translateResult,formulaTwinID)
+        var inputArr = globalCache.findAllInputsInScript(translateResult,formulaTwinID)
 
         var valueTemplate={}
         this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties
@@ -650,53 +650,6 @@ class infoPanel extends baseInfoPanel {
                 this.getPropertyValueTemplate(jsonInfo[ind],newPath,valueTemplateRoot[ind])
             }
         }
-    }
-
-    findAllInputsInScript(actualScript,formulaTwinID,forTestingScript){
-        //find all properties in the script
-        actualScript+="\n" //make sure the below patterns using "[^. ] not fail because of it is the end of string "
-        var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
-        var allSelfProperties=actualScript.match(patt)||[];
-
-        var patt = /_twinVal(?<=_twinVal)\[\".*?(?=\"\][^\[])\"\]/g; 
-        var allOtherTwinProperties=actualScript.match(patt)||[];
-
-        //analyze all variables that can not be as input as they are changed during calcuation
-        //they disqualify as input as they will trigger infinite calculation, all these belongs to _self
-        var noninputpatt = /_self(?<=_self)\[\"[^;{]*?[^\=](?=\=[^\=])/g;
-        var notInputProperties=actualScript.match(noninputpatt)||[];
-        
-        var allProperties=allSelfProperties.concat(allOtherTwinProperties)
-        var seen = {};
-        allProperties=allProperties.filter(function(item) {
-            return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-        });
-
-        var inputPropertiesArr = allProperties.filter(function (el) {
-            return !notInputProperties.includes(el);
-        });
-        if(forTestingScript){
-            return inputPropertiesArr
-        }
-
-        var returnArr=[]
-        inputPropertiesArr.forEach(oneProperty=>{
-            var oneInputObj={} //twinID, path, value
-            var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
-            if(oneProperty.startsWith("_self")){
-                oneInputObj.twinID=formulaTwinID
-                oneInputObj.path=oneProperty.match(fetchpropertypatt);
-                oneInputObj.value=this.searchValue(globalCache.storedTwins[formulaTwinID],oneInputObj.path)
-            }if(oneProperty.startsWith("_twinVal")){
-                var arr=oneProperty.match(fetchpropertypatt);
-                oneInputObj.twinID=arr[0]
-                arr.shift()
-                oneInputObj.path=arr
-                oneInputObj.value=this.searchValue(globalCache.storedTwins[oneInputObj.twinID],oneInputObj.path)
-            }
-            returnArr.push(oneInputObj)
-        })
-        return returnArr
     }
 
     convertToActualScript(scriptContent){

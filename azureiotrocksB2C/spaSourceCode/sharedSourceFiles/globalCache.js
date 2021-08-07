@@ -250,4 +250,69 @@ globalCache.prototype.storeTwinRelationships_remove=function(relationsData){
     })
 }
 
+globalCache.prototype.findAllInputsInScript=function(actualScript,formulaTwin,Bool_forTestingScript){
+    //find all properties in the script
+    actualScript+="\n" //make sure the below patterns using "[^. ] not fail because of it is the end of string "
+    var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
+    var allSelfProperties=actualScript.match(patt)||[];
+
+    var patt = /_twinVal(?<=_twinVal)\[\".*?(?=\"\][^\[])\"\]/g; 
+    var allOtherTwinProperties=actualScript.match(patt)||[];
+
+    //analyze all variables that can not be as input as they are changed during calcuation
+    //they disqualify as input as they will trigger infinite calculation, all these belongs to _self
+    var noninputpatt = /_self(?<=_self)\[\"[^;{]*?[^\=](?=\=[^\=])/g;
+    var notInputProperties=actualScript.match(noninputpatt)||[];
+    
+    var allProperties=allSelfProperties.concat(allOtherTwinProperties)
+    var seen = {};
+    allProperties=allProperties.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+
+    var inputPropertiesArr = allProperties.filter(function (el) {
+        return !notInputProperties.includes(el);
+    });
+
+    var returnArr=[]
+    inputPropertiesArr.forEach(oneProperty=>{
+        var oneInputObj={} //twinID, path, value
+        var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
+        if(oneProperty.startsWith("_self")){
+            oneInputObj.path=oneProperty.match(fetchpropertypatt);
+            if(Bool_forTestingScript){
+                oneInputObj.twinName=formulaTwin+"(self)"
+                oneInputObj.twinName_origin=formulaTwin
+            }else{
+                oneInputObj.twinID=formulaTwin
+                oneInputObj.value=this.searchValue(this.storedTwins[formulaTwin],oneInputObj.path)
+            }
+        }if(oneProperty.startsWith("_twinVal")){
+            var arr=oneProperty.match(fetchpropertypatt);
+            var firstEle=arr[0]
+            arr.shift()
+            oneInputObj.path=arr
+            if(Bool_forTestingScript){
+                oneInputObj.twinName=oneInputObj.twinName_origin=firstEle
+            }else{
+                oneInputObj.twinID=firstEle
+                oneInputObj.value=this.searchValue(globalCache.storedTwins[oneInputObj.twinID],oneInputObj.path)
+            }
+        }
+        returnArr.push(oneInputObj)
+    })
+    return returnArr
+}
+
+globalCache.prototype.searchValue=function(originElementInfo,pathArr){
+    if(pathArr.length==0) return null;
+    var theJson=originElementInfo
+    for(var i=0;i<pathArr.length;i++){
+        var key=pathArr[i]
+        theJson=theJson[key]
+        if(theJson==null) return null;
+    }
+    return theJson //it should be the final value
+}
+
 module.exports = new globalCache();

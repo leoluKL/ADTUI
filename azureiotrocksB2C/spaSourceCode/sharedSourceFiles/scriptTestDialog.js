@@ -9,10 +9,9 @@ function scriptTestDialog() {
     }
 }
 
-scriptTestDialog.prototype.popup = async function(inputsArr,formulaTwinID,formulaTwinModel,valueTemplate) {
+scriptTestDialog.prototype.popup = async function(inputsArr,twinName,formulaTwinModel,valueTemplate) {
     this.scriptContent=""
-    var dbtwin=globalCache.DBTwins[formulaTwinID]
-    this.selfTwinName=dbtwin["displayName"]
+    this.selfTwinName=twinName
     this.valueTemplate=valueTemplate
     this.DOM.show()
     this.DOM.empty()
@@ -26,7 +25,7 @@ scriptTestDialog.prototype.popup = async function(inputsArr,formulaTwinID,formul
     this.DOM.append(this.contentDOM)
 
     var twinNameLbl=this.generateNameLabel("Twin Name","10px")
-    twinNameLbl.append($('<label class="w3-text-gray">'+dbtwin['displayName']+'</label>'))
+    twinNameLbl.append($('<label class="w3-text-gray">'+twinName+'</label>'))
     this.contentDOM.append(twinNameLbl)
 
     var twinNameLbl=this.generateNameLabel("Model","10px")
@@ -42,23 +41,11 @@ scriptTestDialog.prototype.popup = async function(inputsArr,formulaTwinID,formul
     var valueEditorArr=[]
     inputsArr.forEach(oneProperty=>{
         var tr=$('<tr></tr>')
-        var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
-        if(oneProperty.startsWith("_self")){
-            var twinName=dbtwin['displayName']+"(self)"
-            var twinName_origin=dbtwin['displayName']
-            var pPath=oneProperty.match(fetchpropertypatt);
-        }if(oneProperty.startsWith("_twinVal")){
-            var arr=oneProperty.match(fetchpropertypatt);
-            var twinName=arr[0]
-            var twinName_origin=twinName
-            arr.shift()
-            var pPath=arr
-        }
         var td0=$('<td class="w3-border" style="padding:0px 10px"><i class="fas fa-unlock"></i></td>')
-        var td1=$('<td class="w3-light-gray w3-border" style="padding:0px 10px">'+twinName+'</td>')
-        var td2=$('<td class="w3-light-gray w3-border" style="padding:0px 10px">'+pPath+'</td>')
+        var td1=$('<td class="w3-light-gray w3-border" style="padding:0px 10px">'+oneProperty.twinName+'</td>')
+        var td2=$('<td class="w3-light-gray w3-border" style="padding:0px 10px">'+oneProperty.path+'</td>')
         var td3=$('<td class="w3-border" style="padding:0px 10px"></td>')
-        var valueType=this.findPropertyType(twinName_origin,pPath)
+        var valueType=this.findPropertyType(oneProperty.twinName_origin,oneProperty.path)
         var valueEdit=$('<input type="text" style="outline:none;border:none;padding:5px 0px;width:100%"  placeholder="type: ' +valueType + '"/>');
         td0.children(':first').on("click",(e)=>{
             var lockDom=$(e.target)
@@ -66,8 +53,8 @@ scriptTestDialog.prototype.popup = async function(inputsArr,formulaTwinID,formul
             else {lockDom.removeClass("fa-lock");lockDom.addClass("fa-unlock");lockDom.removeClass("w3-text-amber")}
         })
         valueEditorArr.push({"type":valueType,"editor":valueEdit,"lockIcon":td0.children(':first')
-            ,"twinName":twinName_origin
-            ,"inputPath":pPath
+            ,"twinName":oneProperty.twinName_origin
+            ,"inputPath":oneProperty.path
         })
         aTable.append(tr.append(td0,td1,td2,td3))
         td3.append(valueEdit)

@@ -202,13 +202,15 @@ projectSettingDialog.prototype.addOneLayoutBar=function(oneLayoutObj,parentDiv,d
     parentDiv.append(oneLayout)
 
     var nameLbl=$('<a class="w3-bar-item w3-button" href="#">'+layoutName+'</a>')
-    var defaultLbl=$("<a class='w3-lime w3-bar-item' style='font-size:9px;padding:1px 2px;margin-top:9px;border-radius: 2px;'>default</a>")
-    if(layoutName!=defaultLayoutName) defaultLbl.hide()
+    var defaultLbl=$("<a class='w3-bar-item' style='font-size:9px;padding:1px 2px;margin-top:9px;border-radius: 2px;'></a>")
     
     oneLayout.data("layoutObj",oneLayoutObj)
 
     oneLayout.data("defaultLbl",defaultLbl)
     oneLayout.append(nameLbl,defaultLbl)
+
+    if(layoutName!=defaultLayoutName) this.showAsNotDefaultLayoutLbl(oneLayout)
+    else this.showAsDefaultLayoutLbl(oneLayout)
 
     if(selfLayout){
         var str=(sharedFlag)?"Shared":"Share"
@@ -221,16 +223,20 @@ projectSettingDialog.prototype.addOneLayoutBar=function(oneLayoutObj,parentDiv,d
         deleteBtn.hide()
     
         oneLayout.hover(()=>{
+            oneLayout.data("defaultLbl").show()
             var isShared=oneLayout.data("layoutObj").isShared
             if(!isShared) shareBtn.show()
             deleteBtn.show()
         },()=>{
+            if(!oneLayout.data("defaultLbl").hasClass("w3-lime")) oneLayout.data("defaultLbl").hide()
             var isShared=oneLayout.data("layoutObj").isShared
             if(!isShared) shareBtn.hide()
             deleteBtn.hide()
         })
         oneLayout.on("click",()=>{
-            if(layoutName!=defaultLayoutName) this.setAsDefaultLayout(oneLayout)
+            var projectInfo=globalCache.findProjectInfo(globalCache.currentProjectID)
+            console.log(projectInfo.defaultLayout)
+            if(layoutName!=projectInfo.defaultLayout) this.setAsDefaultLayout(oneLayout)
             else this.setAsDefaultLayout()
         })
         deleteBtn.on("click",()=>{
@@ -321,17 +327,29 @@ projectSettingDialog.prototype.deleteLayout=async function(oneLayoutDOM){
     )
 }
 
+projectSettingDialog.prototype.showAsDefaultLayoutLbl=async function(oneLayoutDOM){
+    var defaultLbl=oneLayoutDOM.data("defaultLbl")
+    defaultLbl.show()
+    defaultLbl.text("Default")
+    defaultLbl.addClass("w3-lime")
+}
+
+projectSettingDialog.prototype.showAsNotDefaultLayoutLbl=async function(oneLayoutDOM){
+    var defaultLbl=oneLayoutDOM.data("defaultLbl")
+    defaultLbl.hide()
+    defaultLbl.text("Set As Default")
+    defaultLbl.removeClass("w3-lime")
+}
+
 projectSettingDialog.prototype.setAsDefaultLayout=async function(oneLayoutDOM){
     this.layoutsDiv.children('a').each((index,aLayout)=>{
-        var defaultLbl= $(aLayout).data("defaultLbl")
-        defaultLbl.hide()
+        this.showAsNotDefaultLayoutLbl($(aLayout))
     })
 
     if(oneLayoutDOM==null){ //remove default layout
         var layoutName=""
     }else{
-        var defaultLbl=oneLayoutDOM.data("defaultLbl")
-        defaultLbl.show()
+        this.showAsDefaultLayoutLbl($(oneLayoutDOM))
         layoutName=oneLayoutDOM.data("layoutObj").name 
     }
        

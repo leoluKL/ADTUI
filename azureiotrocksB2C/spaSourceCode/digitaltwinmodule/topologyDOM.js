@@ -246,6 +246,18 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     this.lastHoverTarget=e.target
     e.target.addClass("hover")
     this.broadcastMessage({ "message": "showInfoHoveredEle", "info": [info],"screenXY":this.convertPosition(e.position.x,e.position.y) })
+
+    //if there is calculation script in hovered node, highlight input nodes and the properties
+    if(info["$dtId"]){
+        var twinID=info["$dtId"]
+        var dbtwin=globalCache.DBTwins[twinID]
+        var calcScript=dbtwin["originalScript"]
+        var inputArr = globalCache.findAllInputsInScript(calcScript,dbtwin["displayName"],"Bool_forTestingScriptPurpose")
+
+        console.log(inputArr)
+    }
+    
+
 }
 
 topologyDOM.prototype.convertPosition=function(x,y){
