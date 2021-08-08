@@ -111,7 +111,7 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
 
         await cosmosdbhelper.deleteAllRecordsInAPartition("twincalculation","twinID",payload.twinID)
         var newDocument={
-            "id":payload.twinID,
+            //"id" will be auto generated, to avoid conflict with influence type when self influence self
             "twinID":payload.twinID,
             "type":"formula",
             "baseValueTemplate":payload.baseValueTemplate,
@@ -122,6 +122,7 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
             "projectID":payload.projectID
         }
         await cosmosdbhelper.insertRecord("twincalculation", newDocument)
+        
         for(var i=0;i<payload.calculationInputs.length;i++){
             var oneInput=payload.calculationInputs[i]
             var aDoc={
