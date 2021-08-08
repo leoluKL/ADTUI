@@ -99,6 +99,7 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
     var payload=JSON.parse(req.body.payload)
     var accountID=req.body.account
     try {
+        await cosmosdbhelper.deleteAllRecordsInAPartition("twincalculation","twinID",payload.twinID)
         var newDocument={
             "id":payload.twinID,
             "twinID":payload.twinID,
