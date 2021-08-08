@@ -80,5 +80,23 @@ cosmosdbhelper.prototype.deleteAllRecordsInAPartition=async function(containerID
     }
 }
 
+cosmosdbhelper.prototype.deleteAllRecordsByQuery=async function(queryStr,containerID){
+    //the querystr must return "docID" and "patitionValue" fields
+    try{
+        var docsArr=await this.query(containerID,queryStr)
+    }catch(e){
+        throw e;
+    }
+    try{
+        var promiseArr=[]
+        docsArr.forEach(oneDoc=>{
+            promiseArr.push(this.deleteRecord(containerID,oneDoc.patitionValue,oneDoc.docID))
+        })
+        var results=await Promise.allSettled(promiseArr);
+    }catch(e){
+        throw e;
+    }
+}
+
 
 module.exports = new cosmosdbhelper();

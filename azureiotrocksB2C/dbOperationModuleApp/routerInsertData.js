@@ -13,12 +13,19 @@ function routerInsertData(){
     this.useRoute("setVisualSchemaSharedFlag","post")
     this.useRoute("serviceWorkerSubscription","post")
     this.useRoute("updateFormula","post")
+    this.useRoute("test")
 }
 
 routerInsertData.prototype.useRoute=function(routeStr,isPost){
     this.router[(isPost)?"post":"get"]("/"+routeStr,(req,res)=>{
         this[routeStr](req,res)
     })
+}
+
+routerInsertData.prototype.test =async function(req,res) {
+    var queryStr='SELECT c.id theID FROM c '+"where c.id='e4c7fea2-78c2-4dee-b09b-1b7a99961b85.dataSignal' and c.type='value'"
+    var docs=await cosmosdbhelper.query("twincalculation",queryStr)
+    res.send(docs)
 }
 
 routerInsertData.prototype.newModels =async function(req,res) {
@@ -99,6 +106,9 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
     var payload=JSON.parse(req.body.payload)
     var accountID=req.body.account
     try {
+        //the querystr must return "docID" and "patitionValue" fields
+        await cosmosdbhelper.deleteAllRecordsByQuery(`select c.id patitionValue, c.twinID docID from c where c.id='${payload.twinID}' and c.type='influence'`,"twincalculation")
+
         await cosmosdbhelper.deleteAllRecordsInAPartition("twincalculation","twinID",payload.twinID)
         var newDocument={
             "id":payload.twinID,
@@ -122,6 +132,12 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
                 ,"value":oneInput.value
             }
             await cosmosdbhelper.insertRecord("twincalculation", aDoc)
+            var influenceDoc={
+                "id":payload.twinID,
+                "twinID":oneInput.twinID,
+                "type":"influence"
+            }
+            await cosmosdbhelper.insertRecord("twincalculation", influenceDoc)
         }
     } catch (e) {
         res.status(400).send(e.message)
