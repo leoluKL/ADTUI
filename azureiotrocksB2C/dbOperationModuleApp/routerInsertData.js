@@ -100,7 +100,74 @@ routerInsertData.prototype.updateTwin =async function(req,res) {
     res.send(updatedTwinDoc)
 }
 
+routerInsertData.prototype.twinCalculationScript_findAllIOInScript=function(actualScript,formulaTwin,currentInputValue){
+    //find all properties in the script
+    actualScript+="\n" //make sure the below patterns using "[^. ] not fail because of it is the end of string "
+    var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
+    var allSelfProperties=actualScript.match(patt)||[];
 
+    var patt = /_twinVal(?<=_twinVal)\[\".*?(?=\"\][^\[])\"\]/g; 
+    var allOtherTwinProperties=actualScript.match(patt)||[];
+
+    //analyze all variables that can not be as input as they are changed during calcuation
+    //they disqualify as input as they will trigger infinite calculation, all these belongs to _self
+    var ouputpatt = /_self(?<=_self)\[\"[^;{]*?[^\=](?=\=[^\=])/g;
+    var outputProperties=actualScript.match(ouputpatt)||[];
+    
+    var allProperties=allSelfProperties.concat(allOtherTwinProperties)
+    var seen = {};
+    allProperties=allProperties.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+
+    var inputPropertiesArr = allProperties.filter(function (el) {
+        return !outputProperties.includes(el);
+    });
+
+    var inputArr=[]
+    inputPropertiesArr.forEach(oneProperty=>{
+        var oneInputObj={} //twinID, path, value
+        var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
+        if(oneProperty.startsWith("_self")){
+            oneInputObj.path=oneProperty.match(fetchpropertypatt);
+            oneInputObj.twinID=formulaTwin
+        }else if(oneProperty.startsWith("_twinVal")){
+            var arr=oneProperty.match(fetchpropertypatt);
+            var firstEle=arr[0]
+            arr.shift()
+            oneInputObj.path=arr
+            oneInputObj.twinID=firstEle
+        }
+        inputArr.push(oneInputObj)
+    })
+
+    var outputArr=[]
+    var seen = {};
+    outputProperties=outputProperties.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+    outputProperties.forEach(oneProperty=>{
+        var oneOutputObj={} //path
+        var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
+        if(oneProperty.startsWith("_self")){
+            oneOutputObj.path=oneProperty.match(fetchpropertypatt);
+        }
+        outputArr.push(oneOutputObj)
+    })
+
+    for(var i=0;i<inputArr.length;i++){
+        var oneInput=inputArr[i]
+        oneInput.value=null
+        for(var j=0;j<currentInputValue.length;j++){
+            var oneInputFromRequest=currentInputValue[j]
+            if(oneInput.twinID==oneInputFromRequest.twinID && oneInput.path.join()==oneInputFromRequest.path.join() ){
+                oneInput.value=oneInputFromRequest.value
+                break;
+            }
+        }
+    }
+    return {"input":inputArr,"output":outputArr}
+}
 
 routerInsertData.prototype.updateFormula =async function(req,res) {
     var payload=JSON.parse(req.body.payload)
@@ -110,10 +177,21 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
     for(var i=0;i<prohibitWords.length;i++){
         var oneWord=prohibitWords[i]
         if(payload.actualScript.indexOf(oneWord)!=-1){
-            res.status(400).send("calculation script is rejected becuase of using prohibitted word")
-            return;
+            res.status(400).send(`calculation script is rejected becuase of using prohibitted word:'${oneWord}'`)
+            return
         }
     }
+    var calcIOResult=this.twinCalculationScript_findAllIOInScript(payload.actualScript,payload.twinID,payload.currentInputValue)
+    if(calcIOResult.errorMsg){
+        res.status(400).send(calcIOResult.errorMsg)
+        return
+    }
+    var calculationInputs=calcIOResult.input;
+    var calculationOutputs=calcIOResult.output;
+    var calculationInputs_noValue=[]
+    calculationInputs.forEach(ele=>{calculationInputs_noValue.push({"path":ele.path,"twinID":ele.twinID})})
+    
+    var finalScript = payload.actualScript.replace(/_self\[/g, `_twinVal["${payload.twinID}"][`)
 
     try {
         //the querystr must return "docID" and "patitionValue" fields
@@ -126,15 +204,16 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
             "type":"formula",
             "baseValueTemplate":payload.baseValueTemplate,
             "originalScript":payload.originalScript,
-            "actualScript":payload.actualScript,
-            "calculationInputs":payload.calculationInputs,
+            "actualScript":finalScript,
+            "inputs":calculationInputs_noValue,
+            "outputs":calculationOutputs,
             "author":accountID,
             "projectID":payload.projectID
         }
         await cosmosdbhelper.insertRecord("twincalculation", newDocument)
         
-        for(var i=0;i<payload.calculationInputs.length;i++){
-            var oneInput=payload.calculationInputs[i]
+        for(var i=0;i<calculationInputs.length;i++){
+            var oneInput=calculationInputs[i]
             var aDoc={
                 "id": oneInput.twinID+"."+oneInput.path.join(".")
                 ,"twinID":payload.twinID
@@ -152,6 +231,7 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
         }
     } catch (e) {
         res.status(400).send(e.message)
+        return;
     }
     res.end()
 }
@@ -170,6 +250,7 @@ routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
         await cosmosdbhelper.insertRecord("serverPushInfo", newTwinDocument)
     } catch (e) {
         res.status(400).send(e.message)
+        return;
     }
     res.send(newTwinDocument)
 }
