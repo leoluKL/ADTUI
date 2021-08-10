@@ -183,7 +183,16 @@ routerInsertData.prototype.twinCalculationScript_findAllIOInScript=async functio
     
     var loopingCheck=this.twinCalculationScript_findLoop(currentInputMatchingObj,outputArr,allFormulaRecords)
 
-    if(loopingCheck) return {"errorMsg":loopingCheck}
+    if(loopingCheck) {
+        var tmpArr=loopingCheck.split(".")
+        var twinID=tmpArr[0]
+        tmpArr.shift()
+        //find out twin name
+        var twinRecord=await cosmosdbhelper.query('dtproject',`select c.displayName from c where c.type='DTTwin' and c.projectID='${projectID}' and c.id='${twinID}'`)
+        var twinName=twinID
+        if(twinRecord.length>0) twinName=twinRecord[0].displayName
+        return {"errorMsg":`Possible loop in calculation. Twin: ${twinName}; Property: ${tmpArr.join()}`}
+    }
     return {"input":inputArr,"output":outputArr}
 }
 
@@ -192,7 +201,7 @@ routerInsertData.prototype.twinCalculationScript_findLoop =function(currentInput
         var oneOutput=outputArr[i]
         var str=oneOutput.twinID+"."+oneOutput.path.join(".")
         if(currentInputMatchingObj[str]){ //find looping possibility
-            return `Possible looping calculation: ${str}`
+            return str
         }
         //find further output triggerred from this oneOutput
         for(var j=0;j<allFormulaRecords.length;j++){
