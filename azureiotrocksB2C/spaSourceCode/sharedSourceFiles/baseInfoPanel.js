@@ -206,7 +206,11 @@ class baseInfoPanel {
     }
 
     async editDTProperty(originElementInfo, path, newVal, dataType) {
-        if (["double", "boolean", "float", "integer", "long"].includes(dataType)) newVal = Number(newVal)
+        if (["double", "float", "integer", "long"].includes(dataType)) newVal = Number(newVal)
+        if(dataType=="boolean"){
+            if(newVal=="true") newVal=true
+            else newVal=false
+        }
 
         //{ "op": "add", "path": "/x", "value": 30 }
         if (path.length == 1) {

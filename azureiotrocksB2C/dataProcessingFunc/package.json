@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "func start",
+    "dev":"nodemon",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {

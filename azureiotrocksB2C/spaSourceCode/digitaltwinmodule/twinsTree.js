@@ -102,10 +102,9 @@ twinsTree.prototype.rxMessage=function(msgPayload){
     else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
     else if(msgPayload.message=="ADTModelsChange") this.refreshModels()
     else if(msgPayload.message=="addNewTwin") this.drawOneTwin(msgPayload.twinInfo)
-    else if(msgPayload.message=="addNewTwins") {
-        msgPayload.twinsInfo.forEach(oneTwinInfo=>{this.drawOneTwin(oneTwinInfo)})
-    }
-    else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
+    else if(msgPayload.message=="addNewTwins") msgPayload.twinsInfo.forEach(oneTwinInfo=>{this.drawOneTwin(oneTwinInfo)})
+    else if(msgPayload.message=="twinsDeleted") this.hideTwins(msgPayload.twinIDArr)
+    else if(msgPayload.message=="hideSelectedNodes") this.hideTwins(msgPayload.twinIDArr)
     else if(msgPayload.message=="visualDefinitionChange"){
         if(!msgPayload.srcModelID){ // change model class visualization
             this.tree.groupNodes.forEach(gn=>{gn.refreshName()})
@@ -113,7 +112,7 @@ twinsTree.prototype.rxMessage=function(msgPayload){
     }
 }
 
-twinsTree.prototype.deleteTwins=function(twinIDArr){
+twinsTree.prototype.hideTwins=function(twinIDArr){
     twinIDArr.forEach(twinID=>{
         var twinDisplayName=globalCache.twinIDMapToDisplayName[twinID]
         this.tree.deleteLeafNode(twinDisplayName)
@@ -187,8 +186,6 @@ twinsTree.prototype.loadStartSelection=async function(twinIDs,modelIDs,replaceOr
         if(e.responseText) alert(e.responseText)
     }
 }
-
-
 
 twinsTree.prototype.drawTwinsAndRelations= function(data){
     data.childTwinsAndRelations.forEach(oneSet=>{

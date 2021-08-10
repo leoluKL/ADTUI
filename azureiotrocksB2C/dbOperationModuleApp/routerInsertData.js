@@ -105,6 +105,16 @@ routerInsertData.prototype.updateTwin =async function(req,res) {
 routerInsertData.prototype.updateFormula =async function(req,res) {
     var payload=JSON.parse(req.body.payload)
     var accountID=req.body.account
+
+    var prohibitWords=["eval(","setTimeout(","setInterval("]
+    for(var i=0;i<prohibitWords.length;i++){
+        var oneWord=prohibitWords[i]
+        if(payload.actualScript.indexOf(oneWord)!=-1){
+            res.status(400).send("calculation script is rejected becuase of using prohibitted word")
+            return;
+        }
+    }
+
     try {
         //the querystr must return "docID" and "patitionValue" fields
         await cosmosdbhelper.deleteAllRecordsByQuery(`select c.id patitionValue, c.twinID docID from c where c.id='${payload.twinID}' and c.type='influence'`,"twincalculation")

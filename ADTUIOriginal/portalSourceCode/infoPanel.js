@@ -227,7 +227,11 @@ infoPanel.prototype.drawButtons=function(selectType){
         selectInboundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectInbound"})})
         selectOutBoundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
         coseLayoutBtn.on("click",()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
-        hideBtn.on("click",()=>{this.broadcastMessage({"message": "hideSelectedNodes"})})
+        hideBtn.on("click",()=>{
+            var twinIDArr=[]
+            this.selectedObjects.forEach(ele=>{if(ele['$dtId']) twinIDArr.push(ele['$dtId'])})
+            this.broadcastMessage({"message": "hideSelectedNodes","twinIDArr":twinIDArr})
+        })
     }
     if (numOfNode > 1) {
         //some additional buttons when select multiple items
@@ -808,7 +812,11 @@ infoPanel.prototype.drawDropdownOption=function(contentDOM,newPath,valueArr,isNe
 }
 
 infoPanel.prototype.editDTProperty=function(originElementInfo,path,newVal,dataType,isNewTwin){
-    if(["double","boolean","float","integer","long"].includes(dataType)) newVal=Number(newVal)
+    if (["double", "float", "integer", "long"].includes(dataType)) newVal = Number(newVal)
+    if (dataType == "boolean") {
+        if (newVal == "true") newVal = true
+        else newVal = false
+    }
 
     //{ "op": "add", "path": "/x", "value": 30 }
     if(isNewTwin){

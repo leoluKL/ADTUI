@@ -103,6 +103,7 @@ twinsTree.prototype.rxMessage=function(msgPayload){
         msgPayload.twinsInfo.forEach(oneTwinInfo=>{this.drawOneTwin(oneTwinInfo)})
     }
     else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
+    else if(msgPayload.message=="hideSelectedNodes") this.deleteTwins(msgPayload.twinIDArr)
     else if(msgPayload.message=="visualDefinitionChange"){
         if(!msgPayload.srcModelID){ // change model class visualization
             this.tree.groupNodes.forEach(gn=>{gn.refreshName()})

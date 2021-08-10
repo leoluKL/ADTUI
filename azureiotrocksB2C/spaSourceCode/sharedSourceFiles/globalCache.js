@@ -113,7 +113,7 @@ globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
 
     resArr.forEach(element => {
         if(element.originalScript!=null) { 
-            var twinID=element.id
+            var twinID=element.twinID
             var oneDBTwin=this.DBTwins[twinID]
             if(oneDBTwin){
                 oneDBTwin["originalScript"]=element["originalScript"]
@@ -296,7 +296,7 @@ globalCache.prototype.findAllInputsInScript=function(actualScript,formulaTwin,Bo
                 oneInputObj.twinName=oneInputObj.twinName_origin=firstEle
             }else{
                 oneInputObj.twinID=firstEle
-                oneInputObj.value=this.searchValue(globalCache.storedTwins[oneInputObj.twinID],oneInputObj.path)
+                oneInputObj.value=this.searchValue(this.storedTwins[oneInputObj.twinID],oneInputObj.path)
             }
         }
         returnArr.push(oneInputObj)

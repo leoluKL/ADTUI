@@ -77,24 +77,6 @@ topologyDOM.prototype.init=function(){
                     'arrow-scale':0.6
                 }
             },
-            {selector: 'edge:selected',
-            style: {
-                'width': 3,
-                'line-color': 'red',
-                'target-arrow-color': 'red',
-                'source-arrow-color': 'red',
-                'line-fill':"linear-gradient",
-                'line-gradient-stop-colors':['cyan', 'magenta', 'yellow'],
-                'line-gradient-stop-positions':['0%','70%','100%']
-            }},
-            {selector: 'node:selected',
-            style: {
-                'border-color':"red",
-                'border-width':2,
-                'background-fill':'radial-gradient',
-                'background-gradient-stop-colors':['cyan', 'magenta', 'yellow'],
-                'background-gradient-stop-positions':['0%','50%','60%']
-            }},
             {selector: 'node.hover',
             style: {
                 'background-blacken':0.5
@@ -197,45 +179,473 @@ topologyDOM.prototype.init=function(){
     this.ur=ur
     this.core.trigger("zoom")
     this.setKeyDownFunc()
+
+    this.contenxtMenuInstance = this.core.contextMenus('get')
+    this.addMenuItemsForEditing()
+    this.addMenuItemsForOthers()
+    this.addMenuItemsForLiveData()
+    
+    this.core.on('cxttap', (e)=>{
+        this.decideVisibleContextMenu(e.target)
+    })
+}
+
+topologyDOM.prototype.selectIfClickEleIsNotSelected=function(clickEle){
+    if(!clickEle.selected()){
+        this.core.$(':selected').unselect()
+        clickEle.select()
+    }
+}
+
+topologyDOM.prototype.node_changeSelectionWhenClickElement=function(clickEle){
+    if(clickEle.isNode && clickEle.isNode()){
+        this.selectIfClickEleIsNotSelected(clickEle)
+    }
+    var arr=this.core.$(':selected')
+    return arr
+}
+topologyDOM.prototype.nodeoredge_changeSelectionWhenClickElement=function(clickEle){
+    if(clickEle.isNode){ //at least having isnode function means it is node or edge
+        this.selectIfClickEleIsNotSelected(clickEle)
+    }
+    var arr=this.core.$(':selected')
+    return arr
+}
+
+
+topologyDOM.prototype.decideVisibleContextMenu=function(clickEle){
+    //restore all menu items
+    this.contenxtMenuInstance.showMenuItem('ConnectTo');
+    this.contenxtMenuInstance.showMenuItem('ConnectFrom');
+    this.contenxtMenuInstance.showMenuItem('QueryOutbound');
+    this.contenxtMenuInstance.showMenuItem('QueryInbound');
+    this.contenxtMenuInstance.showMenuItem('SelectOutbound');
+    this.contenxtMenuInstance.showMenuItem('SelectInbound');
+    this.contenxtMenuInstance.showMenuItem('enableLiveDataStream');
+    this.contenxtMenuInstance.showMenuItem('COSE');
+    this.contenxtMenuInstance.showMenuItem('addSimulatingDataSource');
+    this.contenxtMenuInstance.showMenuItem('liveData');
+    this.contenxtMenuInstance.showMenuItem('Hide');
+    this.contenxtMenuInstance.showMenuItem('Others');
+
+    var selectedNodes=this.core.$('node:selected')
+    var selected=this.core.$(':selected')
+    var isClickingNode=(clickEle.isNode && clickEle.isNode())
+    var hasNode=isClickingNode || (selectedNodes.length>0)
+
+    if(!hasNode){
+        this.contenxtMenuInstance.hideMenuItem('ConnectTo');
+        this.contenxtMenuInstance.hideMenuItem('ConnectFrom'); 
+        this.contenxtMenuInstance.hideMenuItem('QueryOutbound');
+        this.contenxtMenuInstance.hideMenuItem('QueryInbound');
+        this.contenxtMenuInstance.hideMenuItem('SelectOutbound');
+        this.contenxtMenuInstance.hideMenuItem('SelectInbound');
+        this.contenxtMenuInstance.hideMenuItem('enableLiveDataStream');
+        this.contenxtMenuInstance.hideMenuItem('Hide');
+        this.contenxtMenuInstance.hideMenuItem('Others');
+
+    }
+
+    if(selected.length<=1) this.contenxtMenuInstance.hideMenuItem('COSE');
+    if(!isClickingNode) this.contenxtMenuInstance.hideMenuItem('addSimulatingDataSource');
+    if(!isClickingNode && selectedNodes.length==0) this.contenxtMenuInstance.hideMenuItem('liveData');
+
+}
+
+topologyDOM.prototype.addMenuItemsForLiveData = function () {
+    this.contenxtMenuInstance.appendMenuItems([
+        {
+            id: 'liveData',
+            content: 'Live Data',
+            selector: 'node,edge',
+            disabled:true,
+            onClickFunction: ()=>{}//empty func, it is only a menu title item
+        },
+        {
+            id: 'addSimulatingDataSource',
+            content: 'Add Simulator Source',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                var target = e.target || e.cyTarget;
+                this.addSimulatorSource(target.id())
+            }
+        },
+        {
+            id: 'enableLiveDataStream',
+            content: 'Enable Live Data Stream',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                var target = e.target || e.cyTarget;
+                this.enableLiveDataStream(target.id())
+            }
+        }
+    ])
+}
+
+topologyDOM.prototype.addMenuItemsForEditing = function () {
+    this.contenxtMenuInstance.appendMenuItems([
+        {
+            id: 'editing',
+            content: 'Edit',
+            selector: 'node,edge',
+            disabled:true,
+            onClickFunction: ()=>{}//empty func, it is only a menu title item
+        },
+        {
+            id: 'ConnectTo',
+            content: 'Connect To',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.startTargetNodeMode("connectTo",this.node_changeSelectionWhenClickElement(e.target))
+            }
+        },
+        {
+            id: 'ConnectFrom',
+            content: 'Connect From',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.startTargetNodeMode("connectFrom",this.node_changeSelectionWhenClickElement(e.target))
+            }
+        },
+        {
+            id: 'DeleteAll',
+            content: 'Delete',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.deleteElementsArray(this.nodeoredge_changeSelectionWhenClickElement(e.target) )
+            }
+        }
+    ])
+}
+
+topologyDOM.prototype.addMenuItemsForOthers = function () {
+    this.contenxtMenuInstance.appendMenuItems([
+        {
+            id: 'Others',
+            content: 'Others', 
+            selector: 'node,edge',
+            disabled:true,
+            onClickFunction: ()=>{} //empty func, it is only a menu title item
+        },
+        {
+            id: 'QueryOutbound',
+            content: 'Load Outbound',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.showOutBound(this.node_changeSelectionWhenClickElement(e.target))
+            }
+        },
+        {
+            id: 'QueryInbound',
+            content: 'Load Inbound', 
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.showInBound(this.node_changeSelectionWhenClickElement(e.target))
+            }
+        },{
+            id: 'SelectOutbound',
+            content: '+Select Outbound',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.selectOutboundNodes(this.node_changeSelectionWhenClickElement(e.target))
+            }
+        },
+        {
+            id: 'SelectInbound',
+            content: '+Select Inbound',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.selectInboundNodes(this.node_changeSelectionWhenClickElement(e.target))
+            }
+        },
+        {
+            id: 'COSE',
+            content: 'COSE Layout',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                this.noPosition_cose(this.core.$(':selected'))
+            }
+        },
+        {
+            id: 'Hide',
+            content: 'Hide',
+            selector: 'node,edge',
+            onClickFunction: (e) => {
+                var collection=this.node_changeSelectionWhenClickElement(e.target)
+                collection.remove()
+                var twinIDArr=[]
+                collection.forEach(oneNode=>{twinIDArr.push(oneNode.data("originalInfo")['$dtId'])})
+                this.broadcastMessage({ "message": "hideSelectedNodes","twinIDArr":twinIDArr })
+            }
+        }
+    ])
+}
+
+
+topologyDOM.prototype.addSimulatorSource = function (twinName) {
+    //TODO:
+    console.log("TODO: add simulator source")
+}
+
+topologyDOM.prototype.enableLiveDataStream = function (twinName) {
+    //TODO:
+    console.log("TODO: enable live data stream")
 }
 
 topologyDOM.prototype.highPriorityStyleDefinition = function () {
     this.core.style()
-    .selector('node.calcInput')
-    .style({
-        'border-color':"red",
-        'border-width':1,
-        'background-fill':'linear-gradient',
-        'background-gradient-stop-colors':['red','red', 'white',"white","red"],
-        'background-gradient-stop-positions':['0%','50%','51%',"90%","91%"]
-    })
-    .update() 
-    
+        .selector('node.calcInput')
+        .style({
+            'border-color': "red",
+            'border-width': 1,
+            'background-fill': 'linear-gradient',
+            'background-gradient-stop-colors': ['red', 'red', 'white', "white", "red"],
+            'background-gradient-stop-positions': ['0%', '50%', '51%', "90%", "91%"]
+        })
+        .update()
+
 
     this.core.style()
         .selector('edge.calcInput')
         .style({
-            'width':'5',
+            'width': '5',
             'line-color': 'red',
-            'target-label':'data(ppath)',
-            'font-size':'11px',
-            'target-text-offset':'40%',
-            'text-background-color':'white',
-            'text-background-opacity':1,
-            'text-border-opacity':1,
-            'text-border-width':1,
-            'text-background-padding':'2px',
-            'color':'gray',
-            'text-border-color':'gray'
+            'target-label': 'data(ppath)',
+            'font-size': '11px',
+            'target-text-offset': '40%',
+            'text-background-color': 'white',
+            'text-background-opacity': 1,
+            'text-border-opacity': 1,
+            'text-border-width': 1,
+            'text-background-padding': '2px',
+            'color': 'gray',
+            'text-border-color': 'gray'
         })
-        .update() 
+        .update()
+    this.core.style()
+        .selector('edge:selected')
+        .style({
+            'width': 3,
+            'line-color': 'red',
+            'target-arrow-color': 'red',
+            'source-arrow-color': 'red',
+            'line-fill': "linear-gradient",
+            'line-gradient-stop-colors': ['cyan', 'magenta', 'yellow'],
+            'line-gradient-stop-positions': ['0%', '70%', '100%']
+        })
+        .update()
+
+    this.core.style()
+        .selector('node:selected')
+        .style({
+            'border-color': "red",
+            'border-width': 2,
+            'background-fill': 'radial-gradient',
+            'background-gradient-stop-colors': ['cyan', 'magenta', 'yellow'],
+            'background-gradient-stop-positions': ['0%', '50%', '60%']
+        })
+        .update()
 }
+
+
+topologyDOM.prototype.showOutBound=async function(collection) {
+    var twinIDArr = []
+    collection.forEach(element => {
+        var originalInfo = element.data("originalInfo")
+        if (originalInfo['$sourceId']) return;
+        twinIDArr.push(originalInfo['$dtId'])
+    });
+
+    while (twinIDArr.length > 0) {
+        var smallArr = twinIDArr.splice(0, 100);
+
+        var knownTargetTwins = {}
+        smallArr.forEach(oneID => {
+            knownTargetTwins[oneID] = 1 //itself also is known
+            var outBoundRelation = globalCache.storedOutboundRelationships[oneID]
+            if (outBoundRelation) {
+                outBoundRelation.forEach(oneRelation => {
+                    var targetID = oneRelation["$targetId"]
+                    if (globalCache.storedTwins[targetID] != null) knownTargetTwins[targetID] = 1
+                })
+            }
+        })
+
+        try {
+            var data = await msalHelper.callAPI("digitaltwin/queryOutBound", "POST", { arr: smallArr, "knownTargets": knownTargetTwins })
+            //new twin's relationship should be stored as well
+            globalCache.storeTwinRelationships(data.newTwinRelations)
+            data.childTwinsAndRelations.forEach(oneSet => {
+                for (var ind in oneSet.childTwins) {
+                    var oneTwin = oneSet.childTwins[ind]
+                    globalCache.storeSingleADTTwin(oneTwin)
+                }
+            })
+            this.drawTwinsAndRelations(data)
+            this.broadcastMessage({ "message": "drawTwinsAndRelations", info: data })
+        } catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+        }
+    }
+}
+
+topologyDOM.prototype.showInBound=async function(collection) {
+    var twinIDArr = []
+    collection.forEach(element => {
+        var originalInfo = element.data("originalInfo")
+        if (originalInfo['$sourceId']) return;
+        twinIDArr.push(originalInfo['$dtId'])
+    });
+
+    while (twinIDArr.length > 0) {
+        var smallArr = twinIDArr.splice(0, 100);
+        var knownSourceTwins = {}
+        var IDDict = {}
+        smallArr.forEach(oneID => {
+            IDDict[oneID] = 1
+            knownSourceTwins[oneID] = 1 //itself also is known
+        })
+        for (var twinID in globalCache.storedOutboundRelationships) {
+            var relations = globalCache.storedOutboundRelationships[twinID]
+            relations.forEach(oneRelation => {
+                var targetID = oneRelation['$targetId']
+                var srcID = oneRelation['$sourceId']
+                if (IDDict[targetID] != null) {
+                    if (globalCache.storedTwins[srcID] != null) knownSourceTwins[srcID] = 1
+                }
+            })
+        }
+
+        try {
+            var data = await msalHelper.callAPI("digitaltwin/queryInBound", "POST", { arr: smallArr, "knownSources": knownSourceTwins })
+            //new twin's relationship should be stored as well
+            globalCache.storeTwinRelationships(data.newTwinRelations)
+            data.childTwinsAndRelations.forEach(oneSet => {
+                for (var ind in oneSet.childTwins) {
+                    var oneTwin = oneSet.childTwins[ind]
+                    globalCache.storeSingleADTTwin(oneTwin)
+                }
+            })
+            this.drawTwinsAndRelations(data)
+            this.broadcastMessage({ "message": "drawTwinsAndRelations", info: data })
+        } catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+        }
+    }
+}
+
+
+topologyDOM.prototype.deleteElementsArray=async function(arr) {
+    if (arr.length == 0) return;
+    var relationsArr = []
+    var twinIDArr = []
+    var twinIDs = {}
+    arr.forEach(element => {
+        var originalInfo = element.data("originalInfo")
+        if(!originalInfo) return;
+        if (originalInfo['$sourceId']) relationsArr.push(originalInfo);
+        else {
+            twinIDArr.push(originalInfo['$dtId'])
+            twinIDs[originalInfo['$dtId']] = 1
+        }
+    });
+    for (var i = relationsArr.length - 1; i >= 0; i--) { //clear those relationships that are going to be deleted after twins deleting
+        var srcId = relationsArr[i]['$sourceId']
+        var targetId = relationsArr[i]['$targetId']
+        if (twinIDs[srcId] != null || twinIDs[targetId] != null) {
+            relationsArr.splice(i, 1)
+        }
+    }
+    var confirmDialogDiv = new simpleConfirmDialog()
+    var dialogStr = ""
+    var twinNumber = twinIDArr.length;
+    var relationsNumber = relationsArr.length;
+    if (twinNumber > 0) dialogStr = twinNumber + " twin" + ((twinNumber > 1) ? "s" : "") + " (with connected relations)"
+    if (twinNumber > 0 && relationsNumber > 0) dialogStr += " and additional "
+    if (relationsNumber > 0) dialogStr += relationsNumber + " relation" + ((relationsNumber > 1) ? "s" : "")
+    dialogStr += " will be deleted. Please confirm"
+    confirmDialogDiv.show(
+        { width: "350px" },
+        {
+            title: "Confirm"
+            , content: dialogStr
+            , buttons: [
+                {
+                    colorClass: "w3-red w3-hover-pink", text: "Confirm", "clickFunc": async () => {
+                        confirmDialogDiv.close()
+                        if (relationsArr.length > 0) await this.deleteRelations(relationsArr)
+                        if (twinIDArr.length > 0) await this.deleteTwins(twinIDArr)
+                    }
+                },
+                {
+                    colorClass: "w3-gray", text: "Cancel", "clickFunc": () => {
+                        confirmDialogDiv.close()
+                    }
+                }
+            ]
+        }
+    )
+}
+
+topologyDOM.prototype.deleteTwins=async function(twinIDArr) {
+    var ioTDevices = []
+    twinIDArr.forEach(oneTwinID => {
+        var dbTwinInfo = globalCache.DBTwins[oneTwinID]
+        if (dbTwinInfo.IoTDeviceID != null && dbTwinInfo.IoTDeviceID != "") {
+            ioTDevices.push(dbTwinInfo.IoTDeviceID)
+        }
+    })
+    if (ioTDevices.length > 0) {
+        msalHelper.callAPI("devicemanagement/unregisterIoTDevices", "POST", { arr: ioTDevices })
+    }
+
+    while (twinIDArr.length > 0) {
+        var smallArr = twinIDArr.splice(0, 100);
+
+        try {
+            var result = await msalHelper.callAPI("digitaltwin/deleteTwins", "POST", { arr: smallArr }, "withProjectID")
+            result.forEach((oneID) => {
+                delete globalCache.storedTwins[oneID]
+                delete globalCache.storedOutboundRelationships[oneID]
+            });
+            var theMessage={ "message": "twinsDeleted", twinIDArr: result }
+            result.forEach(twinID=>{
+                var twinDisplayName=globalCache.twinIDMapToDisplayName[twinID]
+                this.core.$('[id = "'+twinDisplayName+'"]').remove()
+            })
+            this.broadcastMessage(theMessage)
+        } catch (e) {
+            console.log(e)
+            if (e.responseText) alert(e.responseText)
+        }
+    }
+}
+
+topologyDOM.prototype.deleteRelations=async function(relationsArr) {
+    var arr = []
+    relationsArr.forEach(oneRelation => {
+        arr.push({ srcID: oneRelation['$sourceId'], relID: oneRelation['$relationshipId'] })
+    })
+    try {
+        var data = await msalHelper.callAPI("digitaltwin/deleteRelations", "POST", { "relations": arr })
+        globalCache.storeTwinRelationships_remove(data)
+        this.rxMessage({ "message": "relationsDeleted", "relations": data })
+    } catch (e) {
+        console.log(e)
+        if (e.responseText) alert(e.responseText)
+    }
+}
+
 
 
 topologyDOM.prototype.smartPositionNode = function (mousePosition) {
     var zoomLevel=this.core.zoom()
     if(!this.draggingNode) return
-    //comparing nodes set: its connectfrom nodes and their connectto nodes, its connectto nodes and their connectfrom nodes
+    //consider lock mouse move position for these nodes:
+    // - its connectfrom nodes and their connectto nodes
+    // - its connectto nodes and their connectfrom nodes
     var incomers=this.draggingNode.incomers()
     var outerFromIncom= incomers.outgoers()
     var outer=this.draggingNode.outgoers()
@@ -474,7 +884,7 @@ topologyDOM.prototype.updateRelationshipWidth=function(srcModelID,relationshipNa
     this.highPriorityStyleDefinition() 
 }
 
-topologyDOM.prototype.deleteRelations=function(relations){
+topologyDOM.prototype.reflectRelationsDeleted=function(relations){
     relations.forEach(oneRelation=>{
         var srcID=oneRelation["srcID"]
         var relationID=oneRelation["relID"]
@@ -488,14 +898,6 @@ topologyDOM.prototype.deleteRelations=function(relations){
                 break
             }
         }
-    })   
-}
-
-
-topologyDOM.prototype.deleteTwins=function(twinIDArr){
-    twinIDArr.forEach(twinID=>{
-        var twinDisplayName=globalCache.twinIDMapToDisplayName[twinID]
-        this.core.$('[id = "'+twinDisplayName+'"]').remove()
     })   
 }
 
@@ -686,8 +1088,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         }
     }else if(msgPayload.message=="addNewTwins") {
         this.drawTwins(msgPayload.twinsInfo,"animation")
-    }else if(msgPayload.message=="drawTwinsAndRelations") this.drawTwinsAndRelations(msgPayload.info)
-    else if(msgPayload.message=="showInfoSelectedNodes"){ //from selecting twins in the twintree
+    }else if(msgPayload.message=="showInfoSelectedNodes"){ //from selecting twins in the twintree
         this.core.nodes().unselect()
         this.core.edges().unselect()
         var arr=msgPayload.info;
@@ -717,14 +1118,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
             else if(msgPayload.noAvarta)  this.updateModelAvarta(msgPayload.modelID,null)
             else if(msgPayload.dimensionRatio)  this.updateModelTwinDimension(msgPayload.modelID,msgPayload.dimensionRatio)
         } 
-    }else if(msgPayload.message=="twinsDeleted") this.deleteTwins(msgPayload.twinIDArr)
-    else if(msgPayload.message=="relationsDeleted") this.deleteRelations(msgPayload.relations)
-    else if(msgPayload.message=="connectTo"){ this.startTargetNodeMode("connectTo")   }
-    else if(msgPayload.message=="connectFrom"){ this.startTargetNodeMode("connectFrom")   }
-    else if(msgPayload.message=="addSelectOutbound"){ this.selectOutboundNodes()   }
-    else if(msgPayload.message=="addSelectInbound"){ this.selectInboundNodes()   }
-    else if(msgPayload.message=="hideSelectedNodes"){ this.hideSelectedNodes()   }
-    else if(msgPayload.message=="COSESelectedNodes"){ this.COSESelectedNodes()   }
+    }else if(msgPayload.message=="relationsDeleted") this.reflectRelationsDeleted(msgPayload.relations)
     else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName)   }
     else if (msgPayload.message == "layoutChange") this.chooseLayout(globalCache.currentLayoutName)
     else if(msgPayload.message=="alignSelectedNode") this.alignSelectedNodes(msgPayload.direction)
@@ -1055,36 +1449,24 @@ topologyDOM.prototype.numberPrecision = function (number) {
     return parseFloat(number.toFixed(3))
 }
 
-topologyDOM.prototype.COSESelectedNodes = function () {
-    var selected=this.core.$(':selected')
-    this.noPosition_cose(selected)
-}
 
-topologyDOM.prototype.hideSelectedNodes = function () {
-    var selectedNodes=this.core.nodes(':selected')
-    selectedNodes.remove()
-}
 
-topologyDOM.prototype.selectInboundNodes = function () {
-    var selectedNodes=this.core.nodes(':selected')
+topologyDOM.prototype.selectInboundNodes = function (selectedNodes) {
     var eles=this.core.nodes().edgesTo(selectedNodes).sources()
     eles.forEach((ele)=>{ this.animateANode(ele) })
     eles.select()
     this.selectFunction()
 }
 
-topologyDOM.prototype.selectOutboundNodes = function () {
-    var selectedNodes=this.core.nodes(':selected')
+topologyDOM.prototype.selectOutboundNodes = function (selectedNodes) {
     var eles=selectedNodes.edgesTo(this.core.nodes()).targets()
     eles.forEach((ele)=>{ this.animateANode(ele) })
     eles.select()
     this.selectFunction()
 }
 
-topologyDOM.prototype.addConnections = function (targetNode) {
+topologyDOM.prototype.addConnections = function (targetNode,srcNodeArr) {
     var theConnectMode=this.targetNodeMode
-    var srcNodeArr=this.core.nodes(":selected")
-
     var preparationInfo=[]
 
     srcNodeArr.forEach(theNode=>{
@@ -1229,7 +1611,7 @@ topologyDOM.prototype.setKeyDownFunc=function(includeCancelConnectOperation){
     });
 }
 
-topologyDOM.prototype.startTargetNodeMode = function (mode) {
+topologyDOM.prototype.startTargetNodeMode = function (mode,selectedNodes) {
     this.core.autounselectify( true );
     this.core.container().style.cursor = 'crosshair';
     this.targetNodeMode=mode;
@@ -1237,7 +1619,7 @@ topologyDOM.prototype.startTargetNodeMode = function (mode) {
 
     this.core.nodes().on('click', (e)=>{
         var clickedNode = e.target;
-        this.addConnections(clickedNode)
+        this.addConnections(clickedNode,selectedNodes)
         //delay a short while so node selection will not be changed to the clicked target node
         setTimeout(()=>{this.cancelTargetNodeMode()},50)
 
