@@ -194,7 +194,10 @@ infoPanel.prototype.drawButtons=function(selectType){
     if(selectType=="singleRelationship"){
         var delBtn =  $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         this.DOM.append(delBtn)
-        delBtn.on("click",()=>{this.deleteSelected()})
+        delBtn.on("click",()=>{
+            this.deleteSelected()
+            $(document.activeElement).blur()
+        })
     }else if(selectType=="singleNode" || selectType=="multiple"){
         var delBtn = $('<button style="width:104px" class="w3-button w3-red w3-hover-pink w3-border">Delete All</button>')
         var connectToBtn =$('<button style="width:45%"  class="w3-button w3-border">Connect to</button>')
@@ -204,12 +207,27 @@ infoPanel.prototype.drawButtons=function(selectType){
         
         this.DOM.append(delBtn, connectToBtn,connectFromBtn , showInboundBtn, showOutBoundBtn)
     
-        showOutBoundBtn.on("click",()=>{this.showOutBound()})
-        showInboundBtn.on("click",()=>{this.showInBound()})  
-        connectToBtn.on("click",()=>{this.broadcastMessage({ "message": "connectTo"}) })
-        connectFromBtn.on("click",()=>{this.broadcastMessage({ "message": "connectFrom"}) })
+        showOutBoundBtn.on("click",()=>{
+            this.showOutBound()
+            $(document.activeElement).blur()
+        })
+        showInboundBtn.on("click",()=>{
+            this.showInBound()
+            $(document.activeElement).blur()
+        })  
+        connectToBtn.on("click",()=>{
+            this.broadcastMessage({ "message": "connectTo"}) 
+            $(document.activeElement).blur()
+        })
+        connectFromBtn.on("click",()=>{
+            this.broadcastMessage({ "message": "connectFrom"}) 
+            $(document.activeElement).blur()
+        })
 
-        delBtn.on("click",()=>{this.deleteSelected()})
+        delBtn.on("click",()=>{
+            this.deleteSelected()
+            $(document.activeElement).blur()
+        })
     }
     
     var numOfNode = 0;
@@ -224,13 +242,23 @@ infoPanel.prototype.drawButtons=function(selectType){
         var hideBtn= $('<button class="w3-button w3-border">Hide</button>')
         this.DOM.append(selectInboundBtn, selectOutBoundBtn,coseLayoutBtn,hideBtn)
 
-        selectInboundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectInbound"})})
-        selectOutBoundBtn.on("click",()=>{this.broadcastMessage({"message": "addSelectOutbound"})})
-        coseLayoutBtn.on("click",()=>{this.broadcastMessage({"message": "COSESelectedNodes"})})
+        selectInboundBtn.on("click",()=>{
+            this.broadcastMessage({"message": "addSelectInbound"})
+            $(document.activeElement).blur()
+        })
+        selectOutBoundBtn.on("click",()=>{
+            this.broadcastMessage({"message": "addSelectOutbound"})
+            $(document.activeElement).blur()
+        })
+        coseLayoutBtn.on("click",()=>{
+            this.broadcastMessage({"message": "COSESelectedNodes"})
+            $(document.activeElement).blur()
+        })
         hideBtn.on("click",()=>{
             var twinIDArr=[]
             this.selectedObjects.forEach(ele=>{if(ele['$dtId']) twinIDArr.push(ele['$dtId'])})
             this.broadcastMessage({"message": "hideSelectedNodes","twinIDArr":twinIDArr})
+            $(document.activeElement).blur()
         })
     }
     if (numOfNode > 1) {

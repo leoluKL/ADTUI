@@ -363,7 +363,7 @@ topologyDOM.prototype.addMenuItemsForOthers = function () {
             content: 'COSE Layout',
             selector: 'node,edge',
             onClickFunction: (e) => {
-                this.noPosition_cose(this.core.$(':selected'))
+                this.noPosition_cose(this.core.$(':selected'),this.getCurrentLayoutDetail())
             }
         },
         {
@@ -1135,6 +1135,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
 topologyDOM.prototype.chooseLayout = function (layoutName) {
     if (layoutName == "[NA]") {
         //select all visible nodes and do a COSE layout, clean all bend edge line as well
+        var currentLayout=this.getCurrentLayoutDetail()
         this.core.edges().forEach(oneEdge => {
             oneEdge.removeClass('edgebendediting-hasbendpoints')
             oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
@@ -1143,7 +1144,7 @@ topologyDOM.prototype.chooseLayout = function (layoutName) {
             oneEdge.data("cyedgecontroleditingWeights", [])
             oneEdge.data("cyedgecontroleditingDistances", [])
         })
-        this.noPosition_cose()
+        this.noPosition_cose(null,currentLayout)
     } else if (layoutName != null) {
         var layoutDetail = globalCache.layoutJSON[layoutName].detail
         if (layoutDetail) {
@@ -1645,7 +1646,7 @@ topologyDOM.prototype.noPosition_grid=function(eles){
     newLayout.run()
 }
 
-topologyDOM.prototype.noPosition_cose=function(eles){
+topologyDOM.prototype.noPosition_cose=function(eles,undoLayoutDetail){
     if(eles==null) eles=this.core.elements()
 
     var newLayout =eles.layout({
@@ -1655,6 +1656,11 @@ topologyDOM.prototype.noPosition_cose=function(eles){
         ,fit:false
     }) 
     newLayout.run()
+    if(undoLayoutDetail){
+        var newLayoutDetail=this.getCurrentLayoutDetail()
+        this.applyNewLayoutWithUndo(newLayoutDetail, undoLayoutDetail)
+    }
+    
     this.core.center(eles)
 }
 

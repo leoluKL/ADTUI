@@ -614,6 +614,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
     else if (msgPayload.message == "layoutChange") {
         var layoutName = globalCache.currentLayoutName
         if(layoutName=="[NA]"){
+            var currentLayout=this.getCurrentLayoutDetail()
             //select all visible nodes and do a COSE layout, clean all bend edge line as well
             this.core.edges().forEach(oneEdge=>{
                 oneEdge.removeClass('edgebendediting-hasbendpoints')
@@ -623,7 +624,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
                 oneEdge.data("cyedgecontroleditingWeights",[])
                 oneEdge.data("cyedgecontroleditingDistances",[])
             })
-            this.noPosition_cose()
+            this.noPosition_cose(null,currentLayout)
         }else if (layoutName != null) {
             var layoutDetail = globalCache.layoutJSON[layoutName]
             if (layoutDetail) this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail())
@@ -916,8 +917,7 @@ topologyDOM.prototype.numberPrecision = function (number) {
 }
 
 topologyDOM.prototype.COSESelectedNodes = function () {
-    var selected=this.core.$(':selected')
-    this.noPosition_cose(selected)
+    this.noPosition_cose(this.core.$(':selected'),this.getCurrentLayoutDetail())
 }
 
 topologyDOM.prototype.hideSelectedNodes = function () {
@@ -1118,7 +1118,7 @@ topologyDOM.prototype.noPosition_grid=function(eles){
     newLayout.run()
 }
 
-topologyDOM.prototype.noPosition_cose=function(eles){
+topologyDOM.prototype.noPosition_cose=function(eles,undoLayoutDetail){
     if(eles==null) eles=this.core.elements()
 
     var newLayout =eles.layout({
@@ -1128,6 +1128,10 @@ topologyDOM.prototype.noPosition_cose=function(eles){
         ,fit:false
     }) 
     newLayout.run()
+    if(undoLayoutDetail){
+        var newLayoutDetail=this.getCurrentLayoutDetail()
+        this.applyNewLayoutWithUndo(newLayoutDetail, undoLayoutDetail)
+    }
     this.core.center(eles)
 }
 
