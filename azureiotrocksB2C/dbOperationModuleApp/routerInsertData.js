@@ -151,6 +151,7 @@ routerInsertData.prototype.twinCalculationScript_findAllIOInScript=function(actu
         var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
         if(oneProperty.startsWith("_self")){
             oneOutputObj.path=oneProperty.match(fetchpropertypatt);
+            oneOutputObj.twinID=formulaTwin
         }
         outputArr.push(oneOutputObj)
     })
@@ -166,8 +167,20 @@ routerInsertData.prototype.twinCalculationScript_findAllIOInScript=function(actu
             }
         }
     }
+
+    //check all possible looping calculation
+    var currentInputMatchingObj={}
+    inputArr.forEach(oneInput=>{
+        var str=oneInput.twinID+"."+oneInput.path.join(".")
+        currentInputMatchingObj[str]=1
+    })
+
+
     return {"input":inputArr,"output":outputArr}
 }
+routerInsertData.prototype.twinCalculationScript_findLoop =async function(currentInputMatchingObj,outputArr) {
+}
+
 
 routerInsertData.prototype.updateFormula =async function(req,res) {
     var payload=JSON.parse(req.body.payload)
