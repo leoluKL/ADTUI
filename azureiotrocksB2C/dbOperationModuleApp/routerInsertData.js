@@ -100,29 +100,37 @@ routerInsertData.prototype.updateTwin =async function(req,res) {
     res.send(updatedTwinDoc)
 }
 
-routerInsertData.prototype.twinCalculationScript_findAllIOInScript=function(actualScript,formulaTwin,currentInputValue){
+routerInsertData.prototype.twinCalculationScript_findAllIOInScript=async function(actualScript,formulaTwin,currentInputValue,projectID){
     //find all properties in the script
     actualScript+="\n" //make sure the below patterns using "[^. ] not fail because of it is the end of string "
-    var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
-    var allSelfProperties=actualScript.match(patt)||[];
+    var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g;
+    var allSelfProperties = actualScript.match(patt) || [];
+    var countAllSelfTimes = {}
+    allSelfProperties.forEach(oneSelf => {
+        if (countAllSelfTimes[oneSelf]) countAllSelfTimes[oneSelf] += 1
+        else countAllSelfTimes[oneSelf] = 1
+    })
 
-    var patt = /_twinVal(?<=_twinVal)\[\".*?(?=\"\][^\[])\"\]/g; 
-    var allOtherTwinProperties=actualScript.match(patt)||[];
+    var patt = /_twinVal(?<=_twinVal)\[\".*?(?=\"\][^\[])\"\]/g;
+    var allOtherTwinProperties = actualScript.match(patt) || [];
+    var listAllOthers = {}
+    allOtherTwinProperties.forEach(oneOther => { listAllOthers[oneOther] = 1 })
 
     //analyze all variables that can not be as input as they are changed during calcuation
     //they disqualify as input as they will trigger infinite calculation, all these belongs to _self
     var ouputpatt = /_self(?<=_self)\[\"[^;{]*?[^\=](?=\=[^\=])/g;
-    var outputProperties=actualScript.match(ouputpatt)||[];
-    
-    var allProperties=allSelfProperties.concat(allOtherTwinProperties)
-    var seen = {};
-    allProperties=allProperties.filter(function(item) {
-        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-    });
+    var outputProperties = actualScript.match(ouputpatt) || [];
+    var countOutputTimes = {}
+    outputProperties.forEach(oneOutput => {
+        if (countOutputTimes[oneOutput]) countOutputTimes[oneOutput] += 1
+        else countOutputTimes[oneOutput] = 1
+    })
 
-    var inputPropertiesArr = allProperties.filter(function (el) {
-        return !outputProperties.includes(el);
-    });
+    var inputPropertiesArr=[]
+    for(var ind in listAllOthers) inputPropertiesArr.push(ind)
+    for(var ind in countAllSelfTimes){
+        if(countAllSelfTimes[ind]!=countOutputTimes[ind]) inputPropertiesArr.push(ind)
+    }
 
     var inputArr=[]
     inputPropertiesArr.forEach(oneProperty=>{
@@ -142,11 +150,7 @@ routerInsertData.prototype.twinCalculationScript_findAllIOInScript=function(actu
     })
 
     var outputArr=[]
-    var seen = {};
-    outputProperties=outputProperties.filter(function(item) {
-        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-    });
-    outputProperties.forEach(oneProperty=>{
+    for(var oneProperty in countOutputTimes){
         var oneOutputObj={} //path
         var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
         if(oneProperty.startsWith("_self")){
@@ -154,7 +158,7 @@ routerInsertData.prototype.twinCalculationScript_findAllIOInScript=function(actu
             oneOutputObj.twinID=formulaTwin
         }
         outputArr.push(oneOutputObj)
-    })
+    }
 
     for(var i=0;i<inputArr.length;i++){
         var oneInput=inputArr[i]
@@ -174,11 +178,35 @@ routerInsertData.prototype.twinCalculationScript_findAllIOInScript=function(actu
         var str=oneInput.twinID+"."+oneInput.path.join(".")
         currentInputMatchingObj[str]=1
     })
+    //query out all formula records under the same projectID
+    var allFormulaRecords=await cosmosdbhelper.query('twincalculation',`select c.inputs,c.outputs from c where c.type='formula' and c.projectID='${projectID}'`)
+    
+    var loopingCheck=this.twinCalculationScript_findLoop(currentInputMatchingObj,outputArr,allFormulaRecords)
 
-
+    if(loopingCheck) return {"errorMsg":loopingCheck}
     return {"input":inputArr,"output":outputArr}
 }
-routerInsertData.prototype.twinCalculationScript_findLoop =async function(currentInputMatchingObj,outputArr) {
+
+routerInsertData.prototype.twinCalculationScript_findLoop =function(currentInputMatchingObj,outputArr,allFormulaRecords) {
+    for(var i=0;i<outputArr.length;i++){
+        var oneOutput=outputArr[i]
+        var str=oneOutput.twinID+"."+oneOutput.path.join(".")
+        if(currentInputMatchingObj[str]){ //find looping possibility
+            return `Possible looping calculation: ${str}`
+        }
+        //find further output triggerred from this oneOutput
+        for(var j=0;j<allFormulaRecords.length;j++){
+            var oneFormulaDocument=allFormulaRecords[j]
+            for(var k=0;k<oneFormulaDocument.inputs.length;k++){
+                var oneInput=oneFormulaDocument.inputs[k]
+                if(oneInput.twinID==oneOutput.twinID && oneInput.path.join()==oneOutput.path.join()){
+                    var findLoopResult=this.twinCalculationScript_findLoop(currentInputMatchingObj,oneFormulaDocument.outputs,allFormulaRecords)
+                    if(findLoopResult) return findLoopResult
+                }
+            }
+        }
+    }
+    return null;
 }
 
 
@@ -194,7 +222,7 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
             return
         }
     }
-    var calcIOResult=this.twinCalculationScript_findAllIOInScript(payload.actualScript,payload.twinID,payload.currentInputValue)
+    var calcIOResult=await this.twinCalculationScript_findAllIOInScript(payload.actualScript,payload.twinID,payload.currentInputValue,payload.projectID)
     if(calcIOResult.errorMsg){
         res.status(400).send(calcIOResult.errorMsg)
         return
