@@ -247,7 +247,8 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
         //the querystr must return "docID" and "patitionValue" fields
         await cosmosdbhelper.deleteAllRecordsByQuery(`select c.id patitionValue, c.twinID docID from c where c.id='${payload.twinID}' and c.type='influence'`,"twincalculation")
 
-        await cosmosdbhelper.deleteAllRecordsInAPartition("twincalculation","twinID",payload.twinID)
+        await cosmosdbhelper.deleteAllRecordsByQuery(`select c.id docID, c.twinID patitionValue from c where c.twinID='${payload.twinID}' and (c.type='value' or c.type='formula')`,"twincalculation")
+        
         var newDocument={
             //"id" will be auto generated, to avoid conflict with influence type when self influence self
             "twinID":payload.twinID,
