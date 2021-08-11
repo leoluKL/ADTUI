@@ -58,7 +58,7 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
         res.status(400).send(e.message)
     }
 
-    var queryStr='SELECT c.id,c.twinID,c.originalScript,c.lastExecutionTime,c.author,c.invalidFlag FROM c where '
+    var queryStr='SELECT c.id,c.twinID,c.originalScript,c.lastExecutionTime,c.author,c.invalidFlag,c.inputs,c.outputs FROM c where '
     queryStr+=`c.projectID='${projectID}'`
     queryStr+=` and c.type ='formula'`
     try{
