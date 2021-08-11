@@ -30,7 +30,7 @@ projectSettingDialog.prototype.popup = function () {
     closeButton.on("click", () => { this.DOM.hide() })
 
     var tabControl=$('<div class="w3-bar w3-light-gray"></div>')
-    var layoutBtn=$('<button class="w3-bar-item w3-button " style="margin:0px 5px">Layout</button>')
+    var layoutBtn=$('<button class="w3-bar-item w3-button ">Layout</button>')
     var visualSchemaBtn=$('<button class="w3-bar-item w3-button">Visual Schema</button>')
     tabControl.append(layoutBtn,visualSchemaBtn)
     this.DOM.append(tabControl)
@@ -42,15 +42,15 @@ projectSettingDialog.prototype.popup = function () {
     this.fillVisualSchemaContent()
 
     layoutBtn.on("click",()=>{
-        layoutBtn.addClass("w3-dark-grey")
-        visualSchemaBtn.removeClass("w3-dark-grey")
+        layoutBtn.addClass("w3-white")
+        visualSchemaBtn.removeClass("w3-white")
         this.visualSchemaContentDiv.hide()
         this.layoutContentDiv.show()
     })
 
     visualSchemaBtn.on("click",()=>{
-        layoutBtn.removeClass("w3-dark-grey")
-        visualSchemaBtn.addClass("w3-dark-grey")
+        layoutBtn.removeClass("w3-white")
+        visualSchemaBtn.addClass("w3-white")
         this.visualSchemaContentDiv.show()
         this.layoutContentDiv.hide()
     })

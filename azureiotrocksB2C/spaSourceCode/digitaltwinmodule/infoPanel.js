@@ -10,8 +10,7 @@ const scriptTestDialog = require("../sharedSourceFiles/scriptTestDialog")
 class infoPanel extends baseInfoPanel {
     constructor() {
         super()
-        this.openLiveCalculationSection=false
-        this.openFunctionButtonSection=false
+        this.openLiveCalculationSection=true
         this.openPropertiesSection=true
         this.continerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:350px;transform: translateY(-50%);"></div>')
         this.continerDOM.hide()
@@ -29,7 +28,7 @@ class infoPanel extends baseInfoPanel {
         this.closeButton1.on("click", buttonAnim)
         this.closeButton2.on("click", buttonAnim)
 
-        this.DOM = $('<div class="w3-container" style="padding:0px;postion:absolute;top:50px;height:calc(100% - 50px);overflow:auto"></div>')
+        this.DOM = $('<div class="w3-container" style="padding:0px;postion:absolute;top:50px;height:calc(100% - 50px);overflow:hidden"></div>')
         this.continerDOM.css("background-color", "rgba(255, 255, 255, 0.8)")
         this.continerDOM.hover(() => {
             this.continerDOM.css("background-color", "rgba(255, 255, 255, 1)")
@@ -39,6 +38,7 @@ class infoPanel extends baseInfoPanel {
         this.continerDOM.append(this.DOM)
         $('body').append(this.continerDOM)
 
+        this.emptyContentAndDrawTabControl()
         this.drawButtons(null)
         this.selectedObjects = null;
     }
@@ -82,7 +82,7 @@ class infoPanel extends baseInfoPanel {
     }
 
     showInfoOfNodes(arr) {
-        this.DOM.empty()
+        this.emptyContentAndDrawTabControl()
         if (arr == null || arr.length == 0) {
             this.drawButtons(null)
             this.selectedObjects = [];
@@ -95,12 +95,11 @@ class infoPanel extends baseInfoPanel {
             singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
             if (singleElementInfo["$dtId"]) {// select a node
                 this.drawButtons("singleNode")
-                this.drawFormulaSection(singleElementInfo["$dtId"],singleElementInfo["$metadata"]["$model"])
             }else if (singleElementInfo["$sourceId"]) {
                 this.drawButtons("singleRelationship")
             }
 
-            var propertiesSection= new simpleExpandableSection("Properties Section",this.DOM)
+            var propertiesSection= new simpleExpandableSection("Properties Section",this.infoContentDiv,{"marginTop":"2px"})
             propertiesSection.callBack_change=(status)=>{this.openPropertiesSection=status}
             if(this.openPropertiesSection) propertiesSection.expand()
 
@@ -110,19 +109,106 @@ class infoPanel extends baseInfoPanel {
             } else if (singleElementInfo["$sourceId"]) {
                 this.drawSingleRelationProperties(singleElementInfo,propertiesSection.listDOM)
             }
+
+            if (singleElementInfo["$dtId"]) this.drawFormulaSection(singleElementInfo["$dtId"],singleElementInfo["$metadata"]["$model"])
         } else if (arr.length > 1) {
             this.drawButtons("multiple")
             this.drawMultipleObj()
         }
     }
 
+    emptyContentAndDrawTabControl(){
+        if(this.infoContentDiv) this.infoContentDiv.empty()
+        else{
+            this.DOM.empty()
+            var tabControl=$('<div class="w3-bar w3-light-gray "></div>')
+            var infoBtn=$('<button class="w3-bar-item w3-button" style="font-weight:bold;">Information</button>')
+            var liveBtn=$('<button class="w3-bar-item w3-button" style="font-weight:bold;">Live</button>')
+            tabControl.append(infoBtn,liveBtn)
+            this.DOM.append(tabControl)
+
+            this.infoContentDiv=$('<div class="w3-animate-opacity" style="padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
+            this.liveContentDiv=$('<div id="myChart" class="w3-animate-opacity" style="padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
+            this.DOM.append(this.infoContentDiv,this.liveContentDiv)
+            var canvas = $('<canvas style="width:100%;height:100px"></canvas>')
+            this.liveContentDiv.append(canvas)
+            var xValues = [];
+            var yValues = [];
+            for(var i=0;i<50;i++) {
+                xValues.push(i)
+            }
+            yValues[49]=null
+            
+
+
+            var theChart=new Chart(canvas, {
+                type: "line",
+                data: {
+                    labels: xValues,
+                    datasets: [{stepped:true, data: yValues}]
+                },
+                options: {
+                    animation: false,
+                    datasets: {
+                        line: {
+                            spanGaps:true,
+                            borderColor: "rgba(0,0,255,0.7)",
+                            borderWidth:1,
+                            pointRadius:0
+                        }
+                    },
+                    plugins:{
+                        legend: { display: false },
+                        tooltip:{enabled:false}
+                    },
+                    scales: {
+                        x:{grid:{display:false},ticks:{display:false}}
+                        ,y:{grid:{tickLength:0},ticks:{font:{size:9}}}
+                        ,x2: {position:'top',grid:{display:false},ticks:{display:false}}
+                        ,y2: {position:'right',grid:{display:false},ticks:{display:false}}     
+                    }
+                    
+                }
+            });
+
+            /*
+            var newV=1
+            setInterval(()=>{
+                var dataArr=theChart.data.datasets[0].data
+                var len=dataArr.length
+                var passedTime= parseInt(Math.random()*10)
+                for(var i=0;i<passedTime;i++) dataArr.shift()
+                dataArr[len-1]=newV
+                newV=1-newV
+                theChart.update()
+            },500)
+            */
+
+            infoBtn.on("click",()=>{
+                infoBtn.addClass("w3-white w3-text-orange")
+                liveBtn.removeClass("w3-white w3-text-orange")
+                this.liveContentDiv.hide()
+                this.infoContentDiv.show()
+            })
+        
+            liveBtn.on("click",()=>{
+                infoBtn.removeClass("w3-white w3-text-orange")
+                liveBtn.addClass("w3-white w3-text-orange")
+                this.liveContentDiv.show()
+                this.infoContentDiv.hide()
+            })
+        
+            infoBtn.trigger("click")
+        }
+    }
 
     drawButtons(selectType) {
         if(selectType==null){
-            this.DOM.html("<div style='padding:8px'><a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to draw box and select multiple twins in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl+z and ctrl+y to undo/redo in topology view; ctrl+s to save layout</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press shift or ctrl key to select multiple twins in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:12px;padding-bottom:5px'>Import twins data by clicking button below</a></div>") 
+            var div=$("<div style='padding:8px'><a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to draw box and select multiple twins in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl+z and ctrl+y to undo/redo in topology view; ctrl+s to save layout</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press shift or ctrl key to select multiple twins in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:12px;padding-bottom:5px'>Import twins data by clicking button below</a></div>")
+            this.infoContentDiv.append(div)
         }
 
-        var buttonHolderDOM=this.DOM
+        var buttonHolderDOM=this.infoContentDiv
 
         var impBtn = $('<button class="w3-bar-item w3-button w3-blue"><i class="fas fa-cloud-upload-alt"></i></button>')
         var actualImportTwinsBtn = $('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
@@ -161,9 +247,9 @@ class infoPanel extends baseInfoPanel {
 
     async drawAdvanceAlignmentButtons() {
         var label = $("<label class='w3-gray' style='display:block;margin-top:5px;width:20%;text-align:center;font-size:1em;padding:2px 4px;font-weight:normal;border-radius: 2px;'>Arrange</label>")
-        this.DOM.append(label)
+        this.infoContentDiv.append(label)
         var alignButtonsTable = $("<table style='margin:0 auto'><tr><td></td><td></td><td></td></tr><tr><td></td><td style='text-align:center;font-weight:bold;color:darkGray'>ALIGN</td><td></td></tr><tr><td></td><td></td><td></td></tr></table>")
-        this.DOM.append(alignButtonsTable)
+        this.infoContentDiv.append(alignButtonsTable)
         var alignTopButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-chevron-up"></i></button>')
         var alignLeftButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-chevron-left"></i></button>')
         var alignRightButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-chevron-right"></i></button>')
@@ -175,7 +261,7 @@ class infoPanel extends baseInfoPanel {
 
 
         var arrangeTable = $("<table style='margin:0 auto'><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>")
-        this.DOM.append(arrangeTable)
+        this.infoContentDiv.append(arrangeTable)
 
         var distributeHButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-ellipsis-h fa-lg"></i></button>')
         var distributeVButton = $('<button class="w3-ripple w3-button w3-border"><i class="fas fa-ellipsis-v fa-lg"></i></button>')
@@ -435,7 +521,7 @@ class infoPanel extends baseInfoPanel {
     }
 
     drawFormulaSection(formulaTwinID,formulaTwinModelID){
-        var formulaSection= new simpleExpandableSection("Live Calculation Section",this.DOM,{"marginTop":"2px"})
+        var formulaSection= new simpleExpandableSection("Live Calculation Section",this.infoContentDiv)
         formulaSection.callBack_change=(status)=>{this.openLiveCalculationSection=status}
         if(this.openLiveCalculationSection) formulaSection.expand()
 
@@ -638,7 +724,7 @@ class infoPanel extends baseInfoPanel {
         });
         var textDiv = $("<label style='display:block;margin-top:10px;margin-left:16px'></label>")
         textDiv.text(numOfNode + " node" + ((numOfNode <= 1) ? "" : "s") + ", " + numOfEdge + " relationship" + ((numOfEdge <= 1) ? "" : "s"))
-        this.DOM.append(textDiv)
+        this.infoContentDiv.append(textDiv)
     }
 }
 

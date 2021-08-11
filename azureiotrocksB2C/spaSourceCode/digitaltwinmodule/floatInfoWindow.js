@@ -47,7 +47,7 @@ class floatInfoWindow extends baseInfoPanel{
             var documentBodyWidth = $('body').width()
             if (singleElementInfo["$dtId"]) {// select a node
                 var singleDBTwinInfo=globalCache.DBTwins[singleElementInfo["$dtId"]]
-                this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo,contentDOM)
+                this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo,contentDOM,"notEmbedMetadata")
             } else if (singleElementInfo["$sourceId"]) {
                 this.drawSingleRelationProperties(singleElementInfo,contentDOM)
             }

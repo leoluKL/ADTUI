@@ -157,7 +157,7 @@ class baseInfoPanel {
         return modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName].editableRelationshipProperties
     }
 
-    drawSingleNodeProperties(singleDBTwinInfo,singleADTTwinInfo,parentDom) {
+    drawSingleNodeProperties(singleDBTwinInfo,singleADTTwinInfo,parentDom,notEmbedMetadata) {
         //instead of draw the $dtId, draw display name instead
         //this.drawStaticInfo(this.DOM,{"$dtId":singleElementInfo["$dtId"]},"1em","13px")
         parentDom=parentDom||this.DOM
@@ -167,7 +167,7 @@ class baseInfoPanel {
         const constCommonColor="w3-dark-gray"
 
         var modelID = singleDBTwinInfo.modelID
-        this.drawStaticInfo(parentDom, { "name": singleDBTwinInfo["displayName"] }, "1em", "13px")
+        this.drawStaticInfo(parentDom, { "name": singleDBTwinInfo["displayName"] }, ".5em", "13px")
         var theDBModel = globalCache.getSingleDBModelByID(modelID)
         if (theDBModel.isIoTDeviceModel) {
             this.drawConnectionStatus(singleDBTwinInfo["connectState"],parentDom)
@@ -196,12 +196,22 @@ class baseInfoPanel {
             this.drawEditable(parentDom, modelAnalyzer.DTDLModels[modelID].editableProperties, singleADTTwinInfo, [], funcGetKeyLblColorClass)
         }
 
-        this.drawStaticInfo(parentDom, { "Model": modelID }, "1em", "10px")
+        var metadataContent = $("<label style='display:block'></label>")
+        var expandMetaBtn=$("<div class='w3-border w3-button w3-light-gray' style='padding:.1em .5em;margin-right:1em;font-size:10px'>...</div>")
+        parentDom.append(metadataContent)
+        var metaDataDiv=$('<div/>')
+        metadataContent.append(expandMetaBtn,metaDataDiv)
+        metaDataDiv.hide()
+        expandMetaBtn.on("click",()=>{expandMetaBtn.hide();metaDataDiv.show()})
+        if(notEmbedMetadata) expandMetaBtn.trigger("click")
+
+
+        this.drawStaticInfo(metaDataDiv, { "Model": modelID }, "1em", "10px")
         for (var ind in singleADTTwinInfo["$metadata"]) {
             if (ind == "$model") continue;
             var tmpObj = {}
             tmpObj[ind] = singleADTTwinInfo["$metadata"][ind]
-            this.drawStaticInfo(parentDom, tmpObj, "1em", "10px")
+            this.drawStaticInfo(metaDataDiv, tmpObj, ".5em", "10px")
         }
     }
 

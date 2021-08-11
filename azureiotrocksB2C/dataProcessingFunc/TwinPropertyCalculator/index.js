@@ -25,7 +25,7 @@ module.exports = async function (context, eventHubMessages) {
             newDoc["path"]=onePatch["path"]
             newDoc["value"]=onePatch["value"]
             docsArr.push(newDoc)
-            //console.log("observe:"+eventSubject+" change "+onePatch["path"]+" to value "+onePatch["value"])
+            console.log("observe:"+eventSubject+" change "+onePatch["path"]+" to value "+onePatch["value"])
             propagateOneValuePatch(newDoc["twinID"],newDoc["path"],newDoc["value"])
         }
     }

@@ -12,6 +12,7 @@ function topologyDOM(containerDOM){
     this.defaultNodeSize=30
     this.nodeSizeModelAdjustmentRatio={}
     this.lastCalcInputStyleNodes=[]
+    this.lastCalcOutputStyleNodes=[]
 }
 
 topologyDOM.prototype.init=function(){
@@ -403,6 +404,16 @@ topologyDOM.prototype.highPriorityStyleDefinition = function () {
             'background-gradient-stop-positions': ['0%', '50%', '51%', "90%", "91%"]
         })
         .update()
+    this.core.style()
+        .selector('node.calcOutput')
+        .style({
+            'border-color': "blue",
+            'border-width': 1,
+            'background-fill': 'linear-gradient',
+            'background-gradient-stop-colors': ['blue', 'blue', 'white', "white", "blue"],
+            'background-gradient-stop-positions': ['0%', '50%', '51%', "90%", "91%"]
+        })
+        .update()
 
 
     this.core.style()
@@ -412,7 +423,7 @@ topologyDOM.prototype.highPriorityStyleDefinition = function () {
             'line-color': 'red',
             'target-label': 'data(ppath)',
             'font-size': '11px',
-            'target-text-offset': '40%',
+            'target-text-offset': 'data(ppathOffset)',
             'text-background-color': 'white',
             'text-background-opacity': 1,
             'text-border-opacity': 1,
@@ -422,6 +433,24 @@ topologyDOM.prototype.highPriorityStyleDefinition = function () {
             'text-border-color': 'gray'
         })
         .update()
+    this.core.style()
+        .selector('edge.calcOutput')
+        .style({
+            'width': '5',
+            'line-color': 'blue',
+            'source-label': 'data(ppath)',
+            'font-size': '11px',
+            'source-text-offset': 'data(ppathOffset)',
+            'text-background-color': 'white',
+            'text-background-opacity': 1,
+            'text-border-opacity': 1,
+            'text-border-width': 1,
+            'text-background-padding': '2px',
+            'color': 'gray',
+            'text-border-color': 'gray'
+        })
+        .update()
+
     this.core.style()
         .selector('edge:selected')
         .style({
@@ -690,6 +719,9 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
 
     this.lastCalcInputStyleNodes.forEach(ele=>{ele.removeClass("calcInput")})
     this.lastCalcInputStyleNodes.length=0
+    this.lastCalcOutputStyleNodes.forEach(ele=>{ele.removeClass("calcOutput")})
+    this.lastCalcOutputStyleNodes.length=0
+    
 
     this.lastHoverTarget=e.target
     e.target.addClass("hover")
@@ -699,30 +731,74 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     if(info["$dtId"]){
         var twinID=info["$dtId"]
         var dbtwin=globalCache.DBTwins[twinID]
-        var calcScript=dbtwin["originalScript"]
-        var inputArr = globalCache.findAllInputsInScript(calcScript,dbtwin["displayName"])
+        var inputArr = dbtwin["inputs"]
+        if(inputArr) inputArr.forEach(oneInput=>{this.visualizeSingleInputInTwinCalculation(oneInput,e.target)})
 
-        inputArr.forEach(oneInput=>{
-            var inputTwinNode=this.core.nodes("#"+oneInput["twinName_origin"])
-            if(inputTwinNode) {
-                inputTwinNode.addClass("calcInput")
-                this.lastCalcInputStyleNodes.push(inputTwinNode)
-                //find the first relationship link from this node to hovered node
-                var edges=inputTwinNode.edgesTo(e.target)
-                if(edges.length>0) {
-                    edges[0].addClass("calcInput")
-                    var currentPPath=edges[0].data('ppath')||""
-                    if(currentPPath!="") currentPPath+=";"
-                    currentPPath+=oneInput.path.join("/")
-                    edges[0].data('ppath',currentPPath)
-                    this.lastCalcInputStyleNodes.push(edges[0])
-                }
-            }
-        })
+        this.analyseSingleOutput(e.target,info["$dtId"])
     }
     
 
 }
+
+topologyDOM.prototype.analyseSingleOutput = function (twinTopoNode,twinID) {
+    //check if its output is another node's input
+    var furtherInputsArr=[]
+    for (var aTwinID in globalCache.DBTwins) {
+        var checkDBTwin = globalCache.DBTwins[aTwinID]
+        var inputArr=checkDBTwin["inputs"]
+        if(!inputArr) continue;
+        for(var i=0;i<inputArr.length;i++){
+            var aFurtherInput=inputArr[i]
+            if(aFurtherInput.twinID==twinID){
+                furtherInputsArr.push({"path":aFurtherInput.path,"targetTwinName":checkDBTwin.displayName})
+                break;
+            }
+        }
+    }
+    if(furtherInputsArr) furtherInputsArr.forEach(oneFurtherInput=>{
+        this.visualizeSingleInputInTwinCalculation(oneFurtherInput,twinTopoNode)
+    })
+}
+
+topologyDOM.prototype.visualizeSingleInputInTwinCalculation = function (oneInput,twinTopoNode) {
+    var twinName = globalCache.twinIDMapToDisplayName[oneInput.twinID]
+    var edges=null;
+    if(oneInput.targetTwinName){
+        var targetTwinNode = this.core.nodes("#" + oneInput.targetTwinName)
+        if (targetTwinNode) {
+            targetTwinNode.addClass("calcOutput")
+            this.lastCalcOutputStyleNodes.push(targetTwinNode)
+            //find the first relationship link from this node to hovered node
+            var edges = twinTopoNode.edgesTo(targetTwinNode)
+        }
+    } else {
+        var inputTwinNode = this.core.nodes("#" + twinName)
+        if (inputTwinNode) {
+            inputTwinNode.addClass("calcInput")
+            this.lastCalcInputStyleNodes.push(inputTwinNode)
+            //find the first relationship link from this node to hovered node
+            var edges = inputTwinNode.edgesTo(twinTopoNode)
+        }
+    }
+    if(edges && edges.length > 0){
+        if(oneInput.targetTwinName) {
+            edges[0].addClass("calcOutput")
+            this.lastCalcOutputStyleNodes.push(edges[0])
+        }else{
+            edges[0].addClass("calcInput")
+            this.lastCalcInputStyleNodes.push(edges[0])
+        } 
+        var currentPPath = edges[0].data('ppath') || ""
+        if (currentPPath != "") currentPPath += ";"
+        currentPPath += oneInput.path.join("/")
+        edges[0].data('ppath', currentPPath)
+        
+        var randOffset= parseInt(Math.random()*50)+10
+        edges[0].data('ppathOffset', randOffset+"%")
+    }
+}
+
+
 
 topologyDOM.prototype.convertPosition=function(x,y){
     var vpExtent=this.core.extent()
@@ -753,6 +829,11 @@ topologyDOM.prototype.mouseOutFunction= function (e) {
         ele.data('ppath',null)
     })
     this.lastCalcInputStyleNodes.length=0
+    this.lastCalcOutputStyleNodes.forEach(ele=>{
+        ele.removeClass("calcOutput")
+        ele.data('ppath',null)
+    })
+    this.lastCalcOutputStyleNodes.length=0
 
 }
 

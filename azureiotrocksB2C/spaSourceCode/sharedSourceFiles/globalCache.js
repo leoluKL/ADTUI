@@ -120,6 +120,9 @@ globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
                 oneDBTwin["lastExecutionTime"]=element["lastExecutionTime"]
                 oneDBTwin["author"]=element["author"]
                 oneDBTwin["invalidFlag"]=element["invalidFlag"]
+                oneDBTwin["inputs"]=element["inputs"]
+                oneDBTwin["outputs"]=element["outputs"]
+
             }
         }
     });
