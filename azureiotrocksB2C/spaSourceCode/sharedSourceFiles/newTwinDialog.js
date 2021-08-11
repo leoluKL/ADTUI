@@ -8,6 +8,7 @@ function newTwinDialog() {
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
         $("body").append(this.DOM)
         this.DOM.hide()
+        globalCache.makeDOMDraggable(this.DOM)
     }
 }
 
@@ -36,7 +37,7 @@ newTwinDialog.prototype.popup = async function(twinInfo) {
     this.IDInput=IDInput 
     var modelID=twinInfo["$metadata"]["$model"]
     var modelLableDiv= $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
-    var modelInput=$('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID);  
+    var modelInput=$('<label type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID);  
     this.contentDOM.append($("<div/>").append(IDLableDiv,IDInput))
     this.contentDOM.append($("<div style='padding:8px 0px'/>").append(modelLableDiv,modelInput))
     IDInput.change((e)=>{

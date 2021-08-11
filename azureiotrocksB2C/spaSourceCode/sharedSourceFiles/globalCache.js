@@ -339,4 +339,26 @@ globalCache.prototype.shapeSvg=function(shape,color,secondColor){
     }
 }
 
+globalCache.prototype.makeDOMDraggable=function(dom,ignoreChildDomType){
+    ignoreChildDomType=ignoreChildDomType||["LABEL","TD","B","A","INPUT","PRE"]
+    dom.on('mousedown',(e)=>{
+        if(ignoreChildDomType.indexOf(e.target.tagName)!=-1) return;
+        var domOffset=dom.offset()
+        dom.mouseStartDragOffset=[domOffset.left-e.clientX, domOffset.top-e.clientY]
+        $('body').on('mouseup',()=>{
+            dom.mouseStartDragOffset=null
+            $('body').off('mousemove')
+            $('body').off('mouseup')
+        })
+        $('body').on('mousemove',(e)=>{
+            e.preventDefault()
+            if(dom.mouseStartDragOffset){
+                var newLeft= e.clientX+dom.mouseStartDragOffset[0]
+                var newTop=e.clientY+dom.mouseStartDragOffset[1]
+                dom.css({"left":newLeft+"px","top":newTop+"px","transform":"none"})
+            }
+        })
+    })
+}
+
 module.exports = new globalCache();

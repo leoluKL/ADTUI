@@ -412,7 +412,7 @@ simpleTreeLeafNode.prototype.createLeafNodeDOM=function(){
 
 simpleTreeLeafNode.prototype.redrawLabel=function(){
     this.DOM.empty()
-    var nameDiv=$("<div style='display:inline;padding-left:5px;padding-right:3px;vertical-align:middle'></div>")
+    var nameDiv=$("<label style='display:inline;padding-left:5px;padding-right:3px;vertical-align:middle'></label>")
     if(this.parentGroupNode.parentTree.options.leafNodeIconFunc){
         var iconLabel=this.parentGroupNode.parentTree.options.leafNodeIconFunc(this)
         this.DOM.append(iconLabel)

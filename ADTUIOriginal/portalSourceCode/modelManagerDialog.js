@@ -11,6 +11,7 @@ function modelManagerDialog() {
         this.DOM.css("overflow","hidden")
         $("body").append(this.DOM)
         this.DOM.hide()
+        globalCache.makeDOMDraggable(this.DOM)
     }
 }
 
@@ -446,7 +447,7 @@ modelManagerDialog.prototype.fillRelationshipInfo=function(validRelationships,pa
 
 modelManagerDialog.prototype.fillEditableProperties=function(jsonInfo,parentDom){
     for(var ind in jsonInfo){
-        var keyDiv= $("<label style='display:block'><div style='display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</div></label>")
+        var keyDiv= $("<label style='display:block'><label style='display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+ind+"</label></label>")
         parentDom.append(keyDiv)
         keyDiv.css("padding-top",".1em")
 

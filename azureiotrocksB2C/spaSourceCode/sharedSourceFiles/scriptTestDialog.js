@@ -6,6 +6,7 @@ function scriptTestDialog() {
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:100" class="w3-card-2"></div>')
         $("body").append(this.DOM)
         this.DOM.hide()
+        globalCache.makeDOMDraggable(this.DOM)
     }
 }
 
@@ -157,7 +158,7 @@ scriptTestDialog.prototype.findPropertyType=function(twinName,propertyPath){
 
 
 scriptTestDialog.prototype.generateNameLabel=function(str,paddingTop){
-    var keyDiv = $("<label style='display:block'><div class='w3-border' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+str+"</div></label>")
+    var keyDiv = $("<div><div class='w3-border' style='background-color:#f6f6f6;display:inline;padding:.1em .3em .1em .3em;margin-right:.3em'>"+str+"</div></div>")
     keyDiv.css("padding-top",paddingTop)
     return keyDiv
 }

@@ -8,9 +8,10 @@ function adtInstanceSelectionDialog() {
     this.testTwinsInfo=null;
 
     if(!this.DOM){
-        this.DOM = $('<div class="w3-modal" style="display:block;z-index:101"></div>')
+        this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:101" class="w3-card-2"></div>')
         this.DOM.css("overflow","hidden")
         $("body").append(this.DOM)
+        globalCache.makeDOMDraggable(this.DOM)
     }
 }
 

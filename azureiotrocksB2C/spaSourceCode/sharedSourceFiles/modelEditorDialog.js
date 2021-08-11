@@ -2,12 +2,14 @@ const modelAnalyzer=require("./modelAnalyzer")
 const simpleSelectMenu= require("./simpleSelectMenu")
 const msalHelper=require("../msalHelper")
 const simpleConfirmDialog=require("./simpleConfirmDialog")
+const globalCache=require("./globalCache")
 
 function modelEditorDialog() {
     if(!this.DOM){
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:100" class="w3-card-2"></div>')
         $("body").append(this.DOM)
         this.DOM.hide()
+        globalCache.makeDOMDraggable(this.DOM)
     }
 }
 

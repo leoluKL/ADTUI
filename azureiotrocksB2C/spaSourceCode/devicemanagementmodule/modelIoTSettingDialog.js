@@ -9,6 +9,7 @@ function modelIoTSettingDialog() {
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
         $("body").append(this.DOM)
         this.DOM.hide()
+        globalCache.makeDOMDraggable(this.DOM)
     }
 }
 
@@ -52,10 +53,10 @@ modelIoTSettingDialog.prototype.popup = async function(modelID) {
 
     topLeftDom.append($("<div style='padding-top:10px'/>").append(
         $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Model</div>")
-        , $('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID)))
+        , $('<label type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelID)))
     topLeftDom.append($("<div class='w3-padding-16'/>").append(
         $("<div class='w3-padding' style='display:inline;font-weight:bold;color:black'>Name</div>")
-        , $('<div type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelInfo["displayName"])))
+        , $('<label type="text" style="margin:8px 0;padding:2px;display:inline"/>').text(modelInfo["displayName"])))
 
     var isIoTCheck = $('<input class="w3-check" style="width:20px;margin-left:16px;margin-right:10px" type="checkbox">')
     var isIoTText = $('<label class="w3-dark-gray" style="padding:2px 8px;font-size:1.2em;border-radius: 3px;"> This is NOT a IoT Model</label>')
@@ -269,7 +270,7 @@ modelIoTSettingDialog.prototype.drawEditable = async function(parentTable,jsonIn
         if(theIndex==arr.length-1) rightTD.append(this.treeLineDiv(3))
         else rightTD.append(this.treeLineDiv(1))
 
-        var pNameDiv=$("<div style='display:inline;line-height:28px;margin-left:3px'>"+ind+"</div>")
+        var pNameDiv=$("<label style='display:inline;line-height:28px;margin-left:3px'>"+ind+"</label>")
         rightTD.append(pNameDiv)
         var newPath=pathArr.concat([ind])
 

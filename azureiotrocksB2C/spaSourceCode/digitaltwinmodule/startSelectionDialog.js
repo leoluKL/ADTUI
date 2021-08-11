@@ -10,20 +10,23 @@ function startSelectionDialog() {
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
         $("body").append(this.DOM)
         this.DOM.hide()
+        globalCache.makeDOMDraggable(this.DOM)
     }
 }
 
 startSelectionDialog.prototype.popup = async function() {
     this.DOM.show()
     this.DOM.empty()
+
     this.contentDOM = $('<div style="width:680px"></div>')
     this.DOM.append(this.contentDOM)
-    this.contentDOM.append($('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Select Twins</div></div>'))
+    var titleDiv=$('<div style="height:40px" class="w3-bar w3-red"><div class="w3-bar-item" style="font-size:1.5em">Select Twins</div></div>')
+    this.contentDOM.append(titleDiv)
     var closeButton = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em;padding-top:4px">×</button>')
-    this.contentDOM.children(':first').append(closeButton)
+    titleDiv.append(closeButton)
 
     this.buttonHolder = $("<div style='height:100%'></div>")
-    this.contentDOM.children(':first').append(this.buttonHolder)
+    titleDiv.append(this.buttonHolder)
     closeButton.on("click", () => {
         this.useStartSelection("append")
         this.closeDialog() 
