@@ -700,7 +700,7 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
         var twinID=info["$dtId"]
         var dbtwin=globalCache.DBTwins[twinID]
         var calcScript=dbtwin["originalScript"]
-        var inputArr = globalCache.findAllInputsInScript(calcScript,dbtwin["displayName"],"Bool_forTestingScriptPurpose")
+        var inputArr = globalCache.findAllInputsInScript(calcScript,dbtwin["displayName"])
 
         inputArr.forEach(oneInput=>{
             var inputTwinNode=this.core.nodes("#"+oneInput["twinName_origin"])

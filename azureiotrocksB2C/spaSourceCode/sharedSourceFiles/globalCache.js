@@ -250,29 +250,38 @@ globalCache.prototype.storeTwinRelationships_remove=function(relationsData){
     })
 }
 
-globalCache.prototype.findAllInputsInScript=function(actualScript,formulaTwin,Bool_forTestingScript){
+globalCache.prototype.findAllInputsInScript=function(calcScript,formulaTwinName){
     //find all properties in the script
-    actualScript+="\n" //make sure the below patterns using "[^. ] not fail because of it is the end of string "
+    calcScript+="\n" //make sure the below patterns using "[^. ] not fail because of it is the end of string "
     var patt = /_self(?<=_self)\[\".*?(?=\"\][^\[])\"\]/g; 
-    var allSelfProperties=actualScript.match(patt)||[];
+    var allSelfProperties=calcScript.match(patt)||[];
+    var countAllSelfTimes={}
+    allSelfProperties.forEach(oneSelf=>{
+        if(countAllSelfTimes[oneSelf]) countAllSelfTimes[oneSelf]+=1
+        else countAllSelfTimes[oneSelf]=1
+    })
 
     var patt = /_twinVal(?<=_twinVal)\[\".*?(?=\"\][^\[])\"\]/g; 
-    var allOtherTwinProperties=actualScript.match(patt)||[];
+    var allOtherTwinProperties=calcScript.match(patt)||[];
+    var listAllOthers={}
+    allOtherTwinProperties.forEach(oneOther=>{listAllOthers[oneOther]=1 })
 
     //analyze all variables that can not be as input as they are changed during calcuation
     //they disqualify as input as they will trigger infinite calculation, all these belongs to _self
-    var noninputpatt = /_self(?<=_self)\[\"[^;{]*?[^\=](?=\=[^\=])/g;
-    var notInputProperties=actualScript.match(noninputpatt)||[];
+    var outputpatt = /_self(?<=_self)\[\"[^;{]*?[^\=](?=\=[^\=])/g;
+    var outputProperties=calcScript.match(outputpatt)||[];
+    var countOutputTimes={}
+    outputProperties.forEach(oneOutput=>{
+        if(countOutputTimes[oneOutput]) countOutputTimes[oneOutput]+=1
+        else countOutputTimes[oneOutput]=1
+    })
     
-    var allProperties=allSelfProperties.concat(allOtherTwinProperties)
-    var seen = {};
-    allProperties=allProperties.filter(function(item) {
-        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-    });
 
-    var inputPropertiesArr = allProperties.filter(function (el) {
-        return !notInputProperties.includes(el);
-    });
+    var inputPropertiesArr=[]
+    for(var ind in listAllOthers) inputPropertiesArr.push(ind)
+    for(var ind in countAllSelfTimes){
+        if(countAllSelfTimes[ind]!=countOutputTimes[ind]) inputPropertiesArr.push(ind)
+    }
 
     var returnArr=[]
     inputPropertiesArr.forEach(oneProperty=>{
@@ -280,24 +289,18 @@ globalCache.prototype.findAllInputsInScript=function(actualScript,formulaTwin,Bo
         var fetchpropertypatt = /(?<=\[\").*?(?=\"\])/g;
         if(oneProperty.startsWith("_self")){
             oneInputObj.path=oneProperty.match(fetchpropertypatt);
-            if(Bool_forTestingScript){
-                oneInputObj.twinName=formulaTwin+"(self)"
-                oneInputObj.twinName_origin=formulaTwin
-            }else{
-                oneInputObj.twinID=formulaTwin
-                oneInputObj.value=this.searchValue(this.storedTwins[formulaTwin],oneInputObj.path)
-            }
-        }if(oneProperty.startsWith("_twinVal")){
+            oneInputObj.twinName=formulaTwinName+"(self)"
+            oneInputObj.twinName_origin=formulaTwinName
+            var twinID=this.twinDisplayNameMapToID[formulaTwinName]
+            oneInputObj.value=this.searchValue(this.storedTwins[twinID],oneInputObj.path)
+        }else if(oneProperty.startsWith("_twinVal")){
             var arr=oneProperty.match(fetchpropertypatt);
             var firstEle=arr[0]
             arr.shift()
             oneInputObj.path=arr
-            if(Bool_forTestingScript){
-                oneInputObj.twinName=oneInputObj.twinName_origin=firstEle
-            }else{
-                oneInputObj.twinID=firstEle
-                oneInputObj.value=this.searchValue(this.storedTwins[oneInputObj.twinID],oneInputObj.path)
-            }
+            var twinID=this.twinDisplayNameMapToID[firstEle]
+            oneInputObj.value=this.searchValue(this.storedTwins[twinID],oneInputObj.path)
+            oneInputObj.twinName=oneInputObj.twinName_origin=firstEle
         }
         returnArr.push(oneInputObj)
     })

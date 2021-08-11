@@ -503,52 +503,52 @@ class infoPanel extends baseInfoPanel {
         testScriptBtn.on("click",()=>{
             var valueTemplate={}
             this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties,[],valueTemplate)
-            var inputArr = globalCache.findAllInputsInScript(scriptTextArea.val(),DBFormulaTwin["displayName"],"Bool_forTestingScriptPurpose")
+            var inputArr = globalCache.findAllInputsInScript(scriptTextArea.val(),DBFormulaTwin["displayName"])
             scriptTestDialog.popup(inputArr,DBFormulaTwin["displayName"],formulaTwinModelID,valueTemplate)
             scriptTestDialog.scriptContent=scriptTextArea.val()
         })
         confirmScriptBtn.on("click",()=>{
-            this.confirmScript(scriptTextArea.val(),formulaTwinID,formulaTwinModelID)
+            this.confirmScript(scriptTextArea.val(),formulaTwinID,formulaTwinModelID,DBFormulaTwin["displayName"])
         })
     }
 
-    confirmScript(scriptContent,formulaTwinID,formulaTwinModelID){
+    async confirmScript(scriptContent,formulaTwinID,formulaTwinModelID,formulaTwinName){
         //detect if there is prohibitted words, if so, reject the submit request
         if(scriptContent=="") return; 
-        var prohibitWords=["eval(","setTimeout(","setInterval("]
-        for(var i=0;i<prohibitWords.length;i++){
-            var oneWord=prohibitWords[i]
-            if(scriptContent.indexOf(oneWord)!=-1){
-                alert("These words are not allowed in script:\n"+prohibitWords.join(", "))
-                return;
-            }
-        }
-        var selfStr=`_twinVal["${formulaTwinID}"][`
-        scriptContent=scriptContent.replaceAll(selfStr,"_self[")
-        //translate script
+        
+        scriptContent=scriptContent.replaceAll(`_twinVal["${formulaTwinName}"][`,"_self[")
+        scriptContent=scriptContent.replaceAll(`_twinVal['${formulaTwinName}'][`,"_self[")
+        //translate script, replace twins name to twins ID
         var translateResult=this.convertToActualScript(scriptContent,formulaTwinID)
-        //analyze all variables that can not be as input as they are changed during calcuation
-        //they disqualify as input as they will trigger infinite calculation
-        var inputArr = globalCache.findAllInputsInScript(translateResult,formulaTwinID)
-        translateResult=translateResult.replaceAll("_self[",selfStr)
 
         var valueTemplate={}
         this.getPropertyValueTemplate(modelAnalyzer.DTDLModels[formulaTwinModelID].editableProperties
             ,[],valueTemplate)
+
+        var inputValueArr=[]
+        var inputAnalysisResult= globalCache.findAllInputsInScript(scriptContent,formulaTwinName)
+        inputAnalysisResult.forEach(ele=>{
+            inputValueArr.push({
+                "twinID":globalCache.twinDisplayNameMapToID[ele.twinName_origin],
+                "path":ele.path,
+                "value":ele.value
+            })
+        })
+            
         var theBody={
             "twinID": formulaTwinID,
             "originalScript":scriptContent,
             "actualScript":translateResult,
-            "calculationInputs":inputArr,
             "baseValueTemplate":valueTemplate,
-            "projectID":globalCache.currentProjectID
+            "projectID":globalCache.currentProjectID,
+            "currentInputValue":inputValueArr
         }
-        globalCache.DBTwins[formulaTwinID]["originalScript"]=scriptContent
 
         //console.log({"payload":JSON.stringify(theBody) })
         //by using withProjectID it will ensure it is the authorized person send the command
-        try{
-            msalHelper.callAPI("digitaltwin/updateFormula", "POST", {"payload":JSON.stringify(theBody) }, "withProjectID")
+        try{ 
+            await msalHelper.callAPI("digitaltwin/updateFormula", "POST", {"payload":JSON.stringify(theBody) }, "withProjectID")
+            globalCache.DBTwins[formulaTwinID]["originalScript"]=scriptContent
         }catch (e) {
             console.log(e)
             if (e.responseText) alert(e.responseText)
