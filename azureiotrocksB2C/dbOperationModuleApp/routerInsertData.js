@@ -288,22 +288,21 @@ routerInsertData.prototype.updateFormula =async function(req,res) {
 }
 
 routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
-    var projectID=req.body.projectID
-    var serviceWorkerSub=req.body.serviceWorkerSub
-    var accountID=req.body.account
+    var newSubscriptionDocument=req.body
+    newSubscriptionDocument.serviceWorkerSubscription=JSON.parse(newSubscriptionDocument.serviceWorkerSubscription)
+    if(req.body.type=='events'){
+        newSubscriptionDocument.id=req.body.account
+    }else if(req.body.type=='propertyValue'){
+        newSubscriptionDocument.id=req.body.account+"."+req.body.twinID+"."+req.body.propertyPath.join(".")
+    }
 
     try {
-        var newTwinDocument={
-            "id":accountID,
-            "projectID":projectID,
-            "serviceWorkerSubscription":JSON.parse(serviceWorkerSub)
-        }
-        await cosmosdbhelper.insertRecord("serverPushInfo", newTwinDocument)
+        await cosmosdbhelper.insertRecord("serverPushInfo", newSubscriptionDocument)
     } catch (e) {
         res.status(400).send(e.message)
         return;
     }
-    res.send(newTwinDocument)
+    res.send(newSubscriptionDocument)
 }
 
 
