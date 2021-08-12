@@ -13,7 +13,11 @@ simpleConfirmDialog.prototype.show=function(cssOptions,otherOptions){
     closeButton.on("click", () => { this.close() })
 
     var dialogDiv=$('<div class="w3-container" style="margin-top:10px;margin-bottom:10px"></div>')
-    dialogDiv.text(otherOptions.content)
+    if(otherOptions.customDrawing){
+        otherOptions.customDrawing(dialogDiv)
+    }else{
+        dialogDiv.text(otherOptions.content)
+    }
     this.DOM.append(dialogDiv)
     this.dialogDiv=dialogDiv
 

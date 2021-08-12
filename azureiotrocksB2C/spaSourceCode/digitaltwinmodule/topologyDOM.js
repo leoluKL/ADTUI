@@ -5,6 +5,7 @@ const simpleSelectMenu = require("../sharedSourceFiles/simpleSelectMenu")
 const simpleConfirmDialog = require("../sharedSourceFiles/simpleConfirmDialog")
 const globalCache = require("../sharedSourceFiles/globalCache")
 const msalHelper=require("../msalHelper")
+const serviceWorkerHelper=require("../sharedSourceFiles/serviceWorkerHelper")
 
 function topologyDOM(containerDOM){
     this.DOM=$("<div style='height:100%;width:100%'></div>")
@@ -89,7 +90,68 @@ topologyDOM.prototype.init=function(){
         ]
     });
 
-    this.highPriorityStyleDefinition()
+    this.highestStyleArr= [
+        {selector:'node.calcInput' , style: {
+            'border-color': "red",
+            'border-width': 1,
+            'background-fill': 'linear-gradient',
+            'background-gradient-stop-colors': ['red', 'red', 'white', "white", "red"],
+            'background-gradient-stop-positions': ['0%', '50%', '51%', "90%", "91%"]
+        }},
+        {selector:'node.calcOutput' , style: {
+            'border-color': "blue",
+            'border-width': 1,
+            'background-fill': 'linear-gradient',
+            'background-gradient-stop-colors': ['blue', 'blue', 'white', "white", "blue"],
+            'background-gradient-stop-positions': ['0%', '50%', '51%', "90%", "91%"]
+        }},
+        {selector:'edge.calcInput' , style:{
+            'width': '5',
+            'line-color': 'red',
+            'target-label': 'data(ppath)',
+            'font-size': '11px',
+            'target-text-offset': 'data(ppathOffset)',
+            'text-background-color': 'white',
+            'text-background-opacity': 1,
+            'text-border-opacity': 1,
+            'text-border-width': 1,
+            'text-background-padding': '2px',
+            'color': 'gray',
+            'text-border-color': 'gray'
+        } },
+        {selector:'edge.calcOutput' , style: {
+            'width': '5',
+            'line-color': 'blue',
+            'source-label': 'data(ppath)',
+            'font-size': '11px',
+            'source-text-offset': 'data(ppathOffset)',
+            'text-background-color': 'white',
+            'text-background-opacity': 1,
+            'text-border-opacity': 1,
+            'text-border-width': 1,
+            'text-background-padding': '2px',
+            'color': 'gray',
+            'text-border-color': 'gray'
+        }},
+        {selector:'edge:selected' , style:{
+            'width': 3,
+            'line-color': 'red',
+            'target-arrow-color': 'red',
+            'source-arrow-color': 'red',
+            'line-fill': "linear-gradient",
+            'line-gradient-stop-colors': ['cyan', 'magenta', 'yellow'],
+            'line-gradient-stop-positions': ['0%', '70%', '100%']
+        } },
+        {selector:'node:selected' , style: {
+            'border-color': "red",
+            'border-width': 2,
+            'background-fill': 'radial-gradient',
+            'background-gradient-stop-colors': ['cyan', 'magenta', 'yellow'],
+            'background-gradient-stop-positions': ['0%', '50%', '60%']
+        }}
+    ]
+    this.highestStyleSelectors={}
+    this.highestStyleArr.forEach((oneStyle)=>{this.highestStyleSelectors[oneStyle.selector]=1})
 
     //cytoscape edge editing plug-in
     this.core.edgeEditing({
@@ -98,12 +160,11 @@ topologyDOM.prototype.init=function(){
         enableMultipleAnchorRemovalOption: true,
         stickyAnchorTolerence: 20,
         anchorShapeSizeFactor: 5,
-        enableAnchorSizeNotImpactByZoom:true,
-        enableRemoveAnchorMidOfNearLine:false,
-        enableCreateAnchorOnDrag:false
+        enableAnchorSizeNotImpactByZoom: true,
+        enableRemoveAnchorMidOfNearLine: false,
+        enableCreateAnchorOnDrag: false
     });
 
-    
     this.core.boxSelectionEnabled(true)
 
 
@@ -129,21 +190,16 @@ topologyDOM.prototype.init=function(){
     this.core.on('zoom',(e)=>{
         var fs=this.getFontSizeInCurrentZoom();
         var dimension=this.getNodeSizeInCurrentZoom();
-        this.core.style()
-            .selector('node')
-            .style({ 'font-size': fs, width: dimension, height: dimension })
-            .update()
+
+        var arr=[
+            {selector:'node',style:{ 'font-size': fs, width: dimension, height: dimension }},
+            {selector:'node:selected',style:{ 'border-width': Math.ceil(dimension / 15) }},
+        ]
         for (var modelID in this.nodeSizeModelAdjustmentRatio) {
             var newDimension = Math.ceil(this.nodeSizeModelAdjustmentRatio[modelID] * dimension)
-            this.core.style()
-                .selector('node[modelID = "' + modelID + '"]')
-                .style({ width: newDimension, height: newDimension })
-                .update()
+            arr.push({selector:'node[modelID = "' + modelID + '"]',style:{ width: newDimension, height: newDimension }})
         }
-        this.core.style()
-            .selector('node:selected')
-            .style({ 'border-width': Math.ceil(dimension / 15) })
-            .update()
+        this.updateStyleSheet(arr)
     })
 
     var instance = this.core.edgeEditing('get');
@@ -273,7 +329,7 @@ topologyDOM.prototype.addMenuItemsForLiveData = function () {
         },
         {
             id: 'enableLiveDataStream',
-            content: 'Enable Live Data Stream',
+            content: 'Monitor Live Data',
             selector: 'node,edge',
             onClickFunction: (e) => {
                 var target = e.target || e.cyTarget;
@@ -389,93 +445,42 @@ topologyDOM.prototype.addSimulatorSource = function (twinName) {
 }
 
 topologyDOM.prototype.enableLiveDataStream = function (twinName) {
-    //TODO:
-    console.log("TODO: enable live data stream")
+    var twinID=globalCache.twinDisplayNameMapToID[twinName]
+    var dbtwin=globalCache.DBTwins[twinID]
+    var modelID=dbtwin.modelID
+    var propertyPaths=modelAnalyzer.fetchPropertyPathsOfModel(modelID)
+    var checkBoxes=[]
+    
+    var dialog=new simpleConfirmDialog()
+    dialog.show({"max-width":"450px","min-width":"300px"},{
+        "title":"Choose Live Monitor Properties",
+        "customDrawing":(parentDOM)=>{
+            propertyPaths.forEach((path) => {
+                var isIoTCheck = $('<input class="w3-check" style="width:20px;margin-left:16px;margin-right:5px" type="checkbox">')
+                var isIoTText = $('<label style="margin-right:12px">'+path.join(".")+'</label>')
+                parentDOM.append($('<div style="float:left"/>').append(isIoTCheck, isIoTText))
+                checkBoxes.push(isIoTCheck)
+                isIoTCheck.data("path",path)
+            })
+        },
+        "buttons":[
+            {
+                "text": "Live",
+                "colorClass":"w3-lime",
+                "clickFunc": () => {
+                    for(var i=0;i<checkBoxes.length;i++){
+                        var aChkBox=checkBoxes[i]
+                        if(!aChkBox.prop('checked')) continue
+                        var aPath=aChkBox.data("path")
+                        this.broadcastMessage({"message": "addLiveMonitor","twinID":twinID,"propertyPath":aPath})
+                    }
+                    dialog.close()
+                }
+            },
+            {"text":"Cancel","colorClass":"w3-light-gray","clickFunc":()=>{dialog.close()}}
+        ]
+    })
 }
-
-topologyDOM.prototype.highPriorityStyleDefinition = function () {
-    this.core.style()
-        .selector('node.calcInput')
-        .style({
-            'border-color': "red",
-            'border-width': 1,
-            'background-fill': 'linear-gradient',
-            'background-gradient-stop-colors': ['red', 'red', 'white', "white", "red"],
-            'background-gradient-stop-positions': ['0%', '50%', '51%', "90%", "91%"]
-        })
-        .update()
-    this.core.style()
-        .selector('node.calcOutput')
-        .style({
-            'border-color': "blue",
-            'border-width': 1,
-            'background-fill': 'linear-gradient',
-            'background-gradient-stop-colors': ['blue', 'blue', 'white', "white", "blue"],
-            'background-gradient-stop-positions': ['0%', '50%', '51%', "90%", "91%"]
-        })
-        .update()
-
-
-    this.core.style()
-        .selector('edge.calcInput')
-        .style({
-            'width': '5',
-            'line-color': 'red',
-            'target-label': 'data(ppath)',
-            'font-size': '11px',
-            'target-text-offset': 'data(ppathOffset)',
-            'text-background-color': 'white',
-            'text-background-opacity': 1,
-            'text-border-opacity': 1,
-            'text-border-width': 1,
-            'text-background-padding': '2px',
-            'color': 'gray',
-            'text-border-color': 'gray'
-        })
-        .update()
-    this.core.style()
-        .selector('edge.calcOutput')
-        .style({
-            'width': '5',
-            'line-color': 'blue',
-            'source-label': 'data(ppath)',
-            'font-size': '11px',
-            'source-text-offset': 'data(ppathOffset)',
-            'text-background-color': 'white',
-            'text-background-opacity': 1,
-            'text-border-opacity': 1,
-            'text-border-width': 1,
-            'text-background-padding': '2px',
-            'color': 'gray',
-            'text-border-color': 'gray'
-        })
-        .update()
-
-    this.core.style()
-        .selector('edge:selected')
-        .style({
-            'width': 3,
-            'line-color': 'red',
-            'target-arrow-color': 'red',
-            'source-arrow-color': 'red',
-            'line-fill': "linear-gradient",
-            'line-gradient-stop-colors': ['cyan', 'magenta', 'yellow'],
-            'line-gradient-stop-positions': ['0%', '70%', '100%']
-        })
-        .update()
-
-    this.core.style()
-        .selector('node:selected')
-        .style({
-            'border-color': "red",
-            'border-width': 2,
-            'background-fill': 'radial-gradient',
-            'background-gradient-stop-colors': ['cyan', 'magenta', 'yellow'],
-            'background-gradient-stop-positions': ['0%', '50%', '60%']
-        })
-        .update()
-}
-
 
 topologyDOM.prototype.showOutBound=async function(collection) {
     var twinIDArr = []
@@ -793,7 +798,7 @@ topologyDOM.prototype.visualizeSingleInputInTwinCalculation = function (oneInput
         currentPPath += oneInput.path.join("/")
         edges[0].data('ppath', currentPPath)
         
-        var randOffset= parseInt(Math.random()*50)+10
+        var randOffset= parseInt(Math.random()*40)+20
         edges[0].data('ppathOffset', randOffset+"%")
     }
 }
@@ -878,91 +883,130 @@ topologyDOM.prototype.getNodeSizeInCurrentZoom=function(){
 
 topologyDOM.prototype.updateModelAvarta=function(modelID,dataUrl){
     try{
-        this.core.style() 
-        .selector('node[modelID = "'+modelID+'"]')
-        .style({'background-image': dataUrl})
-        .update()   
+        this.updateStyleSheet([
+            {selector:'node[modelID = "'+modelID+'"]',style:{'background-image': dataUrl}}
+        ])
     }catch(e){
         
-    }
-    
+    }   
 }
+
+
+topologyDOM.prototype.updateStyleSheet=function(styleArr){
+    //reserve the two styles of edgeediting plugin first, right now there is no better way to reserve them
+    var allStyle=this.core.style()
+    var edgeBendStyle=null
+    var edgeControlStyle=null
+    for(var ind in allStyle){
+        if(typeof(allStyle[ind])!="object") continue
+        if(!allStyle[ind].selector) continue
+        var str=allStyle[ind].selector.inputText
+        if(str==".edgebendediting-hasbendpoints"){
+            edgeBendStyle=allStyle[ind]
+        }
+        if(str==".edgecontrolediting-hascontrolpoints"){
+            edgeControlStyle=allStyle[ind]
+        }
+    }
+
+    //do style merging
+    var mergeSelector={}
+    styleArr.forEach(ele=>{
+        mergeSelector[ele.selector]=ele.style
+    })
+
+    var styleJson = this.core.style().json();
+    var arr=[]
+    for(var ind in styleJson){
+        if(mergeSelector[styleJson[ind].selector]) {
+            var olds= styleJson[ind].style
+            var news=mergeSelector[styleJson[ind].selector] 
+            for(var ind in olds){
+                if(news[ind]!=null) continue
+                news[ind]=olds[ind]
+            }
+            continue
+        }else if(styleJson[ind].selector==".edgebendediting-hasbendpoints" ||styleJson[ind].selector==".edgecontrolediting-hascontrolpoints" ) continue
+        else if(this.highestStyleSelectors[styleJson[ind].selector]) continue
+        
+        arr.push(styleJson[ind])
+    }
+    arr=arr.concat(styleArr)
+    arr=arr.concat(this.highestStyleArr)
+    this.core.style().fromJson(arr).update()
+    if(edgeBendStyle){
+        allStyle=this.core.style()
+        var curLen=allStyle.length;
+        allStyle.length=curLen+2
+        allStyle[curLen]=edgeBendStyle
+        allStyle[curLen+1]=edgeControlStyle
+    }
+}
+
 topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode,secondColorCode){
+    var styleJson = this.core.style().json();
+    var arr=[]
+    for(var ind in styleJson){
+        arr.push(styleJson[ind].selector)
+    }
+
+    var styleSelector='node[modelID = "' + modelID + '"]'
+    var styleObj=null
     if (secondColorCode == null) {
-        this.core.style()
-            .selector('node[modelID = "' + modelID + '"]')
-            .style({ 'background-color': colorCode })
-            .update()
+        if(colorCode=="none"){
+            styleObj={ 'background-fill': 'solid','background-color': 'darkGray','background-opacity':0 }
+        }else{
+            styleObj={ 'background-fill': 'solid','background-color': colorCode ,'background-opacity':1}
+        }
     } else {
         colorCode=colorCode||"darkGray"
-        this.core.style()
-            .selector('node[modelID = "' + modelID + '"]')
-            .style({
+        if(colorCode=="none") colorCode="darkGray"
+        styleObj={
                 'background-fill': 'linear-gradient',
                 'background-gradient-stop-colors': [colorCode, colorCode, secondColorCode],
                 'background-gradient-stop-positions': ['0%', '50%', '51%']
-            })
-            .update()
+            }
     }
-    this.highPriorityStyleDefinition()
+    if(styleObj) this.updateStyleSheet([{selector:styleSelector,style:styleObj}]) 
 }
 
 topologyDOM.prototype.updateModelTwinShape=function(modelID,shape){
+    var newStyle
     if(shape=="hexagon"){
-        this.core.style()
-        .selector('node[modelID = "'+modelID+'"]')
-        .style({'shape': 'polygon','shape-polygon-points':[0,-1,0.866,-0.5,0.866,0.5,0,1,-0.866,0.5,-0.866,-0.5]})
-        .update()   
+        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': 'polygon','shape-polygon-points':[0,-1,0.866,-0.5,0.866,0.5,0,1,-0.866,0.5,-0.866,-0.5]}}
     }else{
-        this.core.style()
-        .selector('node[modelID = "'+modelID+'"]')
-        .style({'shape': shape})
-        .update()   
+        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': shape}}
     }
-    
+    this.updateStyleSheet([newStyle])
 }
+
 topologyDOM.prototype.updateModelTwinDimension=function(modelID,dimensionRatio){
     this.nodeSizeModelAdjustmentRatio[modelID]=parseFloat(dimensionRatio)
     this.core.trigger("zoom")
 }
 
 topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){
-    
-    this.core.style()
-        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'line-color': colorCode})
-        .update()   
-    this.highPriorityStyleDefinition()
+    this.updateStyleSheet([
+        {selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]', style:{'line-color': colorCode}}
+    ])
 }
 
 topologyDOM.prototype.updateRelationshipShape=function(srcModelID,relationshipName,shape){
+    var newStyle
     if(shape=="solid"){
-        this.core.style()
-        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'line-style': shape})
-        .update()   
+        newStyle={selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]', style:{'line-style': shape}}
     }else if(shape=="dotted"){
-        this.core.style()
-        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'line-style': 'dashed','line-dash-pattern':[8,8]})
-        .update()   
+        newStyle={selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]', style:{'line-style': 'dashed','line-dash-pattern':[8,8]}}
     }
-    
+    this.updateStyleSheet([newStyle])    
 }
 topologyDOM.prototype.updateRelationshipWidth=function(srcModelID,relationshipName,edgeWidth){
-    this.core.style()
-        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'width':parseFloat(edgeWidth)})
-        .update()   
-    this.core.style()
-        .selector('edge:selected[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'width':parseFloat(edgeWidth)+1,'line-color': 'red'})
-        .update()   
-    this.core.style()
-        .selector('edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'width':parseFloat(edgeWidth)+3})
-        .update()
-    this.highPriorityStyleDefinition() 
+    var arr=[
+        {selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)}},
+        {selector:'edge:selected[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)+1,'line-color': 'red'}},
+        {selector:'edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)+3}}
+    ]
+    this.updateStyleSheet(arr)
 }
 
 topologyDOM.prototype.reflectRelationsDeleted=function(relations){

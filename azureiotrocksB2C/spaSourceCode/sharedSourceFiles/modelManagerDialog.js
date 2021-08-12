@@ -320,16 +320,24 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
             colorSelector.append(anOption)
             anOption.css("color",oneColorCode)
         })
-        if(predefinedColor!=null) {
-            colorSelector.val(predefinedColor)
+
+        if(relatinshipName==null){
+            var anOption=$("<option value='none'>none</option>")
+            anOption.css("color","darkGray")
+            colorSelector.append(anOption)
+        }
+
+        if(nameOfColorField=="secondColor"){
+            if(predefinedColor==null) predefinedColor="none"
+        }else{
+            if(predefinedColor==null) predefinedColor="darkGray"
+        }
+
+        colorSelector.val(predefinedColor)
+        if(predefinedColor!="none") {
             colorSelector.css("color",predefinedColor)
         }else{
             colorSelector.css("color","darkGray")
-        }
-        if(nameOfColorField=="secondColor") {
-            var anOption=$("<option value='none'>none</option>")
-            colorSelector.append(anOption)
-            if(predefinedColor==null) colorSelector.val("none")
         }
         
         colorSelector.change((eve)=>{
@@ -340,7 +348,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     
             if(!visualJson[modelID]) visualJson[modelID]={}
             if(!relatinshipName) {
-                if(selectColorCode=="none") delete visualJson[modelID]["secondColor"]
+                if(selectColorCode=="none" && nameOfColorField=="secondColor") delete visualJson[modelID]["secondColor"]
                 else visualJson[modelID][nameOfColorField]=selectColorCode
                 this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID
                     ,"color":visualJson[modelID]["color"],"secondColor":visualJson[modelID]["secondColor"] })
@@ -354,11 +362,11 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
             this.saveVisualDefinition()
         })
     }
+
     createAColorSelector(definedColor,"color")
     if(relatinshipName==null) createAColorSelector(definedColor2,"secondColor")
 
 
-    
     var shapeSelector = $('<select class="w3-border" style="outline:none"></select>')
     containerDiv.append(shapeSelector)
     if(relatinshipName==null){

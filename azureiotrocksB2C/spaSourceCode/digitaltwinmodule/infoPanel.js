@@ -130,60 +130,7 @@ class infoPanel extends baseInfoPanel {
             this.infoContentDiv=$('<div class="w3-animate-opacity" style="padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
             this.liveContentDiv=$('<div id="myChart" class="w3-animate-opacity" style="padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
             this.DOM.append(this.infoContentDiv,this.liveContentDiv)
-            var canvas = $('<canvas style="width:100%;height:100px"></canvas>')
-            this.liveContentDiv.append(canvas)
-            var xValues = [];
-            var yValues = [];
-            for(var i=0;i<50;i++) {
-                xValues.push(i)
-            }
-            yValues[49]=null
             
-
-
-            var theChart=new Chart(canvas, {
-                type: "line",
-                data: {
-                    labels: xValues,
-                    datasets: [{stepped:true, data: yValues}]
-                },
-                options: {
-                    animation: false,
-                    datasets: {
-                        line: {
-                            spanGaps:true,
-                            borderColor: "rgba(0,0,255,0.7)",
-                            borderWidth:1,
-                            pointRadius:0
-                        }
-                    },
-                    plugins:{
-                        legend: { display: false },
-                        tooltip:{enabled:false}
-                    },
-                    scales: {
-                        x:{grid:{display:false},ticks:{display:false}}
-                        ,y:{grid:{tickLength:0},ticks:{font:{size:9}}}
-                        ,x2: {position:'top',grid:{display:false},ticks:{display:false}}
-                        ,y2: {position:'right',grid:{display:false},ticks:{display:false}}     
-                    }
-                    
-                }
-            });
-
-            /*
-            var newV=1
-            setInterval(()=>{
-                var dataArr=theChart.data.datasets[0].data
-                var len=dataArr.length
-                var passedTime= parseInt(Math.random()*10)
-                for(var i=0;i<passedTime;i++) dataArr.shift()
-                dataArr[len-1]=newV
-                newV=1-newV
-                theChart.update()
-            },500)
-            */
-
             infoBtn.on("click",()=>{
                 infoBtn.addClass("w3-white w3-text-orange")
                 liveBtn.removeClass("w3-white w3-text-orange")

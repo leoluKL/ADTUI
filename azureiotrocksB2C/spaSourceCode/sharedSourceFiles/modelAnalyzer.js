@@ -221,4 +221,23 @@ modelAnalyzer.prototype.deleteModel=async function(modelID,funcAfterEachSuccessD
     if(completeFunc) completeFunc()
 }
 
+
+modelAnalyzer.prototype.fetchPropertyPathsOfModel=function(modelID){
+    var properties=this.DTDLModels[modelID].editableProperties
+    var propertyPaths=[]
+    this.analyzePropertyPath(properties,[],propertyPaths)
+    return propertyPaths
+}
+
+modelAnalyzer.prototype.analyzePropertyPath=function (jsonInfo,pathArr,propertyPaths){
+    for(var ind in jsonInfo){
+        var newPath=pathArr.concat([ind])
+        if(!Array.isArray(jsonInfo[ind]) && typeof(jsonInfo[ind])==="object") {
+            this.analyzePropertyPath(jsonInfo[ind],newPath,propertyPaths)
+        }else {
+            propertyPaths.push(newPath)
+        }
+    }
+}
+
 module.exports = new modelAnalyzer();

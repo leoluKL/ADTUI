@@ -143,23 +143,15 @@ topologyDOM.prototype.init=function(){
         var fs=this.getFontSizeInCurrentZoom();
         var dimension=this.getNodeSizeInCurrentZoom();
 
-        this.core.style()
-                .selector('node')
-                .style({ 'font-size': fs, width:dimension ,height:dimension })
-                .update()
-
+        var arr=[
+            {selector:'node',style:{ 'font-size': fs, width: dimension, height: dimension }},
+            {selector:'node:selected',style:{ 'border-width': Math.ceil(dimension / 15) }},
+        ]
         for (var modelID in this.nodeSizeModelAdjustmentRatio) {
-            var newDimension=Math.ceil(this.nodeSizeModelAdjustmentRatio[modelID]*dimension)
-            this.core.style()
-                .selector('node[modelID = "' + modelID + '"]')
-                .style({ width:newDimension ,height:newDimension })
-                .update()
+            var newDimension = Math.ceil(this.nodeSizeModelAdjustmentRatio[modelID] * dimension)
+            arr.push({selector:'node[modelID = "' + modelID + '"]',style:{ width: newDimension, height: newDimension }})
         }
-
-        this.core.style()
-                .selector('node:selected')
-                .style({ 'border-width': Math.ceil(dimension/15) })
-                .update()
+        this.updateStyleSheet(arr)
     })
 
     var instance = this.core.edgeEditing('get');
@@ -315,29 +307,99 @@ topologyDOM.prototype.getNodeSizeInCurrentZoom=function(){
     }
 }
 
+topologyDOM.prototype.updateStyleSheet=function(styleArr){
+    //reserve the two styles of edgeediting plugin first, right now there is no better way to reserve them
+    var allStyle=this.core.style()
+    var edgeBendStyle=null
+    var edgeControlStyle=null
+    for(var ind in allStyle){
+        if(typeof(allStyle[ind])!="object") continue
+        if(!allStyle[ind].selector) continue
+        var str=allStyle[ind].selector.inputText
+        if(str==".edgebendediting-hasbendpoints"){
+            edgeBendStyle=allStyle[ind]
+        }
+        if(str==".edgecontrolediting-hascontrolpoints"){
+            edgeControlStyle=allStyle[ind]
+        }
+    }
+
+    //do style merging
+    var mergeSelector={}
+    styleArr.forEach(ele=>{
+        mergeSelector[ele.selector]=ele.style
+    })
+
+    var styleJson = this.core.style().json();
+    var arr=[]
+    for(var ind in styleJson){
+        if(mergeSelector[styleJson[ind].selector]) {
+            var olds= styleJson[ind].style
+            var news=mergeSelector[styleJson[ind].selector] 
+            for(var ind in olds){
+                if(news[ind]!=null) continue
+                news[ind]=olds[ind]
+            }
+            continue
+        }else if(styleJson[ind].selector==".edgebendediting-hasbendpoints" ||styleJson[ind].selector==".edgecontrolediting-hascontrolpoints" ) continue
+        
+        arr.push(styleJson[ind])
+    }
+    arr=arr.concat(styleArr)
+    this.core.style().fromJson(arr).update()
+    if(edgeBendStyle){
+        allStyle=this.core.style()
+        var curLen=allStyle.length;
+        allStyle.length=curLen+2
+        allStyle[curLen]=edgeBendStyle
+        allStyle[curLen+1]=edgeControlStyle
+    }
+}
 
 topologyDOM.prototype.updateModelAvarta=function(modelID,dataUrl){
     try{
-        this.core.style() 
-        .selector('node[modelID = "'+modelID+'"]')
-        .style({'background-image': dataUrl})
-        .update()   
+        this.updateStyleSheet([
+            {selector:'node[modelID = "'+modelID+'"]',style:{'background-image': dataUrl}}
+        ])
     }catch(e){
         
-    }
+    }  
     
 }
-topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode){
-    this.core.style()
-        .selector('node[modelID = "'+modelID+'"]')
-        .style({'background-color': colorCode})
-        .update()   
+topologyDOM.prototype.updateModelTwinColor=function(modelID,colorCode,secondColorCode){
+    var styleJson = this.core.style().json();
+    var arr=[]
+    for(var ind in styleJson){
+        arr.push(styleJson[ind].selector)
+    }
+
+    var styleSelector='node[modelID = "' + modelID + '"]'
+    var styleObj=null
+    if (secondColorCode == null) {
+        if(colorCode=="none"){
+            styleObj={ 'background-fill': 'solid','background-color': 'darkGray','background-opacity':0 }
+        }else{
+            styleObj={ 'background-fill': 'solid','background-color': colorCode ,'background-opacity':1}
+        }
+    } else {
+        colorCode=colorCode||"darkGray"
+        if(colorCode=="none") colorCode="darkGray"
+        styleObj={
+                'background-fill': 'linear-gradient',
+                'background-gradient-stop-colors': [colorCode, colorCode, secondColorCode],
+                'background-gradient-stop-positions': ['0%', '50%', '51%']
+            }
+    }
+    if(styleObj) this.updateStyleSheet([{selector:styleSelector,style:styleObj}]) 
 }
 topologyDOM.prototype.updateModelTwinShape=function(modelID,shape){
-    this.core.style()
-        .selector('node[modelID = "'+modelID+'"]')
-        .style({'shape': shape})
-        .update()   
+    var newStyle
+    if(shape=="hexagon"){
+        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': 'polygon','shape-polygon-points':[0,-1,0.866,-0.5,0.866,0.5,0,1,-0.866,0.5,-0.866,-0.5]}}
+    }else{
+        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': shape}}
+    }
+    this.updateStyleSheet([newStyle])
 }
 
 topologyDOM.prototype.updateModelTwinDimension=function(modelID,dimensionRatio){
@@ -347,30 +409,26 @@ topologyDOM.prototype.updateModelTwinDimension=function(modelID,dimensionRatio){
 
 
 topologyDOM.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){
-    this.core.style()
-        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'line-color': colorCode})
-        .update()   
+    this.updateStyleSheet([
+        {selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]', style:{'line-color': colorCode}}
+    ])
 }
 topologyDOM.prototype.updateRelationshipShape=function(srcModelID,relationshipName,shape){
-    this.core.style()
-        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'line-style': shape})
-        .update()   
+    var newStyle
+    if(shape=="solid"){
+        newStyle={selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]', style:{'line-style': shape}}
+    }else if(shape=="dotted"){
+        newStyle={selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]', style:{'line-style': 'dashed','line-dash-pattern':[8,8]}}
+    }
+    this.updateStyleSheet([newStyle])    
 }
 topologyDOM.prototype.updateRelationshipWidth=function(srcModelID,relationshipName,edgeWidth){
-    this.core.style()
-        .selector('edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'width':parseFloat(edgeWidth)})
-        .update()   
-    this.core.style()
-        .selector('edge:selected[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'width':parseFloat(edgeWidth)+1,'line-color': 'red'})
-        .update()   
-    this.core.style()
-        .selector('edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]')
-        .style({'width':parseFloat(edgeWidth)+2})
-        .update()   
+    var arr=[
+        {selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)}},
+        {selector:'edge:selected[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)+1,'line-color': 'red'}},
+        {selector:'edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)+3}}
+    ]
+    this.updateStyleSheet(arr)
 }
 
 topologyDOM.prototype.deleteRelations=function(relations){

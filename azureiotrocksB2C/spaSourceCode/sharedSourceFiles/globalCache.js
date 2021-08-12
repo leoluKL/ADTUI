@@ -324,6 +324,7 @@ globalCache.prototype.searchValue=function(originElementInfo,pathArr){
 globalCache.prototype.shapeSvg=function(shape,color,secondColor){
     var svgStart='<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" version="1.1" >'
     if(secondColor){
+        if(color=="none") color="darkGray" 
         var gradientDefinition='<defs>'+
             '<linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">'+
             '<stop offset="0%" style="stop-color:'+color+';stop-opacity:1" />'+

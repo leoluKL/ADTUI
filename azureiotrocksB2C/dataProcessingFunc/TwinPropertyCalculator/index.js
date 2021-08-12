@@ -1,3 +1,4 @@
+const webpush = require('web-push');
 const CosmosClient = require('@azure/cosmos').CosmosClient
 var azureiotrocksDBClient =null;
 if(!azureiotrocksDBClient) azureiotrocksDBClient=new CosmosClient(process.env.azureiotrockscosmosdb)
@@ -7,6 +8,7 @@ var azureiotrocksADTClient=null;
 if(!azureiotrocksADTClient) azureiotrocksADTClient=new DigitalTwinsClient(process.env.ADTEndpoint, new DefaultAzureCredential())
 
 module.exports = async function (context, eventHubMessages) {
+    webpush.setVapidDetails('mailto:leolu@microsoft.com', process.env.SERVICEWORKER_PUBLIC_VAPID_KEY, process.env.SERVICEWORKER_PRIVATE_VAPID_KEY);
     var docsArr=[]
     for(var index=0;index<eventHubMessages.length;index++){
         //console.log("----Start of event processing-----")
@@ -25,14 +27,28 @@ module.exports = async function (context, eventHubMessages) {
             newDoc["path"]=onePatch["path"]
             newDoc["value"]=onePatch["value"]
             docsArr.push(newDoc)
-            console.log("observe:"+eventSubject+" change "+onePatch["path"]+" to value "+onePatch["value"])
-            propagateOneValuePatch(newDoc["twinID"],newDoc["path"],newDoc["value"])
+            //console.log("observe:"+eventSubject+" change "+onePatch["path"]+" to value "+onePatch["value"])
+            var thePath=onePatch["path"].split("/")
+            if(thePath[0]=="") thePath.shift()
+            liveMonitorValueChange(newDoc["twinID"],thePath,newDoc["value"],eventTime)
+            propagateOneValuePatch(newDoc["twinID"],thePath,newDoc["value"])
         }
     }
     
     context.bindings.outputDocToCosmosDB = JSON.stringify(docsArr);
     context.done();
 };
+
+async function liveMonitorValueChange(twinID,propertyPath,newValue,eventTime){
+    console.log("webpush:"+twinID+"."+propertyPath.join(".")+" value "+newValue)
+    //query container 'serverPushInfo', if there is record with this twinID(pID) and propertyPath, push value infomartion to it
+    var propertyPath=propertyPath.join(".")
+    var allRecords=await queryDB('serverPushInfo',`select * from c where c.pID='${twinID}' and c.propertyPath='${propertyPath}'`)
+    const payload = JSON.stringify({ "twinID": twinID,  "propertyPath": propertyPath, "value":newValue, "time": eventTime });
+    allRecords.forEach((oneRecord)=>{
+        webpush.sendNotification(oneRecord.serviceWorkerSubscription, payload).catch(error => {});
+    })
+}
 
 async function propagateOneValuePatch(triggerTwinID,triggerPropertyPath,triggerPropertyValue){
     var twinsToBeRecalculate=await getInfluencedTwins(triggerTwinID,triggerPropertyPath,triggerPropertyValue)
@@ -156,14 +172,12 @@ function createOjb(originalObj,path,value){
 }
 
 async function getInfluencedTwins(twinID,changingProperty,newValue){
-    var arr=changingProperty.split("/")
-    if(arr[0]=="") arr.shift()
     //look for any twins that might be influenced by this twin
     var targetTwins=await queryDB('twincalculation',`select c.id from c where c.type='influence' and c.twinID='${twinID}'`)
     
     //check if there is "value" type record in those targettwins patition, that means this property change should really trigger the change in the target twins
     var trulyInfluencedTwins=[]
-    var valueRecordID=twinID+"."+arr.join(".")
+    var valueRecordID=twinID+"."+changingProperty.join(".")
 
     for(var i=0;i<targetTwins.length;i++){
         var aTarget=targetTwins[i]

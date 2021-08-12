@@ -25,7 +25,7 @@ module.exports = async function (context, IoTHubMessages) {
             var projectID=allProperties["project"]
             var modelID=allProperties["modelID"]
             var opTimestamp=allProperties["operationTimestamp"]
-            var queryStr = `SELECT * FROM c where c.projectID='${projectID}'` // and c.${patitionKey}='${patitionKeyValue}'
+            var queryStr = `SELECT * FROM c where c.pID='${projectID}' and type='events'` 
             const { resources: queryResults } = await azureiotrocksDBClient.database(process.env.azureiotrockscosmosDBName).container('serverPushInfo').items.query(queryStr).fetchAll()
             for (var j = 0; j < queryResults.length; j++) {
                 var oneServiceWorkerSub = queryResults[j].serviceWorkerSubscription
