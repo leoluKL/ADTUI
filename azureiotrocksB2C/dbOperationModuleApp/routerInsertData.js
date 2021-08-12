@@ -294,6 +294,7 @@ routerInsertData.prototype.serviceWorkerSubscription =async function(req,res) {
         newSubscriptionDocument.id=req.body.account
         newSubscriptionDocument.pID=req.body.projectID
     }else if(req.body.type=='propertyValue'){
+        newSubscriptionDocument.propertyPath=newSubscriptionDocument.propertyPath.join(".")
         newSubscriptionDocument.id=req.body.account+"."+req.body.twinID+"."+req.body.propertyPath.join(".")
         newSubscriptionDocument.pID=req.body.twinID
     }
