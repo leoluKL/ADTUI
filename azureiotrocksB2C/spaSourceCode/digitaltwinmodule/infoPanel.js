@@ -6,6 +6,7 @@ const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
 const simpleExpandableSection= require("../sharedSourceFiles/simpleExpandableSection")
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 const scriptTestDialog = require("../sharedSourceFiles/scriptTestDialog")
+const simpleChart= require("../sharedSourceFiles/simpleChart")
 
 class infoPanel extends baseInfoPanel {
     constructor() {
@@ -131,6 +132,14 @@ class infoPanel extends baseInfoPanel {
             this.liveContentDiv=$('<div id="myChart" class="w3-animate-opacity" style="padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
             this.DOM.append(this.infoContentDiv,this.liveContentDiv)
             
+            var aChart=new simpleChart(this.liveContentDiv,60,{width:"100%",height:"100px"})
+
+            setInterval(()=>{
+                var val= parseInt(Math.random()*100)
+                var nowTime=parseInt((new Date().getTime())/1000)
+                aChart.addDataValue(nowTime,val)
+            },1000)
+
             infoBtn.on("click",()=>{
                 infoBtn.addClass("w3-white w3-text-orange")
                 liveBtn.removeClass("w3-white w3-text-orange")

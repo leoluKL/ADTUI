@@ -51,8 +51,25 @@ function simpleChart(parentDom,xLength,cssOptions,customDrawing){
     */
 }
 
-simpleChart.prototype.addDataValue=function(){
-    
+simpleChart.prototype.addDataValue=function(dataIndex,value){
+    var dataArr=this.chart.data.datasets[0].data
+
+    var totalPoints=dataArr.length
+
+    if(this.lastDataIndex==null) this.lastDataIndex=dataIndex-1
+    if(dataIndex<this.lastDataIndex){
+        if(this.lastDataIndex-dataIndex>=totalPoints) return; //ignore receiving too old points
+        var diff=this.lastDataIndex - dataIndex
+        dataArr[totalPoints-1-diff]=value
+    }else{
+        var numOfPassedPoints=dataIndex-this.lastDataIndex
+        dataArr=dataArr.slice(numOfPassedPoints)
+        dataArr[totalPoints-1]=value
+    }
+    this.chart.data.datasets[0].data=dataArr
+    this.chart.update()
+
+    this.lastDataIndex=dataIndex
 }
 
 simpleChart.prototype.setXLength=function(xlen){
