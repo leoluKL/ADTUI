@@ -134,12 +134,14 @@ class infoPanel extends baseInfoPanel {
             
             var aChart=new simpleChart(this.liveContentDiv,60,{width:"100%",height:"100px"})
 
+            /*
             setInterval(()=>{
                 var val= parseInt(Math.random()*100)
                 var nowTime=parseInt((new Date().getTime())/1000)
                 aChart.addDataValue(nowTime,val)
             },1000)
-
+            */
+           
             infoBtn.on("click",()=>{
                 infoBtn.addClass("w3-white w3-text-orange")
                 liveBtn.removeClass("w3-white w3-text-orange")
