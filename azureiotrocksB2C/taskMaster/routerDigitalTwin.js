@@ -31,6 +31,7 @@ function routerDigitalTwin(){
     
 
     this.useRoute("serviceWorkerSubscription","isPost")
+    this.useRoute("updateTwin","isPost")
 }
 
 
@@ -50,6 +51,16 @@ routerDigitalTwin.prototype.serviceWorkerSubscription =async function(req,res) {
         return;
     }
     res.send(body)
+}
+
+routerDigitalTwin.prototype.updateTwin = async function(req,res){
+    try{
+        var postLoad=req.body
+        var {body} = await got.post(process.env.dboperationAPIURL+"insertData/updateTwin", {json:postLoad,responseType: 'json'});
+        res.end()
+    }catch(e){
+        res.status(400).send(e.response.body);
+    }
 }
 
 routerDigitalTwin.prototype.updateFormula =async function(req,res) {
