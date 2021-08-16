@@ -30,7 +30,7 @@ function routerDigitalTwin(){
     this.useRoute("updateFormula","isPost")
     this.useRoute("checkSimulationDataSource","post")
     this.useRoute("updateSimulationDataSource","post")
-    
+    this.useRoute("deleteSimulationDataSourceLock","post")
 
     this.useRoute("serviceWorkerSubscription","isPost")
     this.useRoute("serviceWorkerUnsubscription","post")
@@ -88,6 +88,16 @@ routerDigitalTwin.prototype.updateSimulationDataSource = async function(req,res)
         var postLoad=req.body
         postLoad.account=req.authInfo.account
         await got.post(process.env.dboperationAPIURL+"insertData/updateSimulationDataSource", {json:postLoad,responseType: 'json'});
+        res.end()
+    }catch(e){
+        res.status(400).send(e.response.body);
+    }
+}
+
+routerDigitalTwin.prototype.deleteSimulationDataSourceLock = async function(req,res){
+    try{
+        var postLoad=req.body
+        await got.post(process.env.dboperationAPIURL+"deleteData/deleteSimulationDataSourceLock", {json:postLoad,responseType: 'json'});
         res.end()
     }catch(e){
         res.status(400).send(e.response.body);
