@@ -7,6 +7,7 @@ function routerDeleteData(){
     this.useRoute("deleteTopologySchema","post")
     this.useRoute("deleteTwins","post")
     this.useRoute("serviceWorkerUnsubscription","post")
+    this.useRoute("deleteSimulationDataSourceLock","post")
 }
 
 routerDeleteData.prototype.useRoute=function(routeStr,isPost){
@@ -27,6 +28,17 @@ routerDeleteData.prototype.serviceWorkerUnsubscription =async function(req,res) 
         res.status(400).send(e.message)
     }
 }
+
+routerDeleteData.prototype.deleteSimulationDataSourceLock =async function(req,res) {
+    try {
+        await cosmosdbhelper.deleteRecord("simulation",req.body.twinID,req.body.propertyPathStr)
+        res.end()
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+}
+
+
 
 routerDeleteData.prototype.deleteModel =async function(req,res) {
     var projectID=req.body.projectID
