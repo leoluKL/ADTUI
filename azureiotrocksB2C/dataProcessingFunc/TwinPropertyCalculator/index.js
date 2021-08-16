@@ -44,7 +44,7 @@ async function liveMonitorValueChange(twinID,propertyPath,newValue,eventTime){
     var allRecords=await queryDB('serverPushInfo',`select * from c where c.pID='${twinID}' and c.propertyPath='${propertyPath.join(".")}'`)
     const payload = JSON.stringify({ "twinID": twinID,  "propertyPath": propertyPath, "value":newValue, "time": eventTime });
     allRecords.forEach((oneRecord)=>{
-        console.log("webpush property change:"+twinID+"."+propertyPath.join(".")+" value "+newValue)
+        //console.log("webpush property change:"+twinID+"."+propertyPath.join(".")+" value "+newValue)
         webpush.sendNotification(oneRecord.serviceWorkerSubscription, payload).catch(error => {});
     })
 }
