@@ -28,6 +28,8 @@ function routerDigitalTwin(){
     this.useRoute("setLayoutSharedFlag","isPost")
     this.useRoute("setVisualSchemaSharedFlag","isPost")
     this.useRoute("updateFormula","isPost")
+    this.useRoute("checkSimulationDataSource","post")
+    this.useRoute("updateSimulationDataSource","post")
     
 
     this.useRoute("serviceWorkerSubscription","isPost")
@@ -51,6 +53,27 @@ routerDigitalTwin.prototype.serviceWorkerSubscription =async function(req,res) {
         return;
     }
     res.send(body)
+}
+
+routerDigitalTwin.prototype.checkSimulationDataSource = async function(req,res){
+    try{
+        var postLoad=req.body
+        var {body} = await got.post(process.env.dboperationAPIURL+"queryData/checkSimulationDataSource", {json:postLoad,responseType: 'json'});
+        res.send(body)
+    }catch(e){
+        res.status(400).send(e.response.body);
+    }
+}
+
+routerDigitalTwin.prototype.updateSimulationDataSource = async function(req,res){
+    try{
+        var postLoad=req.body
+        postLoad.account=req.authInfo.account
+        await got.post(process.env.dboperationAPIURL+"insertData/updateSimulationDataSource", {json:postLoad,responseType: 'json'});
+        res.end()
+    }catch(e){
+        res.status(400).send(e.response.body);
+    }
 }
 
 routerDigitalTwin.prototype.updateTwin = async function(req,res){
