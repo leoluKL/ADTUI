@@ -6,6 +6,7 @@ function routerDeleteData(){
     this.useRoute("deleteModel","post")
     this.useRoute("deleteTopologySchema","post")
     this.useRoute("deleteTwins","post")
+    this.useRoute("serviceWorkerUnsubscription","post")
 }
 
 routerDeleteData.prototype.useRoute=function(routeStr,isPost){
@@ -14,6 +15,18 @@ routerDeleteData.prototype.useRoute=function(routeStr,isPost){
     })
 }
 
+routerDeleteData.prototype.serviceWorkerUnsubscription =async function(req,res) {
+    var pID=req.body.twinID
+    var account=req.body.account
+    var propertyPathStr=req.body.propertyPath.join(".")
+
+    try {
+        await cosmosdbhelper.deleteAllRecordsByQuery(`select c.pID patitionValue, c.id docID from c where c.pID='${pID}' and c.type='propertyValue' and c.propertyPath='${propertyPathStr}' and c.account='${account}'`,"serverPushInfo")
+        res.end()
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
+}
 
 routerDeleteData.prototype.deleteModel =async function(req,res) {
     var projectID=req.body.projectID
