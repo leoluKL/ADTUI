@@ -33,6 +33,7 @@ function routerDigitalTwin(){
     
 
     this.useRoute("serviceWorkerSubscription","isPost")
+    this.useRoute("serviceWorkerUnsubscription","post")
     this.useRoute("updateTwin","isPost")
 }
 
@@ -54,6 +55,19 @@ routerDigitalTwin.prototype.serviceWorkerSubscription =async function(req,res) {
     }
     res.send(body)
 }
+
+routerDigitalTwin.prototype.serviceWorkerUnsubscription =async function(req,res) {
+    var reqBody=req.body
+    reqBody.account=req.authInfo.account
+    try{
+        var {body} = await got.post(process.env.dboperationAPIURL+"deleteData/serviceWorkerUnsubscription", {json:reqBody,responseType: 'json'});
+    }catch(e){
+        res.status(e.response.statusCode).send(e.response.body);
+        return;
+    }
+    res.send(body)
+}
+
 
 routerDigitalTwin.prototype.checkSimulationDataSource = async function(req,res){
     try{
