@@ -13,6 +13,7 @@ function routerInsertData(){
     this.useRoute("setVisualSchemaSharedFlag","post")
     this.useRoute("serviceWorkerSubscription","post")
     this.useRoute("updateFormula","post")
+    this.useRoute("updateSimulationDataSource","post")
     this.useRoute("test")
 }
 
@@ -26,6 +27,22 @@ routerInsertData.prototype.test =async function(req,res) {
     var queryStr='SELECT c.id theID FROM c '+"where c.id='e4c7fea2-78c2-4dee-b09b-1b7a99961b85.dataSignal' and c.type='value'"
     var docs=await cosmosdbhelper.query("twincalculation",queryStr)
     res.send(docs)
+}
+
+
+routerInsertData.prototype.updateSimulationDataSource =async function(req,res) {
+    try {
+        var newModelDocument = {
+            "id":req.body.propertyPathStr,
+            "accountID":req.body.account,
+            "twinID":req.body.twinID
+        }
+
+        await cosmosdbhelper.insertRecord("simulation",newModelDocument)
+        res.end()
+    } catch (e) {
+        res.status(400).send(e.message)
+    }
 }
 
 routerInsertData.prototype.newModels =async function(req,res) {

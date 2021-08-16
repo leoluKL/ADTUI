@@ -27,6 +27,8 @@ twinsList.prototype.findSingleModelTwinsListByModelID=function(modelID){
 
 twinsList.prototype.refill=function(){
     this.DOM.empty()
+    this.singleModelTwinsListArr.forEach(ele=>{ele.removeMemoryReference()})
+
     this.singleModelTwinsListArr.length=0
 
     for(var ind in modelAnalyzer.DTDLModels){

@@ -15,6 +15,45 @@ function globalCache(){
     this.initStoredInformtion()
 }
 
+globalCache.prototype.checkTooLongIdle = function () {
+    var previousTime=new Date().getTime()
+    var maxDiff=10*60*1000
+
+    var previousMouseDown=new Date().getTime()
+    $(document).ready( ()=> {
+        $(document).mousedown( (e)=> {
+            previousMouseDown=new Date().getTime()
+        });
+    })
+
+    setInterval(()=>{
+        var currentTime=new Date().getTime()
+        var diff1=currentTime-previousTime
+        var diff2=currentTime-previousMouseDown
+        if(diff1>maxDiff || diff2>maxDiff){
+            //log out as it means the page just resumed from long time computer sleep
+            this.stallPage()
+        }
+        previousTime=currentTime
+    },60000)
+}
+
+globalCache.prototype.stallPage=function(){
+    $('body').empty()
+    for(var ind in global){
+        if(ind=="location") continue
+        try{
+            global[ind]=null
+        }catch(e){
+            console.log(e)
+        }
+    } 
+
+    const url = new URL(window.location.href);
+    var destURL= url.origin+"/spaindex.html"
+    window.location.replace(destURL);
+}
+
 globalCache.prototype.initStoredInformtion = function () {
     this.storedOutboundRelationships = {} 
     //stored data, seperately from ADT service and from cosmosDB service
@@ -363,6 +402,13 @@ globalCache.prototype.makeDOMDraggable=function(dom,ignoreChildDomType){
             }
         })
     })
+}
+
+globalCache.prototype.uuidv4=function() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 module.exports = new globalCache();

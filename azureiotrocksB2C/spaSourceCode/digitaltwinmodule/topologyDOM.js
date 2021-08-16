@@ -9,6 +9,7 @@ const serviceWorkerHelper=require("../sharedSourceFiles/serviceWorkerHelper")
 const topologyDOM_styleManager=require("./topologyDOM_styleManager")
 const topologyDOM_menu=require("./topologyDOM_menu")
 const topologyDOM_visual=require("./topologyDOM_visual")
+const topologyDOM_simDataSource=require("./topologyDOM_simDataSource")
 
 function topologyDOM(containerDOM){
     this.DOM=$("<div style='height:100%;width:100%'></div>")
@@ -84,7 +85,6 @@ topologyDOM.prototype.init=function(){
     })
 
     this.core.on('mouseover',e=>{
-
         this.mouseOverFunction(e)
     })
     this.core.on('mouseout',e=>{
@@ -135,6 +135,7 @@ topologyDOM.prototype.init=function(){
     })
 
     this.visualManager=new topologyDOM_visual(this.core)
+    this.simDataSourceManager= new topologyDOM_simDataSource(this)
 }
 
 topologyDOM.prototype.hideCollection = function (collection) { 
@@ -145,27 +146,7 @@ topologyDOM.prototype.hideCollection = function (collection) {
 }
 
 topologyDOM.prototype.addSimulatorSource = function (twinName) {
-    //add a simulator data source node beside the clicked twin
-    var simNodeName= this.uuidv4()
-    var twinID=globalCache.twinDisplayNameMapToID[twinName]
-    var newSim={
-        "propertyPath":null
-    }
-    this.visualManager.showSimulatorSource(twinID,simNodeName,newSim)
-
-    //write the simulate node infomation to database
-    try {
-        var dbtwin=globalCache.DBTwins[twinID]
-        var allSims= dbtwin.simulate||{}
-        allSims[simNodeName]=newSim
-        dbtwin.simulate=allSims
-        msalHelper.callAPI("digitaltwin/updateTwin", "POST"
-            , {"twinID":twinID,"updateInfo":JSON.stringify({"simulate":allSims})}
-            , "withProjectID")
-    } catch (e) {
-        console.log(e)
-        if (e.responseText) alert(e.responseText)
-    }
+    this.simDataSourceManager.newSimulatorSource(twinName)
 }
 
 topologyDOM.prototype.enableLiveDataStream = function (twinName) {
@@ -292,6 +273,10 @@ topologyDOM.prototype.loadInBound=async function(collection) {
             if (e.responseText) alert(e.responseText)
         }
     }
+}
+
+topologyDOM.prototype.deleteSimNode=function(simNodeInfo){
+    this.simDataSourceManager.deleteSimNode(simNodeInfo)
 }
 
 
@@ -444,7 +429,7 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     
     var info=e.target.data().originalInfo
 
-    if(info==null && !e.target.data().notTwin) return;
+    if(info==null) return;
 
     if(this.lastHoverTarget) this.lastHoverTarget.removeClass("hover")
 
@@ -457,25 +442,18 @@ topologyDOM.prototype.mouseOverFunction= function (e) {
     this.lastHoverTarget=e.target
     e.target.addClass("hover")
 
-    if(e.target.data().notTwin) {
-        return; //TODO: show special nodes' infomration, such as simulation data source
-    }else{
-        //digital twins info
-        this.broadcastMessage({ "message": "showInfoHoveredEle", "info": [info],"screenXY":this.convertPosition(e.position.x,e.position.y) })
+    //digital twins info
+    this.broadcastMessage({ "message": "showInfoHoveredEle", "info": [info],"screenXY":this.convertPosition(e.position.x,e.position.y) })
 
-        //if there is calculation script in hovered node, highlight input nodes and the properties
-        if(info["$dtId"]){
-            var twinID=info["$dtId"]
-            var dbtwin=globalCache.DBTwins[twinID]
-            var inputArr = dbtwin["inputs"]
-            if(inputArr) inputArr.forEach(oneInput=>{this.visualizeSingleInputInTwinCalculation(oneInput,e.target)})
-    
-            this.analyseSingleOutput(e.target,info["$dtId"])
-        }
+    //if there is calculation script in hovered node, highlight input nodes and the properties
+    if(info["$dtId"]){
+        var twinID=info["$dtId"]
+        var dbtwin=globalCache.DBTwins[twinID]
+        var inputArr = dbtwin["inputs"]
+        if(inputArr) inputArr.forEach(oneInput=>{this.visualizeSingleInputInTwinCalculation(oneInput,e.target)})
+
+        this.analyseSingleOutput(e.target,info["$dtId"])
     }
-    
-    
-
 }
 
 topologyDOM.prototype.analyseSingleOutput = function (twinTopoNode,twinID) {
@@ -583,7 +561,7 @@ topologyDOM.prototype.selectFunction = function () {
     if(arr.length==1){
         var ele=arr[0]
         if(ele.data().modelID=="_fixed_simulationDataSource"){
-            this.broadcastMessage({ "message": "showInfoSelectedNodes", info: ele.data().originalInfo })
+            this.broadcastMessage({ "message": "showInfoSelectedNodes", info: [ele.data().originalInfo] })
             return;
         }
     }
@@ -850,19 +828,12 @@ topologyDOM.prototype.createOneConnectionAdjustRow = function (oneRow,confirmDia
     return returnObj;
 }
 
-topologyDOM.prototype.uuidv4=function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
 topologyDOM.prototype.createConnections = async function (resultActions) {
     var finalActions=[]
     resultActions.forEach(oneAction=>{
         var oneFinalAction={}
         oneFinalAction["$srcId"]=oneAction["from"]
-        oneFinalAction["$relationshipId"]=this.uuidv4();
+        oneFinalAction["$relationshipId"]=globalCache.uuidv4();
         oneFinalAction["obj"]={
             "$targetId": oneAction["to"],
             "$relationshipName": oneAction["connect"]

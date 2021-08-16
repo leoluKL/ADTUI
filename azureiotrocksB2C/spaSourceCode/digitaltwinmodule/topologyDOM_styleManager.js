@@ -60,6 +60,11 @@ function topologyDOM_styleManager(topologyCore,defaultNodeSize){
             'background-fill': 'radial-gradient',
             'background-gradient-stop-colors': ['cyan', 'magenta', 'yellow'],
             'background-gradient-stop-positions': ['0%', '50%', '60%']
+        }},
+        {selector: 'node[modelID = "_fixed_simulationDataSource"].running',
+        style:{
+            'border-width':3
+            ,'border-color':'#cddc39'
         }}
     ]
     this.highestStyleSelectors={}

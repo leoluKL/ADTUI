@@ -17,6 +17,7 @@ const serviceWorkerHelper=require("../sharedSourceFiles/serviceWorkerHelper")
 const globalCache = require("../sharedSourceFiles/globalCache")
 
 function digitaltwinmoduleUI() {
+    globalCache.checkTooLongIdle()
     this.initUILayout()
 
     this.twinsTree= new twinsTree($("#treeHolder"),$("#treeSearch"))
@@ -37,7 +38,9 @@ function digitaltwinmoduleUI() {
     if(theAccount==null && !globalAppSettings.isLocalTest) window.open(globalAppSettings.logoutRedirectUri,"_self")
 
     this.initData()
+    //setTimeout(()=>{this.stallPage()},1000)
 }
+
 
 
 digitaltwinmoduleUI.prototype.initData=async function(){

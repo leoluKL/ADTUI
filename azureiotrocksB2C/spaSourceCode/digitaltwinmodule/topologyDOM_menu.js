@@ -8,46 +8,35 @@ function topologyDOM_menu(parentTopologyDOM){
 }
 
 topologyDOM_menu.prototype.decideVisibleContextMenu=function(clickEle){
-    //restore all menu items
-    this.contenxtMenuInstance.showMenuItem('ConnectTo');
-    this.contenxtMenuInstance.showMenuItem('ConnectFrom');
-    this.contenxtMenuInstance.showMenuItem('QueryOutbound');
-    this.contenxtMenuInstance.showMenuItem('QueryInbound');
-    this.contenxtMenuInstance.showMenuItem('SelectOutbound');
-    this.contenxtMenuInstance.showMenuItem('SelectInbound');
-    this.contenxtMenuInstance.showMenuItem('enableLiveDataStream');
-    this.contenxtMenuInstance.showMenuItem('COSE');
-    this.contenxtMenuInstance.showMenuItem('addSimulatingDataSource');
-    this.contenxtMenuInstance.showMenuItem('liveData');
-    this.contenxtMenuInstance.showMenuItem('Hide');
-    this.contenxtMenuInstance.showMenuItem('Others');
-
+    //hide all menu items
+    var allItems=['ConnectTo','ConnectFrom','QueryOutbound','QueryInbound','SelectOutbound','SelectInbound','enableLiveDataStream','COSE','addSimulatingDataSource','liveData','Hide','Others','Simulation', 'startSimulatingDataSource', 'stopSimulatingDataSource', 'editing','DeleteAll']
+    allItems.forEach(ele=>{this.contenxtMenuInstance.hideMenuItem(ele)})
+    
     var selectedNodes=this.core.$('node:selected')
     var selected=this.core.$(':selected')
     var isClickingNode=(clickEle.isNode && clickEle.isNode() )
     var hasNode=isClickingNode || (selectedNodes.length>0)
+    if(clickEle.isNode && clickEle.data("originalInfo").simNodeName) var clickSimNode=true
     
-    if(clickEle.isNode && clickEle.data().notTwin) var clickSpecialNode=true
-    
-
-
-    if(!hasNode || clickSpecialNode){
-        this.contenxtMenuInstance.hideMenuItem('ConnectTo');
-        this.contenxtMenuInstance.hideMenuItem('ConnectFrom'); 
-        this.contenxtMenuInstance.hideMenuItem('QueryOutbound');
-        this.contenxtMenuInstance.hideMenuItem('QueryInbound');
-        this.contenxtMenuInstance.hideMenuItem('SelectOutbound');
-        this.contenxtMenuInstance.hideMenuItem('SelectInbound');
-        this.contenxtMenuInstance.hideMenuItem('Hide');
-        this.contenxtMenuInstance.hideMenuItem('Others');
-    }
-    if(!isClickingNode|| clickSpecialNode){
-        this.contenxtMenuInstance.hideMenuItem('liveData');
-        this.contenxtMenuInstance.hideMenuItem('enableLiveDataStream');
-        this.contenxtMenuInstance.hideMenuItem('addSimulatingDataSource');
+    var showMenuArr=(arr)=>{
+        arr.forEach(ele=>{this.contenxtMenuInstance.showMenuItem(ele)})
     }
 
-    if(selected.length<=1 || clickSpecialNode) this.contenxtMenuInstance.hideMenuItem('COSE');
+    if(clickSimNode) {
+        var simNodeName=clickEle.data('originalInfo').simNodeName
+        showMenuArr(['editing','DeleteAll','Simulation'])
+        if(this.parentTopologyDOM.simDataSourceManager.runningSimDataSource[simNodeName]){
+            showMenuArr(['stopSimulatingDataSource'])
+        }else showMenuArr(['startSimulatingDataSource'])
+    }else{
+        if(hasNode){
+            showMenuArr(['editing','ConnectTo','ConnectFrom','Others','QueryOutbound','QueryInbound','SelectOutbound','SelectInbound','Hide','DeleteAll'])
+            if(isClickingNode) showMenuArr(['liveData','enableLiveDataStream','addSimulatingDataSource'])
+            if(selected.length>1) showMenuArr(['COSE'])
+        }
+    
+        if(!hasNode) showMenuArr(['editing','DeleteAll'])
+    }
 }
 
 topologyDOM_menu.prototype.addMenuItemsForLiveData = function () {
@@ -73,7 +62,7 @@ topologyDOM_menu.prototype.addMenuItemsForLiveData = function () {
             onClickFunction: (e) => {
                 this.selectClickedEle(e.target)
                 var target = e.target || e.cyTarget;
-                
+                this.parentTopologyDOM.simDataSourceManager.startSimNode(e.target)
             }
         },
         {
@@ -83,7 +72,7 @@ topologyDOM_menu.prototype.addMenuItemsForLiveData = function () {
             onClickFunction: (e) => {
                 this.selectClickedEle(e.target)
                 var target = e.target || e.cyTarget;
-                
+                this.parentTopologyDOM.simDataSourceManager.stopSimNode(e.target)
             }
         },
         {
@@ -139,7 +128,17 @@ topologyDOM_menu.prototype.addMenuItemsForEditing = function () {
             content: 'Delete',
             selector: 'node,edge',
             onClickFunction: (e) => {
-                this.parentTopologyDOM.deleteElementsArray(this.nodeoredge_changeSelectionWhenClickElement(e.target) )
+                var collection=this.nodeoredge_changeSelectionWhenClickElement(e.target)
+                collection.unselect()
+                this.parentTopologyDOM.selectFunction()
+                if(collection.length==1){
+                    var ele=collection[0]
+                    if(ele.data && ele.data("originalInfo").simNodeName){
+                        this.parentTopologyDOM.deleteSimNode(ele.data("originalInfo"))
+                        return
+                    }
+                }
+                this.parentTopologyDOM.deleteElementsArray( )
             }
         }
     ])
@@ -206,16 +205,21 @@ topologyDOM_menu.prototype.addMenuItemsForOthers = function () {
 }
 
 
+topologyDOM_menu.prototype.selectElement=function(element){
+    element.select()
+    this.parentTopologyDOM.selectFunction()
+}
+
 topologyDOM_menu.prototype.selectIfClickEleIsNotSelected=function(clickEle){
     if(!clickEle.selected()){
         this.core.$(':selected').unselect()
-        clickEle.select()
+        this.selectElement(clickEle)
     }
 }
 
 topologyDOM_menu.prototype.selectClickedEle=function(clickEle){
     this.core.$(':selected').unselect()
-    clickEle.select()
+    this.selectElement(clickEle)
 }
 
 topologyDOM_menu.prototype.node_changeSelectionWhenClickElement=function(clickEle){

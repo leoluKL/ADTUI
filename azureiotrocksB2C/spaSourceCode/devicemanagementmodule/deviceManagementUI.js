@@ -12,7 +12,8 @@ const projectSelectionDialog=require("./projectSelectionDialog")
 const serviceWorkerHelper=require("../sharedSourceFiles/serviceWorkerHelper")
 const globalCache = require("../sharedSourceFiles/globalCache")
 
-function deviceManagementUI() {
+function deviceManagementUI() {    
+    globalCache.checkTooLongIdle()
     deviceManagementMainToolbar.render()
 
     this.myMSALObj = new msal.PublicClientApplication(globalAppSettings.msalConfig);

@@ -2,6 +2,7 @@ const simpleSelectMenu= require("./simpleSelectMenu")
 const globalCache = require("../sharedSourceFiles/globalCache")
 const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer");
 const msalHelper = require("../msalHelper")
+const simpleChart=require("./simpleChart")
 
 class baseInfoPanel {
     drawEditable(parent,jsonInfo,originElementInfo,pathArr,funcGetKeyLblColorClass){
@@ -101,7 +102,11 @@ class baseInfoPanel {
             parent.append(keyDiv)
     
             var contentDOM=$("<label></label>")
-            if(typeof(jsonInfo[ind])==="object") {
+            contentDOM.css({"fontSize":fontSize,"color":fontColor})
+            if(jsonInfo[ind]==null){
+                contentDOM.css({ "color": "gray", "font-size": "9px" })
+                contentDOM.text("[empty]")
+            }else if(typeof(jsonInfo[ind])==="object") {
                 contentDOM.css("display","block")
                 contentDOM.css("padding-left","1em")
                 this.drawStaticInfo(contentDOM,jsonInfo[ind],".5em",fontSize)
@@ -109,13 +114,14 @@ class baseInfoPanel {
                 contentDOM.css("padding-top",".2em")
                 contentDOM.text(jsonInfo[ind])
             }
-            contentDOM.css({"fontSize":fontSize,"color":fontColor})
+            
             keyDiv.append(contentDOM)
         }
     }
 
     fetchRealElementInfo(singleElementInfo){ //the input is possibly from topology view which might not be precise about property value
         var returnElementInfo={}
+        if(singleElementInfo==null) return;
         if (singleElementInfo["$dtId"]) {
             returnElementInfo=globalCache.storedTwins[singleElementInfo["$dtId"]] //note that dynamical property value is not stored in topology node, so always get refresh data from globalcache
         }else if (singleElementInfo["$sourceId"]) {
@@ -126,6 +132,12 @@ class baseInfoPanel {
                     break;
                 }
             }
+        }else if(singleElementInfo["simNodeName"]){
+            var attachTwinID=singleElementInfo["twinID"]
+            var dbtwin=globalCache.DBTwins[attachTwinID]
+            var simNodeName=singleElementInfo["simNodeName"]
+            singleElementInfo.detail=dbtwin.simulate[simNodeName]
+            returnElementInfo=singleElementInfo
         }
         return returnElementInfo
     }
@@ -156,6 +168,166 @@ class baseInfoPanel {
         if (!modelAnalyzer.DTDLModels[sourceModel] || !modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName]) return
         return modelAnalyzer.DTDLModels[sourceModel].validRelationships[relationshipName].editableRelationshipProperties
     }
+
+
+    drawSimDatasourceInfo(simNodeInfo,parentDom){
+        parentDom=parentDom||this.DOM
+        var dbTwin=globalCache.DBTwins[simNodeInfo.twinID]
+        var twinName=globalCache.twinIDMapToDisplayName[simNodeInfo.twinID]
+        if(!this.readOnly) {
+            var containerDiv=$("<div class='w3-container'/>")
+            parentDom.append(containerDiv)
+            parentDom=containerDiv 
+        }
+        this.drawStaticInfo(parentDom, { "name": twinName }, ".5em", "13px")
+        this.drawStaticInfo(parentDom, { "Model": dbTwin.modelID }, ".5em", "13px")
+        if (this.readOnly) {//in float info panel
+            this.drawStaticInfo(parentDom, { "Simulate Property": simNodeInfo.propertyPath }, ".5em", "13px")
+            this.drawStaticInfo(parentDom, { "Cycle Length": simNodeInfo.cycleLength }, ".5em", "13px")
+            this.drawStaticInfo(parentDom, { "Sampling": simNodeInfo.sampleInterval }, ".5em", "13px")
+            this.drawStaticInfo(parentDom, { "Formula": simNodeInfo.formula }, ".5em", "13px")
+        }else{ // in right side info panel
+            this.drawSimDatasourceInfo_propertyPath(parentDom,simNodeInfo,dbTwin)
+            //draw cycleLength,sampleInterval and formula
+            var demoChart=this.drawSimDatasourceInfo_chart(simNodeInfo,parentDom)
+            this.drawSimDatasourceInfo_input("Cycle Length(_T)","cycleLength","Cycle time length in seconds",parentDom,simNodeInfo,dbTwin,demoChart)
+            this.drawSimDatasourceInfo_input("Sampling","sampleInterval","Sampling time in seconds",parentDom,simNodeInfo,dbTwin,demoChart) 
+            this.drawSimDatasourceInfo_formula(parentDom,simNodeInfo,dbTwin,demoChart)
+            parentDom.append(demoChart.canvas) //move chart to the end
+            this.drawSimDatasourceInfo_refreshChart(simNodeInfo,demoChart)
+        }
+    }
+
+    drawSimDatasourceInfo_refreshChart(simNodeInfo,theChart){
+        var _T=parseFloat(simNodeInfo.detail["cycleLength"])
+        var sampling=parseFloat(simNodeInfo.detail["sampleInterval"])
+        var formula=simNodeInfo.detail["formula"]
+        var numOfPoints=parseInt(2*_T/sampling)+1
+        theChart.setXLength(numOfPoints)
+        var _t=0;
+        var dataArr=[]
+        var _output=null;
+        for(var i=0;i<numOfPoints;i++){
+            var evalStr=formula+"\n_output"
+            try{
+                _output=eval(evalStr) // jshint ignore:line
+            }catch(e){
+                return e
+            }
+            dataArr.push(_output)
+            _t+=sampling
+            if(_t>=_T)_t=_t-_T
+        }
+        theChart.setDataArr(dataArr)
+    }
+
+    drawSimDatasourceInfo_chart(simNodeInfo,parentDom){
+        var cycleL= simNodeInfo.detail["cycleLength"]
+        var sampling=simNodeInfo.detail["sampleInterval"]
+        var numOfPoints=100
+        var demoChart=new simpleChart(parentDom,numOfPoints,{width:"100%","height":"130px"}) 
+        return demoChart
+    }
+    drawSimDatasourceInfo_formula(parentDom,simNodeInfo,dbTwin,demoChart){
+        var scriptLbl=this.generateSmallKeyDiv("Calculation Script","2px")
+        scriptLbl.css("margin-top","10px")
+
+        var lbl2=$('<lbl style="font-size:10px;color:gray">(Build in variables:_t _T _output)</lbl>')
+        scriptLbl.append(lbl2)
+
+        var placeHolderStr='Sample&#160;Script&#58;&#10;&#10;SIN&#160;Wave&#10;_output=Math.sin(_t/_T*2*3.14)&#10;&#10;Value&#160;List&#10;var&#160;valueList=[2,3.5,-1,10.3,9.1]&#10;var&#160;index=(_t/_T*valueList.length).toFixed(0)&#10;_output=valueList[index]&#10;&#10;Square&#160;Wave&#10;_output=1-_output' 
+        var scriptTextArea=$('<textarea class="w3-border" spellcheck="false" style="outline:none;font-size:11px;height:140px;width:100%;font-family:Verdana" placeholder='+placeHolderStr+'></textarea>')
+        parentDom.append(scriptLbl,scriptTextArea)
+        scriptTextArea.on("keydown", (e) => {
+            if (e.keyCode == 9){
+                this.insertToTextArea('\t',scriptTextArea)
+                return false;
+            }
+        })
+        scriptTextArea.highlightWithinTextarea({highlight: [
+            { "highlight": "_t", "className": "Purple"},
+            { "highlight": "_T", "className": "Cyan"},
+            { "highlight": "_output", "className": "Amber"},
+        ]});
+        var confirmBtn=$('<button class="w3-button w3-amber w3-ripple" style="padding:2px 10px;display:block">Commit Script</button>')
+        parentDom.append(confirmBtn)
+        var originalV=simNodeInfo.detail["formula"]
+        if (originalV != null) {
+            scriptTextArea.val(originalV)
+            scriptTextArea.highlightWithinTextarea('update');
+        }
+        confirmBtn.on("click",()=>{
+            simNodeInfo.detail["formula"] = scriptTextArea.val()
+            try {
+                var error=this.drawSimDatasourceInfo_refreshChart(simNodeInfo,demoChart)
+                if(error){
+                    alert(error)
+                    return;
+                }
+                msalHelper.callAPI("digitaltwin/updateTwin", "POST"
+                    , { "twinID": simNodeInfo.twinID, "updateInfo": JSON.stringify({ "simulate": dbTwin.simulate }) }
+                    , "withProjectID")
+            } catch (e) {
+                console.log(e)
+                if (e.responseText) alert(e.responseText)
+            }
+        })
+    }
+
+    drawSimDatasourceInfo_input(lblText, keyStr,placeHolderStr, parentDom, simNodeInfo, dbTwin,demoChart) {
+        var keyDiv = $("<div style='display:block;margin-top:.5em'><div style='display:inline;padding:.1em .3em .1em .3em; margin-right:5px'>"+lblText+"</div></div>")
+        parentDom.append(keyDiv)
+        var contentDOM = $("<label style='padding-top:.2em'></label>")
+        keyDiv.append(contentDOM)
+        var aInput = $('<input type="text" style="padding:2px;width:60%;outline:none;display:inline" placeholder="' + placeHolderStr + '"/>').addClass("w3-input w3-border");
+        contentDOM.append(aInput)
+        var originalV=simNodeInfo.detail[keyStr] 
+        if (originalV != null) aInput.val(originalV)
+        aInput.change((e) => {
+            simNodeInfo.detail[keyStr] = $(e.target).val()
+            try {
+                this.drawSimDatasourceInfo_refreshChart(simNodeInfo,demoChart)
+                msalHelper.callAPI("digitaltwin/updateTwin", "POST"
+                    , { "twinID": simNodeInfo.twinID, "updateInfo": JSON.stringify({ "simulate": dbTwin.simulate }) }
+                    , "withProjectID")
+            } catch (e) {
+                console.log(e)
+                if (e.responseText) alert(e.responseText)
+            }
+        })
+    }
+
+
+    drawSimDatasourceInfo_propertyPath(parentDom,simNodeInfo,dbTwin){
+        var keyDiv= $("<label style='display:block;padding-top:.3em'><div style='display:inline;padding:.1em .3em .1em .3em; margin-right:5px'>Simulate Property</div></label>")
+        parentDom.append(keyDiv)    
+        var contentDOM=$("<label style='padding-top:.2em'></label>")
+        keyDiv.append(contentDOM)
+        var aSelectMenu = new simpleSelectMenu("", { buttonCSS: { "padding": "4px 16px" } })
+        contentDOM.append(aSelectMenu.DOM)
+        var propertiesArr=modelAnalyzer.fetchPropertyPathsOfModel(dbTwin.modelID)
+        propertiesArr.forEach((oneProperty) => {
+            aSelectMenu.addOption(oneProperty.join("."),oneProperty)
+        })
+        var originalPath=simNodeInfo.detail.propertyPath
+        aSelectMenu.callBack_clickOption = (optionText, optionValue, realMouseClick) => {
+            aSelectMenu.changeName(optionText)
+            if(!realMouseClick) return;
+            if(originalPath==null || originalPath.join()!=optionValue.join){
+                simNodeInfo.detail.propertyPath=optionValue
+                try {
+                    msalHelper.callAPI("digitaltwin/updateTwin", "POST"
+                        , {"twinID":simNodeInfo.twinID,"updateInfo":JSON.stringify({"simulate":dbTwin.simulate})}
+                        , "withProjectID")
+                } catch (e) {
+                    console.log(e)
+                    if (e.responseText) alert(e.responseText)
+                }
+            }
+        }
+        if (originalPath != null) aSelectMenu.triggerOptionText(originalPath.join("."))
+    }
+
 
     drawSingleNodeProperties(singleDBTwinInfo,singleADTTwinInfo,parentDom,notEmbedMetadata) {
         //instead of draw the $dtId, draw display name instead

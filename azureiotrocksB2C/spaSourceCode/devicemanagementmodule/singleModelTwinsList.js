@@ -11,6 +11,10 @@ function singleModelTwinsList(singleADTModel,parentTwinsList) {
     this.createDOM()
 }
 
+singleModelTwinsList.prototype.removeMemoryReference=function(){
+    for(var ind in this) this[ind]=null
+}
+
 singleModelTwinsList.prototype.createDOM=function(){
     var oneSection= new simpleExpandableSection("Properties Section",this.parentTwinsList.DOM,{"marginTop":"1px"})
     this.oneSection=oneSection

@@ -36,19 +36,11 @@ function simpleChart(parentDom,xLength,cssOptions,customDrawing){
         }
     });
     this.setXLength(xLength)
+}
 
-    /*
-    var newV=1
-    setInterval(()=>{
-        var dataArr=theChart.data.datasets[0].data
-        var len=dataArr.length
-        var passedTime= parseInt(Math.random()*10)
-        for(var i=0;i<passedTime;i++) dataArr.shift()
-        dataArr[len-1]=newV
-        newV=1-newV
-        theChart.update()
-    },500)
-    */
+simpleChart.prototype.setDataArr=function(dataArr){
+    this.chart.data.datasets[0].data=dataArr
+    this.chart.update()
 }
 
 simpleChart.prototype.addDataValue=function(dataIndex,value){
@@ -66,9 +58,7 @@ simpleChart.prototype.addDataValue=function(dataIndex,value){
         dataArr=dataArr.slice(numOfPassedPoints)
         dataArr[totalPoints-1]=value
     }
-    this.chart.data.datasets[0].data=dataArr
-    this.chart.update()
-
+    this.setDataArr(dataArr)
     this.lastDataIndex=dataIndex
 }
 

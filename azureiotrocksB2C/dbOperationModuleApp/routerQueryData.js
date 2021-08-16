@@ -6,6 +6,7 @@ function routerQueryData(){
     this.useRoute("userData","post")
     this.useRoute("projectModels","post")
     this.useRoute("projectTwinsAndVisual","post")
+    this.useRoute("checkSimulationDataSource","post")
 }
 
 routerQueryData.prototype.useRoute=function(routeStr,isPost){
@@ -22,6 +23,22 @@ routerQueryData.prototype.userData =async function(req,res) {
     try{
         var queryResult=await cosmosdbhelper.query('appuser',queryStr)
         res.send(queryResult)
+    }catch(e){
+        res.status(400).send(e.message)
+    }
+}
+
+routerQueryData.prototype.checkSimulationDataSource =async function(req,res) {
+    var twinID=req.body.twinID
+    var propertyPathStr=req.body.propertyPathStr
+    
+    try{
+        var resultDocument=await cosmosdbhelper.getDocByID("simulation","twinID",twinID,propertyPathStr)
+        if(resultDocument.length==0) res.send({})
+        else {
+            var whoRunSimulation=resultDocument[0].accountID
+            res.send({"account":whoRunSimulation})
+        }
     }catch(e){
         res.status(400).send(e.message)
     }

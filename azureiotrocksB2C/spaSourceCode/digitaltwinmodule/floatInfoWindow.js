@@ -30,14 +30,13 @@ class floatInfoWindow extends baseInfoPanel{
         } else if (msgPayload.message == "showInfoHoveredEle") {
             if (!globalCache.showFloatInfoPanel) return;
             this.DOM.empty()
-
             var arr = msgPayload.info;
             if (arr == null || arr.length == 0) return;
             this.DOM.css("left", "-2000px") //it is always outside of browser so it wont block mouse and cause mouse out
             
             var singleElementInfo = arr[0];
+            if(singleElementInfo==null) return;
             singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
-            if (singleElementInfo["$dtId"]) this.currentShowingTwinID=singleElementInfo["$dtId"];
             
             this.DOM.css("width","295px")
             this.DOM.show()
@@ -50,6 +49,8 @@ class floatInfoWindow extends baseInfoPanel{
                 this.drawSingleNodeProperties(singleDBTwinInfo,singleElementInfo,contentDOM,"notEmbedMetadata")
             } else if (singleElementInfo["$sourceId"]) {
                 this.drawSingleRelationProperties(singleElementInfo,contentDOM)
+            } else if(singleElementInfo["simNodeName"]){
+                this.drawSimDatasourceInfo(singleElementInfo,contentDOM)
             }
 
             var screenXY = msgPayload.screenXY
@@ -62,6 +63,7 @@ class floatInfoWindow extends baseInfoPanel{
             if (windowTop < 5) windowTop = 5
             this.DOM.css({ "left": windowLeft + "px", "top": windowTop + "px" })
 
+            if (singleElementInfo["$dtId"]) this.currentShowingTwinID=singleElementInfo["$dtId"];
             if(this.currentShowingTwinID==null) return;
             var dbtwin= globalCache.DBTwins[this.currentShowingTwinID]
             if(!dbtwin || !dbtwin.originalScript || dbtwin.originalScript=="") return;

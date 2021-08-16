@@ -334,9 +334,9 @@ topologyDOM_visual.prototype.showSimulatorSource = function (twinID,simNodeName,
             "modelID":"_fixed_simulationDataSource",
             "notTwin":true,
             "originalInfo":{
-                "id":simNodeName,
+                "simNodeName":simNodeName,
                 "twinID":twinID,
-                "propertyPath":simSourceObj.propertyPath
+                "detail":simSourceObj
             }
         }
         ,group:"nodes"
@@ -348,7 +348,7 @@ topologyDOM_visual.prototype.showSimulatorSource = function (twinID,simNodeName,
         topoNode.renderedPosition( {x:position.x-60,y:position.y-parseInt((Math.random()-0.5)*120)} )
         this.core.add([{
             data:{
-                "id":this.uuidv4(),
+                "id":globalCache.uuidv4(),
                 "sourceModel":"_fixed_simulationDataSource",
                 "source":simNodeName,
                 "target":twinName,
@@ -357,13 +357,6 @@ topologyDOM_visual.prototype.showSimulatorSource = function (twinID,simNodeName,
             ,group:"edges"
         }])
     }
-}
-
-topologyDOM_visual.prototype.uuidv4=function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
 }
 
 topologyDOM_visual.prototype.getCurrentLayoutDetail = function () {

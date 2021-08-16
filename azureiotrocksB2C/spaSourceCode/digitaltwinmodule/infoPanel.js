@@ -40,7 +40,7 @@ class infoPanel extends baseInfoPanel {
         $('body').append(this.continerDOM)
 
         this.emptyContentAndDrawTabControl()
-        this.drawButtons(null)
+        this.drawButtons(null,this.infoContentDiv)
         this.selectedObjects = null;
     }
 
@@ -85,19 +85,21 @@ class infoPanel extends baseInfoPanel {
     showInfoOfNodes(arr) {
         this.emptyContentAndDrawTabControl()
         if (arr == null || arr.length == 0) {
-            this.drawButtons(null)
+            this.drawButtons(null,this.infoContentDiv)
             this.selectedObjects = [];
             return;
         }
         this.selectedObjects = arr;
         if (arr.length == 1) {
             var singleElementInfo = arr[0];
-
             singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
             if (singleElementInfo["$dtId"]) {// select a node
-                this.drawButtons("singleNode")
+                this.drawButtons("singleNode",this.infoContentDiv)
             }else if (singleElementInfo["$sourceId"]) {
-                this.drawButtons("singleRelationship")
+                this.drawButtons("singleRelationship",this.infoContentDiv)
+            }else if(singleElementInfo["simNodeName"]){
+                this.drawSimDatasourceInfo(singleElementInfo,this.infoContentDiv)
+                return;
             }
 
             var propertiesSection= new simpleExpandableSection("Properties Section",this.infoContentDiv,{"marginTop":"2px"})
@@ -113,7 +115,7 @@ class infoPanel extends baseInfoPanel {
 
             if (singleElementInfo["$dtId"]) this.drawFormulaSection(singleElementInfo["$dtId"],singleElementInfo["$metadata"]["$model"])
         } else if (arr.length > 1) {
-            this.drawButtons("multiple")
+            this.drawButtons("multiple",this.infoContentDiv)
             this.drawMultipleObj()
         }
     }
@@ -141,7 +143,7 @@ class infoPanel extends baseInfoPanel {
                 aChart.addDataValue(nowTime,val)
             },1000)
             */
-           
+
             infoBtn.on("click",()=>{
                 infoBtn.addClass("w3-white w3-text-orange")
                 liveBtn.removeClass("w3-white w3-text-orange")
@@ -160,13 +162,13 @@ class infoPanel extends baseInfoPanel {
         }
     }
 
-    drawButtons(selectType) {
+    drawButtons(selectType,parentDOM) {
         if(selectType==null){
-            var div=$("<div style='padding:8px'><a style='display:block;font-style:italic;color:gray'>Choose twins or relationships to view infomration</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to draw box and select multiple twins in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl+z and ctrl+y to undo/redo in topology view; ctrl+s to save layout</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press shift or ctrl key to select multiple twins in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:12px;padding-bottom:5px'>Import twins data by clicking button below</a></div>")
-            this.infoContentDiv.append(div)
+            var div=$("<div style='padding:8px'><a style='display:block;font-style:italic;color:gray'>Right click twins or relationships to operate</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press shift key to draw box and select multiple twins in topology view</a><a style='display:block;font-style:italic;color:gray;padding-top:20px'>Press ctrl+z and ctrl+y to undo/redo in topology view; ctrl+s to save layout</a><a style='display:block;font-style:italic;color:gray;padding-top:20px;padding-bottom:20px'>Press shift or ctrl key to select multiple twins in tree view</a><a style='display:block;font-style:italic;color:gray;padding-top:12px;padding-bottom:5px'>Import twins data by clicking button below</a></div>")
+            parentDOM.append(div)
         }
 
-        var buttonHolderDOM=this.infoContentDiv
+        var buttonHolderDOM=parentDOM
 
         var impBtn = $('<button class="w3-bar-item w3-button w3-blue"><i class="fas fa-cloud-upload-alt"></i></button>')
         var actualImportTwinsBtn = $('<input type="file" name="modelFiles" multiple="multiple" style="display:none"></input>')
@@ -369,16 +371,10 @@ class infoPanel extends baseInfoPanel {
             }
         }
 
-        function uuidv4() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
         var oldTwinID2NewID = {}
         importTwins.forEach(oneTwin => {
             var oldID = oneTwin["$dtId"]
-            var newID = uuidv4();
+            var newID = globalCache.uuidv4();
             oldTwinID2NewID[oldID] = newID
             oneTwin["$dtId"] = newID
         })
@@ -390,7 +386,7 @@ class infoPanel extends baseInfoPanel {
             } else {
                 oneRel["$srcId"] = oldTwinID2NewID[oneRel["$srcId"]]
                 oneRel["obj"]["$targetId"] = oldTwinID2NewID[oneRel["obj"]["$targetId"]]
-                oneRel["$relationshipId"] = uuidv4();
+                oneRel["$relationshipId"] = globalCache.uuidv4();
             }
         }
 

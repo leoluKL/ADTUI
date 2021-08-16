@@ -68,6 +68,16 @@ simpleSelectMenu.prototype.findOption=function(optionValue){
     }
 }
 
+simpleSelectMenu.prototype.findOptionByText=function(optionText){
+    var options=this.optionContentDOM.children()
+    for(var i=0;i<options.length;i++){
+        var anOption=$(options[i])
+        if(optionText==anOption.text()){
+            return {"text":anOption.text(),"value":anOption.data("optionValue"),"colorClass":anOption.data("optionColorClass")}
+        }
+    }
+}
+
 simpleSelectMenu.prototype.addOptionArr=function(arr){
     arr.forEach(element => {
         this.addOption(element)
@@ -115,6 +125,17 @@ simpleSelectMenu.prototype.triggerOptionIndex=function(optionIndex){
 
 simpleSelectMenu.prototype.triggerOptionValue=function(optionValue){
     var re=this.findOption(optionValue)
+    if(re==null){
+        this.curSelectVal=null
+        this.callBack_clickOption(null,null)
+    }else{
+        this.curSelectVal=re.value
+        this.callBack_clickOption(re.text,re.value,null,re.colorClass)
+    }
+}
+
+simpleSelectMenu.prototype.triggerOptionText=function(optionText){
+    var re=this.findOptionByText(optionText)
     if(re==null){
         this.curSelectVal=null
         this.callBack_clickOption(null,null)
