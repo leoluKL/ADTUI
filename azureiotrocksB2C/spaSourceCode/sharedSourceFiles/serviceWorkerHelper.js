@@ -3,13 +3,13 @@ const globalCache = require("../sharedSourceFiles/globalCache");
 
 function serviceWorkerHelper(){
     this.projectID=null
-    this.listAllLiveMonitor={}
+    this.allLiveMonitor={}
     setInterval(()=>{
         if(this.projectID==null) return;
         this.subscribeImportantEvent(this.projectID)
 
-        for(var ind in this.listAllLiveMonitor){
-            var aLiveProperty=this.listAllLiveMonitor[ind]
+        for(var ind in this.allLiveMonitor){
+            var aLiveProperty=this.allLiveMonitor[ind]
             this.subscribeLiveProperty(aLiveProperty.twinID,aLiveProperty.propertyPath)
         }
 
@@ -46,6 +46,14 @@ serviceWorkerHelper.prototype.subscribeLiveProperty = async function (twinID,pro
     }
 }
 
+serviceWorkerHelper.prototype.unsubscribeLiveProperty = async function (twinID,propertyPath) {    
+    try {
+        msalHelper.callAPI("digitaltwin/serviceWorkerUnsubscription", "POST", {twinID:twinID,propertyPath:propertyPath}, "withProjectID")
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 serviceWorkerHelper.prototype.createSubscription = async function () {
     if (!('serviceWorker' in navigator)) return null;
     //this public key should be the one used in backend server side for pushing message (in azureiotrocksfunction)
@@ -68,29 +76,53 @@ serviceWorkerHelper.prototype.createSubscription = async function () {
 }
 
 serviceWorkerHelper.prototype.processLiveMessage=function(msgBody){
-    console.log(msgBody)
+    //console.log(msgBody)
     if(msgBody.connectionState && msgBody.projectID==globalCache.currentProjectID){
         var twinID=msgBody.twinID
         var twinDBInfo=globalCache.DBTwins[twinID]
         if(msgBody.connectionState=="deviceConnected") twinDBInfo.connectState=true
         else twinDBInfo.connectState=false
         //console.log(msgBody)
+    }else if(msgBody.propertyPath){
+        var twinInfo=globalCache.storedTwins[msgBody.twinID]
+        this.updateOriginObjectValue(twinInfo,msgBody.propertyPath,msgBody.value)
+    }
+}
+
+serviceWorkerHelper.prototype.updateOriginObjectValue=function(nodeInfo, pathArr, newVal) {
+    if (pathArr.length == 0) return;
+    var theJson = nodeInfo
+    for (var i = 0; i < pathArr.length; i++) {
+        var key = pathArr[i]
+
+        if (i == pathArr.length - 1) {
+            theJson[key] = newVal
+            break
+        }
+        if (theJson[key] == null) theJson[key] = {}
+        theJson = theJson[key]
     }
 }
 
 serviceWorkerHelper.prototype.rxMessage=function(msgPayload){
     if(msgPayload.message=="projectIsChanged"){
-        for(var ind in this.listAllLiveMonitor) delete this.listAllLiveMonitor[ind]
+        for(var ind in this.allLiveMonitor) delete this.allLiveMonitor[ind]
         this.projectID=msgPayload.projectID
         this.subscribeImportantEvent(msgPayload.projectID)
     }else if(msgPayload.message=="addLiveMonitor"){
-        var str=msgPayload.twinID+"."+msgPayload.propertyPath.join(".")
-        this.listAllLiveMonitor[str]=msgPayload
+        var str=this.generateID(msgPayload.twinID,msgPayload.propertyPath)
+        this.allLiveMonitor[str]=msgPayload
         this.subscribeLiveProperty(msgPayload.twinID,msgPayload.propertyPath)
     }else if(msgPayload.message=="removeLiveMonitor"){
-        var str=msgPayload.twinID+"."+msgPayload.propertyPath.join(".")
-        delete this.listAllLiveMonitor[str]
+        var str=this.generateID(msgPayload.twinID,msgPayload.propertyPath)
+        delete this.allLiveMonitor[str]
+        this.unsubscribeLiveProperty(msgPayload.twinID,msgPayload.propertyPath)
     }
 }
+
+serviceWorkerHelper.prototype.generateID=function(twinID,propertyPath){
+    return twinID+"."+propertyPath.join(".")
+}
+
 
 module.exports = new serviceWorkerHelper();

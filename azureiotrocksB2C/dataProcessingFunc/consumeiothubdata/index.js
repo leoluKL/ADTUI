@@ -65,6 +65,7 @@ module.exports = async function (context, IoTHubMessages) {
                     }catch(e){
                         //if there is error, it is possibly because of the patch path does not exist in twin
                         //in this case, query the twin info out, and rebuild the patch
+                        /*
                         var twinInfo=await azureiotrocksADTClient.getDigitalTwin(devID)
                         var currentRootInfo={}
                         for(var ind in twinInfo.body){
@@ -73,6 +74,7 @@ module.exports = async function (context, IoTHubMessages) {
                         }
                         patchADT=getADTPatchFromPath(thePath,theValue,currentRootInfo)
                         await azureiotrocksADTClient.updateDigitalTwin(devID, patchADT)
+                        */
                     }
 
                 }

@@ -6,20 +6,20 @@ const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
 const simpleExpandableSection= require("../sharedSourceFiles/simpleExpandableSection")
 const simpleSelectMenu= require("../sharedSourceFiles/simpleSelectMenu")
 const scriptTestDialog = require("../sharedSourceFiles/scriptTestDialog")
-const simpleChart= require("../sharedSourceFiles/simpleChart")
+const infoPanel_liveMonitor=require("./infoPanel_liveMonitor")
 
 class infoPanel extends baseInfoPanel {
     constructor() {
         super()
         this.openLiveCalculationSection=true
         this.openPropertiesSection=true
-        this.continerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:350px;transform: translateY(-50%);"></div>')
-        this.continerDOM.hide()
-        this.continerDOM.append($('<div style="height:50px" class="w3-bar w3-red"></div>'))
+        this.containerDOM = $('<div class="w3-card" style="position:absolute;z-index:90;right:0px;top:50%;height:70%;width:350px;transform: translateY(-50%);"></div>')
+        this.containerDOM.hide()
+        this.containerDOM.append($('<div style="height:50px" class="w3-bar w3-red"></div>'))
 
         this.closeButton1 = $('<button style="height:100%" class="w3-bar-item w3-button"><i class="fa fa-info-circle fa-2x" style="padding:2px"></i></button>')
         this.closeButton2 = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em">×</button>')
-        this.continerDOM.children(':first').append(this.closeButton1, this.closeButton2)
+        this.containerDOM.children(':first').append(this.closeButton1, this.closeButton2)
 
         this.isMinimized = false;
         var buttonAnim = () => {
@@ -30,30 +30,34 @@ class infoPanel extends baseInfoPanel {
         this.closeButton2.on("click", buttonAnim)
 
         this.DOM = $('<div class="w3-container" style="padding:0px;postion:absolute;top:50px;height:calc(100% - 50px);overflow:hidden"></div>')
-        this.continerDOM.css("background-color", "rgba(255, 255, 255, 0.8)")
-        this.continerDOM.hover(() => {
-            this.continerDOM.css("background-color", "rgba(255, 255, 255, 1)")
+        this.containerDOM.css("background-color", "rgba(255, 255, 255, 0.8)")
+        this.containerDOM.hover(() => {
+            this.containerDOM.css("background-color", "rgba(255, 255, 255, 1)")
         }, () => {
-            this.continerDOM.css("background-color", "rgba(255, 255, 255, 0.8)")
+            this.containerDOM.css("background-color", "rgba(255, 255, 255, 0.8)")
         });
-        this.continerDOM.append(this.DOM)
-        $('body').append(this.continerDOM)
+        this.containerDOM.append(this.DOM)
+        $('body').append(this.containerDOM)
 
         this.emptyContentAndDrawTabControl()
         this.drawButtons(null,this.infoContentDiv)
         this.selectedObjects = null;
+
+        this.liveMonitorManager=new infoPanel_liveMonitor(this)
+        this.liveMonitorManager.showBlank()
     }
 
     minimizeWindow() {
-        this.continerDOM.animate({
-            right: "-250px",
+        var pos=this.containerDOM.width()-60
+        this.containerDOM.animate({
+            right: `-${pos}px`,
             height: "50px"
         })
         this.isMinimized = true;
     }
 
     expandWindow() {
-        this.continerDOM.animate({
+        this.containerDOM.animate({
             right: "0px",
             height: "70%"
         })
@@ -62,9 +66,9 @@ class infoPanel extends baseInfoPanel {
 
     rxMessage(msgPayload) {
         if (msgPayload.message == "startSelectionDialog_closed") {
-            if (!this.continerDOM.is(":visible")) {
-                this.continerDOM.show()
-                this.continerDOM.addClass("w3-animate-right")
+            if (!this.containerDOM.is(":visible")) {
+                this.containerDOM.show()
+                this.containerDOM.addClass("w3-animate-right")
             }
         } else if (msgPayload.message == "mapFlyingStart") {
             this.minimizeWindow()
@@ -79,7 +83,13 @@ class infoPanel extends baseInfoPanel {
         } else if (msgPayload.message == "showInfoSelectedNodes" || msgPayload.message == "showInfoHoveredEle") {
             if (globalCache.showFloatInfoPanel && msgPayload.message == "showInfoHoveredEle") return; //the floating info window will show mouse over element information, do not change info panel content in this case
             this.showInfoOfNodes(msgPayload.info)
+        }else if(msgPayload.message == "addLiveMonitor") {
+            this.liveMonitorManager.addChart(msgPayload.twinID,msgPayload.propertyPath)
+        }else if(msgPayload.message=="liveData"){
+            var msgBody=msgPayload.body
+            this.liveMonitorManager.drawNewData(msgBody.twinID,msgBody.propertyPath,msgBody.value,msgBody.time)
         }
+        
     }
 
     showInfoOfNodes(arr) {
@@ -125,40 +135,29 @@ class infoPanel extends baseInfoPanel {
         else{
             this.DOM.empty()
             var tabControl=$('<div class="w3-bar w3-light-gray "></div>')
-            var infoBtn=$('<button class="w3-bar-item w3-button" style="font-weight:bold;">Information</button>')
-            var liveBtn=$('<button class="w3-bar-item w3-button" style="font-weight:bold;">Live</button>')
-            tabControl.append(infoBtn,liveBtn)
+            var liveBtn=$('<button class="w3-bar-item w3-right w3-button w3-border" style="font-weight:bold;">Show Live Pane</button>')
+            tabControl.append(liveBtn)
             this.DOM.append(tabControl)
 
-            this.infoContentDiv=$('<div class="w3-animate-opacity" style="padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
-            this.liveContentDiv=$('<div id="myChart" class="w3-animate-opacity" style="padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
+            this.infoContentDiv=$('<div class="w3-animate-opacity" style="float:left;padding-top:5px;height:calc(100% - 36px);overflow:auto"></div>')
+            this.liveContentDiv=$('<div id="myChart" class="w3-animate-opacity w3-border-left" style="float:left;padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
             this.DOM.append(this.infoContentDiv,this.liveContentDiv)
-            
-            var aChart=new simpleChart(this.liveContentDiv,60,{width:"100%",height:"100px"})
-
-            /*
-            setInterval(()=>{
-                var val= parseInt(Math.random()*100)
-                var nowTime=parseInt((new Date().getTime())/1000)
-                aChart.addDataValue(nowTime,val)
-            },1000)
-            */
-
-            infoBtn.on("click",()=>{
-                infoBtn.addClass("w3-white w3-text-orange")
-                liveBtn.removeClass("w3-white w3-text-orange")
-                this.liveContentDiv.hide()
-                this.infoContentDiv.show()
-            })
         
             liveBtn.on("click",()=>{
-                infoBtn.removeClass("w3-white w3-text-orange")
-                liveBtn.addClass("w3-white w3-text-orange")
-                this.liveContentDiv.show()
-                this.infoContentDiv.hide()
+                if(!this.liveContentDiv.is(":visible")){
+                    this.liveContentDiv.show()
+                    this.containerDOM.css("width","600px")
+                    this.infoContentDiv.css("width","50%")
+                    this.liveContentDiv.css("width","50%")
+                    liveBtn.text("Hide Live Pane")
+                }else{
+                    this.liveContentDiv.hide()
+                    this.containerDOM.css("width","350px")
+                    this.infoContentDiv.css("width","100%")
+                    liveBtn.text("Show Live Pane")
+                }
+                
             })
-        
-            infoBtn.trigger("click")
         }
     }
 
@@ -554,8 +553,6 @@ class infoPanel extends baseInfoPanel {
 
     async confirmScript(scriptContent,formulaTwinID,formulaTwinModelID,formulaTwinName){
         //detect if there is prohibitted words, if so, reject the submit request
-        if(scriptContent=="") return; 
-        
         scriptContent=scriptContent.replaceAll(`_twinVal["${formulaTwinName}"][`,"_self[")
         scriptContent=scriptContent.replaceAll(`_twinVal['${formulaTwinName}'][`,"_self[")
         //translate script, replace twins name to twins ID

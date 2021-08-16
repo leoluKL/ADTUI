@@ -1,10 +1,12 @@
 function simpleChart(parentDom,xLength,cssOptions,customDrawing){
+    this.chartDOM=$("<div/>")
+    parentDom.append(this.chartDOM)
     if(customDrawing){
-        customDrawing(parentDom)
+        customDrawing(this.chartDOM)
     }
     this.canvas = $('<canvas></canvas>')
     this.canvas.css(cssOptions)
-    parentDom.append(this.canvas)
+    this.chartDOM.append(this.canvas)
     
     this.chart=new Chart(this.canvas, {
         type: "line",
@@ -80,7 +82,7 @@ simpleChart.prototype.setXLength=function(xlen){
 }
 
 simpleChart.prototype.destroy=function(){
-    this.canvas.remove()
+    this.chartDOM.remove()
 }
 
 module.exports = simpleChart;

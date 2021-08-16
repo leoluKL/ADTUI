@@ -204,6 +204,9 @@ class baseInfoPanel {
         var formula=simNodeInfo.detail["formula"]
         var numOfPoints=parseInt(2*_T/sampling)+1
         theChart.setXLength(numOfPoints)
+
+        if(_T==0 || sampling==0 || formula=="" || _T==null || sampling==null || formula==null || _T<0 || sampling<0) return;
+
         var _t=0;
         var dataArr=[]
         var _output=null;

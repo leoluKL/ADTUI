@@ -40,12 +40,11 @@ module.exports = async function (context, eventHubMessages) {
 };
 
 async function liveMonitorValueChange(twinID,propertyPath,newValue,eventTime){
-    console.log("webpush:"+twinID+"."+propertyPath.join(".")+" value "+newValue)
     //query container 'serverPushInfo', if there is record with this twinID(pID) and propertyPath, push value infomartion to it
-    var propertyPath=propertyPath.join(".")
-    var allRecords=await queryDB('serverPushInfo',`select * from c where c.pID='${twinID}' and c.propertyPath='${propertyPath}'`)
+    var allRecords=await queryDB('serverPushInfo',`select * from c where c.pID='${twinID}' and c.propertyPath='${propertyPath.join(".")}'`)
     const payload = JSON.stringify({ "twinID": twinID,  "propertyPath": propertyPath, "value":newValue, "time": eventTime });
     allRecords.forEach((oneRecord)=>{
+        console.log("webpush property change:"+twinID+"."+propertyPath.join(".")+" value "+newValue)
         webpush.sendNotification(oneRecord.serviceWorkerSubscription, payload).catch(error => {});
     })
 }
@@ -73,17 +72,25 @@ async function recalculateTwin(twinID) {
             break;
         }
     }
-    _twinVal[twinID]=emptySelfValue
+
     for(var i=0;i<allRecords.length;i++){
         var oneRecourd=allRecords[i]
         if(oneRecourd.type=="value"){
             var path=oneRecourd.path
             var value=oneRecourd.value
             var properTwinID=oneRecourd.id.split('.')[0]
+            if(properTwinID==twinID) continue; //self value use query result directly from ADT
             _twinVal[properTwinID]=createOjb(_twinVal[properTwinID],path,value)
         }
     }
+    var re =await azureiotrocksADTClient.getDigitalTwin(twinID)
+    delete re.body['$metadata']
+    delete re.body['$etag']
+    delete re.body['$dtId']
+    _twinVal[twinID]=re.body
+    mergeObj(_twinVal[twinID],emptySelfValue)
 
+    var copyOfInitialSelf=JSON.parse(JSON.stringify(_twinVal[twinID]))
     var evalStr=formulaScript+"\n_twinVal"
     var result=eval(evalStr) // jshint ignore:line
     
@@ -91,7 +98,8 @@ async function recalculateTwin(twinID) {
     var selfValue=_twinVal[twinID]
     var startPath=[]
     var allPatches=[]
-    generateAllADTPatches(selfValue,startPath,allPatches,twinID)
+    generateAllADTPatches(copyOfInitialSelf,selfValue,startPath,allPatches,twinID)
+    //console.log(allPatches)
 
     for(var i=0;i<allPatches.length;i++){
         var onePatch=allPatches[i]
@@ -102,14 +110,19 @@ async function recalculateTwin(twinID) {
         }catch(e){
             //if there is error, it is possibly because of the patch path does not exist in twin
             //in this case, query the twin info out, and rebuild the patch
-            var twinInfo=await azureiotrocksADTClient.getDigitalTwin(onePatch.twinID)
-            var currentRootInfo={}
-            for(var ind in twinInfo.body){
-                if(ind=='$dtId'||ind=='$etag'||ind=='$metadata') continue
-                currentRootInfo[ind]=twinInfo.body[ind]
-            }
-            patchADT=getADTPatchFromPath(onePatch.path,onePatch.value,currentRootInfo)
+            var twinInfo=copyOfInitialSelf
+            patchADT=getADTPatchFromPath(onePatch.path,onePatch.value,twinInfo)
             await azureiotrocksADTClient.updateDigitalTwin(onePatch.twinID, patchADT)
+        }
+    }
+}
+
+function mergeObj(src,ref){
+    if(ref==null) return;
+    for(var ind in ref){
+        if(src[ind]==null) src[ind]=ref[ind]
+        else{
+            if(typeof(ref[ind])==="object") mergeObj(src[ind],ref[ind])
         }
     }
 }
@@ -144,12 +157,13 @@ function updateOriginObjectValue(nodeInfo, pathArr, newVal) {
     }
 }
 
-function generateAllADTPatches(valueObj,pathArr,allPatches,twinID){
+function generateAllADTPatches(initValueObj,valueObj,pathArr,allPatches,twinID){
     for(var ind in valueObj){
         var newPath=pathArr.concat([ind])
         if(typeof(valueObj[ind])==="object"){
-            generateAllADTPatches(valueObj[ind],newPath,allPatches,twinID)
+            generateAllADTPatches(initValueObj[ind], valueObj[ind],newPath,allPatches,twinID)
         }else{
+            if(initValueObj[ind]==valueObj[ind]) continue
             allPatches.push({
                 "twinID":twinID,
                 "path":newPath,

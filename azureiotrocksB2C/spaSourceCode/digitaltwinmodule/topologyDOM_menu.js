@@ -16,7 +16,7 @@ topologyDOM_menu.prototype.decideVisibleContextMenu=function(clickEle){
     var selected=this.core.$(':selected')
     var isClickingNode=(clickEle.isNode && clickEle.isNode() )
     var hasNode=isClickingNode || (selectedNodes.length>0)
-    if(clickEle.isNode && clickEle.data("originalInfo").simNodeName) var clickSimNode=true
+    if(clickEle.isNode && clickEle.data("originalInfo") && clickEle.data("originalInfo").simNodeName) var clickSimNode=true
     
     var showMenuArr=(arr)=>{
         arr.forEach(ele=>{this.contenxtMenuInstance.showMenuItem(ele)})
@@ -34,8 +34,7 @@ topologyDOM_menu.prototype.decideVisibleContextMenu=function(clickEle){
             if(isClickingNode) showMenuArr(['liveData','enableLiveDataStream','addSimulatingDataSource'])
             if(selected.length>1) showMenuArr(['COSE'])
         }
-    
-        if(!hasNode) showMenuArr(['editing','DeleteAll'])
+        if(!hasNode && !clickEle.data().notTwin) showMenuArr(['editing','DeleteAll'])
     }
 }
 
