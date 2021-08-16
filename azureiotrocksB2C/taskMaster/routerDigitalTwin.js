@@ -59,6 +59,10 @@ routerDigitalTwin.prototype.checkSimulationDataSource = async function(req,res){
     try{
         var postLoad=req.body
         var {body} = await got.post(process.env.dboperationAPIURL+"queryData/checkSimulationDataSource", {json:postLoad,responseType: 'json'});
+        if(body.account==null){
+            postLoad.account=req.authInfo.account
+            await got.post(process.env.dboperationAPIURL+"insertData/updateSimulationDataSource", {json:postLoad,responseType: 'json'});
+        }
         res.send(body)
     }catch(e){
         res.status(400).send(e.response.body);
