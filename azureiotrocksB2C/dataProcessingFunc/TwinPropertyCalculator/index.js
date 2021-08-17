@@ -102,7 +102,7 @@ async function recalculateTwin(twinID) {
     //console.log(allPatches)
 
     for(var i=0;i<allPatches.length;i++){
-        var onePatch=allPatches[i]
+        var onePatch=allPatches[i] 
         //console.log("generate a patch:"+JSON.stringify(onePatch))
         var patchADT=getADTPatchFromPath(onePatch.path,onePatch.value)
         try{
