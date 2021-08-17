@@ -42,7 +42,7 @@ serviceWorkerHelper.prototype.subscribeLiveProperty = async function (twinID,pro
         }
         msalHelper.callAPI("digitaltwin/serviceWorkerSubscription", "POST", payload, "withProjectID")
     } catch (e) {
-        console.log(e)
+        console.log(e) 
     }
 }
 
