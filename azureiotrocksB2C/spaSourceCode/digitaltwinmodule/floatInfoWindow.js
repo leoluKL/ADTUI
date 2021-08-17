@@ -38,7 +38,7 @@ class floatInfoWindow extends baseInfoPanel{
             if(singleElementInfo==null) return;
             singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
             
-            this.DOM.css("width","295px")
+            this.DOM.css("width","325px") 
             this.DOM.show()
             var contentDOM=$('<div class="w3-container"/>')
             this.DOM.append(contentDOM)

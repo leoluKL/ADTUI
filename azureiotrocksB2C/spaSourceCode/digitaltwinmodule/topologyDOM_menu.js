@@ -137,7 +137,7 @@ topologyDOM_menu.prototype.addMenuItemsForEditing = function () {
                         return
                     }
                 }
-                this.parentTopologyDOM.deleteElementsArray( )
+                this.parentTopologyDOM.deleteElementsArray(collection)
             }
         }
     ])

@@ -282,8 +282,9 @@ class baseInfoPanel {
         parentDom.append(keyDiv)
         var contentDOM = $("<label style='padding-top:.2em'></label>")
         keyDiv.append(contentDOM)
-        var aInput = $('<input type="text" style="padding:2px;width:60%;outline:none;display:inline" placeholder="' + placeHolderStr + '"/>').addClass("w3-input w3-border");
+        var aInput = $('<input type="text" style="padding:2px;width:40%;outline:none;display:inline" placeholder="' + placeHolderStr + '"/>').addClass("w3-input w3-border");
         contentDOM.append(aInput)
+        contentDOM.append($('<label>sec</label>')) 
         var originalV=simNodeInfo.detail[keyStr] 
         if (originalV != null) aInput.val(originalV)
         aInput.change((e) => {
