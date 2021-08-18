@@ -1,4 +1,3 @@
-const modelAnalyzer = require("../sharedSourceFiles/modelAnalyzer");
 const globalCache = require("../sharedSourceFiles/globalCache")
 const baseInfoPanel = require("../sharedSourceFiles/baseInfoPanel")
 
@@ -38,7 +37,7 @@ class floatInfoWindow extends baseInfoPanel{
             if(singleElementInfo==null) return;
             singleElementInfo=this.fetchRealElementInfo(singleElementInfo)
             
-            this.DOM.css("width","325px") 
+            this.DOM.css("width","325px")
             this.DOM.show()
             var contentDOM=$('<div class="w3-container"/>')
             this.DOM.append(contentDOM)
@@ -62,11 +61,13 @@ class floatInfoWindow extends baseInfoPanel{
             var windowTop = screenXY.y - this.DOM.outerHeight() - 50
             if (windowTop < 5) windowTop = 5
             this.DOM.css({ "left": windowLeft + "px", "top": windowTop + "px" })
+            this.DOM.css("padding-bottom","5px") 
 
             if (singleElementInfo["$dtId"]) this.currentShowingTwinID=singleElementInfo["$dtId"];
             if(this.currentShowingTwinID==null) return;
             var dbtwin= globalCache.DBTwins[this.currentShowingTwinID]
             if(!dbtwin || !dbtwin.originalScript || dbtwin.originalScript=="") return;
+            this.DOM.css("padding-bottom","0px") 
             //var div=$('<div>'+dbtwin.originalScript+'</div>')
             //this.DOM.append(div)
             var holderDiv=$('<div style="padding:1px"/>')

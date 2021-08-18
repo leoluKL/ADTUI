@@ -18,8 +18,9 @@ class infoPanel extends baseInfoPanel {
         this.containerDOM.append($('<div style="height:50px" class="w3-bar w3-red"></div>'))
 
         this.closeButton1 = $('<button style="height:100%" class="w3-bar-item w3-button"><i class="fa fa-info-circle fa-2x" style="padding:2px"></i></button>')
+        this.livePaneButton = $('<button style="height:100%;margin-right:10px" class="w3-right w3-amber w3-bar-item w3-button">Show Live Pane</button>')
         this.closeButton2 = $('<button class="w3-bar-item w3-button w3-right" style="font-size:2em">×</button>')
-        this.containerDOM.children(':first').append(this.closeButton1, this.closeButton2)
+        this.containerDOM.children(':first').append(this.closeButton1, this.closeButton2,this.livePaneButton)
 
         this.isMinimized = false;
         var buttonAnim = () => {
@@ -134,27 +135,23 @@ class infoPanel extends baseInfoPanel {
         if(this.infoContentDiv) this.infoContentDiv.empty()
         else{
             this.DOM.empty()
-            var tabControl=$('<div class="w3-bar w3-light-gray "></div>')
-            var liveBtn=$('<button class="w3-bar-item w3-right w3-button w3-border" style="font-weight:bold;">Show Live Pane</button>')
-            tabControl.append(liveBtn)
-            this.DOM.append(tabControl)
 
-            this.infoContentDiv=$('<div class="w3-animate-opacity" style="float:left;padding-top:5px;height:calc(100% - 36px);overflow:auto"></div>')
-            this.liveContentDiv=$('<div id="myChart" class="w3-animate-opacity w3-border-left" style="float:left;padding-top:5px;display:none;height:calc(100% - 36px);overflow:auto"></div>')
+            this.infoContentDiv=$('<div class="w3-animate-opacity" style="width:100%;float:left;height:calc(100% - 1px);overflow:auto"></div>')
+            this.liveContentDiv=$('<div id="myChart" class="w3-animate-opacity w3-border-left" style="float:left;padding-top:5px;display:none;height:calc(100% - 1px);overflow:auto"></div>')
             this.DOM.append(this.infoContentDiv,this.liveContentDiv)
         
-            liveBtn.on("click",()=>{
+            this.livePaneButton.on("click",()=>{
                 if(!this.liveContentDiv.is(":visible")){
                     this.liveContentDiv.show()
                     this.containerDOM.css("width","600px")
                     this.infoContentDiv.css("width","50%")
                     this.liveContentDiv.css("width","50%")
-                    liveBtn.text("Hide Live Pane")
+                    this.livePaneButton.text("Hide Live Pane")
                 }else{
                     this.liveContentDiv.hide()
                     this.containerDOM.css("width","350px")
                     this.infoContentDiv.css("width","100%")
-                    liveBtn.text("Show Live Pane")
+                    this.livePaneButton.text("Show Live Pane")
                 }
                 
             })

@@ -13,7 +13,7 @@ topologyDOM_visual.prototype.chooseLayout = function (layoutName) {
     } else if (layoutName != null) {
         var layoutDetail = globalCache.layoutJSON[layoutName].detail
         if (layoutDetail) {
-            this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail())
+            this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail(),null,"centerNodes")
         }
     }
 }
@@ -412,7 +412,7 @@ topologyDOM_visual.prototype.noPosition_cose=function(eles){
     this.core.center(eles)
 }
 
-topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,onlyAdjustNodePosition,noAnimation) {
+topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,onlyAdjustNodePosition,noAnimation,centerNodes) {
     //remove all bending edge 
     if(!onlyAdjustNodePosition){
         this.core.edges().forEach(oneEdge=>{
@@ -453,6 +453,12 @@ topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,
         animationDuration: 300,
     })
     newLayout.run()
+    if(centerNodes){
+        newLayout.on("layoutstop",()=>{
+            this.core.animate({"fit":{"eles":this.core.nodes(),"padding":"100"}})
+        })
+    }
+    
 
     //restore edges bending or control points
     var edgePointsDict=layoutDetail["edges"]
@@ -503,15 +509,15 @@ topologyDOM_visual.prototype.applyCurrentLayoutWithNoAnimtaion = function () {
     this.core.center(this.core.nodes())
 }
 
-topologyDOM_visual.prototype.applyNewLayoutWithUndo = function (newLayoutDetail,oldLayoutDetail,onlyAdjustNodePosition) {
+topologyDOM_visual.prototype.applyNewLayoutWithUndo = function (newLayoutDetail,oldLayoutDetail,onlyAdjustNodePosition,centerNodes) {
     //store current layout for undo operation
     this.ur.action( "changeLayout"
         , (arg)=>{
-            this.redrawBasedOnLayoutDetail(arg.newLayoutDetail,arg.onlyAdjustNodePosition)        
+            this.redrawBasedOnLayoutDetail(arg.newLayoutDetail,arg.onlyAdjustNodePosition,null,centerNodes)        
             return arg
         }
         , (arg)=>{
-            this.redrawBasedOnLayoutDetail(arg.oldLayoutDetail,arg.onlyAdjustNodePosition)
+            this.redrawBasedOnLayoutDetail(arg.oldLayoutDetail,arg.onlyAdjustNodePosition,null,centerNodes)
             return arg
         }
     )
