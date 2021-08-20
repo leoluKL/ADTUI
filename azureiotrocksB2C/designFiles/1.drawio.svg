@@ -1,0 +1,13 @@
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="101px" height="101px" viewBox="-0.5 -0.5 101 101" content="&lt;mxfile&gt;&lt;diagram id=&quot;SVQtn9t7k2W10hTTP-Xu&quot; name=&quot;Page-1&quot;&gt;jZNNT8MwDIZ/Ta9TP8Q0jjA2OICENCTOWWPaSGkdpV7X8utxlqRdNU3i5Pjx68ax3aTYNsOrFab+QAk6yVM5JMVLkudZlm/YODJ6ss5TDyqrZBDN4KB+IcAoOykJ3UJIiJqUWcIS2xZKWjBhLZ6Xsh/Uy1uNqOAGHEqhb+m3klR7unlIZ/4GqqrjzVkaIo2I4gC6Wkg8X6FilxRbi0j+1Axb0K55sS8+b38nOhVmoaX/JKx9Qi/0Kbwt1EVjfGwPlhS//V0cQX9ip0hhy6EjEmGTFM9Cq8qBku8Ey6CmRrOf8TEmPwUNoWFqUDnprueMLiil6GpwVaXscFuMu74ZKrdBK6NkzjX20K0uxn3Z2a/xIqsEOSRKOglC6xLRWf82LgGGu/3Jpq7zugI2QHZkSUhYhzmFRX0M7nme+jTb+nriEYqwadX05XkYfAjziO4890vs6u8pdn8=&lt;/diagram&gt;&lt;/mxfile&gt;">
+    <defs/>
+    <g>
+        <ellipse cx="50" cy="17.5" rx="17.5" ry="17.5" fill="#ffffff" stroke="#000000" pointer-events="all"/>
+        <path d="M 50 35 L 50 70" fill="none" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="14px">
+            <text x="49.5" y="23">
+                M
+            </text>
+        </g>
+        <path d="M 0 40 L 50 70 L 0 100 Z M 100 40 L 50 70 L 100 100 Z" fill="#ffffff" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10" pointer-events="all"/>
+    </g>
+</svg>

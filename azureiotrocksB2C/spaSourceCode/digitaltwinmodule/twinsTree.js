@@ -23,7 +23,7 @@ function twinsTree(DOM, searchDOM) {
             if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
         }
 
-        var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative;padding-top:2px'></div>")
+        var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative'></div>")
         if(dbModelInfo && dbModelInfo.isIoTDeviceModel){
             var iotDiv=$("<div class='w3-border' style='position:absolute;right:-5px;padding:0px 2px;top:-7px;border-radius: 3px;font-size:7px'>IoT</div>")
             iconDOM.append(iotDiv)
@@ -32,7 +32,7 @@ function twinsTree(DOM, searchDOM) {
         var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,colorCode,secondColorCode))
         iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
         if(avarta){
-            var avartaimg=$("<img style='position:absolute;left:0px;width:60%;margin:20%' src='"+avarta+"'></img>")
+            var avartaimg=$(`<img style='max-width:${dimension*0.75}px;max-height:${dimension*0.75}px;position:absolute;left:50%;top:50%;transform:translateX(-50%) translateY(-50%)' src='${avarta}'></img>`)
             iconDOM.append(avartaimg)
         }
         return iconDOM

@@ -11,6 +11,7 @@ function globalCache(){
     this.storedTwins = {}
     this.layoutJSON={}
     this.visualDefinition={"default":{"detail":{}}}
+    this.symbolLibs={}
 
     this.initStoredInformtion()
 }
@@ -147,6 +148,9 @@ globalCache.prototype.storeProjectTwinsAndVisualData=function(resArr){
         }else if(element.type=="Topology") {
             this.recordSingleLayout(element.detail,element.accountID,element.name,element.isShared)
         }else if(element.type=="DTTwin") dbtwins.push(element)
+        else if(element.type=="symbols"){
+            this.symbolLibs[element.displayName]=element.detail
+        }
     });
     this.storeDBTwinsArr(dbtwins)
 

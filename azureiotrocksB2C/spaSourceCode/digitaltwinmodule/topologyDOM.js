@@ -71,7 +71,9 @@ topologyDOM.prototype.init=function(){
         anchorShapeSizeFactor: 5,
         enableAnchorSizeNotImpactByZoom: true,
         enableRemoveAnchorMidOfNearLine: false,
-        enableCreateAnchorOnDrag: false
+        enableCreateAnchorOnDrag: false,
+        enableAnchorsAbsolutePosition:true,
+        disableReconnect:true
     });
 
     this.core.boxSelectionEnabled(true)
@@ -94,36 +96,6 @@ topologyDOM.prototype.init=function(){
     this.core.on('zoom',(e)=>{
         this.styleManager.adjustStyleWhenZoom()
     })
-
-    var instance = this.core.edgeEditing('get');
-    var tapdragHandler=(e) => {
-        instance.keepAnchorsAbsolutePositionDuringMoving()
-        if(e.target.isNode && e.target.isNode()) this.draggingNode=e.target
-        this.smartPositionNode(e.position)
-    }
-    var setOneTimeGrab = () => {
-        this.core.once("grab", (e) => {
-            var draggingNodes = this.core.collection()
-            if (e.target.isNode()) draggingNodes.merge(e.target)
-            var arr = this.core.$(":selected")
-            arr.forEach((ele) => {
-                if (ele.isNode()) draggingNodes.merge(ele)
-            })
-            instance.storeAnchorsAbsolutePosition(draggingNodes)
-            this.core.on("tapdrag",tapdragHandler )
-            setOneTimeFree()
-        })
-    }
-    var setOneTimeFree = () => {
-        this.core.once("free", (e) => {
-            var instance = this.core.edgeEditing('get');
-            instance.resetAnchorsAbsolutePosition()
-            this.draggingNode=null
-            setOneTimeGrab()
-            this.core.removeListener("tapdrag",tapdragHandler)
-        })
-    }
-    setOneTimeGrab()
 
     this.core.trigger("zoom")
     this.setKeyDownFunc()

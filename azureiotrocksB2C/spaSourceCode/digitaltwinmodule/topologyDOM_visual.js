@@ -152,12 +152,13 @@ topologyDOM_visual.prototype.alignSelectedNodes = function (direction) {
 
 topologyDOM_visual.prototype.numberPrecision = function (number) {
     if(Array.isArray(number)){
-        for(var i=0;i<number.length;i++){
-            number[i] = this.numberPrecision(number[i])
-        }
+        for(var i=0;i<number.length;i++) number[i] = this.numberPrecision(number[i])
         return number
-    }else
-    return parseFloat(number.toFixed(3))
+    }else{
+        if(number == null) return null
+        else number=parseFloat(number)
+        return parseFloat(number.toFixed(3))
+    }  
 }
 
 topologyDOM_visual.prototype.drawTwins=function(twinsData,animation){
@@ -365,10 +366,17 @@ topologyDOM_visual.prototype.getCurrentLayoutDetail = function () {
     //store nodes position
     this.core.nodes().forEach(oneNode=>{
         var position=oneNode.position()
-        layoutDict[oneNode.id()]=[this.numberPrecision(position['x']),this.numberPrecision(position['y'])]
+        var theArr=[position['x'],position['y']]
+        //also store node rotate and scale information
+        if(oneNode.data("scaleFactor") || oneNode.data("rotateAngle")){
+            theArr.push(oneNode.data("scaleFactor"),oneNode.data("rotateAngle"))
+        }
+
+        this.numberPrecision(theArr)
+        layoutDict[oneNode.id()]=theArr
     })
 
-    //store any edge bending points or controling points
+    //store any edge bending points or controling points, which is elements data cyedgebendeditingWeights,cyedgebendeditingDistances cyedgecontroleditingWeights  cyedgecontroleditingDistances
     this.core.edges().forEach(oneEdge=>{
         if(oneEdge.data().notTwin) return;
         var srcID=oneEdge.data("originalInfo")["$sourceId"]
@@ -437,7 +445,11 @@ topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,
             ,y:layoutDetail[ind][1]
         }
         var dbTwin=globalCache.getSingleDBTwinByName(ind)
+        //apply scale or rotate if the twin node has
+        this.applyNodeScaleRotate(ind,layoutDetail[ind][2],layoutDetail[ind][3])
+
         if (!dbTwin || !dbTwin.simulate) continue
+        //redraw the attached simulation data sources of twin
         for (var simNodeName in dbTwin.simulate) {
             storedPositions[simNodeName] = {
                 x: layoutDetail[ind][0] - 60
@@ -459,7 +471,6 @@ topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,
         })
     }
     
-
     //restore edges bending or control points
     var edgePointsDict=layoutDetail["edges"]
     if(edgePointsDict==null)return;
@@ -470,6 +481,17 @@ topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,
             ,obj["cyedgebendeditingDistances"],obj["cyedgecontroleditingWeights"],obj["cyedgecontroleditingDistances"])
         }
     }
+}
+
+topologyDOM_visual.prototype.applyNodeScaleRotate=function(twinName,scaleF,rotateF){
+    var theNode=this.core.filter('[id = "'+twinName+'"]');
+    if(theNode.length==0) return;
+    theNode=theNode[0]
+    if(scaleF || rotateF){
+        if(scaleF) theNode.data("scaleFactor",scaleF)
+        if(rotateF) theNode.data("rotateAngle",rotateF)
+        theNode.addClass('edgebendediting_scaleRotate');
+    }else theNode.removeClass('edgebendediting_scaleRotate');
 }
 
 topologyDOM_visual.prototype.applyEdgeBendcontrolPoints = function (srcID,relationshipID

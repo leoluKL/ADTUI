@@ -127,8 +127,10 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
 
     var importPicBtn = $('<button class="w3-button w3-light-gray w3-hover-amber w3-border-right">Upload Avarta</button>')
     var actualImportPicBtn = $('<input type="file" name="img" style="display:none"></input>')
+    var chooseAvartaBtn = $('<button class="w3-ripple w3-button w3-light-gray w3-hover-pink w3-border-right">Choose A Symbol</button>')
+    
     var clearAvartaBtn = $('<button class="w3-ripple w3-button w3-light-gray w3-hover-pink w3-border-right">Clear Avarta</button>')
-    this.modelButtonBar.append(importPicBtn, actualImportPicBtn, clearAvartaBtn)
+    this.modelButtonBar.append(importPicBtn, actualImportPicBtn,chooseAvartaBtn, clearAvartaBtn)
     importPicBtn.on("click", () => {
         actualImportPicBtn.trigger('click');
     });
@@ -141,7 +143,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
             var str = await this.readOneFile(theFile)
             var dataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(str);
         } else if (theFile.type.match('image.*')) {
-            var dataUrl = await this.resizeImgFile(theFile, 70)
+            var dataUrl = await this.resizeImgFile(theFile, 256)
         } else {
             var confirmDialogDiv = new simpleConfirmDialog()
             confirmDialogDiv.show({ width: "200px" },
@@ -152,16 +154,11 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
                 }
             )
         }
-        if (this.avartaImg) this.avartaImg.attr("src", dataUrl)
-
-        var visualJson = globalCache.visualDefinition["default"].detail
-        if (!visualJson[modelID]) visualJson[modelID] = {}
-        visualJson[modelID].avarta = dataUrl
-        this.saveVisualDefinition()
-        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID": modelID, "avarta": dataUrl })
-        this.refreshModelTreeLabel()
+        this.updateAvartaDataUrl(dataUrl,modelID)
         actualImportPicBtn.val("")
     })
+
+    chooseAvartaBtn.on("click",()=>{this.chooseAvarta(modelID)})
 
     clearAvartaBtn.on("click", () => {
         var visualJson = globalCache.visualDefinition["default"].detail
@@ -230,6 +227,46 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     this.fillBaseClasses(modelAnalyzer.DTDLModels[modelID].allBaseClasses,baseClassesDOM) 
 }
 
+modelManagerDialog.prototype.updateAvartaDataUrl = function (dataUrl,modelID) {
+    if (!dataUrl) return;
+    if (this.avartaImg) this.avartaImg.attr("src", dataUrl)
+
+    var visualJson = globalCache.visualDefinition["default"].detail
+    if (!visualJson[modelID]) visualJson[modelID] = {}
+    visualJson[modelID].avarta = dataUrl
+    this.saveVisualDefinition()
+    this.broadcastMessage({ "message": "visualDefinitionChange", "modelID": modelID, "avarta": dataUrl })
+    this.refreshModelTreeLabel()
+}
+
+modelManagerDialog.prototype.chooseAvarta=function(modelID){
+    var popWindow=new simpleConfirmDialog()
+    popWindow.show({"max-width":"450px","min-width":"300px"},{
+        "title":"Choose Symbol as Avarta",
+        "customDrawing":(parentDOM)=>{
+            for(var ind in globalCache.symbolLibs) var symbolList=globalCache.symbolLibs[ind] //TODO:multiple libs
+            for(var symbolName in symbolList){
+                this.createSymbolDOM(ind,symbolName,modelID,parentDOM,popWindow)
+            }
+        }
+    })
+}
+
+modelManagerDialog.prototype.createSymbolDOM=function(libName,symbolName,modelID,parentDOM,popWindow){
+    var symbolSize=80
+    var symbolList=globalCache.symbolLibs[libName]
+    var aSymbolDOM=$("<div class='w3-button w3-white' style='padding:0px;width:"+symbolSize+"px;height:"+symbolSize+"px;float:left'></div>")
+    var svgStr=symbolList[symbolName].replaceAll("'",'"')
+    var dataUrl=`data:image/svg+xml;utf8,${encodeURIComponent(svgStr)}`
+    var svgImg=$(`<img style='max-width:${symbolSize}px;max-height:${symbolSize}px' src='${dataUrl}'></img>`)
+    aSymbolDOM.append(svgImg)
+    parentDOM.append(aSymbolDOM)
+    aSymbolDOM.on("click",()=>{
+        popWindow.close()
+        this.updateAvartaDataUrl(dataUrl,modelID)
+    })
+}
+
 modelManagerDialog.prototype.confirmDeleteModel=function(modelID){
     var funcAfterEachSuccessDelete = (eachDeletedModelID) => {
         this.tree.deleteLeafNode(globalCache.modelIDMapToName[eachDeletedModelID])
@@ -263,7 +300,7 @@ modelManagerDialog.prototype.fillBaseClasses=function(baseClasses,parentDom){
 modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
     var modelJson=modelAnalyzer.DTDLModels[modelID];
     var aTable=$("<table style='width:100%'></table>")
-    aTable.html('<tr><td></td><td></td></tr>')
+    aTable.html('<tr><td></td><td align="center"></td></tr>')
     parentDom.append(aTable) 
 
     var leftPart=aTable.find("td:first")
@@ -601,7 +638,7 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
             var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,colorCode,secondColor))
             iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
             if(avarta){
-                var avartaimg=$("<img style='position:absolute;left:0px;width:60%;margin:20%' src='"+avarta+"'></img>")
+                var avartaimg=$(`<img style='max-width:${dimension*0.75}px;max-height:${dimension*0.75}px;position:absolute;left:50%;top:50%;transform:translateX(-50%) translateY(-50%)' src='${avarta}'></img>`)
                 iconDOM.append(avartaimg)
             }
             return iconDOM

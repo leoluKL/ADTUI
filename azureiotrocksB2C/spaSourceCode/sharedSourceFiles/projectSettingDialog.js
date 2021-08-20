@@ -155,7 +155,7 @@ projectSettingDialog.prototype.addOneVisualSchema=function(oneSchemaObj,parentDi
         var imgSrc = encodeURIComponent(globalCache.shapeSvg(shape, colorCode,secondColor))
         iconDOM.append($("<img src='data:image/svg+xml;utf8," + imgSrc + "'></img>"))
         if (avarta) {
-            var avartaimg = $("<img style='position:absolute;left:0px;width:60%;margin:20%' src='" + avarta + "'></img>")
+            var avartaimg=$(`<img style='max-width:${dimension*0.75}px;max-height:${dimension*0.75}px;position:absolute;left:50%;top:50%;transform:translateX(-50%) translateY(-50%)' src='${avarta}'></img>`)
             iconDOM.append(avartaimg)
         }
         oneSchemaRow.append(iconDOM)
