@@ -78,7 +78,6 @@ routerQueryData.prototype.projectTwinsAndVisual =async function(req,res) {
     var queryStr='SELECT * FROM c where '
     queryStr+=`c.projectID='public'`
     queryStr+=` and c.type ='symbols'`
-    var resultArr=[]
     try{
         var queryResult=await cosmosdbhelper.query('dtproject',queryStr)
         resultArr=resultArr.concat(queryResult)
