@@ -381,7 +381,7 @@ globalCache.prototype.shapeSvg=function(shape,color,secondColor){
         return svgStart+'<circle cx="50" cy="50" r="50"  fill="'+colorStr+'"/></svg>'
     }else if(shape=="hexagon"){
         return svgStart+'<polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25"  fill="'+colorStr+'" /></svg>'
-    }else if(shape=="round-rectangle"){
+    }else if(shape=="rectangle"){
         return svgStart+'<rect x="10" y="10" rx="10" ry="10" width="80" height="80" fill="'+colorStr+'" /></svg>'
     }
 }

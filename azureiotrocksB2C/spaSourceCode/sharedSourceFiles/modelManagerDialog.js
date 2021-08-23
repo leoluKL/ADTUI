@@ -229,14 +229,42 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
 
 modelManagerDialog.prototype.updateAvartaDataUrl = function (dataUrl,modelID) {
     if (!dataUrl) return;
+    
+    //if it is svg, check if the svg set its width and height attribute, as cytoscape js can not handle svg scaling withouth width and heigh attribute
+    var dec= decodeURIComponent(dataUrl)
+    if(dec.startsWith("data:image/svg+xml")){
+        var pos=dec.indexOf("<svg ")
+        var svgPart=dec.substr(pos)
+        var tmpObj=$(svgPart)
+        if(tmpObj.attr('width')==null){
+            var ss=tmpObj.attr('viewBox')
+            if(ss){
+                var arr=ss.split(" ")
+                tmpObj.attr("width",arr[2]-arr[0])
+                tmpObj.attr("height",arr[3]-arr[1])
+                dataUrl=`data:image/svg+xml;utf8,${encodeURIComponent(tmpObj[0].outerHTML)}`
+            }
+        }
+    }
+
     if (this.avartaImg) this.avartaImg.attr("src", dataUrl)
 
-    var visualJson = globalCache.visualDefinition["default"].detail
+    var visualJson = globalCache.visualDefinition["default"].detail //currently there is only one visual definition: "default"
     if (!visualJson[modelID]) visualJson[modelID] = {}
     visualJson[modelID].avarta = dataUrl
-    this.saveVisualDefinition()
-    this.broadcastMessage({ "message": "visualDefinitionChange", "modelID": modelID, "avarta": dataUrl })
-    this.refreshModelTreeLabel()
+
+    
+    var testImg = $(`<img src="${dataUrl}"/>`)
+    testImg.on('load', ()=>{
+        testImg.css({"display":"none"}) //to get the image size, append it to body temporarily
+        $('body').append(testImg)
+        visualJson[modelID].avartaWidth=testImg.width()
+        visualJson[modelID].avartaHeight=testImg.height()
+        testImg.remove()
+        this.saveVisualDefinition()
+        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID": modelID, "avarta": dataUrl })
+        this.refreshModelTreeLabel()
+    });
 }
 
 modelManagerDialog.prototype.chooseAvarta=function(modelID){
@@ -408,7 +436,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     containerDiv.append(shapeSelector)
     if(relatinshipName==null){
         shapeSelector.append($("<option value='ellipse'>◯</option>"))
-        shapeSelector.append($("<option value='round-rectangle' style='font-size:120%'>▢</option>"))
+        shapeSelector.append($("<option value='rectangle' style='font-size:120%'>▢</option>"))
         shapeSelector.append($("<option value='hexagon' style='font-size:130%'>⬡</option>"))
     }else{
         shapeSelector.append($("<option value='solid'>→</option>"))

@@ -94,7 +94,7 @@ topologyDOM.prototype.init=function(){
     })
     
     this.core.on('zoom',(e)=>{
-        this.styleManager.adjustStyleWhenZoom()
+        this.styleManager.adjustModelsBaseDimension()
     })
 
     this.core.trigger("zoom")
@@ -643,7 +643,10 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         else{
             if(msgPayload.color) this.styleManager.updateModelTwinColor(msgPayload.modelID,msgPayload.color,msgPayload.secondColor)
             else if(msgPayload.shape) this.styleManager.updateModelTwinShape(msgPayload.modelID,msgPayload.shape)
-            else if(msgPayload.avarta) this.styleManager.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
+            else if(msgPayload.avarta){
+                this.styleManager.adjustModelsBaseDimension(msgPayload.modelID)
+                this.styleManager.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
+            } 
             else if(msgPayload.noAvarta)  this.styleManager.updateModelAvarta(msgPayload.modelID,null)
             else if(msgPayload.dimensionRatio)  this.styleManager.updateModelTwinDimension(msgPayload.modelID,msgPayload.dimensionRatio)
         } 
