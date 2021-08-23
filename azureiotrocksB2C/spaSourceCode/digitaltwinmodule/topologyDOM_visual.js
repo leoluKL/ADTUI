@@ -405,6 +405,9 @@ topologyDOM_visual.prototype.noPosition_cose=function(eles){
     if(eles==null) eles=this.core.elements()
     var undoLayoutDetail= this.getCurrentLayoutDetail()
 
+    //remove all bending point and scale rotate
+    this.resetAllBendingEdge()
+    this.resetAllNodeScaleRotate()
     var newLayout =eles.layout({
         name: 'cose',
         gravity:1,
@@ -420,20 +423,28 @@ topologyDOM_visual.prototype.noPosition_cose=function(eles){
     this.core.center(eles)
 }
 
+topologyDOM_visual.prototype.resetAllBendingEdge=function(){
+    this.core.edges().forEach(oneEdge=>{
+        oneEdge.removeClass('edgebendediting-hasbendpoints')
+        oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
+        oneEdge.data("cyedgebendeditingWeights",[])
+        oneEdge.data("cyedgebendeditingDistances",[])
+        oneEdge.data("cyedgecontroleditingWeights",[])
+        oneEdge.data("cyedgecontroleditingDistances",[])
+    })
+}
+
+topologyDOM_visual.prototype.resetAllNodeScaleRotate=function(){
+    this.core.nodes().forEach(oneNode=>{
+        oneNode.removeClass('edgebendediting_scaleRotate')
+        oneNode.removeData("scaleFactor")
+        oneNode.removeData("rotateAngle")
+    })
+}
+
 topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,onlyAdjustNodePosition,noAnimation,centerNodes) {
     //remove all bending edge 
-    if(!onlyAdjustNodePosition){
-        this.core.edges().forEach(oneEdge=>{
-            oneEdge.removeClass('edgebendediting-hasbendpoints')
-            oneEdge.removeClass('edgecontrolediting-hascontrolpoints')
-            oneEdge.data("cyedgebendeditingWeights",[])
-            oneEdge.data("cyedgebendeditingDistances",[])
-            oneEdge.data("cyedgecontroleditingWeights",[])
-            oneEdge.data("cyedgecontroleditingDistances",[])
-        })
-    }
-    
-    
+    if(!onlyAdjustNodePosition) this.resetAllBendingEdge()    
     if(layoutDetail==null) return;
     
     var storedPositions={}
