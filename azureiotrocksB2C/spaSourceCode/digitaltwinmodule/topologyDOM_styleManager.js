@@ -22,8 +22,8 @@ topologyDOM_styleManager.prototype.initStyle=function(){
                 //,'background-image': function(ele){ return "images/cat.png"; }
                 //,'background-fit':'contain' //cover
                 //'background-color': function( ele ){ return ele.data('bg') }
-                ,'background-width':'85%'
-                ,'background-height':'85%'
+                ,'background-width':'75%'
+                ,'background-height':'75%'
             }
         },
         {
@@ -266,27 +266,32 @@ topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyMod
         //if its shape is round-rectangle (actually it is polygon rectangle) and it does have a svg or image avarta, then it is possible that this type of nodes have width different from height. It will follow the width-height-ratio of the image or svg
         var newW=Math.ceil(sizeAdjustRatio * baseDimension)
         var newH=newW
-        var bgRatio='85%'
+        var bgRatioW=75
+        var bgRatioH=75
         var visualJson=globalCache.visualDefinition["default"].detail[modelID]
-        if(this.nodeModelVisualAdjustment[modelID].shape=="rectangle" && visualJson.avarta){
+        var currentShape=this.nodeModelVisualAdjustment[modelID].shape
+        if(currentShape=="rectangle" && visualJson.avarta){
             var visualJson=globalCache.visualDefinition["default"].detail[modelID]
             if(visualJson.avartaHeight && visualJson.avartaHeight!=0){
                 var whRatio=visualJson.avartaWidth/visualJson.avartaHeight
                 if(whRatio>1) newW=newH*whRatio
                 else newH=newW/whRatio
-                bgRatio='100%'
-                //console.log(newW,newH,modelID)
-                //for any node that already has edgebendediting_scaleRotate, also modify its originalWidth and originalHeight
-                this.core.nodes(`[modelID = "${modelID}"]`).forEach(ele=>{
-                    if(ele.data("originalWidth")!=null){
-                        ele.data("originalWidth",newW)
-                        ele.data("originalHeight",newH)
-                    }
-                })
-
+                bgRatioW=bgRatioH='100'
             }
+        }else if(visualJson.avarta && visualJson.avartaHeight && visualJson.avartaHeight!=0){
+            var whRatio=visualJson.avartaWidth/visualJson.avartaHeight
+            if(whRatio>1) bgRatioH=bgRatioW/whRatio
+            else bgRatioW = bgRatioH * whRatio
         }
-        arr.push({selector:'node[modelID = "' + modelID + '"]',style:{ width: newW, height: newH,'background-width':bgRatio,'background-height':bgRatio }}) 
+        //console.log(newW,newH,modelID)
+        //for any node that already has edgebendediting_scaleRotate, also modify its originalWidth and originalHeight
+        this.core.nodes(`[modelID = "${modelID}"]`).forEach(ele => {
+            if (ele.data("originalWidth") != null) {
+                ele.data("originalWidth", newW)
+                ele.data("originalHeight", newH)
+            }
+        })
+        arr.push({selector:'node[modelID = "' + modelID + '"]',style:{ width: newW, height: newH,'background-width':bgRatioW+"%",'background-height':bgRatioH+"%" }}) 
     }
     this.updateStyleSheet(arr)
 }

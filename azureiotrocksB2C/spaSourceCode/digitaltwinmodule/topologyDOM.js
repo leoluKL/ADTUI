@@ -642,8 +642,10 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         } 
         else{
             if(msgPayload.color) this.styleManager.updateModelTwinColor(msgPayload.modelID,msgPayload.color,msgPayload.secondColor)
-            else if(msgPayload.shape) this.styleManager.updateModelTwinShape(msgPayload.modelID,msgPayload.shape)
-            else if(msgPayload.avarta){
+            else if(msgPayload.shape) {
+                this.styleManager.updateModelTwinShape(msgPayload.modelID,msgPayload.shape)
+                this.styleManager.adjustModelsBaseDimension(msgPayload.modelID)
+            }else if(msgPayload.avarta){
                 this.styleManager.adjustModelsBaseDimension(msgPayload.modelID)
                 this.styleManager.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
             } 
