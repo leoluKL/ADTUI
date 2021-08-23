@@ -1,3 +1,5 @@
+const globalCache = require("../sharedSourceFiles/globalCache")
+
 function topologyDOM_menu(parentTopologyDOM){
     this.parentTopologyDOM=parentTopologyDOM
     this.core=parentTopologyDOM.core
@@ -198,6 +200,29 @@ topologyDOM_menu.prototype.addMenuItemsForOthers = function () {
             onClickFunction: (e) => {
                 var collection=this.node_changeSelectionWhenClickElement(e.target)
                 this.parentTopologyDOM.hideCollection(collection)
+            }
+        },
+        {
+            id: 'copyScaleRotate',
+            content: 'Copy Style',
+            selector: 'node.edgebendediting_scaleRotate',
+            onClickFunction: (e) => {
+                var collection=this.node_changeSelectionWhenClickElement(e.target)
+                var n=collection[0]
+                globalCache.clipboardNodeStyle={"scaleFactor":n.data("scaleFactor")||1,"rotateAngle":n.data("rotateAngle")||0}
+            }
+        },
+        {
+            id: 'pasteScaleRotate',
+            content: 'Paste Style',
+            selector: 'node',
+            onClickFunction: (e) => {
+                var collection=this.node_changeSelectionWhenClickElement(e.target)
+                var n=collection[0]
+                if(globalCache.clipboardNodeStyle){
+                    this.parentTopologyDOM.visualManager.applyNodeScaleRotate(n.id(),globalCache.clipboardNodeStyle.scaleFactor,globalCache.clipboardNodeStyle.rotateAngle)
+                }
+                
             }
         }
     ])

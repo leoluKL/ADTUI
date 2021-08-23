@@ -13,6 +13,8 @@ function globalCache(){
     this.visualDefinition={"default":{"detail":{}}}
     this.symbolLibs={}
 
+    this.clipboardNodeStyle=null
+
     this.initStoredInformtion()
 }
 

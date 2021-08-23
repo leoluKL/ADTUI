@@ -24,9 +24,9 @@ class floatInfoWindow extends baseInfoPanel{
 
 
     rxMessage(msgPayload) {
-        if (msgPayload.message == "topologyMouseOut") {
+        if (msgPayload.message == "hideFloatInfoPanel") {
             this.hideSelf()
-        } else if (msgPayload.message == "showInfoHoveredEle") {
+        }else if (msgPayload.message == "showInfoHoveredEle") {
             if (!globalCache.showFloatInfoPanel) return;
             this.DOM.empty()
             var arr = msgPayload.info;

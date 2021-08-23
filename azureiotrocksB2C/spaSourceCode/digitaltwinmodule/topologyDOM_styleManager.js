@@ -242,6 +242,18 @@ topologyDOM_styleManager.prototype.updateStyleSheet=function(styleArr){
                 return parseFloat(theH)*scaleF
             },'shape-rotation': ( ele )=>{
                 return parseFloat(ele.data("rotateAngle")||0)
+            },'text-margin-x':(ele)=>{
+                var modelID=ele.data("modelID")
+                var visualJson = globalCache.visualDefinition["default"].detail
+                var xoff=visualJson[modelID].labelX||0
+                var scaleF=ele.data('scaleFactor')||1
+                return xoff*scaleF
+            },'text-margin-y':(ele)=>{
+                var modelID=ele.data("modelID")
+                var visualJson = globalCache.visualDefinition["default"].detail
+                var yoff=visualJson[modelID].labelY||0 
+                var scaleF=ele.data('scaleFactor')||1
+                return yoff*scaleF
             }
         }).update()
 }
@@ -328,6 +340,17 @@ topologyDOM_styleManager.prototype.updateModelTwinDimension=function(modelID,dim
     if(!this.nodeModelVisualAdjustment[modelID])this.nodeModelVisualAdjustment[modelID]={}
     this.nodeModelVisualAdjustment[modelID].sizeRatio=parseFloat(dimensionRatio)
     this.core.trigger("zoom")
+}
+
+topologyDOM_styleManager.prototype.updateModelTwinLabelOffset = function (modelID) {
+    var visualJson = globalCache.visualDefinition["default"].detail
+    var xoff=visualJson[modelID].labelX||0
+    var yoff=visualJson[modelID].labelY||0
+    var newStyle = {
+        selector: 'node[modelID = "' + modelID + '"]'
+        , style: { 'text-margin-x': xoff, 'text-margin-y': yoff }
+    }
+    this.updateStyleSheet([newStyle])
 }
 
 topologyDOM_styleManager.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){

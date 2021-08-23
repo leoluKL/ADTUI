@@ -353,13 +353,60 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
             this.addOneVisualizationRow(modelID,leftPart,ind)
         }
     }
+    this.addLabelVisualizationRow(modelID,leftPart)
 }
+
+modelManagerDialog.prototype.addLabelVisualizationRow=function(modelID,parentDom){
+    var containerDiv=$("<div style='padding-bottom:8px'></div>")
+    parentDom.append(containerDiv)
+    var contentDOM=$("<label class='w3-text-gray' style='margin-right:10px;font-style:italic; font-weight:bold;font-size:0.9em'>Position Label</label>")
+    containerDiv.append(contentDOM)
+    var definedLblX=0
+    var definedLblY=0
+    var visualJson=globalCache.visualDefinition["default"].detail
+    if(visualJson[modelID] && visualJson[modelID].labelX) definedLblX=visualJson[modelID].labelX
+    if(visualJson[modelID] && visualJson[modelID].labelY) definedLblY=visualJson[modelID].labelY
+    var lblXAdjustSelector = $('<select class="w3-border" style="outline:none;width:110px"></select>')
+    for(var f=-25;f<=30;f+=5){
+        var val=f.toFixed(0)+""
+        lblXAdjustSelector.append($("<option value="+val+">xoff:"+val+"</option>"))
+    }
+    if(definedLblX!=null) lblXAdjustSelector.val(definedLblX)
+    else lblXAdjustSelector.val("0")
+    containerDiv.append(lblXAdjustSelector)
+    var lblYAdjustSelector = $('<select class="w3-border" style="outline:none;width:110px"></select>')
+    for(var f=-25;f<=30;f+=5){
+        var val=f.toFixed(0)+""
+        lblYAdjustSelector.append($("<option value="+val+">yoff:"+val+"</option>"))
+    }
+    if(definedLblY!=null) lblYAdjustSelector.val(definedLblY)
+    else lblYAdjustSelector.val("0")
+    containerDiv.append(lblYAdjustSelector)
+
+    lblXAdjustSelector.change((eve)=>{
+        var chooseVal=eve.target.value
+        this.modifyLblOffset("labelX",chooseVal,modelID)
+    })
+    lblYAdjustSelector.change((eve)=>{
+        var chooseVal=eve.target.value
+        this.modifyLblOffset("labelY",chooseVal,modelID)
+    })
+}
+
+modelManagerDialog.prototype.modifyLblOffset = function (XY, val,modelID) {
+    var visualJson = globalCache.visualDefinition["default"].detail
+    if (!visualJson[modelID]) visualJson[modelID] = {}
+    visualJson[modelID][XY] = val
+    this.broadcastMessage({ "message": "visualDefinitionChange", "modelID": modelID, "labelPosition":true })
+    this.saveVisualDefinition()
+}
+
 modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,relatinshipName){
     if(relatinshipName==null) var nameStr="◯" //visual for node
     else nameStr="⟜ "+relatinshipName
     var containerDiv=$("<div style='padding-bottom:8px'></div>")
     parentDom.append(containerDiv)
-    var contentDOM=$("<label style='margin-right:10px'>"+nameStr+"</label>")
+    var contentDOM=$("<label class='w3-text-gray' style='margin-right:10px;font-weight:bold;font-size:0.9em'>"+nameStr+"</label>")
     containerDiv.append(contentDOM)
 
     var definedColor=null

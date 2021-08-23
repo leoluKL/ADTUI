@@ -101,7 +101,12 @@ topologyDOM.prototype.init=function(){
     this.setKeyDownFunc()
     
     this.menuManager=new topologyDOM_menu(this)
+    this.core.on('grab', (e)=>{
+        this.broadcastMessage({ "message": "hideFloatInfoPanel"})
+    }) 
     this.core.on('cxttap', (e)=>{
+        //hide the float info window
+        this.broadcastMessage({ "message": "hideFloatInfoPanel"})
         this.cancelTargetNodeMode()
         this.menuManager.decideVisibleContextMenu(e.target)
     })
@@ -506,7 +511,7 @@ topologyDOM.prototype.mouseOutFunction= function (e) {
         }
     }
     
-    this.broadcastMessage({ "message": "topologyMouseOut"})
+    this.broadcastMessage({ "message": "hideFloatInfoPanel"})
 
     if(this.lastHoverTarget){
         this.lastHoverTarget.removeClass("hover")
@@ -565,6 +570,9 @@ topologyDOM.prototype.applyVisualDefinition=function(){
         if(visualJson[modelID].shape) this.styleManager.updateModelTwinShape(modelID,visualJson[modelID].shape)
         if(visualJson[modelID].avarta) this.styleManager.updateModelAvarta(modelID,visualJson[modelID].avarta)
         if(visualJson[modelID].dimensionRatio) this.styleManager.updateModelTwinDimension(modelID,visualJson[modelID].dimensionRatio)
+        if(visualJson[modelID].labelX || visualJson[modelID].labelY){
+            this.styleManager.updateModelTwinLabelOffset(modelID)
+        } 
         if(visualJson[modelID].rels){
             for(var relationshipName in visualJson[modelID].rels){
                 if(visualJson[modelID]["rels"][relationshipName].color){
@@ -653,6 +661,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
                 this.styleManager.adjustModelsBaseDimension(msgPayload.modelID)
                 this.styleManager.updateModelAvarta(msgPayload.modelID,null)
             }else if(msgPayload.dimensionRatio)  this.styleManager.updateModelTwinDimension(msgPayload.modelID,msgPayload.dimensionRatio)
+            else if(msgPayload.labelPosition) this.styleManager.updateModelTwinLabelOffset(msgPayload.modelID)
         } 
     }else if(msgPayload.message=="relationsDeleted") this.visualManager.hideRelations(msgPayload.relations)
     else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName)   }
