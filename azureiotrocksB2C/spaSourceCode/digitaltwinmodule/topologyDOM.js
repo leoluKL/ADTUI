@@ -647,8 +647,10 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
                 this.styleManager.adjustModelsBaseDimension(msgPayload.modelID)
                 this.styleManager.updateModelAvarta(msgPayload.modelID,msgPayload.avarta)
             } 
-            else if(msgPayload.noAvarta)  this.styleManager.updateModelAvarta(msgPayload.modelID,null)
-            else if(msgPayload.dimensionRatio)  this.styleManager.updateModelTwinDimension(msgPayload.modelID,msgPayload.dimensionRatio)
+            else if(msgPayload.noAvarta)  {
+                this.styleManager.adjustModelsBaseDimension(msgPayload.modelID)
+                this.styleManager.updateModelAvarta(msgPayload.modelID,null)
+            }else if(msgPayload.dimensionRatio)  this.styleManager.updateModelTwinDimension(msgPayload.modelID,msgPayload.dimensionRatio)
         } 
     }else if(msgPayload.message=="relationsDeleted") this.visualManager.hideRelations(msgPayload.relations)
     else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName)   }

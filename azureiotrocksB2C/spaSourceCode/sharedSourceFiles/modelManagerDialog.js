@@ -161,12 +161,7 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
     chooseAvartaBtn.on("click",()=>{this.chooseAvarta(modelID)})
 
     clearAvartaBtn.on("click", () => {
-        var visualJson = globalCache.visualDefinition["default"].detail
-        if (visualJson[modelID]) delete visualJson[modelID].avarta
-        if (this.avartaImg) this.avartaImg.removeAttr('src');
-        this.saveVisualDefinition()
-        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID": modelID, "noAvarta": true })
-        this.refreshModelTreeLabel()
+        this.updateAvartaDataUrl(null,modelID)
     });
 
     
@@ -228,7 +223,19 @@ modelManagerDialog.prototype.fillRightSpan=async function(modelID){
 }
 
 modelManagerDialog.prototype.updateAvartaDataUrl = function (dataUrl,modelID) {
-    if (!dataUrl) return;
+    if (!dataUrl){
+        var visualJson = globalCache.visualDefinition["default"].detail
+        if (visualJson[modelID]){
+            delete visualJson[modelID].avarta
+            delete visualJson[modelID].avartaWidth
+            delete visualJson[modelID].avartaHeight
+        } 
+        if (this.avartaImg) this.avartaImg.removeAttr('src');
+        this.saveVisualDefinition()
+        this.broadcastMessage({ "message": "visualDefinitionChange", "modelID": modelID, "noAvarta": true })
+        this.refreshModelTreeLabel()
+        return;
+    } 
     
     //if it is svg, check if the svg set its width and height attribute, as cytoscape js can not handle svg scaling withouth width and heigh attribute
     var dec= decodeURIComponent(dataUrl)
@@ -252,7 +259,6 @@ modelManagerDialog.prototype.updateAvartaDataUrl = function (dataUrl,modelID) {
     var visualJson = globalCache.visualDefinition["default"].detail //currently there is only one visual definition: "default"
     if (!visualJson[modelID]) visualJson[modelID] = {}
     visualJson[modelID].avarta = dataUrl
-
     
     var testImg = $(`<img src="${dataUrl}"/>`)
     testImg.on('load', ()=>{

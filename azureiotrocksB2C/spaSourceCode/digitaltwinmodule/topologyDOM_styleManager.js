@@ -202,12 +202,14 @@ topologyDOM_styleManager.prototype.updateStyleSheet=function(styleArr){
                 if(news[ind]!=null) continue
                 news[ind]=olds[ind]
             }
+            if(news["background-image"] && news["background-image"]=="NONE") delete news["background-image"]
             continue
         }else if(styleJson[ind].selector==".edgebendediting-hasbendpoints" ||styleJson[ind].selector==".edgecontrolediting-hascontrolpoints" || styleJson[ind].selector=="node.edgebendediting_scaleRotate" ) continue
         else if(this.highestStyleSelectors[styleJson[ind].selector]) continue
         
         arr.push(styleJson[ind])
     }
+    
     arr=arr.concat(styleArr)
     arr=arr.concat(this.highestStyleArr)
     this.core.style().fromJson(arr).update()
@@ -265,7 +267,8 @@ topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyMod
         var newW=Math.ceil(sizeAdjustRatio * baseDimension)
         var newH=newW
         var bgRatio='85%'
-        if(this.nodeModelVisualAdjustment[modelID].shape=="rectangle" && this.nodeModelVisualAdjustment[modelID].avarta){
+        var visualJson=globalCache.visualDefinition["default"].detail[modelID]
+        if(this.nodeModelVisualAdjustment[modelID].shape=="rectangle" && visualJson.avarta){
             var visualJson=globalCache.visualDefinition["default"].detail[modelID]
             if(visualJson.avartaHeight && visualJson.avartaHeight!=0){
                 var whRatio=visualJson.avartaWidth/visualJson.avartaHeight
@@ -291,10 +294,10 @@ topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyMod
 topologyDOM_styleManager.prototype.updateModelAvarta=function(modelID,dataUrl){
     if(!this.nodeModelVisualAdjustment[modelID])this.nodeModelVisualAdjustment[modelID]={}
     this.nodeModelVisualAdjustment[modelID].avarta=dataUrl
+
     try{
-        this.updateStyleSheet([
-            {selector:'node[modelID = "'+modelID+'"]',style:{'background-image': dataUrl}}
-        ])
+        if(dataUrl==null) dataUrl="NONE"
+        this.updateStyleSheet([{selector:'node[modelID = "'+modelID+'"]',style:{'background-image': dataUrl}} ])
     }catch(e){
         
     }
