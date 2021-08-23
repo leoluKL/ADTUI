@@ -652,8 +652,9 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         } 
     }else if(msgPayload.message=="relationsDeleted") this.visualManager.hideRelations(msgPayload.relations)
     else if(msgPayload.message=="saveLayout"){ this.saveLayout(msgPayload.layoutName)   }
-    else if (msgPayload.message == "layoutChange") this.visualManager.chooseLayout(globalCache.currentLayoutName)
-    else if(msgPayload.message=="alignSelectedNode") this.visualManager.alignSelectedNodes(msgPayload.direction)
+    else if (msgPayload.message == "layoutChange") {
+        this.visualManager.chooseLayout(globalCache.currentLayoutName)
+    }else if(msgPayload.message=="alignSelectedNode") this.visualManager.alignSelectedNodes(msgPayload.direction)
     else if(msgPayload.message=="distributeSelectedNode") this.visualManager.distributeSelectedNode(msgPayload.direction)
     else if(msgPayload.message=="rotateSelectedNode") this.visualManager.rotateSelectedNode(msgPayload.direction)
     else if(msgPayload.message=="mirrorSelectedNode") this.visualManager.mirrorSelectedNode(msgPayload.direction)

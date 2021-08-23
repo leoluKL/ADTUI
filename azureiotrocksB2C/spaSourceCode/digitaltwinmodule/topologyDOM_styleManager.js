@@ -225,11 +225,19 @@ topologyDOM_styleManager.prototype.updateStyleSheet=function(styleArr){
         .style({
             'width':  (ele)=> {
                 var scaleF=ele.data('scaleFactor')||1
-                return parseFloat(ele.data("originalWidth"))*scaleF
+                if(!ele.data("originalWidth")){
+                    ele.data("originalWidth",ele.width())
+                }
+                var theW=ele.data("originalWidth")
+                return parseFloat(theW)*scaleF
             },
             'height':  (ele)=> {
                 var scaleF=ele.data('scaleFactor')||1
-                return parseFloat(ele.data("originalHeight"))*scaleF
+                if(!ele.data("originalHeight")){
+                    ele.data("originalHeight",ele.height())
+                }
+                var theH=ele.data("originalHeight")
+                return parseFloat(theH)*scaleF
             },'shape-rotation': ( ele )=>{
                 return parseFloat(ele.data("rotateAngle")||0)
             }
