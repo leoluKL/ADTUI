@@ -244,16 +244,12 @@ topologyDOM_styleManager.prototype.updateStyleSheet=function(styleArr){
                 return parseFloat(ele.data("rotateAngle")||0)
             },'text-margin-x':(ele)=>{
                 var modelID=ele.data("modelID")
-                var visualJson = globalCache.visualDefinition["default"].detail
-                var xoff=visualJson[modelID].labelX||0
-                var scaleF=ele.data('scaleFactor')||1
-                return xoff*scaleF
+                var lblOffset=this.calculateLblOffset(modelID,ele.data('scaleFactor')||1)
+                return lblOffset[0]
             },'text-margin-y':(ele)=>{
                 var modelID=ele.data("modelID")
-                var visualJson = globalCache.visualDefinition["default"].detail
-                var yoff=visualJson[modelID].labelY||0 
-                var scaleF=ele.data('scaleFactor')||1
-                return yoff*scaleF
+                var lblOffset=this.calculateLblOffset(modelID,ele.data('scaleFactor')||1)
+                return lblOffset[1]
             }
         }).update()
 }
@@ -267,14 +263,14 @@ topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyMod
         var arr=[
             {selector:'node',style:{ 'font-size': fs, width: baseDimension, height: baseDimension }}, //normal node is a circle, width=height
             {selector:'node:selected',style:{ 'border-width': Math.ceil(baseDimension / 15) }},
+            {selector:'edge',style:{'width':2}}
         ]
     }else{
         arr=[]
     }
-    
     for (var modelID in this.nodeModelVisualAdjustment) {
         if(specifyModelID!=null && modelID!=specifyModelID) continue
-        var sizeAdjustRatio=this.nodeModelVisualAdjustment[modelID].sizeRatio||1
+        var sizeAdjustRatio=this.nodeModelVisualAdjustment[modelID].dimensionRatio||1
         //if its shape is round-rectangle (actually it is polygon rectangle) and it does have a svg or image avarta, then it is possible that this type of nodes have width different from height. It will follow the width-height-ratio of the image or svg
         var newW=Math.ceil(sizeAdjustRatio * baseDimension)
         var newH=newW
@@ -303,9 +299,27 @@ topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyMod
                 ele.data("originalHeight", newH)
             }
         })
-        arr.push({selector:'node[modelID = "' + modelID + '"]',style:{ width: newW, height: newH,'background-width':bgRatioW+"%",'background-height':bgRatioH+"%" }}) 
+        
+        var lblOffset=this.calculateLblOffset(modelID)
+        arr.push({
+            selector: 'node[modelID = "' + modelID + '"]', style: {
+                width: newW, height: newH, 'background-width': bgRatioW + "%", 'background-height': bgRatioH + "%"
+                ,"text-margin-x":lblOffset[0],'text-margin-y':lblOffset[1] 
+            }
+        })
     }
     this.updateStyleSheet(arr)
+}
+
+topologyDOM_styleManager.prototype.calculateLblOffset=function(modelID,scaleF){
+    var visualJson=globalCache.visualDefinition["default"].detail[modelID]
+    if(!visualJson) return [0,0]
+    var xoff=visualJson.labelX||0
+    var yoff=visualJson.labelY||0
+    var dimensionRatio= visualJson.dimensionRatio||1 
+    var baseNodeAdjustR= this.baseNodeSize/30
+    var scaleF=scaleF||1
+    return [xoff*dimensionRatio*baseNodeAdjustR*scaleF,yoff*dimensionRatio*baseNodeAdjustR*scaleF ] 
 }
 
 topologyDOM_styleManager.prototype.updateModelAvarta=function(modelID,dataUrl){
@@ -338,19 +352,12 @@ topologyDOM_styleManager.prototype.updateModelTwinShape=function(modelID,shape){
 
 topologyDOM_styleManager.prototype.updateModelTwinDimension=function(modelID,dimensionRatio){
     if(!this.nodeModelVisualAdjustment[modelID])this.nodeModelVisualAdjustment[modelID]={}
-    this.nodeModelVisualAdjustment[modelID].sizeRatio=parseFloat(dimensionRatio)
-    this.core.trigger("zoom")
+    this.nodeModelVisualAdjustment[modelID].dimensionRatio=parseFloat(dimensionRatio)
+    this.adjustModelsBaseDimension(modelID)
 }
 
 topologyDOM_styleManager.prototype.updateModelTwinLabelOffset = function (modelID) {
-    var visualJson = globalCache.visualDefinition["default"].detail
-    var xoff=visualJson[modelID].labelX||0
-    var yoff=visualJson[modelID].labelY||0
-    var newStyle = {
-        selector: 'node[modelID = "' + modelID + '"]'
-        , style: { 'text-margin-x': xoff, 'text-margin-y': yoff }
-    }
-    this.updateStyleSheet([newStyle])
+    this.adjustModelsBaseDimension(modelID)
 }
 
 topologyDOM_styleManager.prototype.updateRelationshipColor=function(srcModelID,relationshipName,colorCode){
@@ -395,11 +402,13 @@ topologyDOM_styleManager.prototype.getFontSizeInCurrentZoom=function(){
 
 topologyDOM_styleManager.prototype.getNodeSizeInCurrentZoom=function(){
     var curZoom=this.core.zoom()
+    //console.log(curZoom)
+    //bigger zoom means zoom in more to the detail
     if(curZoom>1){//scale up but not too much
-        var ratio= (curZoom-1)*(2-1)/9+1
+        var ratio= (curZoom-1)*(2-1)/4+1
         return Math.ceil(this.defaultNodeSize/ratio)
     }else{
-        var ratio= (1/curZoom-1)*(4-1)/9+1
+        var ratio= (1/curZoom-1)*(2-1)/4+1
         return Math.ceil(this.defaultNodeSize*ratio)
     }
 }

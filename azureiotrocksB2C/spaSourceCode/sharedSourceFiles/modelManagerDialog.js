@@ -339,10 +339,10 @@ modelManagerDialog.prototype.fillVisualization=function(modelID,parentDom){
 
     var leftPart=aTable.find("td:first")
     var rightPart=aTable.find("td:nth-child(2)")
-    rightPart.css({"width":"50px","height":"50px","border":"solid 1px lightGray"})
-    
+    var outerDIV=$("<div class='w3-border' style='width:55px;height:55px;padding:5px'></div>")
     var avartaImg=$("<img style='height:45px'></img>")
-    rightPart.append(avartaImg)
+    rightPart.append(outerDIV)
+    outerDIV.append(avartaImg)
     var visualJson=globalCache.visualDefinition["default"].detail
     if(visualJson && visualJson[modelID] && visualJson[modelID].avarta) avartaImg.attr('src',visualJson[modelID].avarta)
     this.avartaImg=avartaImg;
@@ -375,7 +375,11 @@ modelManagerDialog.prototype.addLabelVisualizationRow=function(modelID,parentDom
     else lblXAdjustSelector.val("0")
     containerDiv.append(lblXAdjustSelector)
     var lblYAdjustSelector = $('<select class="w3-border" style="outline:none;width:110px"></select>')
-    for(var f=-25;f<=30;f+=5){
+    for(var f=0;f<30;f+=5){
+        var val=f.toFixed(0)+""
+        lblYAdjustSelector.append($("<option value="+val+">yoff:"+val+"</option>"))
+    }
+    for(var f=30;f<=90;f+=10){
         var val=f.toFixed(0)+""
         lblYAdjustSelector.append($("<option value="+val+">yoff:"+val+"</option>"))
     }
@@ -518,7 +522,11 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
 
     var sizeAdjustSelector = $('<select class="w3-border" style="outline:none;width:110px"></select>')
     if(relatinshipName==null){
-        for(var f=0.2;f<=3;f+=0.4){
+        for(var f=0.2;f<=2;f+=0.4){
+            var val=f.toFixed(1)+""
+            sizeAdjustSelector.append($("<option value="+val+">dimension*"+val+"</option>"))
+        }
+        for(var f=2;f<=10;f+=1){
             var val=f.toFixed(1)+""
             sizeAdjustSelector.append($("<option value="+val+">dimension*"+val+"</option>"))
         }
@@ -527,6 +535,10 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
     }else{
         sizeAdjustSelector.css("width","80px")
         for(var f=0.5;f<=4;f+=0.5){
+            var val=f.toFixed(1)+""
+            sizeAdjustSelector.append($("<option value="+val+">width *"+val+"</option>"))
+        }
+        for(var f=5;f<=10;f+=1){ 
             var val=f.toFixed(1)+""
             sizeAdjustSelector.append($("<option value="+val+">width *"+val+"</option>"))
         }
@@ -544,6 +556,7 @@ modelManagerDialog.prototype.addOneVisualizationRow=function(modelID,parentDom,r
             if(!visualJson[modelID]) visualJson[modelID]={}
             visualJson[modelID].dimensionRatio=chooseVal
             this.broadcastMessage({ "message": "visualDefinitionChange", "modelID":modelID,"dimensionRatio":chooseVal })
+            this.refreshModelTreeLabel()
         }else{
             if(!visualJson[modelID]["rels"]) visualJson[modelID]["rels"]={}
             if(!visualJson[modelID]["rels"][relatinshipName]) visualJson[modelID]["rels"][relatinshipName]={}
@@ -707,9 +720,11 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
                 var shape = visualJson.shape || "ellipse"
                 var avarta = visualJson.avarta
                 if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
+                if(dimension>60) dimension=60
             }
 
-            var iconDOM=$("<div style='width:"+dimension+"px;height:"+dimension+"px;float:left;position:relative'></div>")
+            var iconDOMDimension=Math.max(dimension,20) //other wise it is too small to be in vertical middle of parent div
+            var iconDOM=$("<div style='width:"+iconDOMDimension+"px;height:"+iconDOMDimension+"px;float:left;position:relative'></div>")
             if(dbModelInfo.isIoTDeviceModel){
                 var iotDiv=$("<div class='w3-border' style='position:absolute;right:-5px;padding:0px 2px;top:-9px;border-radius: 3px;font-size:7px'>IoT</div>")
                 iconDOM.append(iotDiv)
@@ -717,7 +732,12 @@ modelManagerDialog.prototype.listModels=async function(shouldBroadcast){
 
 
             var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,colorCode,secondColor))
-            iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
+            var shapeImg=$("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>")
+            shapeImg.css({"width":dimension+"px","height":dimension+"px"})
+            if(dimension<iconDOMDimension){
+                shapeImg.css({"position":"absolute","top":(iconDOMDimension-dimension)/2+"px","left":(iconDOMDimension-dimension)/2+"px"})
+            }
+            iconDOM.append(shapeImg)
             if(avarta){
                 var avartaimg=$(`<img style='max-width:${dimension*0.75}px;max-height:${dimension*0.75}px;position:absolute;left:50%;top:50%;transform:translateX(-50%) translateY(-50%)' src='${avarta}'></img>`)
                 iconDOM.append(avartaimg)

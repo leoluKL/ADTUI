@@ -139,7 +139,7 @@ topologyDOM.prototype.init=function(){
         this.mouseOutFunction(e)
     })
     
-    this.core.on('zoom',(e)=>{
+    this.core.on("zoom",(e)=>{
         var fs=this.getFontSizeInCurrentZoom();
         var dimension=this.getNodeSizeInCurrentZoom();
 
@@ -511,8 +511,10 @@ topologyDOM.prototype.drawRelations=function(relationsData){
         aRelation.data["id"]=theID
         aRelation.data["source"]=originalInfo['$sourceId']
         aRelation.data["target"]=originalInfo['$targetId']
-        if(this.core.$("#"+aRelation.data["source"]).length==0 || this.core.$("#"+aRelation.data["target"]).length==0) continue
-        var sourceNode=this.core.$("#"+aRelation.data["source"])
+
+        if(this.core.$(`[id="${aRelation.data["source"]}"]`).length==0 
+            || this.core.$(`[id="${aRelation.data["target"]}"]`).length==0) continue
+        var sourceNode=this.core.$(`[id="${aRelation.data["source"]}"]`)
         var sourceModel=sourceNode[0].data("originalInfo")['$metadata']['$model']
         
         //add additional source node information to the original relationship information
@@ -621,7 +623,7 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         this.drawTwins([msgPayload.twinInfo],"animation")
         var nodeInfo= msgPayload.twinInfo;
         var nodeName= nodeInfo["$dtId"]
-        var topoNode= this.core.nodes("#"+nodeName)
+        var topoNode= this.core.nodes(`[id="${nodeName}"]`)
         if(topoNode){
             var position=topoNode.renderedPosition()
             this.core.panBy({x:-position.x+200,y:-position.y+200})
@@ -637,13 +639,13 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         var arr=msgPayload.info;
         var mouseClickDetail=msgPayload.mouseClickDetail;
         arr.forEach(element => {
-            var aTwin= this.core.nodes("#"+element['$dtId'])
+            var aTwin=this.core.nodes(`[id="${element['$dtId']}"]`)
             aTwin.select()
             if(mouseClickDetail!=2) this.animateANode(aTwin) //ignore double click second click
         });
     }else if(msgPayload.message=="PanToNode"){
         var nodeInfo= msgPayload.info;
-        var topoNode= this.core.nodes("#"+nodeInfo["$dtId"])
+        var topoNode=this.core.nodes(`[id="${nodeInfo["$dtId"]}"]`)
         if(topoNode){
             this.core.center(topoNode)
         }

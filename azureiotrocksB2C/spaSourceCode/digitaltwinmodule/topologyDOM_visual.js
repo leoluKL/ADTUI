@@ -14,6 +14,7 @@ topologyDOM_visual.prototype.chooseLayout = function (layoutName) {
         var layoutDetail = globalCache.layoutJSON[layoutName].detail
         if (layoutDetail) {
             this.applyNewLayoutWithUndo(layoutDetail, this.getCurrentLayoutDetail(),null,"centerNodes")
+            this.core.fit(this.core.nodes()) 
         }
     }
 }
@@ -285,9 +286,9 @@ topologyDOM_visual.prototype.drawRelations=function(relationsData){
         aRelation.data["source"]=globalCache.twinIDMapToDisplayName[originalInfo['$sourceId']]
         aRelation.data["target"]=globalCache.twinIDMapToDisplayName[originalInfo['$targetId']]
 
-
-        if(this.core.$("#"+aRelation.data["source"]).length==0 || this.core.$("#"+aRelation.data["target"]).length==0) continue
-        var sourceNode=this.core.$("#"+aRelation.data["source"])
+        if(this.core.$(`[id="${aRelation.data["source"]}"]`).length==0 
+            || this.core.$(`[id="${aRelation.data["target"]}"]`).length==0) continue
+        var sourceNode=this.core.$(`[id="${aRelation.data["source"]}"]`)
         var sourceModel=sourceNode[0].data("originalInfo")['$metadata']['$model']
         
         //add additional source node information to the original relationship information
@@ -342,8 +343,8 @@ topologyDOM_visual.prototype.showSimulatorSource = function (twinID,simNodeName,
         }
         ,group:"nodes"
     }])
-    var topoNode= this.core.nodes("#"+simNodeName)
-    var sourceNode=this.core.nodes("#"+twinName)
+    var topoNode= this.core.nodes(`[id="${simNodeName}"]`)
+    var sourceNode=this.core.nodes(`[id="${twinName}"]`)
     if(topoNode){
         var position=sourceNode.renderedPosition()
         topoNode.renderedPosition( {x:position.x-60,y:position.y-parseInt((Math.random()-0.5)*120)} )
@@ -455,10 +456,12 @@ topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,
             x:layoutDetail[ind][0]
             ,y:layoutDetail[ind][1]
         }
+        if (!onlyAdjustNodePosition) {
+            //apply scale or rotate if the twin node has
+            this.applyNodeScaleRotate(ind, layoutDetail[ind][2], layoutDetail[ind][3])
+        }
+        
         var dbTwin=globalCache.getSingleDBTwinByName(ind)
-        //apply scale or rotate if the twin node has
-        this.applyNodeScaleRotate(ind,layoutDetail[ind][2],layoutDetail[ind][3])
-
         if (!dbTwin || !dbTwin.simulate) continue
         //redraw the attached simulation data sources of twin
         for (var simNodeName in dbTwin.simulate) {
@@ -539,7 +542,7 @@ topologyDOM_visual.prototype.applyCurrentLayoutWithNoAnimtaion = function () {
             this.redrawBasedOnLayoutDetail(layoutDetail, null, "noAnimation")
         }
     }
-    this.core.center(this.core.nodes())
+    this.core.fit(this.core.nodes())
 }
 
 topologyDOM_visual.prototype.applyNewLayoutWithUndo = function (newLayoutDetail,oldLayoutDetail,onlyAdjustNodePosition,centerNodes) {

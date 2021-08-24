@@ -93,11 +93,11 @@ topologyDOM.prototype.init=function(){
         this.mouseOutFunction(e)
     })
     
-    this.core.on('zoom',(e)=>{
+    this.core.on("zoom",(e)=>{
         this.styleManager.adjustModelsBaseDimension()
     })
 
-    this.core.trigger("zoom")
+    this.styleManager.adjustModelsBaseDimension()
     this.setKeyDownFunc()
     
     this.menuManager=new topologyDOM_menu(this)
@@ -358,8 +358,6 @@ topologyDOM.prototype.deleteRelations=async function(relationsArr) {
     }
 }
 
-
-
 topologyDOM.prototype.smartPositionNode = function (mousePosition) {
     var zoomLevel=this.core.zoom()
     if(!this.draggingNode) return
@@ -457,7 +455,7 @@ topologyDOM.prototype.visualizeSingleInputInTwinCalculation = function (oneInput
     var twinName = globalCache.twinIDMapToDisplayName[oneInput.twinID]
     var edges=null;
     if(oneInput.targetTwinName){
-        var targetTwinNode = this.core.nodes("#" + oneInput.targetTwinName)
+        var targetTwinNode =this.core.nodes(`[id="${oneInput.targetTwinName}"]`)
         if (targetTwinNode) {
             targetTwinNode.addClass("calcOutput")
             this.lastCalcOutputStyleNodes.push(targetTwinNode)
@@ -465,7 +463,7 @@ topologyDOM.prototype.visualizeSingleInputInTwinCalculation = function (oneInput
             var edges = twinTopoNode.edgesTo(targetTwinNode)
         }
     } else {
-        var inputTwinNode = this.core.nodes("#" + twinName)
+        var inputTwinNode =this.core.nodes(`[id="${twinName}"]`)
         if (inputTwinNode) {
             inputTwinNode.addClass("calcInput")
             this.lastCalcInputStyleNodes.push(inputTwinNode)
@@ -544,6 +542,7 @@ topologyDOM.prototype.selectFunction = function () {
     }
 
     arr.forEach((ele) => { 
+        //console.log(ele.renderedPosition())
         //remove those special elements
         if(ele.data().notTwin) {
             ele.unselect()
@@ -566,7 +565,7 @@ topologyDOM.prototype.applyVisualDefinition=function(){
     var visualJson=globalCache.visualDefinition["default"].detail
     if(visualJson==null) return;
     for(var modelID in visualJson){
-        if(visualJson[modelID].color) this.styleManager.updateModelTwinColor(modelID,visualJson[modelID].color,visualJson[modelID].secondColor)
+        if(visualJson[modelID].color ||visualJson[modelID].secondColor  ) this.styleManager.updateModelTwinColor(modelID,visualJson[modelID].color,visualJson[modelID].secondColor)
         if(visualJson[modelID].shape) this.styleManager.updateModelTwinShape(modelID,visualJson[modelID].shape)
         if(visualJson[modelID].avarta) this.styleManager.updateModelAvarta(modelID,visualJson[modelID].avarta)
         if(visualJson[modelID].dimensionRatio) this.styleManager.updateModelTwinDimension(modelID,visualJson[modelID].dimensionRatio)
@@ -616,10 +615,14 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         this.visualManager.drawTwins([msgPayload.twinInfo],"animation")
         var nodeInfo= msgPayload.twinInfo;
         var nodeName= globalCache.twinIDMapToDisplayName[nodeInfo["$dtId"]]
-        var topoNode= this.core.nodes("#"+nodeName)
+        var topoNode= this.core.nodes(`[id="${nodeName}"]`)
         if(topoNode){
-            var position=topoNode.renderedPosition()
-            this.core.panBy({x:-position.x+200,y:-position.y+50})
+            var w=this.core.width()
+            var h= this.core.height()
+
+            var targetNodeRenderPosX= w/11
+            var targetNodeRenderPosY=h/2+((Math.random()-0.5)*h/4)
+            topoNode.renderedPosition({x:targetNodeRenderPosX,y:targetNodeRenderPosY})
             topoNode.select()
             this.selectFunction()
         }
@@ -631,14 +634,14 @@ topologyDOM.prototype.rxMessage=function(msgPayload){
         var arr=msgPayload.info;
         var mouseClickDetail=msgPayload.mouseClickDetail;
         arr.forEach(element => {
-            var aTwin= this.core.nodes("#"+element['displayName'])
+            var aTwin=this.core.nodes(`[id="${element['displayName']}"]`)
             aTwin.select()
             if(mouseClickDetail!=2) this.visualManager.animateANode(aTwin) //ignore double click second click
         });
     }else if(msgPayload.message=="PanToNode"){
         var nodeInfo= msgPayload.info;
         var nodeName= globalCache.twinIDMapToDisplayName[nodeInfo["$dtId"]]
-        var topoNode= this.core.nodes("#"+nodeName)
+        var topoNode= this.core.nodes(`[id="${nodeName}"]`)
         if(topoNode){
             this.core.center(topoNode)
         }
