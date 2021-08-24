@@ -68,7 +68,7 @@ topologyDOM.prototype.init=function(){
         bendRemovalSensitivity: 16,
         enableMultipleAnchorRemovalOption: true,
         stickyAnchorTolerence: 20,
-        anchorShapeSizeFactor: 5,
+        anchorShapeSizeFactor: 2,
         enableAnchorSizeNotImpactByZoom: true,
         enableRemoveAnchorMidOfNearLine: false,
         enableCreateAnchorOnDrag: false,
@@ -96,10 +96,31 @@ topologyDOM.prototype.init=function(){
     this.core.on("zoom",(e)=>{
         this.styleManager.adjustModelsBaseDimension()
     })
-
     this.styleManager.adjustModelsBaseDimension()
+    
     this.setKeyDownFunc()
     
+    var tapdragHandler=(e) => { 
+        this.smartPositionNode(e.position) 
+    }
+    var setOneTimeGrab = () => {
+        this.core.once("grab", (e) => {
+            if(e.target.isNode && e.target.isNode()){
+                this.draggingNode=e.target
+            } 
+            this.core.on("tapdrag",tapdragHandler )
+            setOneTimeFree()
+        })
+    }
+    var setOneTimeFree = () => {
+        this.core.once("free", (e) => {
+            this.draggingNode=null
+            setOneTimeGrab()
+            this.core.removeListener("tapdrag",tapdragHandler)
+        })
+    }
+    setOneTimeGrab() 
+
     this.menuManager=new topologyDOM_menu(this)
     this.core.on('grab', (e)=>{
         this.broadcastMessage({ "message": "hideFloatInfoPanel"})
@@ -365,10 +386,20 @@ topologyDOM.prototype.smartPositionNode = function (mousePosition) {
     // - its connectfrom nodes and their connectto nodes
     // - its connectto nodes and their connectfrom nodes
     var incomers=this.draggingNode.incomers()
-    var outerFromIncom= incomers.outgoers()
     var outer=this.draggingNode.outgoers()
-    var incomFromOuter=outer.incomers()
-    var monitorSet=incomers.union(outerFromIncom).union(outer).union(incomFromOuter).filter('node').unmerge(this.draggingNode)
+
+    //also find the nearby node within certain x y offset area
+    var rpos=this.draggingNode.renderedPosition()
+    var nearbyNodes=this.core.collection()
+    var threshold=150
+    this.core.nodes().forEach(ele=>{
+        var eleRPos=ele.renderedPosition()
+        if(Math.abs(eleRPos.x-rpos.x)<threshold && Math.abs(eleRPos.y-rpos.y)<threshold) {
+            nearbyNodes.merge(ele)
+        }
+    })
+    
+    var monitorSet=incomers.union(outer).union(nearbyNodes).filter('node').unmerge(this.draggingNode)
 
     var returnExpectedPos=(diffArr,posArr)=>{
         var minDistance=Math.min(...diffArr)

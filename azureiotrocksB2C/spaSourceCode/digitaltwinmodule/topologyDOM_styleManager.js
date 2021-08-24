@@ -46,7 +46,7 @@ topologyDOM_styleManager.prototype.initStyle=function(){
         }},
         {selector: 'edge.hover',
         style: {
-            'width':5
+            'width':10
         }},
         {selector: 'node[modelID = "_fixed_simulationDataSource"]',
         style: {
@@ -117,7 +117,7 @@ topologyDOM_styleManager.prototype.defineHighPriorityStyles=function(){
             'text-border-color': 'gray'
         }},
         {selector:'edge:selected' , style:{
-            'width': 3,
+            'width': 8,
             'line-color': 'red',
             'target-arrow-color': 'red',
             'source-arrow-color': 'red',
@@ -263,7 +263,6 @@ topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyMod
         var arr=[
             {selector:'node',style:{ 'font-size': fs, width: baseDimension, height: baseDimension }}, //normal node is a circle, width=height
             {selector:'node:selected',style:{ 'border-width': Math.ceil(baseDimension / 15) }},
-            {selector:'edge',style:{'width':2}}
         ]
     }else{
         arr=[]
@@ -378,8 +377,7 @@ topologyDOM_styleManager.prototype.updateRelationshipShape=function(srcModelID,r
 topologyDOM_styleManager.prototype.updateRelationshipWidth=function(srcModelID,relationshipName,edgeWidth){
     var arr=[
         {selector:'edge[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)}},
-        {selector:'edge:selected[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)+1,'line-color': 'red'}},
-        {selector:'edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)+3}}
+        {selector:'edge.hover[sourceModel = "'+srcModelID+'"][relationshipName = "'+relationshipName+'"]',style:{'width':parseFloat(edgeWidth)+10}},
     ]
     this.updateStyleSheet(arr)
 }

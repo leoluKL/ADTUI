@@ -157,11 +157,11 @@ topologyDOM.prototype.init=function(){
     var instance = this.core.edgeEditing('get');
     var tapdragHandler=(e) => {
         instance.keepAnchorsAbsolutePositionDuringMoving()
-        if(e.target.isNode && e.target.isNode()) this.draggingNode=e.target
         this.smartPositionNode(e.position)
     }
     var setOneTimeGrab = () => {
         this.core.once("grab", (e) => {
+            if(e.target.isNode && e.target.isNode()) this.draggingNode=e.target
             var draggingNodes = this.core.collection()
             if (e.target.isNode()) draggingNodes.merge(e.target)
             var arr = this.core.$(":selected")
@@ -193,12 +193,24 @@ topologyDOM.prototype.init=function(){
 topologyDOM.prototype.smartPositionNode = function (mousePosition) {
     var zoomLevel=this.core.zoom()
     if(!this.draggingNode) return
-    //comparing nodes set: its connectfrom nodes and their connectto nodes, its connectto nodes and their connectfrom nodes
+    //consider lock mouse move position for these nodes:
+    // - its connectfrom nodes and their connectto nodes
+    // - its connectto nodes and their connectfrom nodes
     var incomers=this.draggingNode.incomers()
-    var outerFromIncom= incomers.outgoers()
     var outer=this.draggingNode.outgoers()
-    var incomFromOuter=outer.incomers()
-    var monitorSet=incomers.union(outerFromIncom).union(outer).union(incomFromOuter).filter('node').unmerge(this.draggingNode)
+
+    //also find the nearby node within certain x y offset area
+    var rpos=this.draggingNode.renderedPosition()
+    var nearbyNodes=this.core.collection()
+    var threshold=150
+    this.core.nodes().forEach(ele=>{
+        var eleRPos=ele.renderedPosition()
+        if(Math.abs(eleRPos.x-rpos.x)<threshold && Math.abs(eleRPos.y-rpos.y)<threshold) {
+            nearbyNodes.merge(ele)
+        }
+    })
+    
+    var monitorSet=incomers.union(outer).union(nearbyNodes).filter('node').unmerge(this.draggingNode)
 
     var returnExpectedPos=(diffArr,posArr)=>{
         var minDistance=Math.min(...diffArr)
