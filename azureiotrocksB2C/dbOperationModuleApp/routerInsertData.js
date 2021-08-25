@@ -6,6 +6,7 @@ function routerInsertData(){
     this.useRoute("newModels","post")
     this.useRoute("updateModel","post")
     this.useRoute("updateTwin","post")
+    this.useRoute("setTwinsGroupTag","post")
     this.useRoute("newTwin","post")
     this.useRoute("updateVisualSchema","post")
     this.useRoute("updateTopologySchema","post")
@@ -98,23 +99,50 @@ routerInsertData.prototype.updateModel =async function(req,res) {
     res.send({"updatedModelDoc":updatedModelDoc,"twins":queryResult})
 }
 
+routerInsertData.prototype.setTwinsGroupTag =async function(req,res) {
+    var projectID=req.body.projectID
+    var twinsIDArr=req.body.twinsIDArr
+    var groupTag=req.body.groupTag
+
+    try{
+        var promiseArr=[]
+        twinsIDArr.forEach(oneTwinID=>{
+            promiseArr.push(this.updateTwinDocument(projectID,oneTwinID,{"groupTag":groupTag}))
+        })
+        await Promise.allSettled(promiseArr);
+        res.end()
+    }catch(e){
+        res.status(400).send(e.message)
+    }
+
+}
+
+routerInsertData.prototype.updateTwinDocument =async function(projectID,twinID,updateInfo) {
+    try {
+        var originalDocument=await cosmosdbhelper.getDocByID("dtproject","projectID",projectID,twinID)
+        if(originalDocument.length==0) throw new Error("twin "+twinID+" is not found!")
+        var newTwinDocument = originalDocument[0]
+        for(var ind in updateInfo){
+            newTwinDocument[ind]=updateInfo[ind]
+        }
+        await cosmosdbhelper.insertRecord("dtproject", newTwinDocument)
+        return newTwinDocument;
+    } catch (e) {
+        throw e
+    }
+}
+
 routerInsertData.prototype.updateTwin =async function(req,res) {
     var projectID=req.body.projectID
     var twinID=req.body.twinID
     var updateInfo=JSON.parse(req.body.updateInfo)
 
-    try {
-        var originalDocument=await cosmosdbhelper.getDocByID("dtproject","projectID",projectID,twinID)
-        if(originalDocument.length==0) res.status(400).send("twin "+twinID+" is not found!")
-        var newTwinDocument = originalDocument[0]
-        for(var ind in updateInfo){
-            newTwinDocument[ind]=updateInfo[ind]
-        }
-        var updatedTwinDoc=await cosmosdbhelper.insertRecord("dtproject", newTwinDocument)
-    } catch (e) {
+    try{
+        var newTwinDocument= await this.updateTwinDocument(projectID,twinID,updateInfo)
+        res.send(newTwinDocument)
+    }catch (e) {
         res.status(400).send(e.message)
     }
-    res.send(updatedTwinDoc)
 }
 
 routerInsertData.prototype.twinCalculationScript_findAllIOInScript=async function(actualScript,formulaTwin,currentInputValue,projectID){
