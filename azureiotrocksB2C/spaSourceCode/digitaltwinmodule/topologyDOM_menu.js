@@ -219,6 +219,19 @@ topologyDOM_menu.prototype.addMenuItemsForOthers = function () {
             }
         },
         {
+            id: 'addGroupTag',
+            content: 'Add Group Tag',
+            selector: 'node',
+            onClickFunction: (e) => {
+                var collection=this.node_changeSelectionWhenClickElement(e.target).filter('node')
+                var nodesID=[]
+                collection.forEach(ele=>{
+                    nodesID.push(ele.data("originalInfo")["$dtId"])
+                })
+                
+            }
+        },
+        {
             id: 'copyScaleRotate',
             content: 'Copy Style',
             selector: 'node.edgebendediting_scaleRotate',

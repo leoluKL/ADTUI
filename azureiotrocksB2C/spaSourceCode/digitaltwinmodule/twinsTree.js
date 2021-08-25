@@ -8,40 +8,7 @@ function twinsTree(DOM, searchDOM) {
     this.tree=new simpleTree(DOM,{"leafNameProperty":"displayName"})
 
     this.tree.options.groupNodeIconFunc=(gn)=>{
-        var modelClass=gn.info["@id"]
-        var dbModelInfo=globalCache.getSingleDBModelByID(modelClass)
-        var colorCode="darkGray"
-        var shape="ellipse"
-        var avarta=null
-        var dimension=20;
-        if(globalCache.visualDefinition["default"].detail[modelClass]){
-            var visualJson =globalCache.visualDefinition["default"].detail[modelClass]
-            var colorCode= visualJson.color || "darkGray"
-            var secondColorCode = visualJson.secondColor
-            var shape=  visualJson.shape || "ellipse"
-            var avarta= visualJson.avarta 
-            if(visualJson.dimensionRatio) dimension*=parseFloat(visualJson.dimensionRatio)
-            if(dimension>60) dimension=60
-        }
-        var iconDOMDimension=Math.max(dimension,20) //other wise it is too small to be in vertical middle of parent div
-        var iconDOM=$("<div style='width:"+iconDOMDimension+"px;height:"+iconDOMDimension+"px;float:left;position:relative'></div>")
-        if(dbModelInfo && dbModelInfo.isIoTDeviceModel){
-            var iotDiv=$("<div class='w3-border' style='position:absolute;right:-5px;padding:0px 2px;top:-7px;border-radius: 3px;font-size:7px'>IoT</div>")
-            iconDOM.append(iotDiv)
-        }
-
-        var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,colorCode,secondColorCode))
-        var shapeImg = $("<img src='data:image/svg+xml;utf8," + imgSrc + "'></img>")
-        shapeImg.css({ "width": dimension + "px", "height": dimension + "px" })
-        if (dimension < iconDOMDimension) {
-            shapeImg.css({ "position": "absolute", "top": (iconDOMDimension - dimension) / 2 + "px", "left": (iconDOMDimension - dimension) / 2 + "px" })
-        }
-        iconDOM.append(shapeImg)
-        if(avarta){
-            var avartaimg=$(`<img style='max-width:${dimension*0.75}px;max-height:${dimension*0.75}px;position:absolute;left:50%;top:50%;transform:translateX(-50%) translateY(-50%)' src='${avarta}'></img>`)
-            iconDOM.append(avartaimg)
-        }
-        return iconDOM
+        return globalCache.generateModelIcon(gn.info["@id"])
     }
 
     this.tree.options.groupNodeTailButtonFunc = (gn) => {

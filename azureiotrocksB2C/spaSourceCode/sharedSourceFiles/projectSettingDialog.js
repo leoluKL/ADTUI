@@ -143,28 +143,7 @@ projectSettingDialog.prototype.addOneVisualSchema=function(oneSchemaObj,parentDi
     })
 
     for(var modelID in detail){
-        var visualJson=detail[modelID]
-        var avarta = null
-        var dimension = 20;
-        var colorCode = visualJson.color || "darkGray"
-        var secondColor=visualJson.secondColor
-        var shape = visualJson.shape || "ellipse"
-        var avarta = visualJson.avarta
-        if (visualJson.dimensionRatio) dimension *= parseFloat(visualJson.dimensionRatio)
-        if(dimension>60) dimension=60
-        var iconDOMDimension=Math.max(dimension,20) //other wise it is too small to be in vertical middle of parent div
-        var iconDOM = $("<div style='width:" + iconDOMDimension + "px;height:" + iconDOMDimension + "px;float:left;position:relative'></div>")
-        var imgSrc = encodeURIComponent(globalCache.shapeSvg(shape, colorCode,secondColor))
-        var shapeImg = $("<img src='data:image/svg+xml;utf8," + imgSrc + "'></img>")
-        shapeImg.css({ "width": dimension + "px", "height": dimension + "px" })
-        if (dimension < iconDOMDimension) {
-            shapeImg.css({ "position": "absolute", "top": (iconDOMDimension - dimension) / 2 + "px", "left": (iconDOMDimension - dimension) / 2 + "px" })
-        }
-        iconDOM.append(shapeImg)
-        if (avarta) {
-            var avartaimg=$(`<img style='max-width:${dimension*0.75}px;max-height:${dimension*0.75}px;position:absolute;left:50%;top:50%;transform:translateX(-50%) translateY(-50%)' src='${avarta}'></img>`)
-            iconDOM.append(avartaimg)
-        }
+        var iconDOM=globalCache.generateModelIcon(modelID)
         oneSchemaRow.append(iconDOM)
     }
 

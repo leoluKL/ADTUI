@@ -1,7 +1,8 @@
 const globalCache = require("../sharedSourceFiles/globalCache");
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 const modelIoTSettingDialog = require("./modelIoTSettingDialog")
-const simpleExpandableSection = require("../sharedSourceFiles/simpleExpandableSection")
+const simpleExpandableSection = require("../sharedSourceFiles/simpleExpandableSection");
+const { modelsCheckBoxes } = require("../digitaltwinmodule/startSelectionDialog");
 
 function singleModelTwinsList(singleADTModel,parentTwinsList) {
     this.parentTwinsList=parentTwinsList
@@ -187,30 +188,12 @@ singleTwinIcon.prototype.redrawIoTState=function(){
 }
 
 singleTwinIcon.prototype.redrawIcon=function(){
-    this.iconDOM.empty()
     var modelID= this.twinInfo.modelID;
-
-    var visualJson=globalCache.visualDefinition["default"].detail
-    var fillColor="darkGray"
-    if(visualJson[modelID] && visualJson[modelID].color) fillColor=visualJson[modelID].color
-    if(visualJson[modelID]) var secondColor=visualJson[modelID].secondColor
-    var dimension=30;
-    if(visualJson[modelID] && visualJson[modelID].dimensionRatio){
-        dimension*=parseFloat(visualJson[modelID].dimensionRatio)
-        this.iconDOM.css({"width":dimension+"px","height":dimension+"px"})
-    } 
-    var shape="ellipse"
-    if(visualJson[modelID] && visualJson[modelID].shape) shape=visualJson[modelID].shape
-    var avarta=null
-    if(visualJson[modelID] && visualJson[modelID].avarta) avarta=visualJson[modelID].avarta
-
-    var imgSrc=encodeURIComponent(globalCache.shapeSvg(shape,fillColor,secondColor))
-
-    this.iconDOM.append($("<img src='data:image/svg+xml;utf8,"+imgSrc+"'></img>"))
-    if(avarta){
-        var avartaimg=$(`<img style='max-width:${dimension*0.75}px;max-height:${dimension*0.75}px;position:absolute;left:50%;top:50%;transform:translateX(-50%) translateY(-50%)' src='${avarta}'></img>`)
-        this.iconDOM.append(avartaimg)
-    }
+    this.iconDOM.empty()
+    var modelSymbol=globalCache.generateModelIcon(modelID,30,this.iconDOM)
+    var size=modelSymbol.width()
+    if(size>30) this.iconDOM.css({"width":size+"px","height":size+"px"})
+    this.iconDOM.append(modelSymbol)
 }
 
 singleTwinIcon.prototype.highlight=function(){

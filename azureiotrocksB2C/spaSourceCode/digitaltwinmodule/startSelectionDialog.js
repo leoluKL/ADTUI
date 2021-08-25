@@ -171,17 +171,26 @@ startSelectionDialog.prototype.closeDialog=function(){
 
 startSelectionDialog.prototype.fillAvailableModels = function() {
     this.modelsCheckBoxes.empty()
-    this.modelsCheckBoxes.append('<input class="w3-check" type="checkbox" id="ALL"><label style="padding-left:5px"><b>ALL</b></label><p/>')
+    this.modelsCheckBoxes.append('<div style="display:block"><input class="w3-check" type="checkbox" id="ALL"><label style="padding-left:5px"><b>ALL</b></label><p/></div>')
     globalCache.DBModelsArr.forEach(oneModel=>{
         var modelName=oneModel["displayName"]
         var modelID=oneModel["id"]
-        this.modelsCheckBoxes.append(`<input class="w3-check" type="checkbox" id="${modelID}"><label style="padding-left:5px">${modelName}</label><p/>`)
+        var symbol=globalCache.generateModelIcon(modelID)
+        var rowH=Math.max(24,symbol.height())
+        var rowDiv=$("<div style='display:flex;align-items:center;margin-top:8px;height:"+rowH+"px'></div>")
+        this.modelsCheckBoxes.append(rowDiv)
+        rowDiv.append(`<input class="w3-check" style="top:0px;float:left" type="checkbox" id="${modelID}">`)
+        var innerDiv=$("<div style='display:flex;align-items:center;margin-left:6px'></div>")
+        rowDiv.append(innerDiv)
+        
+        innerDiv.append(symbol)
+        innerDiv.append(`<label style="padding-left:5px">${modelName}</label><p/>`)
     })
     this.modelsCheckBoxes.on("change",(evt)=>{
         if($(evt.target).attr("id")=="ALL"){
             //select all the other input
             var val=$(evt.target).prop("checked")
-            this.modelsCheckBoxes.children('input').each(function () {
+            this.modelsCheckBoxes.find('input').each(function () {
                 $(this).prop("checked",val)
             });
         }
@@ -192,7 +201,7 @@ startSelectionDialog.prototype.fillAvailableModels = function() {
 startSelectionDialog.prototype.getSelectedTwins=function(){
     var reArr=[]
     var chosenModels={}
-    this.modelsCheckBoxes.children('input').each(function () {
+    this.modelsCheckBoxes.find('input').each(function () {
         if(!$(this).prop("checked")) return;
         if($(this).attr("id")=="ALL") return;
         chosenModels[$(this).attr("id")]=1
