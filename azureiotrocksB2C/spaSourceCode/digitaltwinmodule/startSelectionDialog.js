@@ -70,8 +70,16 @@ startSelectionDialog.prototype.popup = async function() {
     rightSpan.children(':first').append(selectedTwinsDOM)
     this.selectedTwinsDOM=selectedTwinsDOM 
 
-    this.leftSpan.append($('<div class="w3-bar"><div class="w3-bar-item w3-tooltip" style="padding-left:2px;font-weight:bold;color:gray">Choose twins...<p style="position:absolute;text-align:left;font-weight:normal;top:-10px;width:140px" class="w3-text w3-tag w3-tiny">choose twins of one or more models</p></div></div>'))
+    var row1=$("<div style='margin:8px 0px;font-weight:bold;color:gray;display:flex;align-items:center;height:24px'></div>")
+    this.leftSpan.append(row1)
+    row1.append($('<label style="padding-right:5px">Choose twins</label>'))
 
+    var radioByModel=$('<input type="radio" name="SelectTwins" value="model" checked><label style="font-weight:normal;padding-right:8px">By Model</label>')
+    var radioBTag=$('<input type="radio" name="SelectTwins" value="tag"><label  style="font-weight:normal">By Tag</label>')
+    row1.append(radioByModel,radioBTag)
+    radioBTag.on("change",(e)=>{this.chooseTwinBy="tag"; this.fillAvailableTags() })
+    radioByModel.on("change",(e)=>{this.chooseTwinBy="model"; this.fillAvailableModels() })
+    
     this.modelsCheckBoxes=$('<form class="w3-container w3-border" style="height:'+(panelHeight-40)+'px;overflow:auto"></form>')
     leftSpan.append(this.modelsCheckBoxes)
     
@@ -80,6 +88,8 @@ startSelectionDialog.prototype.popup = async function() {
     }else{
         switchProjectSelector.triggerOptionIndex(0)
     }
+
+    radioByModel.trigger("change") 
 }
 
 startSelectionDialog.prototype.chooseProject = async function (selectedProjectID) {
@@ -158,7 +168,8 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
         if (e.responseText) alert(e.responseText)
         return
     }
-    this.fillAvailableModels()
+    if(this.chooseTwinBy=="tag") this.fillAvailableTags()
+    else this.fillAvailableModels()
     this.listTwins()
 }
 
@@ -167,6 +178,39 @@ startSelectionDialog.prototype.chooseProject = async function (selectedProjectID
 startSelectionDialog.prototype.closeDialog=function(){
     this.DOM.hide()
     this.broadcastMessage({ "message": "startSelectionDialog_closed"})
+}
+
+startSelectionDialog.prototype.getTagsTwins = function(){
+    var tagsTwins={"ALL":[],"Non Tagged":[]}
+    for(var twinID in globalCache.DBTwins){
+        var aDBTwin=globalCache.DBTwins[twinID]
+        tagsTwins["ALL"].push(aDBTwin)
+        var tag=aDBTwin.groupTag
+        if(tag==null) tagsTwins["Non Tagged"].push(aDBTwin)
+        else{
+            if(tagsTwins[tag]==null)tagsTwins[tag]=[]
+            tagsTwins[tag].push(aDBTwin)
+        }
+    }
+    return tagsTwins
+}
+
+startSelectionDialog.prototype.fillAvailableTags = function(){
+    var tagsTwins=this.getTagsTwins()
+    this.modelsCheckBoxes.empty() 
+    for(var tagName in tagsTwins){
+        var arr=tagsTwins[tagName]
+        var rowDiv=$("<div style='display:flex;align-items:center;margin-top:8px;height:24px'></div>")
+        this.modelsCheckBoxes.append(rowDiv)
+        rowDiv.append(`<input class="w3-check" style="top:0px;float:left" type="checkbox" id="${tagName}"/>`)
+        rowDiv.append(`<label style="padding-left:5px">${tagName}</label><p/>`)
+        var numberlabel=$("<label class='w3-lime' style='display:inline;font-size:9px;padding:2px;margin-left:5px;font-weight:normal;border-radius: 2px;'>"+arr.length+"</label>")
+        rowDiv.append(numberlabel)
+    }
+    this.modelsCheckBoxes.off("change")//clear any previsou on change func
+    this.modelsCheckBoxes.on("change",(evt)=>{
+        this.listTwins()
+    })
 }
 
 startSelectionDialog.prototype.fillAvailableModels = function() {
@@ -185,8 +229,9 @@ startSelectionDialog.prototype.fillAvailableModels = function() {
         innerDiv.append(symbol)
         innerDiv.append(`<label style="padding-left:5px">${modelName}</label><p/>`)
     })
+    this.modelsCheckBoxes.off("change") //clear any previsou on change func
     this.modelsCheckBoxes.on("change",(evt)=>{
-        if($(evt.target).attr("id")=="ALL"){
+        if($(evt.target).attr("id")=="ALL"){ 
             //select all the other input
             var val=$(evt.target).prop("checked")
             this.modelsCheckBoxes.find('input').each(function () {
@@ -199,15 +244,30 @@ startSelectionDialog.prototype.fillAvailableModels = function() {
 
 startSelectionDialog.prototype.getSelectedTwins=function(){
     var reArr=[]
-    var chosenModels={}
-    this.modelsCheckBoxes.find('input').each(function () {
-        if(!$(this).prop("checked")) return;
-        if($(this).attr("id")=="ALL") return;
-        chosenModels[$(this).attr("id")]=1
-    });
-    for(var twinID in globalCache.DBTwins){
-        var aTwin=globalCache.DBTwins[twinID]
-        if(chosenModels[aTwin["modelID"]])  reArr.push(aTwin)
+    var tagsTwins=this.getTagsTwins()
+    if(this.chooseTwinBy=="tag"){
+        var checkedArr=[]
+        this.modelsCheckBoxes.find('input').each( function () {
+            if(!$(this).prop("checked")) return;
+            checkedArr=checkedArr.concat(tagsTwins[$(this).attr("id")])
+        });
+        var usedID={}
+        checkedArr.forEach(oneTwin=>{
+            if(usedID[oneTwin["id"]]) return;
+            usedID[oneTwin["id"]]=1
+            reArr.push(oneTwin)
+        })
+    }else{
+        var chosenModels={}
+        this.modelsCheckBoxes.find('input').each(function () {
+            if(!$(this).prop("checked")) return;
+            if($(this).attr("id")=="ALL") return;
+            chosenModels[$(this).attr("id")]=1
+        });
+        for(var twinID in globalCache.DBTwins){
+            var aTwin=globalCache.DBTwins[twinID]
+            if(chosenModels[aTwin["modelID"]])  reArr.push(aTwin)
+        }    
     }
     return reArr;
 }

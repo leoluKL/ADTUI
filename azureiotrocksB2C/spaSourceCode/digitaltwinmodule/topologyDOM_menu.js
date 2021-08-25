@@ -1,5 +1,8 @@
 const globalCache = require("../sharedSourceFiles/globalCache")
 const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
+const simpleConfirmDialog=require("../sharedSourceFiles/simpleConfirmDialog")
+const msalHelper=require("../msalHelper")
+
 function topologyDOM_menu(parentTopologyDOM){
     this.parentTopologyDOM=parentTopologyDOM
     this.core=parentTopologyDOM.core
@@ -228,7 +231,7 @@ topologyDOM_menu.prototype.addMenuItemsForOthers = function () {
                 collection.forEach(ele=>{
                     nodesID.push(ele.data("originalInfo")["$dtId"])
                 })
-                
+                this.setGroupTag(nodesID)
             }
         },
         {
@@ -257,6 +260,36 @@ topologyDOM_menu.prototype.addMenuItemsForOthers = function () {
     ])
 }
 
+
+topologyDOM_menu.prototype.setGroupTag=function(nodesIDArr){
+    var dialog=new simpleConfirmDialog()
+    var sendTagReqest=(tagStr)=>{
+        msalHelper.callAPI("digitaltwin/setTwinsGroupTag", "POST", {"twinsIDArr":nodesIDArr,"groupTag":tagStr},"withProjectID")
+        dialog.close() 
+    }
+    dialog.show({"width":"320px"},{
+        "title":"Assign Group Tag",
+        "customDrawing":(parentDOM)=>{
+            dialog.tagInput=$('<input type="text" style="margin:8px 0;padding:2px;width:290px;outline:none;display:inline" placeholder="Tag"/>').addClass("w3-input w3-border");
+            parentDOM.append(dialog.tagInput)
+            dialog.tagInput.on('keyup', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    sendTagReqest(dialog.tagInput.val())
+                }
+            });
+        },
+        "buttons":[
+            {
+                "text": "OK",
+                "colorClass":"w3-lime",
+                "clickFunc": () => {
+                    sendTagReqest(dialog.tagInput.val())
+                }
+            },
+            {"text":"Cancel","colorClass":"w3-light-gray","clickFunc":()=>{dialog.close()}}
+        ]
+    })
+}
 
 topologyDOM_menu.prototype.selectElement=function(element){
     element.select()
