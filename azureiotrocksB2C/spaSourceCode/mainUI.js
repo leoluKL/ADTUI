@@ -60,7 +60,7 @@ mainUI.prototype.showModuleButtons=function(){
             postLogoutRedirectUri: globalAppSettings.logoutRedirectUri,
             mainWindowRedirectUri: globalAppSettings.logoutRedirectUri
         };
-    
+        
         this.myMSALObj.logoutPopup(logoutRequest);
     })
 

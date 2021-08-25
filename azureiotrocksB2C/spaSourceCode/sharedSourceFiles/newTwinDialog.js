@@ -12,7 +12,8 @@ function newTwinDialog() {
     }
 }
 
-newTwinDialog.prototype.popup = async function(twinInfo) {
+newTwinDialog.prototype.popup = async function(twinInfo,afterTwinCreatedCallback) {
+    this.afterTwinCreatedCallback=afterTwinCreatedCallback
     this.originalTwinInfo=JSON.parse(JSON.stringify(twinInfo))
     this.twinInfo=twinInfo
     this.DOM.show()
@@ -24,9 +25,11 @@ newTwinDialog.prototype.popup = async function(twinInfo) {
     this.contentDOM.children(':first').append(closeButton)
     closeButton.on("click", () => { this.DOM.hide() })
 
-    var addButton = $('<button class="w3-ripple w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Add</button>')
-    this.contentDOM.children(':first').append(addButton)
-    addButton.on("click", async () => { this.addNewTwin() })
+    if(!this.afterTwinCreatedCallback){
+        var addButton = $('<button class="w3-ripple w3-button w3-card w3-green w3-hover-light-green" style="height:100%">Add</button>')
+        this.contentDOM.children(':first').append(addButton)
+        addButton.on("click", async () => { this.addNewTwin() })        
+    }
     
     var addAndCloseButton = $('<button class="w3-button w3-card w3-green w3-hover-light-green" style="height:100%;margin-left:5px">Add & Close</button>')    
     this.contentDOM.children(':first').append(addAndCloseButton)
@@ -104,10 +107,15 @@ newTwinDialog.prototype.addNewTwin = async function(closeDialog) {
     //it should select the new node in the tree, and move topology view to show the new node (note pan to a place that is not blocked by the dialog itself)
     this.broadcastMessage({ "message": "addNewTwin", "twinInfo": data.ADTTwin, "DBTwinInfo":data.DBTwin})
 
-    if(closeDialog)this.DOM.hide()
-    else{
-        //clear the input editbox
-        this.popup(this.originalTwinInfo)
+    if(this.afterTwinCreatedCallback){
+        this.afterTwinCreatedCallback(data.ADTTwin)
+        this.DOM.hide()
+    }else{
+        if(closeDialog)this.DOM.hide()
+        else{
+            //clear the input editbox
+            this.popup(this.originalTwinInfo)
+        }
     }
 }
 
@@ -127,11 +135,11 @@ newTwinDialog.prototype.drawModelSettings = async function() {
 
     var initialPathArr=[]
     var lastRootNodeRecord=[]
-    this.drawEditable(settingsTable,copyModelEditableProperty,initialPathArr,lastRootNodeRecord)
+    this.drawEditable(settingsTable,copyModelEditableProperty,this.twinInfo,initialPathArr,lastRootNodeRecord)
 }
 
 
-newTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathArr,lastRootNodeRecord) {
+newTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,originElementInfo,pathArr,lastRootNodeRecord) {
     if(jsonInfo==null) return;
     var arr=[]
     for(var ind in jsonInfo) arr.push(ind)
@@ -158,11 +166,13 @@ newTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathA
         var newPath=pathArr.concat([ind])
 
         if (Array.isArray(jsonInfo[ind])) { //it is a enumerator
-            this.drawDropDownBox(rightTD,newPath,jsonInfo[ind])
+            this.drawDropDownBox(rightTD,newPath,jsonInfo[ind],originElementInfo)
         } else if (typeof (jsonInfo[ind])==="object") {
-            this.drawEditable(parentTable,jsonInfo[ind],newPath,lastRootNodeRecord)
+            this.drawEditable(parentTable,jsonInfo[ind],originElementInfo,newPath,lastRootNodeRecord)
         }else {
+            var val = globalCache.searchValue(originElementInfo, newPath)
             var aInput=$('<input type="text" style="margin-left:5px;padding:2px;width:200px;outline:none;display:inline" placeholder="type: '+jsonInfo[ind]+'"/>').addClass("w3-input w3-border");  
+            if (val != null) aInput.val(val)
             rightTD.append(aInput)
             aInput.data("path", newPath)
             aInput.data("dataType", jsonInfo[ind])
@@ -173,7 +183,7 @@ newTwinDialog.prototype.drawEditable = async function(parentTable,jsonInfo,pathA
     }
 }
 
-newTwinDialog.prototype.drawDropDownBox=function(rightTD,newPath,valueArr){
+newTwinDialog.prototype.drawDropDownBox=function(rightTD,newPath,valueArr,originElementInfo){
     var aSelectMenu = new simpleSelectMenu(""
         , { width: "200" 
             ,buttonCSS: { "padding": "4px 16px"}
@@ -191,6 +201,10 @@ newTwinDialog.prototype.drawDropDownBox=function(rightTD,newPath,valueArr){
     aSelectMenu.callBack_clickOption = (optionText, optionValue, realMouseClick) => {
         aSelectMenu.changeName(optionText)
         if (realMouseClick) this.updateOriginObjectValue(aSelectMenu.DOM.data("path"), optionValue, "string")
+    }
+    var val = globalCache.searchValue(originElementInfo, newPath)
+    if (val != null) {
+        aSelectMenu.triggerOptionValue(val)
     }
 }
 

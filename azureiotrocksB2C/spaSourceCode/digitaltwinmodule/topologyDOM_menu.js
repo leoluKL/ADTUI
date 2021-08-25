@@ -1,5 +1,5 @@
 const globalCache = require("../sharedSourceFiles/globalCache")
-
+const newTwinDialog=require("../sharedSourceFiles/newTwinDialog");
 function topologyDOM_menu(parentTopologyDOM){
     this.parentTopologyDOM=parentTopologyDOM
     this.core=parentTopologyDOM.core
@@ -191,6 +191,22 @@ topologyDOM_menu.prototype.addMenuItemsForOthers = function () {
             selector: 'node,edge',
             onClickFunction: (e) => {
                 this.parentTopologyDOM.coseSelected()
+            }
+        },
+        {
+            id: 'duplicate',
+            content: 'Duplicate',
+            selector: 'node',
+            onClickFunction: (e) => {
+                var collection=this.selectClickedEle(e.target)
+                var oInfo=JSON.parse(JSON.stringify(e.target.data("originalInfo")))
+                delete oInfo["$metadata"];delete oInfo["$dtId"];delete oInfo["$etag"];delete oInfo["displayName"]
+                oInfo["$metadata"]={"$model": e.target.data("modelID")}
+                newTwinDialog.popup(oInfo,(twinInfo)=>{
+                    var twinName=twinInfo.displayName
+                    //copy this node's scale and rotate to the new node
+                    this.parentTopologyDOM.visualManager.applyNodeScaleRotate(twinName,e.target.data("scaleFactor"),e.target.data("rotateAngle"))
+                })
             }
         },
         {

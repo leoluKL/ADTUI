@@ -4,6 +4,7 @@ function topologyDOM_styleManager(topologyCore,defaultNodeSize){
     this.core=topologyCore;
     this.defaultNodeSize=defaultNodeSize||30
     this.baseNodeSize=this.defaultNodeSize;
+    this.baseSquareShapeSize=this.defaultNodeSize;
     this.nodeModelVisualAdjustment={}
     this.defineHighPriorityStyles()
     this.initStyle()
@@ -256,13 +257,12 @@ topologyDOM_styleManager.prototype.updateStyleSheet=function(styleArr){
 
 topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyModelID){
     var fs=this.getFontSizeInCurrentZoom();
-    var baseDimension=this.getNodeSizeInCurrentZoom();
-    this.baseNodeSize=baseDimension;
+    this.baseSquareShapeSize=this.getNodeSizeInCurrentZoom();
 
     if(!specifyModelID){
         var arr=[
-            {selector:'node',style:{ 'font-size': fs, width: baseDimension, height: baseDimension }}, //normal node is a circle, width=height
-            {selector:'node:selected',style:{ 'border-width': Math.ceil(baseDimension / 15) }},
+            {selector:'node',style:{ 'font-size': fs, width: this.baseSquareShapeSize, height: this.baseSquareShapeSize }}, //normal node is a circle, width=height
+            {selector:'node:selected',style:{ 'border-width': Math.ceil(this.baseSquareShapeSize / 15) }},
         ]
     }else{
         arr=[]
@@ -271,7 +271,11 @@ topologyDOM_styleManager.prototype.adjustModelsBaseDimension=function(specifyMod
         if(specifyModelID!=null && modelID!=specifyModelID) continue
         var sizeAdjustRatio=this.nodeModelVisualAdjustment[modelID].dimensionRatio||1
         //if its shape is round-rectangle (actually it is polygon rectangle) and it does have a svg or image avarta, then it is possible that this type of nodes have width different from height. It will follow the width-height-ratio of the image or svg
-        var newW=Math.ceil(sizeAdjustRatio * baseDimension)
+        var theShape=this.nodeModelVisualAdjustment[modelID].shape||"ellipse"
+        if(theShape=="ellipse" ||theShape=="hexagon"){
+            var baseSize=this.baseSquareShapeSize
+        }else baseSize=this.baseNodeSize
+        var newW=Math.ceil(sizeAdjustRatio * baseSize)
         var newH=newW
         var bgRatioW=75
         var bgRatioH=75
@@ -316,7 +320,11 @@ topologyDOM_styleManager.prototype.calculateLblOffset=function(modelID,scaleF){
     var xoff=visualJson.labelX||0
     var yoff=visualJson.labelY||0
     var dimensionRatio= visualJson.dimensionRatio||1 
-    var baseNodeAdjustR= this.baseNodeSize/30
+    var theShape = visualJson.shape || "ellipse"
+    if (theShape == "ellipse" || theShape == "hexagon") {
+        var baseSize = this.baseSquareShapeSize
+    } else baseSize = this.baseNodeSize
+    var baseNodeAdjustR= baseSize/30
     var scaleF=scaleF||1
     return [xoff*dimensionRatio*baseNodeAdjustR*scaleF,yoff*dimensionRatio*baseNodeAdjustR*scaleF ] 
 }

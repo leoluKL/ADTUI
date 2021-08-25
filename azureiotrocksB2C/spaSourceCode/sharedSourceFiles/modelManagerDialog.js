@@ -5,7 +5,7 @@ const modelEditorDialog = require("./modelEditorDialog")
 const globalCache = require("./globalCache")
 const msalHelper=require("../msalHelper")
 const simpleExpandableSection= require("../sharedSourceFiles/simpleExpandableSection")
-
+const simpleSelectMenu=require("../sharedSourceFiles/simpleSelectMenu")
 function modelManagerDialog() {
     if(!this.DOM){
         this.DOM = $('<div style="position:absolute;top:50%;background-color:white;left:50%;transform: translateX(-50%) translateY(-50%);z-index:99" class="w3-card-2"></div>')
@@ -276,12 +276,26 @@ modelManagerDialog.prototype.updateAvartaDataUrl = function (dataUrl,modelID) {
 modelManagerDialog.prototype.chooseAvarta=function(modelID){
     var popWindow=new simpleConfirmDialog()
     popWindow.show({"max-width":"450px","min-width":"300px"},{
-        "title":"Choose Symbol as Avarta",
-        "customDrawing":(parentDOM)=>{
-            for(var ind in globalCache.symbolLibs) var symbolList=globalCache.symbolLibs[ind] //TODO:multiple libs
-            for(var symbolName in symbolList){
-                this.createSymbolDOM(ind,symbolName,modelID,parentDOM,popWindow)
+        "title": "Choose Symbol as Avarta (best with rectangle shape )",
+        "customDrawing": (parentDOM) => {
+            var row1=$('<div class="w3-bar" style="padding:2px"></div>')
+            parentDOM.append(row1)
+            var lable = $('<div class="w3-bar-item w3-opacity" style="padding-right:5px;">Icon Set </div>')
+            row1.append(lable)
+            var iconSetSelector = new simpleSelectMenu(" ", { withBorder: 1, colorClass: "w3-light-gray", buttonCSS: { "padding": "5px 10px" } })
+            row1.append(iconSetSelector.DOM)
+            this.iconsHolderDiv=$("<div/>")
+            parentDOM.append(this.iconsHolderDiv)
+            iconSetSelector.callBack_clickOption = (optionText, optionValue) => {
+                iconSetSelector.changeName(optionText)
+                this.iconsHolderDiv.empty()
+                var symbolList=globalCache.symbolLibs[optionText]
+                for(var symbolName in symbolList){
+                    this.createSymbolDOM(optionText,symbolName,modelID,this.iconsHolderDiv,popWindow)
+                }
             }
+            for (var ind in globalCache.symbolLibs) iconSetSelector.addOption(ind)
+            iconSetSelector.triggerOptionIndex(0)
         }
     })
 }
