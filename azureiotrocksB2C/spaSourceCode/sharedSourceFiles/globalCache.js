@@ -410,7 +410,7 @@ globalCache.prototype.makeDOMDraggable=function(dom,ignoreChildDomType){
     })
 }
 
-globalCache.prototype.generateModelIcon = function (modelID,dimension) {
+globalCache.prototype.generateModelIcon = function (modelID,dimension,isFixSize) {
     var dbModelInfo = this.getSingleDBModelByID(modelID)
     var colorCode = "darkGray"
     var shape = "ellipse"
@@ -422,8 +422,10 @@ globalCache.prototype.generateModelIcon = function (modelID,dimension) {
         var secondColorCode = visualJson.secondColor
         var shape = visualJson.shape || "ellipse"
         var avarta = visualJson.avarta
-        if (visualJson.dimensionRatio) dimension *= parseFloat(visualJson.dimensionRatio)
-        if (dimension > 60) dimension = 60
+        if(!isFixSize){
+            if (visualJson.dimensionRatio) dimension *= parseFloat(visualJson.dimensionRatio)
+            if (dimension > 60) dimension = 60    
+        }
     }
     var iconDOMDimension = Math.max(dimension, 20) //other wise it is too small to be in vertical middle of parent div
     var iconDOM = $("<div style='width:" + iconDOMDimension + "px;height:" + iconDOMDimension + "px;float:left;position:relative'></div>")

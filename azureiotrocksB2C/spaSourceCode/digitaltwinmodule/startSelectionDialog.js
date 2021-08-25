@@ -175,11 +175,10 @@ startSelectionDialog.prototype.fillAvailableModels = function() {
     globalCache.DBModelsArr.forEach(oneModel=>{
         var modelName=oneModel["displayName"]
         var modelID=oneModel["id"]
-        var symbol=globalCache.generateModelIcon(modelID)
-        var rowH=Math.max(24,symbol.height())
-        var rowDiv=$("<div style='display:flex;align-items:center;margin-top:8px;height:"+rowH+"px'></div>")
+        var symbol=globalCache.generateModelIcon(modelID,40,"fixSize")
+        var rowDiv=$("<div style='display:flex;align-items:center;margin-top:8px;height:40px'></div>")
         this.modelsCheckBoxes.append(rowDiv)
-        rowDiv.append(`<input class="w3-check" style="top:0px;float:left" type="checkbox" id="${modelID}">`)
+        rowDiv.append(`<div style="width:24px"><input class="w3-check" style="top:0px;float:left" type="checkbox" id="${modelID}"/></div>`)
         var innerDiv=$("<div style='display:flex;align-items:center;margin-left:6px'></div>")
         rowDiv.append(innerDiv)
         
