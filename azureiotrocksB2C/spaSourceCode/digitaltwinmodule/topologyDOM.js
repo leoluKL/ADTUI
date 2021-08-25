@@ -380,6 +380,7 @@ topologyDOM.prototype.deleteRelations=async function(relationsArr) {
 }
 
 topologyDOM.prototype.smartPositionNode = function (mousePosition) {
+    if(this.core.nodes(':selected').length>1) return
     var zoomLevel=this.core.zoom()
     if(!this.draggingNode) return
     //consider lock mouse move position for these nodes:

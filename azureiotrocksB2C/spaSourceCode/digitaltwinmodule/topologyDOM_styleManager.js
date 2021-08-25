@@ -338,11 +338,10 @@ topologyDOM_styleManager.prototype.updateModelTwinShape=function(modelID,shape){
     if(!this.nodeModelVisualAdjustment[modelID])this.nodeModelVisualAdjustment[modelID]={}
     this.nodeModelVisualAdjustment[modelID].shape=shape
     if(shape=="hexagon"){
-        this.nodeModelVisualAdjustment[modelID].polygon=[0,-1,0.866,-0.5,0.866,0.5,0,1,-0.866,0.5,-0.866,-0.5]
-        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': 'polygon','shape-polygon-points':this.nodeModelVisualAdjustment[modelID].polygon}}
+        var polygon=[0,-1,0.866,-0.5,0.866,0.5,0,1,-0.866,0.5,-0.866,-0.5]
+        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': 'polygon','shape-polygon-points':polygon}}
     }else if(shape=="rectangle"){
-        this.nodeModelVisualAdjustment[modelID].polygon=[-1, -1, -1, 1, 1, 1, 1, -1] 
-        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': 'polygon','shape-polygon-points':this.nodeModelVisualAdjustment[modelID].polygon}}
+        newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': 'rectangle'}}
     }else{
         newStyle={selector:'node[modelID = "'+modelID+'"]',style:{'shape': shape}}
     }

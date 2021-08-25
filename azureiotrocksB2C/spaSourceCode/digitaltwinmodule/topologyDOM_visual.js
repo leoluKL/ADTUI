@@ -498,12 +498,15 @@ topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,
 }
 
 topologyDOM_visual.prototype.applyNodeScaleRotate=function(twinName,scaleF,rotateF){
+    if(twinName=="tank1")console.log(scaleF,rotateF)
     var theNode=this.core.filter('[id = "'+twinName+'"]');
     if(theNode.length==0) return;
     theNode=theNode[0]
     if(scaleF || rotateF){
         if(scaleF) theNode.data("scaleFactor",scaleF)
+        else theNode.removeData("scaleFactor")
         if(rotateF) theNode.data("rotateAngle",rotateF)
+        else theNode.removeData("rotateAngle")
         theNode.addClass('edgebendediting_scaleRotate');
     }else theNode.removeClass('edgebendediting_scaleRotate');
 }
