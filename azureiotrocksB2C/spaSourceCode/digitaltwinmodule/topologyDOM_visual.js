@@ -498,7 +498,6 @@ topologyDOM_visual.prototype.redrawBasedOnLayoutDetail = function (layoutDetail,
 }
 
 topologyDOM_visual.prototype.applyNodeScaleRotate=function(twinName,scaleF,rotateF){
-    if(twinName=="tank1")console.log(scaleF,rotateF)
     var theNode=this.core.filter('[id = "'+twinName+'"]');
     if(theNode.length==0) return;
     theNode=theNode[0]
