@@ -35,6 +35,7 @@ function routerDigitalTwin(){
     this.useRoute("serviceWorkerSubscription","isPost")
     this.useRoute("serviceWorkerUnsubscription","post")
     this.useRoute("updateTwin","isPost")
+    this.useRoute("setTwinsGroupTag","post")
 }
 
 
@@ -103,6 +104,17 @@ routerDigitalTwin.prototype.deleteSimulationDataSourceLock = async function(req,
         res.status(400).send(e.response.body);
     }
 }
+
+routerDigitalTwin.prototype.setTwinsGroupTag = async function(req,res){
+    try{
+        var postLoad=req.body
+        var {body} = await got.post(process.env.dboperationAPIURL+"insertData/setTwinsGroupTag", {json:postLoad,responseType: 'json'});
+        res.end()
+    }catch(e){
+        res.status(400).send(e.response.body);
+    }
+}
+
 
 routerDigitalTwin.prototype.updateTwin = async function(req,res){
     try{
