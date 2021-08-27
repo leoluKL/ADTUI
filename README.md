@@ -1,8 +1,5 @@
 # Notice
-The project moves its focus toward cloud native end to end IoT platform demonstration. It is designed to be B2C platform to prompt Azure IoT services through practical product implementation.
-Refer to readme in [Azure IoT Rocks Platform](azureiotrocks-platform.md).<br/>
-Original ADTUI is still in the repository with below original introduction.
-
+Azure IoT Rocks digital twin project repository is moved to a [seperate repostiory](https://github.com/leolumicrosoft/azureiotrocks)
 
 # Azure Digital Twin UI Application
 Azure digital twin service can be used in implementing IoT digital twin solutions. Though It works mainly as part of the backend service, there is need to have a convinient UI for models/twins creation. This software is for that purpose. It can be used in real-world scenerio by supporting large scale digital twins management.
@@ -98,17 +95,12 @@ A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-pla
 * W3.CSS (https://www.w3schools.com/w3css/default.asp)
 * JQuery UI Layout (http://layout.jquery-dev.com/)
 
-
-## Contributing
-
-## Versioning
-
 ## Authors
 
-leolu@microsoft.com
+[Leo Lu](mailto:leolu@microsoft.com)
 
 
 ## License
-
+MIT
 
 ## Acknowledgments
