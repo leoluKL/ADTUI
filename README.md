@@ -41,9 +41,9 @@ For developer's usage, there are additional npm run options (inside folder ./ADT
 4. A flexible data selection feature at the start so you do not need to wait a long loading time when there are many twins.
 5. Customizable twin and relationship visualization style, including importing image as twin's avarta    
 
-![Main UI](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/screenshot1.jpg)
-![Choose datasets](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/screenshot2.jpg)
-![CAD](https://raw.githubusercontent.com/leolumicrosoft/ADTUI/master/ADTUIOriginal/libfiles/images/CAD.png)
+![Main UI](libfiles/images/screenshot1.jpg)
+![Choose datasets](libfiles/images/screenshot2.jpg)
+![CAD](libfiles/images/CAD.png)
 
 ## How To Use Tips
 1. Start with a set of twins data
@@ -65,15 +65,9 @@ For developer's usage, there are additional npm run options (inside folder ./ADT
 
 ## Development
 ### Plan
-The application is created as an single web page application that accesses azure digital twin service remotely. Since this limitation, more advanced features, such as below are not implemented.
-- SingalR integration for live telemetry event
-- database storage 
-- Azure indoor map view integration
-- Revit 3D Autocad BIM model integration
+[Azure IoT Rocks](https://github.com/leolumicrosoft/azureiotrocks)
 
-A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-platform.md) , which including ADT UI and other Azure IoT services. It is a B2C platform so anyone can use it for a taste of Azure IoT without need for Azure subscription.
-
-### New Feature update
+## New Feature update
 - Mouse over twin or connection line will flah information
 - ADT DTDL model can be created with GUI in application
 - Rehaul UI to be align with the coming cloud host platform version
@@ -87,20 +81,19 @@ A more comprehensive platform is in [Azure IoT Rocks Platform](azureiotrocks-pla
 
 ## Built With
 
-* JQuery
-* Cytoscape.js (https://js.cytoscape.org/#demos)
-* Cytoscape Edge Editing extension (https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing)
-* Azure Digital Twin Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/digital-twins-core/?view=azure-node-latest)
-* Azure Identity Javascript SDK (https://docs.microsoft.com/en-us/javascript/api/@azure/identity/?view=azure-node-latest)
-* W3.CSS (https://www.w3schools.com/w3css/default.asp)
-* JQuery UI Layout (http://layout.jquery-dev.com/)
+* [JQuery](https://jquery.com/)
+* [Cytoscape.js](https://js.cytoscape.org/#demos) (Note: customization code is added to fulfill project requirement)
+* [Cytoscape Edge Editing extension](https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing) (Note: customization code is added to fulfill project requirement)
+* [Azure Digital Twin Javascript SDK](https://docs.microsoft.com/en-us/javascript/api/@azure/digital-twins-core/?view=azure-node-latest)
+* [Azure Identity Javascript SDK](https://docs.microsoft.com/en-us/javascript/api/@azure/identity/?view=azure-node-latest)
+* [W3.CSS](https://www.w3schools.com/w3css/default.asp)
+* [JQuery UI Layout](http://layout.jquery-dev.com/)
 
-## Authors
+
+# Authors
 
 [Leo Lu](mailto:leolu@microsoft.com)
 
 
-## License
+# License
 MIT
-
-## Acknowledgments
